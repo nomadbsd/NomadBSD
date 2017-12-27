@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+<menu id="System" label="System" comment="--- auto ---">
+	<item icon="/usr/local/share/pixmaps/mc.png" label="Midnight Commander" comment="--- auto ---">
+		<action name="Execute">
+			<command>sakura -e mc</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/scalable/apps/tint2.svg" label="Tint2" comment="--- auto ---">
+		<action name="Execute">
+			<command>tint2</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/Thunar.png" label="Bulk Rename" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/lib/Thunar/ThunarBulkRename </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/Thunar.png" label="Open Folder with Thunar" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunar </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/Thunar.png" label="Thunar File Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunar </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/system-file-manager.png" label="File Manager PCManFM" comment="--- auto ---">
+		<action name="Execute">
+			<command>pcmanfm </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/devices/96/drive-harddisk-usb.png" label="DSBMC" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbmc</command>
+		</action>
+	</item>
+</menu>
+<menu id="Office" label="Office" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/hicolor/48x48/apps/lyx.png" label="LyX" comment="--- auto ---">
+		<action name="Execute">
+			<command>lyx </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/epdfview/pixmaps/icon_epdfview-48.png" label="ePDFViewer" comment="--- auto ---">
+		<action name="Execute">
+			<command>epdfview </command>
+		</action>
+	</item>
+</menu>
+<menu id="AudioVideo" label="AudioVideo" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/hicolor/16x16/stock/media/stock_xfburn.png" label="Xfburn" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfburn</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/vlc.png" label="VLC media player" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/bin/vlc --started-from-file </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/status/96/audio-volume-high.png" label="DSBMixer" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbmixer</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/deadbeef.png" label="DeaDBeeF" comment="--- auto ---">
+		<action name="Execute">
+			<command>deadbeef </command>
+		</action>
+	</item>
+</menu>
+<menu id="Graphics" label="Graphics" comment="--- auto ---">
+	<item icon="/usr/local/share/pixmaps/mirage.png" label="Mirage" comment="--- auto ---">
+		<action name="Execute">
+			<command>mirage </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/gtkam-camera.png" label="Gtkam Digital Camera Browser" comment="--- auto ---">
+		<action name="Execute">
+			<command>gtkam</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/xsane.xpm" label="XSane - Scanning" comment="--- auto ---">
+		<action name="Execute">
+			<command>xsane</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/48x48/apps/feh.png" label="Feh" comment="--- auto ---">
+		<action name="Execute">
+			<command>feh </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/gimp.png" label="GNU Image Manipulation Program" comment="--- auto ---">
+		<action name="Execute">
+			<command>gimp-2.8 </command>
+		</action>
+	</item>
+</menu>
+<menu id="Network" label="Network" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/hicolor/48x48/apps/hexchat.png" label="HexChat" comment="--- auto ---">
+		<action name="Execute">
+			<command>hexchat --existing </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/palemoon.png" label="Pale Moon" comment="--- auto ---">
+		<action name="Execute">
+			<command>palemoon </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/pidgin.png" label="Pidgin Internet Messenger" comment="--- auto ---">
+		<action name="Execute">
+			<command>pidgin</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/16x16/apps/wifimgr.png" label="WiFi Networks Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>wifimgr </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/sylpheed.png" label="Sylpheed" comment="--- auto ---">
+		<action name="Execute">
+			<command>sylpheed </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/web-browser.png" label="Web Browser" comment="--- auto ---">
+		<action name="Execute">
+			<command>exo-open --launch WebBrowser </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/actions/96/mail-send.png" label="Mail Reader" comment="--- auto ---">
+		<action name="Execute">
+			<command>exo-open --launch MailReader </command>
+		</action>
+	</item>
+</menu>
+<menu id="Settings" label="Settings" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/Faenza/actions/96/system-run.png" label="DSBAutostart" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbautostart</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/obconf.png" label="Openbox Configuration Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>obconf </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/scalable/apps/tint2conf.svg" label="Tint2 Settings" comment="--- auto ---">
+		<action name="Execute">
+			<command>tint2conf</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/places/96/user-desktop.png" label="Desktop Preferences" comment="--- auto ---">
+		<action name="Execute">
+			<command>pcmanfm --desktop-pref</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/preferences-desktop-theme.png" label="Qt5 Settings" comment="--- auto ---">
+		<action name="Execute">
+			<command>qt5ct</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/system-file-manager.png" label="File Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunar-settings</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/xfce4-panel.png" label="Panel" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfce4-panel --preferences</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/categories/96/preferences-desktop.png" label="Preferred Applications" comment="--- auto ---">
+		<action name="Execute">
+			<command>libfm-pref-apps</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/preferences-desktop-default-applications.png" label="Preferred Applications" comment="--- auto ---">
+		<action name="Execute">
+			<command>exo-preferred-applications</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/status/96/gtk-dialog-authentication.png" label="Authorizations" comment="--- auto ---">
+		<action name="Execute">
+			<command>polkit-gnome-authorization</command>
+		</action>
+	</item>
+</menu>
+<menu id="Utility" label="Utility" comment="--- auto ---">
+	<item icon="/usr/local/share/pixmaps/terminal-tango.svg" label="Sakura" comment="--- auto ---">
+		<action name="Execute">
+			<command>sakura</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/scalable/apps/kvantum.svg" label="Kvantum Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>kvantummanager</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/gvim.png" label="GVim" comment="--- auto ---">
+		<action name="Execute">
+			<command>gvim -f </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/xarchiver.png" label="Xarchiver" comment="--- auto ---">
+		<action name="Execute">
+			<command>xarchiver </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/gvim.png" label="Vim" comment="--- auto ---">
+		<action name="Execute">
+			<command> vim </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/system-file-manager.png" label="File Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>exo-open --launch FileManager </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/categories/96/applications-other.png" label="Shortcut Editor" comment="--- auto ---">
+		<action name="Execute">
+			<command>lxshortcut -i </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/apps/96/utilities-terminal.png" label="Terminal Emulator" comment="--- auto ---">
+		<action name="Execute">
+			<command>exo-open --launch TerminalEmulator</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Faenza/actions/96/help-about.png" label="About Xfce" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfce4-about</command>
+		</action>
+	</item>
+</menu>
+<menu id="Development" label="Development" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/hicolor/16x16/apps/gtk3-widget-factory.png" label="Widget Factory" comment="--- auto ---">
+		<action name="Execute">
+			<command>gtk3-widget-factory</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/hicolor/16x16/apps/gtk3-demo.png" label="GTK+ Demo" comment="--- auto ---">
+		<action name="Execute">
+			<command>gtk3-demo</command>
+		</action>
+	</item>
+	<item label="Icon Browser" comment="--- auto ---">
+		<action name="Execute">
+			<command>gtk3-icon-browser</command>
+		</action>
+	</item>
+</menu>
+<menu id="Application" label="Application" comment="--- auto ---">
+	<item icon="/usr/local/share/icons/Faenza/mimetypes/96/application-x-executable.png" label="Create Launcher on the panel" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfce4-panel --add=launcher </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/openbox.png" label="Openbox" comment="--- auto ---">
+		<action name="Execute">
+			<command>openbox</command>
+		</action>
+	</item>
+	<item label="View file" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/bin/gcr-viewer</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Adwaita/16x16/status/security-medium.png" label="Access Prompt" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/libexec/gcr-prompter</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Adwaita/scalable/actions/mark-location-symbolic.svg" label="Geoclue Demo agent" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/libexec/geoclue-2.0/demos/agent</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/icons/Adwaita/scalable/actions/mark-location-symbolic.svg" label="Where am I?" comment="--- auto ---">
+		<action name="Execute">
+			<command> /usr/local/libexec/geoclue-2.0/demos/where-am-i</command>
+		</action>
+	</item>
+</menu>
+<menu id="root-menu" label="Openbox 3">
+	<menu id="System" icon="/usr/local/share/icons/Faenza/categories/96/applications-system.png" comment="--- auto ---"/>
+	<menu id="Office" icon="/usr/local/share/icons/Faenza/categories/96/applications-office.png" comment="--- auto ---"/>
+	<menu id="AudioVideo" icon="/usr/local/share/icons/Faenza/categories/96/applications-multimedia.png" comment="--- auto ---"/>
+	<menu id="Graphics" icon="/usr/local/share/icons/Faenza/categories/96/applications-graphics.png" comment="--- auto ---"/>
+	<menu id="Network" icon="/usr/local/share/icons/Faenza/categories/96/applications-internet.png" comment="--- auto ---"/>
+	<menu id="Settings" icon="/usr/local/share/icons/Faenza/categories/96/preferences-system.png" comment="--- auto ---"/>
+	<menu id="Utility" icon="/usr/local/share/icons/Faenza/categories/96/applications-utilities.png" comment="--- auto ---"/>
+	<menu id="Development" icon="/usr/local/share/icons/Faenza/categories/96/applications-development.png" comment="--- auto ---"/>
+	<menu id="Application" icon="/usr/local/share/icons/Faenza/categories/96/applications-other.png" comment="--- auto ---"/>
+<separator />
+<menu id="client-list-menu" />
+<separator />
+<item label="Reconfigure">
+<action name="Reconfigure" />
+</item>
+<separator />
+<item label="Logout" icon="/usr/local/share/icons/Faenza/actions/48/system-log-out.png">
+                <action name="Execute">
+                        <command>/usr/local/bin/dsblogoutmgr -l "openbox --exit"</command>
+                </action>
+        </item>
+<separator />
+	<item label="Update Menu" comment="--- auto ---">
+		<action name="Execute">
+			<command>/home/nomad/bin/update_obmenu -u</command>
+		</action>
+	</item>
+</menu>
+</openbox_menu>

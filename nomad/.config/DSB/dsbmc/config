@@ -1,0 +1,15 @@
+play_cdda = "deadbeef all.cda"
+play_dvd = "vlc dvd://%d"
+play_vcd = "vlc vcd://%d"
+play_svcd = "vlc vcd://%d"
+filemanager = "thunar \"%m\""
+dvd_auto = true
+vcd_auto = true
+svcd_auto = true
+cdda_auto = true
+win_width = 510
+win_height = 433
+win_pos_x = 100
+win_pos_y = 100
+ignore = "/home/nomad/.gvfs"
+

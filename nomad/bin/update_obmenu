@@ -1,0 +1,492 @@
+#!/usr/bin/env perl
+#
+# Copyright (c) 2012 Marcel Kaiser. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+##############################################################################
+#
+# FILENAME:	update_obmenu
+# AUTHOR:	Marcel Kaiser <mk@nic-nac-project.org>
+# PURPOSE:	Creates and updates the Openbox menu.
+# REQUIRES:     Optional: gmessage or xmessage for error messages.
+#
+##############################################################################
+use utf8;
+use strict;
+
+my %category_icons = (
+	AudioVideo  => "applications-multimedia",
+	Audio	    => "applications-multimedia",
+	Video	    => "applications-multimedia",
+	Development => "applications-development",
+	Education   => "applications-science",
+	Games	    => "applications-games",
+	Graphics    => "applications-graphics",
+	Network	    => "applications-internet",
+	Office	    => "applications-office",
+	Settings    => "preferences-system",
+	System	    => "applications-system",
+	Utility	    => "applications-utilities",
+	Application => "applications-other"
+);
+
+my @categories = (
+	"AudioVideo",	"Audio",	"Video",	"Development",
+	"Education",	"Game",		"Graphics",	"Network",
+	"Office",	"Settings",	"System",	"Utility"
+);
+
+# Add your language here.
+my %ctgrs_de = (
+	AudioVideo => "Audio/Video", Audio	 => "Audio",
+	Video	   => "Video",	     Development => "Entwicklung",
+	Education  => "Bildung",     Game	 => "Spiele",
+	Graphics   => "Grafik",	     Network	 => "Netzwerk/Internet",
+	Office	   => "Büro",	     Settings	 => "Einstellungen",
+	System	   => "System",	     Utility	 => "Zubehör",
+	Application=> "Anwendungen"
+);
+my %ctgrs = (de => \%ctgrs_de);
+
+my @xterms= ("urxvt", "rxvt", "mrxvt", "xterm", "Terminal", "gnome-terminal");
+
+# Where to look for desktop files.
+my @apps_paths = (
+	"/usr/local/share/applications", "/usr/share/applications",
+	$ENV{'XDG_DATA_HOME'} ? $ENV{'XDG_DATA_HOME'} : "$ENV{'HOME'}/.local"
+);
+
+# Paths to look for icon dirs.
+my @icon_prefix = (
+	"$ENV{HOME}/.icons",
+	"/usr/local/share/icons",
+	"/usr/share/icons",
+	"$ENV{'HOME'}/.local/share/icons"
+);
+
+# Pixmaps paths
+my @icon_paths = (
+	"$ENV{HOME}/.icons",
+	"/usr/local/share/icons",
+	"/usr/local/share/pixmaps",
+	"/usr/share/pixmaps",
+	"/usr/share/icons",
+	"$ENV{'HOME'}/.fluxbox/icons",
+	"$ENV{'HOME'}/.local/share/pixmaps",
+);
+
+my $lang        = "en";
+my $menu_path   = "$ENV{'HOME'}/.config/openbox/menu.xml";
+my @menu_prefix = ("/etc", "/usr/etc", "/usr/local/etc");
+my $dflt_menu   = "xdg/openbox/menu.xml";
+my $icon_theme;
+my $fallback_icon_theme;
+my $xterm;
+my @ob_menu;
+##############################################################################
+sub Xerr {
+	my ($ret, $msg) = @_;
+
+	print STDERR "$msg\n";
+	system("xmessage \"$msg\"") if (system("gmessage \"$msg\"") == -1);
+	exit($ret);
+}
+
+sub translate {
+	my ($str) = @_;
+	my ($l, $p, $tstr);
+	
+	return ($str) if (!$lang || $lang eq 'en');
+	($l) = split(/_/, $lang, 2);
+	return ($str) if (!($p = $ctgrs{$l}));
+	$tstr = ${$p}{$str};
+	utf8::encode($tstr);
+	return ($tstr);
+}
+
+sub find_xterm {
+	my ($t, $path);
+
+	foreach $t (@xterms) {
+		foreach $path (split(/:/, $ENV{'PATH'})) {
+			if (-x "$path/$t")
+				{ $xterm = "$path/$t -e"; return ($xterm); }
+		}
+	}
+	return ("");
+}
+
+sub lookup_icon_theme {
+	open(FH, '<', "$ENV{'HOME'}/.gtkrc.mine") or return (-1);
+	foreach (<FH>) {
+		if (/^gtk-icon-theme-name\s*=\s*\"(.+)\"/) {
+			$icon_theme = $1;
+		} elsif (/^gtk-fallback-icon-theme\s*=\s*\"(.+)\"/) {
+			$fallback_icon_theme = $1;
+		}
+	}
+	close(FH);
+	return (0);
+}
+
+sub get_inherits
+{
+	my ($fh);
+	my ($index) = "$_[0]/index.theme";
+		
+	return if (! -f $index);
+	open($fh, '<', $index) || return;
+	foreach (<$fh>) {
+		if (/^Inherits=(.*)/) {
+			close($fh);
+			return split(/\,/, $1);
+		}
+	}
+	close($fh);
+}
+
+sub find_icon_theme_dir
+{
+	my ($theme) = @_;
+
+	foreach (@icon_prefix) {
+		my $dir = "$_/$theme";
+		return $dir if (-d $dir);
+	}
+	return "";
+}
+
+sub find_icon {
+	my ($i, $ih, $p, $path, $dir, @inherit, @tmp);
+	my ($icon) = @_;
+	my @exts = ('.png', '.svg', '.xpm');
+
+	if (!$icon_theme && !$fallback_icon_theme && lookup_icon_theme() == 0) {
+		@tmp = @icon_paths;
+
+		@icon_paths = ();
+
+		if (($dir = find_icon_theme_dir($icon_theme))) {
+			my @inherits = get_inherits($dir);
+			foreach $ih (@inherits) {
+				my $ihdir = find_icon_theme_dir($ih);
+				push @icon_paths, $ihdir if ($ihdir);
+			}
+		}
+		if (($dir = find_icon_theme_dir($fallback_icon_theme))) {
+			my @inherits = get_inherits($dir);
+			foreach $ih (@inherits) {
+				my $ihdir = find_icon_theme_dir($ih);
+				push @icon_paths, $ihdir if ($ihdir);
+			}
+		}
+	}
+	push @icon_paths, @tmp;
+	if ($icon !~ /.*\.[a-zA-Z]+$/) {
+		for ($i = 0; $i < @exts; $i++) {
+			$p = $icon . $exts[$i];
+			foreach $dir (@icon_paths) {
+				foreach (`find "$dir" -name "$p" 2>/dev/null`)
+					{ chomp; return ($_); }
+			}
+		}
+	} else {
+		foreach $dir (@icon_paths) {
+			foreach (`find "$dir" -name "$icon" 2>/dev/null`)
+				{ chomp; return ($_); }
+		}
+	}
+}
+
+sub find_menu {
+	my ($id) = @_;
+	my $idx  = 0;
+
+	foreach (@ob_menu) {
+		return ($idx) if (/^\s*\<menu id=\"$id\"/);
+		$idx++;
+	}
+	return (-1);
+}
+
+sub find_application {
+	my ($app) = @_;
+
+	foreach (@ob_menu) {
+		return (1) if (/^\s*\<item label=\"$app\"/);
+	}
+	return (0);
+}
+
+sub parse_desktop_file {
+	my ($fname) = @_;
+	my %info;
+	my ($type, $default_comment, $default_name, $terminal, $command);
+	my ($lang1, $lang2, $name, $comment, $category, $path, $icon, $x);
+	my ($dt_entry_section);
+
+	$lang1 = $lang;
+	$lang2 = ($lang =~ /(.*)_/) ? $1 : $lang;
+
+	$info{'Filename'} = $fname;
+
+	open(FH, '<', $fname) or return (0);
+
+	$name = $comment = $category = "";
+	foreach (<FH>) {
+		if (!$dt_entry_section) {
+			$dt_entry_section = 1 if ($_ =~ /^\[Desktop Entry\]/);
+			next;
+		}
+		last if ($_ =~ /^\[/); 
+
+		$default_name	 = $1 if (/^_?Name\s*=\s*(.*)/);
+		$name		 = $1 if (/^_?Name\[$lang1\]\s*=\s*(.*)$/ ||
+					 /^_?Name\[$lang2\]\s*=\s*(.*)$/);
+		$default_comment = $1 if (/^_?Comment\s*=\s*(.*)/);
+		$comment	 = $1 if (/^_?Comment\[$lang1\]\s*=\s*(.*)/ ||
+					 /^_?Comment\[$lang2\]\s*=\s*(.*)/);
+		$command	 = $1 if (/^Exec\s*=\s*(.*)$/);
+		$type		 = $1 if (/^Type\s*=\s*(.*)/);
+		$terminal	 = $1 if (/^Terminal\s*=\s*(.*)/);
+		$path		 = $1 if (/^Path\s*=\s*(.*)/);
+		$icon		 = $1 if (/^Icon\s*=\s*(.*)$/);
+	
+		if (/^Categories\s*=(\S*)/) {
+			foreach $x (split(/;/, $1)) {
+				foreach (@categories)
+					{ $category = $_ if ($_ eq $x); }
+				last if ($category);
+			}
+		}
+	}
+	chomp($category);
+
+	close(FH);
+	return (0) if ($type ne "Application");
+
+	$command =~ s/\%[a-z,A-Z]//;
+	$info{'Icon'}	  = $icon; 
+	$info{'Name'}	  = $name ? $name : $default_name;
+	$info{'Comment'}  = $comment ? $comment : $default_comment;
+ 	$info{'Type'}	  = $type;
+	$info{'Terminal'} = $terminal;
+	$info{'Exec'}	  = $command;
+	$info{'Category'} = $category ? $category : "Application";
+	$info{'Path'}	  = $path;
+
+	return (%info);
+}
+
+sub add_submenu {
+	my ($id)  = @_;
+	my $idx   = 0;
+	my $label = translate($id);
+	my $icon = find_icon($category_icons{$id});
+
+	foreach (@ob_menu) {
+		last if (/^\<openbox_menu/);
+		$idx++;
+	}
+	if ($idx == @ob_menu) {
+		Xerr(1, "Fatal: Coudn't find 'openbox_menu'\n".
+			"Your menu.xml seems to be corrupted.");
+	}
+	splice @ob_menu, $idx + 1, 0,
+	    "<menu id=\"$id\" label=\"$label\" comment=\"--- auto ---\">\n";
+	splice @ob_menu, $idx + 2, 0, "</menu>\n";
+
+	if (($idx = find_menu("root-menu")) == -1)
+		{ Xerr(1, "Fatal: Couldn't find the root menu") }
+	splice @ob_menu, $idx + 1, 0, "\t<menu id=\"$id\" icon=\"$icon\" " .
+	    "comment=\"--- auto ---\"/>\n";
+	return (0);
+}
+
+sub add_application {
+	my (%app) = @_;
+	my $i     = 0;
+	my $xterm;
+	my $icon;
+
+	return (-1) if (($i = find_menu($app{'Category'})) == -1);
+	
+	if ($app{'Terminal'} && $app{'Terminal'} ne 'false') { 
+		$xterm = find_xterm();
+		$app{'Exec'} = "$xterm $app{'Exec'}"
+	}
+	if ($app{'Icon'}) {
+		if ($app{'Icon'} !~ /^\/.*/) {
+			$icon = find_icon($app{'Icon'});
+		} else {
+			$icon = $app{'Icon'};
+		}
+		if ($icon) {
+			$icon = "$icon".".png"
+				if ($icon !~ /.*\.[a-zA-Z]+$/);
+			splice @ob_menu, $i + 1, 0,
+			    "\t<item icon=\"$icon\"" .
+			    " label=\"$app{'Name'}\" ".
+			     "comment=\"--- auto ---\">\n";
+		} else {
+			splice @ob_menu, $i + 1, 0,
+			    "\t<item label=\"$app{'Name'}\" ".
+			    "comment=\"--- auto ---\">\n";
+		}
+	} else {
+		splice @ob_menu, $i + 1, 0, "\t<item label=\"$app{'Name'}\" ".
+					    "comment=\"--- auto ---\">\n";
+	}
+	splice @ob_menu, $i + 2, 0, "\t\t<action name=\"Execute\">\n";
+	splice @ob_menu, $i + 3, 0, "\t\t\t<command>$app{'Exec'}</command>\n";
+	splice @ob_menu, $i + 4, 0, "\t\t</action>\n";
+	splice @ob_menu, $i + 5, 0, "\t</item>\n";
+
+	return (0);
+}
+
+sub add_me {
+	my $idx = 0;
+	my $found_root_menu = 0;
+
+	foreach (@ob_menu) {
+		if (/^\<menu id=\"root-menu\"/) {
+			$found_root_menu = 1;
+		} elsif ($found_root_menu == 1 && /^\<\/menu\>/) {
+			last;
+		}
+		$idx++;
+	}
+	return if ($idx == @ob_menu);
+	splice @ob_menu, $idx + 0, 0,
+	    "\t<item label=\"Update Menu\" comment=\"--- auto ---\">\n";
+	splice @ob_menu, $idx + 1, 0, "\t\t<action name=\"Execute\">\n";
+	splice @ob_menu, $idx + 2, 0,
+	    "\t\t\t<command>$0 -u<\/command>\n";
+	splice @ob_menu, $idx + 3, 0, "\t\t<\/action>\n";
+	splice @ob_menu, $idx + 4, 0, "\t<\/item>\n";
+}
+
+##############################################################################
+my $nflag = 0;
+my $uflag = 0;
+my ($skip_item, $skip_menu);
+my $path;
+
+($lang) = split(/\./, $ENV{'LANG'});
+
+# Look for the default openbox menu
+foreach (@menu_prefix) {
+	my $path = "${_}/${dflt_menu}";
+
+	if (-e $path) {
+		$dflt_menu = $path;
+		last;
+	}
+}
+
+while ($ARGV[0] =~ m/^-/) {
+	if ($ARGV[0] eq "-u") {
+		$uflag = 1;
+	} elsif ($ARGV[0] eq "-n") {
+		$nflag = 1;
+	}
+	shift;
+}
+if (($uflag == 1 && $nflag == 1) || ($uflag == 0 && $nflag == 0)) {
+	my $progname = $0;
+
+	$progname = $1 if ($0 =~ /\.{0,2}.*\/([a-zA-Z0-9.,-_]+$)/);
+	print STDERR "Usage: $progname -u|-n\n" .
+		     "-u   : Update your Openbox menu.\n" .
+		     "-n   : Create a new Openbox menu. Your old menu.xml " .
+	    "will be overwritten!\n";
+	exit(1);
+}
+
+if ($nflag == 1) {
+	# Create a new menu.
+	@ob_menu = ();
+	push @ob_menu, '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+	push @ob_menu, '<openbox_menu xmlns="http://openbox.org/3.4/menu">' . "\n";
+	push @ob_menu, '<menu id="root-menu" label="Openbox 3">' . "\n";
+	push @ob_menu, '<separator />' . "\n";
+	push @ob_menu, '<menu id="client-list-menu" />' . "\n";
+	push @ob_menu, '<separator />' . "\n";
+	push @ob_menu, '<item label="Reconfigure">' . "\n";
+	push @ob_menu, '<action name="Reconfigure" />' . "\n";
+	push @ob_menu, '</item>' . "\n";
+	push @ob_menu, '<separator />' . "\n";
+	push @ob_menu, '<item label="Exit">' . "\n";
+	push @ob_menu, '<action name="Exit" />' . "\n";
+	push @ob_menu, '</item>' . "\n";
+	push @ob_menu, '</menu>' . "\n";
+	push @ob_menu, '</openbox_menu>' . "\n";
+} else {
+	# Read the obenbox menu and skip previously added menus and
+	# application entries.
+	if (!open(FH, '<', $menu_path) and !open(FH, '<', $dflt_menu))
+		{ Xerr(1, "Could not find menu.xml") }
+	foreach (<FH>) {
+		if (/\s*<menu\s*.*\s*comment=\"--- auto ---\">/) {
+			$skip_menu++;
+		} elsif (/\s*<item\s*.*\s*comment=\"--- auto ---\">/) {
+			$skip_item++;
+		} elsif ($skip_menu && /\s*<\/menu>/) {
+			$skip_menu--;
+		} elsif ($skip_item && /\s*<\/item>/) {
+			$skip_item--;
+		} else {
+			next if ($skip_item || $skip_menu);
+			next if (/\s*<menu\s*.*\s*comment=\"--- auto ---\".*\/>/);
+			push @ob_menu, $_;
+		}
+	}
+	close(FH);
+}
+foreach $path (@apps_paths) {
+	foreach (`find $path -name "*.desktop" 2>/dev/null`) {
+		chomp;
+		next if (/userapp-/);
+		my %i;
+		if ((%i = parse_desktop_file($_))) {
+			next if (find_application($i{'Name'}));
+			if ($i{'Category'} && find_menu($i{'Category'}) == -1)
+				{ add_submenu($i{'Category'}) }
+			add_application(%i);
+		}
+	}
+}
+
+# Add an entry for this script to the Openbox root menu.
+add_me();
+
+# Write the menu to menu.xml
+chmod(0644, $menu_path);
+open(FH, '>', $menu_path)
+	or Xerr(1, "Could not open \'$menu_path\'");
+foreach(@ob_menu)
+	{ print FH }
+close(FH);
+system("openbox --reconfigure");
+exit(0);
+

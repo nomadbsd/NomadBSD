@@ -1,0 +1,160 @@
+#!/bin/sh
+
+path_installdir="/usr/libexec/nomad"
+path_nomadcfg="/nomad.cfg"
+selection="/tmp/selection.$$"
+path_xorg_input_tmpl=${path_installdir}/input-keyboard.conf.tmpl
+path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
+
+summary() {
+	local text
+
+	text="\n"
+	text="${text}Language:     $lang\n"
+	text="${text}Shell:        $shell\n"
+	text="${text}Xkbdmodel:    $xkbdmodel\n"
+	text="${text}Xkbdlayout:   $xkbdlayout\n"
+
+	dialog --no-items --no-cancel --title "SUMMARY"   \
+	       --menu "$text" -1 -1 2 "I'm happy with it" \
+	       "I want to change something"
+}
+
+change() {
+	local text
+
+	text=""
+	text="${text}Language     $lang "
+	text="${text}Shell        $shell "
+	text="${text}Xkbdmodel    $xkbdmodel "
+	text="${text}Xkbdlayout   $xkbdlayout"
+
+	dialog --title "CHANGE SETTINGS" --ok-label "Change" \
+	       --menu "" -1 60 4 $text
+}
+
+setlang() {
+	list=$(locale -a | grep '.UTF-8'| sort -n | uniq | cut -d. -f 1)
+	while [ true ]; do
+		dialog --clear --title "LANGUAGE" --no-items   \
+		       --menu "\nPlease select your language." \
+		       -1 -1 10 $list 2>${selection}
+		ret=$?; lang=$(cat $selection)
+		[ $ret -eq 0 -a ! -z "$lang" ] && break
+	done
+	rm -f $selection
+	echo "lang=$lang" >> $path_nomadcfg
+}
+
+setshell() {
+	local opts
+
+	for i in `cat /etc/shells | sed '/^\#/d; /^$/d'`; do
+		if (echo $i | grep -q '/zsh$'); then
+			opts="${opts}$i on ";
+		else
+			opts="${opts}$i off ";
+		fi
+	done
+	while [ true ]; do
+		dialog --clear --title "SHELL" --no-items \
+		       --radiolist "\nPlease select your prefered shell." \
+		       -1 60 4 $opts 2>${selection}
+		ret=$?; shell=$(cat $selection)
+		[ $ret -eq 0 -a ! -z "$shell" ] && break
+	done
+	rm -f $selection
+	echo "shell=$shell" >> $path_nomadcfg
+}
+
+getlist() {
+	baselst="/usr/local/share/X11/xkb/rules/base.lst"
+
+	re=$(echo -n '^! '$1)
+	cat $baselst | awk -v re=$re -F " " '{
+		if ($0 ~ re) {
+			in_model = 1;
+		} else if (/^\! /) {
+			in_model = 0;
+		} else if (/^ /) {
+			if (in_model) {
+				printf("%s\t", $1);
+				for (i = 2; i <= NF; i++) {
+					printf("%s", $i);
+					if (i < NF)
+						printf(" ");
+				}
+				printf("\n");
+			}
+		}
+	}'
+}
+
+setxkbdmodel() {
+	local IFS=$(printf "\t");
+
+	models=$(getlist "model" | tr '\n' '\t')
+	while [ true ]; do
+		dialog --clear --title "KEYBOARD MODEL" \
+		       --menu "\nPlease select your keyboard model.\n" \
+		       -1 60 8 $models 2>${selection}
+		ret=$?; model=$(cat ${selection})
+		[ $ret -eq 0 ] && break
+	done
+	rm -f $selection
+	echo "xkbdmodel=$model" >> $path_nomadcfg
+}
+
+setxkbdlayout() {
+	local IFS=$(printf "\t");
+
+	layouts=$(getlist "layout" | sort -n | tr '\n' '\t')
+	while [ true ]; do
+		dialog --clear --title "KEYBOARD LAYOUT" \
+		       --menu "\nPlease select your keyboard layout.\n" \
+	               -1 60 8 $layouts 2>${selection}
+		ret=$?; layout=$(cat ${selection})
+		[ $ret -eq 0 ] && break
+	done
+	rm -f $selection
+	echo "xkbdlayout=$layout" >> $path_nomadcfg
+}
+
+[ -f $path_nomadcfg ] && exit 0
+
+kbdmap
+passwd
+setlang
+setshell
+tzsetup
+setxkbdmodel
+setxkbdlayout
+
+while [ true ]; do
+	eval $(cat $path_nomadcfg)
+	summary 2>$selection
+	opt=$(cat $selection)
+
+	case $opt in
+	*change*) change 2>$selection ;;
+	*)        break ;;
+	esac
+
+	case $(cat $selection) in
+	Shell)       setshell ;;
+	Language)    setlang ;;
+	Xkbdmodel)   setxkbdmodel ;;
+	Xkbdlayout)  setxkbdlayout ;;
+	esac
+done
+rm -f $selection
+
+pw usermod nomad -L $lang -s $shell
+
+sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
+    $path_xorg_input_tmpl > $path_xorg_input
+
+sed "/^keymap=.*/d" < /etc/rc.conf > /tmp/rc.conf
+printf "\nkeymap=\"$xkbdlayout\"\n" >> /tmp/rc.conf
+mv /tmp/rc.conf /etc/rc.conf
+

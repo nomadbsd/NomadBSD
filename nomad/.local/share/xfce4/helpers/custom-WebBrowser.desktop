@@ -1,0 +1,11 @@
+[Desktop Entry]
+NoDisplay=true
+Version=1.0
+Encoding=UTF-8
+Type=X-XFCE-Helper
+X-XFCE-Category=WebBrowser
+X-XFCE-CommandsWithParameter=/usr/local/bin/palemoon "%s"
+Icon=palemoon
+Name=palemoon
+X-XFCE-Commands=/usr/local/bin/palemoon
+

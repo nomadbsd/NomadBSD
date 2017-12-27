@@ -1,0 +1,7 @@
+# $FreeBSD: releng/11.1/share/skel/dot.login_conf 77995 2001-06-10 17:08:53Z ache $
+#
+# see login.conf(5)
+#
+#me:\
+#	:charset=iso-8859-1:\
+#	:lang=de_DE.ISO8859-1:

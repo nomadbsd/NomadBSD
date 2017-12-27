@@ -1,0 +1,9 @@
+# $FreeBSD: releng/11.1/share/skel/dot.rhosts 50476 1999-08-28 00:22:10Z peter $
+#
+# .rhosts - trusted remote host name and user data base
+#
+# see hosts.equiv(5), rsh(1), rlogin(1), rcp(1)
+#
+# This file should NOT be group or other readable.
+# OtherMachine
+# OtherMachine myFriend

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# PROVIDE: mount_uzip
+# BEFORE: ldconfig NETWORKING
+# REQUIRE: FILESYSTEMS
+
+. /etc/rc.subr 
+
+mddev=`mdconfig -a -t vnode -f /uzip/usr.local.uzip -o readonly | \
+cut -d":" -f 1`
+mount -r /dev/${mddev}.uzip /usr/local
+
