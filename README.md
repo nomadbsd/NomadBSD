@@ -9,5 +9,5 @@ NomadBSD is a livesystem for flash drives, based on FreeBSD.
 ### Building the image
 
 ~~~ csh
-make image
+# make image
 ~~~
