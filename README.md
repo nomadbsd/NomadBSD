@@ -1,6 +1,6 @@
 ### About
 
-NomadBSD is a livesystem for flash drives, based on FreeBSD.
+NomadBSD is a live system for flash drives, based on FreeBSD.
 
 ### Screenshots
 ![](http://freeshell.de/~mk/download/nomadbsd-ss1.png)
