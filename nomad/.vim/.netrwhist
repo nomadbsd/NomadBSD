@@ -1,5 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =3
-let g:netrw_dirhist_1='/home/ich/.config/gtk-3.0'
-let g:netrw_dirhist_2='/home/ich/.config/DSB/dsbmc'
-let g:netrw_dirhist_3='/home/ich/git/nomadbsd/config/etc/rc.d'
