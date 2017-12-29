@@ -7,7 +7,7 @@ export PS1="%m:%d%% "
 bindkey -e
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
-zstyle :compinstall filename '/home/ich/.zshrc'
+zstyle :compinstall filename '/home/nomad/.zshrc'
 
 autoload -Uz compinit
 autoload -U history-search-end
