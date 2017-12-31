@@ -8,6 +8,7 @@ devel/pkgconf
 editors/leafpad
 editors/libreoffice
 editors/vim
+emulators/virtualbox-ose-additions
 french/aspell
 german/aspell
 german/hunspell
@@ -32,6 +33,7 @@ net-im/pidgin
 net-mgmt/wifimgr
 polish/aspell
 polish/hunspell
+ports-mgmt/pkg
 portuguese/hunspell
 print/gimp-gutenprint
 russian/aspell
@@ -47,6 +49,7 @@ sysutils/dsbmc
 sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/fusefs-ext4fuse
+sysutils/smartmontools
 sysutils/tmux
 sysutils/xfburn
 textproc/aspell
