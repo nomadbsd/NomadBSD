@@ -11,6 +11,15 @@ DISTDIR=	${PWD}/dists
 DISTSITE=	${URL}/${ARCH}/${RELEASE}
 DISTS=		base.txz
 PKGLIST=	pkg.list
+GIT_SITE=	https://github.com/mrclksr
+GIT_REPOS=	${GIT_SITE}/DSBDriverd.git
+GIT_REPOS+=	${GIT_SITE}/DSBMC.git
+GIT_REPOS+=	${GIT_SITE}/DSBMC-Cli.git
+GIT_REPOS+=	${GIT_SITE}/DSBMD.git
+GIT_REPOS+=	${GIT_SITE}/dsbcfg.git
+GIT_REPOS+=	${GIT_SITE}/libdsbmc.git
+GIT_REPO_DIRS=	DSBDriverd DSBMC DSBMC-Cli DSBMD
+
 KERNELTARGET=	${SYSDIR}/usr/obj/usr/src/sys/NOMADBSD/kernel
 PKGDB=		${SYSDIR}/var/db/pkg/local.sqlite
 XORG_CONF_D=	${SYSDIR}/usr/local/etc/X11/xorg.conf.d
@@ -68,7 +77,17 @@ instpkgs: ${PKGDB}
 ${PKGDB}: initbase ${PKGLIST}
 	export ASSUME_ALWAYS_YES=yes; \
 	    cat ${PKGLIST} | xargs -J% pkg -c ${SYSDIR} install -y %
-
+	if [ ! -d ${SYSDIR}/git ]; then mkdir ${SYSDIR}/git; fi
+.for r in ${GIT_REPOS}
+	if [ ! -d ${SYSDIR}/git/${r:S,${GIT_SITE}/,,:S,.git,,} ]; then \
+		chroot ${SYSDIR} sh -c 'cd /git && git clone ${r}'; \
+	fi
+.endfor
+.for r in ${GIT_REPO_DIRS}
+	chroot ${SYSDIR} sh -c 'cd /git/${r} && make && make install'
+.endfor
+	cp ${SYSDIR}/usr/local/etc/dsbmd.conf.sample \
+	    ${SYSDIR}/usr/local/etc/dsbmd.conf
 buildkernel: ${KERNELTARGET}
 
 ${KERNELTARGET}: initbase
@@ -112,6 +131,7 @@ nomadbsd.img: uzip
 	(cd ${SYSDIR} && rm -rf var/tmp/*; rm -rf tmp/*); \
 	(cd ${SYSDIR} && tar -cf - \
 	    --exclude '^boot/kernel.old' \
+	    --exclude '^git*'		 \
 	    --exclude '^pkgs/*'		 \
 	    --exclude '^usr/obj*'	 \
 	    --exclude '^usr/src*'	 \
@@ -121,7 +141,6 @@ nomadbsd.img: uzip
 	    --exclude '^home*'		 \
 	    --exclude '^usr/home*'	 \
 	    --exclude '^var/cache/pkg*'	 \
-	    --exclude '^var/db/pkg/*'	 \
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'	 \
 	    --exclude '^var/log/*' .) | (cd mnt && tar pxf -); \
