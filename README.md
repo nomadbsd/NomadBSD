@@ -40,3 +40,6 @@ the remaining size of da0s1a:
 # service growfs onestart
 # reboot
 ~~~
+
+### Ready to use image
+Visit https://freeshell.de/~mk/projects/nomadbsd.html to download the recent image.
