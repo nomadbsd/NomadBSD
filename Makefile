@@ -55,12 +55,14 @@ fontpaths: ${FONTPATHS_FILE}
 ${FONTPATHS_FILE}: instpkgs
 	if [ ! -d ${XORG_CONF_D} ]; then mkdir -p ${XORG_CONF_D}; fi
 	(for i in ${FONTSDIR}/*; do \
+		[ ! -d "$$i" ] && continue; \
 		mkfontscale "$$i/"; \
 		mkfontdir "$$i/"; \
 	done; \
 	echo "Section \"Files\""; \
 	IFS=; \
 	for i in ${FONTSDIR}/*; do \
+		[ ! -d "$$i" ] && continue; \
 		n=`head -1 "$$i/fonts.scale"`; \
 		i=`echo $$i | sed -E 's#${SYSDIR}(/.*)$$#\1#'`; \
 		if [ $$n -gt 0 ]; then \
