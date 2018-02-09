@@ -124,6 +124,7 @@ setxkbdlayout() {
 
 kbdmap
 passwd
+passwd nomad
 setlang
 setshell
 tzsetup
