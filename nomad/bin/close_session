@@ -1,0 +1,10 @@
+#!/bin/sh
+
+for i in 15 9; do
+	pkill -$i gvfsd
+	pkill -$i dbus-daemon
+	pkill -$i dsbus-launch
+	[ $i -ne 9 ] && sleep 1
+done
+openbox --exit
+
