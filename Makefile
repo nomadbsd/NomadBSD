@@ -54,12 +54,29 @@ fontpaths: ${FONTPATHS_FILE}
 
 ${FONTPATHS_FILE}: instpkgs
 	if [ ! -d ${XORG_CONF_D} ]; then mkdir -p ${XORG_CONF_D}; fi
-	echo Section \"Files\" >> ${FONTPATHS_FILE}
-	find ${FONTSDIR} -type d -d 1 | while read i; \
-		do path=`echo $$i | sed -E 's#^${SYSDIR}(/.*)$$#\1#'`; \
-		printf "\tFontPath\t\"$$path/\"\n" ; \
-	done >> ${FONTPATHS_FILE}
-	echo 'EndSection' >> ${FONTPATHS_FILE}
+	(for i in ${FONTSDIR}/*; do \
+		mkfontscale "$$i/"; \
+		mkfontdir "$$i/"; \
+	done; \
+	echo "Section \"Files\""; \
+	IFS=; \
+	for i in ${FONTSDIR}/*; do \
+		n=`head -1 "$$i/fonts.scale"`; \
+		i=`echo $$i | sed -E 's#${SYSDIR}(/.*)$$#\1#'`; \
+		if [ $$n -gt 0 ]; then \
+			echo "  FontPath \"$$i\""; \
+		else \
+			if [ ! -z $${ns} ]; then \
+				ns=`printf "$${ns}\n$$i"`; \
+			else \
+				ns="$$i"; \
+			fi \
+		fi \
+	done; \
+	echo $${ns} | while read i; do \
+		echo "  FontPath \"$$i\""; \
+	done; \
+	echo "EndSection") > ${FONTPATHS_FILE}
 
 ${SYSDIR}:
 	BSDINSTALL_DISTDIR=${DISTDIR} BSDINSTALL_DISTSITE=${DISTSITE} \
