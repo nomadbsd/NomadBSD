@@ -302,7 +302,7 @@
 <separator />
 <item label="Logout" icon="/usr/local/share/icons/Faenza/actions/48/system-log-out.png">
                 <action name="Execute">
-                        <command>/usr/local/bin/dsblogoutmgr -l "openbox --exit"</command>
+                        <command>/usr/local/bin/dsblogoutmgr -l close_session</command>
                 </action>
         </item>
 <separator />
