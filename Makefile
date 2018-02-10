@@ -89,10 +89,11 @@ ${SYSDIR}:
 	    DISTRIBUTIONS=kernel.txz bsdinstall distextract
 
 updatebase: ${SYSDIR}
-	freebsd-update --currently-running ${RELEASE} \
+	-freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b ${SYSDIR} fetch && \
 	freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b ${SYSDIR} install
+
 instpkgs: ${PKGDB}
 	if grep -q ^cups: ${SYSDIR}/etc/group; then \
 		chroot ${SYSDIR} sh -c 'pw groupmod cups -m root,nomad'; \
@@ -140,7 +141,8 @@ nomadbsd.img: uzip
 	maxsize=`echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024 - \
 	    5 * (${MEDIASIZE} * 1000^3 / 1024) / 100" | bc`; \
 	mddev=`mdconfig -a -t vnode -f $@ -s $${maxsize}k || exit 1`; \
-	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
+	if [ ! -d mnt ]; then mkdir mnt || exit 1; fi; \
+	sh -c "gpart destroy -F $${mddev}; exit 0"; \
 	gpart create -s gpt $${mddev} || exit 1; \
 	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $${mddev} || exit 1;\
 	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 $${mddev} || exit 1;\
