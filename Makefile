@@ -40,7 +40,7 @@ init: initbase buildkernel instpkgs fontpaths
 	    (cd ${SYSDIR}/usr/src/sys/${ARCH}/conf && tar xf -)
 .endif
 
-initbase: ${SYSDIR}
+initbase: ${SYSDIR} updatebase
 	if ! grep -q ^nomad ${SYSDIR}/etc/passwd; then \
 		chroot ${SYSDIR} sh -c \
 		    'pw useradd nomad -m -G wheel,operator,video \
@@ -88,6 +88,11 @@ ${SYSDIR}:
 	BSDINSTALL_DISTDIR=${DISTDIR} BSDINSTALL_CHROOT=${SYSDIR} \
 	    DISTRIBUTIONS=kernel.txz bsdinstall distextract
 
+updatebase: ${SYSDIR}
+	freebsd-update --currently-running ${RELEASE} \
+		-f config/etc/freebsd-update.conf -b ${SYSDIR} fetch && \
+	freebsd-update --currently-running ${RELEASE} \
+		-f config/etc/freebsd-update.conf -b ${SYSDIR} install
 instpkgs: ${PKGDB}
 	if grep -q ^cups: ${SYSDIR}/etc/group; then \
 		chroot ${SYSDIR} sh -c 'pw groupmod cups -m root,nomad'; \
