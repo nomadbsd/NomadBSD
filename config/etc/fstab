@@ -1,5 +1,5 @@
-/dev/ufs/NomadBSD	/			ufs	  rw,noatime       1 1
-/dev/label/NomadBSDsw	none			swap	  sw	           0 0
+/dev/gpt/gprootfs	/			ufs	  rw,noatime       1 1
+/dev/gpt/gpswap		none			swap	  sw	           0 0
 tmpfs			/tmp			tmpfs	  rw,mode=1777     0 0	
 tmpfs			/var/log		tmpfs	  rw               0 0
 tmpfs			/var/run		tmpfs     rw		   0 0
