@@ -135,18 +135,22 @@ nomadbsd.img: uzip
 	maxsize=`echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024 - \
 	    5 * (${MEDIASIZE} * 1000^3 / 1024) / 100" | bc`; \
 	mddev=`mdconfig -a -t vnode -f $@ -s $${maxsize}k || exit 1`; \
-	fdisk -BI /dev/$${mddev} || exit 1; \
-	bsdlabel -w -B -b ${SYSDIR}/boot/boot /dev/$${mddev}s1 || exit 1; \
-	bsdlabel /dev/$${mddev}s1 | sed -e '/^ *a:/d' > disklabel; \
-	echo "  a: *    16 unused 0 0" >> disklabel; \
-	echo "  b: ${SWAPSIZE}M  * swap   0 0" >> disklabel; \
-	bsdlabel -R /dev/$${mddev}s1 disklabel; \
-	rm -f disklabel; \
-	glabel label NomadBSDsw /dev/$${mddev}s1b || exit 1; \
-	newfs -E -U -O 1 -L NomadBSD -b $${blksize} -f ${FRAGSIZE} \
-	    -m 0 /dev/$${mddev}s1a || exit 1; \
 	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
-	mount /dev/$${mddev}s1a mnt || exit 1; \
+	gpart create -s gpt $${mddev} || exit 1; \
+	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $${mddev} || exit 1;\
+	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 $${mddev} || exit 1;\
+	gpart add -t efi -l gpefiboot -a4k -s492k $${mddev} || exit 1; \
+	newfs_msdos /dev/$${mddev}p2 || exit 1; \
+	mount -t msdosfs /dev/$${mddev}p2 ./mnt || exit 1; \
+	mkdir -p ./mnt/EFI/BOOT; \
+	cp ${SYSDIR}/boot/boot1.efi ./mnt/EFI/BOOT; \
+	umount ./mnt; \
+	gpart add -t freebsd-swap -l gpswap -s ${SWAPSIZE}M $${mddev}; \
+	gpart add -t freebsd-ufs -l gprootfs $${mddev}; \
+	newfs -E -U -O 1 -b $${blksize} -f ${FRAGSIZE} \
+	    -m 0 /dev/$${mddev}p4 || exit 1; \
+	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
+	mount /dev/$${mddev}p4 mnt || exit 1; \
 	(cd ${SYSDIR} && rm -rf var/tmp/*; rm -rf tmp/*); \
 	(cd ${SYSDIR} && tar -cf - \
 	    --exclude '^boot/kernel.old' \
