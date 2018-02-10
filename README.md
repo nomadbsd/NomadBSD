@@ -25,18 +25,8 @@ A recent FreeBSD system
 ### Resize filesystem to use the entire USB memory
 Boot NomadBSD into single user mode, and execute:
 ~~~
-# gpart delete -i 2 da0s1
-# gpart resize -i 1 da0
-# gpart commit da0s1
-~~~
-Determine the partition size in megabytes using ````fdisk da0````, and calculate
-the remaining size of da0s1a:
-````<REMAIN> = <SIZE OF PARTITION IN MB> - <DESIRED SWAP SIZE IN MB>````.
-
-~~~
-# gpart resize -i 1 -s <REMAIN>M da0s1
-# gpart add -t freebsd-swap -i 2 da0s1
-# glabel label NomadBSDsw da0s1b
+# gpart recover da0
+# gpart resize -i 4 da0
 # service growfs onestart
 # reboot
 ~~~
