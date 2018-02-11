@@ -6,7 +6,6 @@
 
 . /etc/rc.subr 
 
-mddev=`mdconfig -a -t vnode -f /uzip/usr.local.uzip -o readonly | \
-cut -d":" -f 1`
-mount -r /dev/${mddev}.uzip /usr/local
+echo "Mounting uzip. Please wait ..."
+mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /usr/local
 
