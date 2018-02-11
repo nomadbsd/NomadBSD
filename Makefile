@@ -18,7 +18,8 @@ GIT_REPOS+=	${GIT_SITE}/DSBMC-Cli.git
 GIT_REPOS+=	${GIT_SITE}/DSBMD.git
 GIT_REPOS+=	${GIT_SITE}/dsbcfg.git
 GIT_REPOS+=	${GIT_SITE}/libdsbmc.git
-GIT_REPO_DIRS=	DSBDriverd DSBMC DSBMC-Cli DSBMD
+GIT_REPOS+=	${GIT_SITE}/DSBBatmon.git
+GIT_REPO_DIRS=	DSBBatmon DSBDriverd DSBMC DSBMC-Cli DSBMD
 
 KERNELTARGET=	${SYSDIR}/usr/obj/usr/src/sys/NOMADBSD/kernel
 PKGDB=		${SYSDIR}/var/db/pkg/local.sqlite
