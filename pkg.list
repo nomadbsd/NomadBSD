@@ -5,6 +5,9 @@ audio/dsbmixer
 devel/git
 devel/gmake
 devel/pkgconf
+devel/qt5-buildtools
+devel/qt5-linguisttools
+devel/qt5-qmake
 editors/leafpad
 editors/libreoffice
 editors/vim
