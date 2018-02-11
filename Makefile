@@ -191,7 +191,7 @@ ${UZIP_IMAGE}.img: init
 	blksize=`echo "${FRAGSIZE} * 8" | bc`; \
 	touch ${UZIP_IMAGE}.img; \
 	mddev=`mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s 6000m || exit 1`; \
-	newfs -O 1 -b $${blksize} -f ${FRAGSIZE} -m 0 /dev/$${mddev} || \
+	newfs -O 1 -E -b $${blksize} -f ${FRAGSIZE} -m 0 /dev/$${mddev} || \
 	    exit 1; \
 	if [ ! -d ${UZIP_MNT} ]; then mkdir ${UZIP_MNT} || exit 1; fi; \
 	mount /dev/$${mddev} ${UZIP_MNT} || exit 1; \
@@ -203,7 +203,7 @@ ${UZIP_IMAGE}.img: init
 	rmdir ${UZIP_MNT}
 
 ${UZIP_IMAGE}.uzip: ${UZIP_IMAGE}.img
-	mkuzip -d -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
+	mkuzip -j 2 -d -s 19456 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 
 baseclean:
 	chflags -R noschg,nosunlnk ${SYSDIR}
