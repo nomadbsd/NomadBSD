@@ -110,7 +110,8 @@ ${PKGDB}: initbase ${PKGLIST}
 	fi
 .endfor
 .for r in ${GIT_REPO_DIRS}
-	chroot ${SYSDIR} sh -c 'cd /git/${r} && make && make install'
+	chroot ${SYSDIR} sh -c 'cd /git/${r}; \
+		ls *.pro > /dev/null 2>&1 && qmake; make && make install'
 .endfor
 	cp ${SYSDIR}/usr/local/etc/dsbmd.conf.sample \
 	    ${SYSDIR}/usr/local/etc/dsbmd.conf
