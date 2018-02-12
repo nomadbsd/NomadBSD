@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Printer configuration
+Exec=xdg-open http://localhost:631
+Icon=printer
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=System;Settings;Application
+
