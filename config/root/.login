@@ -6,7 +6,10 @@
 #
 if ( "`tty`" =~ "/dev/ttyv0" ) then
 /usr/libexec/nomad/nomad_setup
-echo "Starting Xorg. This might take a while ..."
+echo "*********************************************************************"
+echo "Starting Xorg. This might take a while when starting NomadBSD for the"
+echo "first time. Stay tuned!"
+echo "*********************************************************************"
 service slim onestart; sleep 3; service slim onestart; sleep 3
 service slim onestart
 endif
