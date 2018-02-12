@@ -22,14 +22,5 @@ A recent FreeBSD system
 # dd if=nomadbsd.img of=/dev/da0 bs=10240 conv=sync
 ~~~
 
-### Resize filesystem to use the entire USB memory
-Boot NomadBSD into single user mode, and execute:
-~~~
-# gpart recover da0
-# gpart resize -i 4 da0
-# service growfs onestart
-# reboot
-~~~
-
 ### Ready to use image
 Visit https://freeshell.de/~mk/projects/nomadbsd.html to download the recent image.
