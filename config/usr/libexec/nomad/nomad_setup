@@ -120,8 +120,18 @@ setxkbdlayout() {
 	echo "xkbdlayout=$layout" >> $path_nomadcfg
 }
 
+growfs() {
+	msg="Would you like to grow the filesystem to use the remaning"
+	msg="${msg} space of your flash drive?"
+	dialog --yesno "$msg" 6 60
+	if [ $? -eq 0 ]; then
+		service growfs onestart
+	fi
+}
+
 [ -f $path_nomadcfg ] && exit 0
 
+growfs
 kbdmap
 passwd
 passwd nomad
