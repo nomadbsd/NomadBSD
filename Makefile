@@ -205,7 +205,7 @@ ${UZIP_IMAGE}.img: init
 	rmdir ${UZIP_MNT}
 
 ${UZIP_IMAGE}.uzip: ${UZIP_IMAGE}.img
-	mkuzip -j 2 -d -s 19456 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
+	mkuzip -j 2 -d -s 18944 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 
 baseclean:
 	chflags -R noschg,nosunlnk ${SYSDIR}
