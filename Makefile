@@ -90,10 +90,10 @@ ${SYSDIR}:
 	    DISTRIBUTIONS=kernel.txz bsdinstall distextract
 
 updatebase: ${SYSDIR}
-	-freebsd-update --currently-running ${RELEASE} \
+	-(cat /dev/null | freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b ${SYSDIR} fetch && \
 	freebsd-update --currently-running ${RELEASE} \
-		-f config/etc/freebsd-update.conf -b ${SYSDIR} install
+		-f config/etc/freebsd-update.conf -b ${SYSDIR} install)
 
 instpkgs: ${PKGDB}
 	if grep -q ^cups: ${SYSDIR}/etc/group; then \
@@ -193,7 +193,7 @@ ${UZIP_IMAGE}.img: init
 	blksize=`echo "${FRAGSIZE} * 8" | bc`; \
 	touch ${UZIP_IMAGE}.img; \
 	mddev=`mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s 6000m || exit 1`; \
-	newfs -O 1 -E -b $${blksize} -f ${FRAGSIZE} -m 0 /dev/$${mddev} || \
+	newfs -O 1 -b $${blksize} -f ${FRAGSIZE} -m 0 /dev/$${mddev} || \
 	    exit 1; \
 	if [ ! -d ${UZIP_MNT} ]; then mkdir ${UZIP_MNT} || exit 1; fi; \
 	mount /dev/$${mddev} ${UZIP_MNT} || exit 1; \
