@@ -10,10 +10,10 @@ if ( "`tty`" =~ "/dev/ttyv0" ) then
 	/usr/libexec/nomad/nomad_setup
 	pciconf -lv | grep -B3 display | grep -i nvidia >& /dev/null
 	if ( $? == 0 ) then
-		if ( ! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
+		if (! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
 			cp /root/10-nvidia.conf /usr/local/etc/X11/xorg.conf.d/
 		endif
-	else
+	else if (-f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
 		rm /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
 	endif
 	echo "*********************************************************************"
