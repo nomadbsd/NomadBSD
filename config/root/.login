@@ -4,13 +4,23 @@
 #
 # see also csh(1), environ(7).
 #
+# vim: set tabstop=4:
+
 if ( "`tty`" =~ "/dev/ttyv0" ) then
-/usr/libexec/nomad/nomad_setup
-echo "*********************************************************************"
-echo "Starting Xorg. This might take a while when starting NomadBSD for the"
-echo "first time. Stay tuned!"
-echo "*********************************************************************"
-service slim onestart; sleep 3; service slim onestart; sleep 3
-service slim onestart
+	/usr/libexec/nomad/nomad_setup
+	pciconf -lv | grep -B3 display | grep -i nvidia >& /dev/null
+	if ( $? == 0 ) then
+		if ( ! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
+			cp /root/10-nvidia.conf /usr/local/etc/X11/xorg.conf.d/
+		endif
+	else
+		rm /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
+	endif
+	echo "*********************************************************************"
+	echo "Starting Xorg. This might take a while when starting NomadBSD for the"
+	echo "first time. Stay tuned!"
+	echo "*********************************************************************"
+	service slim onestart; sleep 3; service slim onestart; sleep 3
+	service slim onestart
 endif
 
