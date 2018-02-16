@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Modify/Set GTK theme
+Exec=gtk-chtheme
+Icon=gtk3-demo
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=Settings;Application
