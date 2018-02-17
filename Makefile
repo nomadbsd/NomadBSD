@@ -5,7 +5,7 @@ URL=		ftp://ftp.freebsd.org/pub/FreeBSD/releases
 MEDIASIZE=	4
 # Size of swap partition in MB
 SWAPSIZE=	128
-FRAGSIZE=	2048
+FRAGSIZE=	4096
 SYSDIR=		${PWD}/sys
 DISTDIR=	${PWD}/dists
 DISTSITE=	${URL}/${ARCH}/${RELEASE}
@@ -90,7 +90,7 @@ ${SYSDIR}:
 	    DISTRIBUTIONS=kernel.txz bsdinstall distextract
 
 updatebase: ${SYSDIR}
-	-(cat /dev/null | freebsd-update --currently-running ${RELEASE} \
+	-(freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b ${SYSDIR} fetch && \
 	freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b ${SYSDIR} install)
@@ -156,8 +156,8 @@ nomadbsd.img: uzip
 	umount ./mnt; \
 	gpart add -t freebsd-swap -l gpswap -s ${SWAPSIZE}M $${mddev}; \
 	gpart add -t freebsd-ufs -l gprootfs $${mddev}; \
-	newfs -E -U -O 1 -b $${blksize} -f ${FRAGSIZE} \
-	    -m 0 /dev/$${mddev}p4 || exit 1; \
+	newfs -E -U -O 1 -o time -b $${blksize} -f ${FRAGSIZE} \
+	    -m 8 /dev/$${mddev}p4 || exit 1; \
 	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
 	mount /dev/$${mddev}p4 mnt || exit 1; \
 	(cd ${SYSDIR} && rm -rf var/tmp/*; rm -rf tmp/*); \
