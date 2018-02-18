@@ -12,6 +12,8 @@ if ( "`tty`" =~ "/dev/ttyv0" ) then
 	if ( $? == 0 ) then
 		if (! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
 			cp /root/10-nvidia.conf /usr/local/etc/X11/xorg.conf.d/
+			kldload nvidia
+			kldload nvidia-modeset
 		endif
 	else if (-f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
 		rm /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
