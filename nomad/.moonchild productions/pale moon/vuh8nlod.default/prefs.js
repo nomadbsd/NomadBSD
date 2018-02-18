@@ -28,6 +28,7 @@ user_pref("browser.rights.3.shown", true);
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.slowStartup.averageTime", 11920);
 user_pref("browser.slowStartup.samples", 3);
+user_pref("browser.startup.homepage", "https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/index.html");
 user_pref("browser.startup.homepage_override.buildID", "20180216000824");
 user_pref("browser.startup.homepage_override.mstone", "3.4.2");
 user_pref("extensions.blocklist.pingCountVersion", -1);
