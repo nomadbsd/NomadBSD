@@ -18,7 +18,7 @@ user_pref("browser.cache.disk.enable", false);
 user_pref("browser.cache.disk.parent_directory", "/tmp");
 user_pref("browser.cache.disk.smart_size.first_run", false);
 user_pref("browser.cache.memory.capacity", -1);
-user_pref("browser.cache.memory.enable", false);
+user_pref("browser.cache.memory.enable", true);
 user_pref("browser.download.importedFromSqlite", true);
 user_pref("browser.migration.version", 14);
 user_pref("browser.newtabpage.storageVersion", 1);
