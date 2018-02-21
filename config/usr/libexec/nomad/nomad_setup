@@ -5,6 +5,8 @@ path_nomadcfg="/nomad.cfg"
 selection="/tmp/selection.$$"
 path_xorg_input_tmpl=${path_installdir}/input-keyboard.conf.tmpl
 path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
+fragsize=4096
+blksize=$(echo "${fragsize} * 8" | bc)
 
 summary() {
 	local text
@@ -125,15 +127,72 @@ growfs() {
 	msg="${msg} space of your flash drive?"
 	dialog --yesno "$msg" 6 60
 	if [ $? -eq 0 ]; then
-		service growfs onestart
+		clear
+		homedev=`glabel status | grep gphomefs | awk -F" " '{ print $3 }'`;
+		if [ -z "${homedev}" ]; then
+			echo "Error: Couldn't find home partition!"
+			return
+		fi
+		dev=`echo ${homedev} | sed -E 's/(.*)p[0-9]/\1/'`
+		pno=`echo ${homedev} | sed -E 's/.*p([0-9])$/\1/'`
+		
+		gpart recover ${dev}
+		gpart resize -i ${pno} $dev
 	fi
+}
+
+mkgeli() {
+	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1
+	geli init -s 4096 -K /root/gprivatefs.key /dev/gpt/gprivatefs
+	geli attach -k /root/gprivatefs.key /dev/gpt/gprivatefs
+	newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
+		-m 8 /dev/gpt/gprivatefs.eli
+	mkdir /private
+	mount /dev/gpt/gprivatefs.eli /private
+	mkdir /private/home
+	mkdir /private/etc
+	mkdir /private/home/nomad
+	ln -s /private/home /
+	chown nomad:nomad /home/nomad
+
+	mv /etc/master.passwd /etc/passwd /etc/ppp /private/etc/
+	mv /etc/wpa_supplicant.conf /private/etc >/dev/null 2>&1
+	touch /private/etc/wpa_supplicant.conf
+	sysrc geli_devices="gpt/gprivatefs"
+	sysrc geli_gpt_gprivatefs_flags="-k /root/gprivatefs.key"
+	printf "/dev/gpt/gprivatefs.eli\t/private\t\t\tufs\trw,noatime\t1 1\n" >> \
+		/etc/fstab
+	printf "/private/etc\t/etc\t\tunionfs\trw,noatime\t0 0\n" >> /etc/fstab
+	mount_unionfs /private/etc /etc
+}
+
+mkhome() {
+	msg="Would you like /home to be encrypted using geli?"
+	dialog --yesno "$msg" 6 60
+	ret=$?
+	clear
+	if [ $ret -eq 0 ]; then
+		mkgeli
+	else
+		newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
+			-m 8 /dev/gpt/gprivatefs
+		mount /dev/gpt/gprivatefs /home
+		mkdir /home/nomad
+		chown nomad:nomad /home/nomad
+		printf "/dev/gpt/gprivatefs\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
+		/etc/fstab
+	fi
+	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
 }
 
 [ -f $path_nomadcfg ] && exit 0
 
 growfs
 kbdmap
+mkhome
+clear
 passwd
+clear
 passwd nomad
 setlang
 setshell
