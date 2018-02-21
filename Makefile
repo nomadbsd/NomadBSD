@@ -138,10 +138,16 @@ ${KERNELTARGET}: initbase
 image: nomadbsd.img
 
 nomadbsd.img: uzip
-	touch nomadbsd.img; \
 	blksize=`echo "${FRAGSIZE} * 8" | bc`; \
-	maxsize=`echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024 - \
-	    5 * (${MEDIASIZE} * 1000^3 / 1024) / 100" | bc`; \
+	uzipsz=`du -B $${blksize} -m ${UZIP_IMAGE}.uzip | cut -f1`; \
+	tot=`du -B $${blksize} -mc sys | tail -1 | cut -f1`; \
+	r=`du -B $${blksize} -mc sys/boot/kernel.old sys/git sys/usr/obj \
+		sys/usr/src sys/usr/share/doc sys/usr/local sys/var/cache/pkg \
+		sys/var/db/ports sys/var/db/portsnap sys/var/log | \
+		tail -1 | cut -f1`; \
+	basesz=`expr $$tot - $$r + $$uzipsz`; \
+	touch nomadbsd.img; \
+	maxsize=`echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc`; \
 	mddev=`mdconfig -a -t vnode -f $@ -s $${maxsize}k || exit 1`; \
 	if [ ! -d mnt ]; then mkdir mnt || exit 1; fi; \
 	sh -c "gpart destroy -F $${mddev}; exit 0"; \
@@ -155,7 +161,8 @@ nomadbsd.img: uzip
 	cp ${SYSDIR}/boot/boot1.efi ./mnt/EFI/BOOT; \
 	umount ./mnt; \
 	gpart add -t freebsd-swap -l gpswap -s ${SWAPSIZE}M $${mddev}; \
-	gpart add -t freebsd-ufs -l gprootfs $${mddev}; \
+	gpart add -t freebsd-ufs -l gprootfs -s $${basesz}M $${mddev}; \
+	gpart add -t freebsd-ufs -l gprivatefs $${mddev}; \
 	newfs -E -U -O 1 -o time -b $${blksize} -f ${FRAGSIZE} \
 	    -m 8 /dev/$${mddev}p4 || exit 1; \
 	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
@@ -176,9 +183,8 @@ nomadbsd.img: uzip
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'	 \
 	    --exclude '^var/log/*' .) | (cd mnt && tar pxf -); \
-	mkdir mnt/var/log; mkdir -p mnt/home/nomad; \
-	(cd ${SYSDIR}/usr/home/nomad && tar cf - .) | \
-	    (cd mnt/home/nomad && tar vpxf -); \
+	mkdir mnt/var/log; \
+	(cd ${SYSDIR}/usr/home/nomad && tar cfz - .) > mnt/home.nomad.tgz; \
 	mkdir mnt/usr.local.etc; \
 	(cd ${SYSDIR}/usr/local/etc && tar cf - .) | \
  	    (cd mnt/usr.local.etc && tar vpxf -); \
