@@ -21,6 +21,7 @@ user_pref("browser.cache.disk.enable", false);
 user_pref("browser.cache.disk.filesystem_reported", 1);
 user_pref("browser.cache.disk.smart_size.first_run", false);
 user_pref("browser.cache.frecency_experiment", 2);
+user_pref("browser.cache.memory.enable", true);
 user_pref("browser.cache.memory.capacity", -1);
 user_pref("browser.laterrun.bookkeeping.profileCreationTime", 1518987453);
 user_pref("browser.laterrun.bookkeeping.sessionCount", 4);
