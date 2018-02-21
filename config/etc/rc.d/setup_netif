@@ -15,7 +15,7 @@ start_cmd="${name}_start"
 setup_netifs_start() {
 	rc_conf=/etc/rc.conf
 
-	sed -E '/^# -- setup_netifs start --/,/^# -- setup_netifs end --/d' \
+	sed -E '/^# -- setup_netifs start --/,/^# -- setup_netifs end --$/d' \
 		$rc_conf > /tmp/rc.conf.$$ && \
 	mv /tmp/rc.conf.$$ $rc_conf
 	ethernets=`ifconfig | awk '
@@ -46,7 +46,7 @@ setup_netifs_start() {
 		printf "ifconfig_%s=\"DHCP\"\n" $i >> $rc_conf
 		n=`expr $n + 1`
 	done
-	printf "# -- setup_netifs end --" >> $rc_conf
+	printf "# -- setup_netifs end --\n" >> $rc_conf
 }
 
 setup_netifs_start
