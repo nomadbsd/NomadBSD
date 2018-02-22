@@ -144,7 +144,9 @@ growfs() {
 mkgeli() {
 	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1
 	geli init -s 4096 -K /root/gprivatefs.key /dev/gpt/gprivatefs
-	geli attach -k /root/gprivatefs.key /dev/gpt/gprivatefs
+	while [ true ]; do
+		geli attach -k /root/gprivatefs.key /dev/gpt/gprivatefs && break
+	done
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
 		-m 8 /dev/gpt/gprivatefs.eli
 	mkdir /private
