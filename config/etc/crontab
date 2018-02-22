@@ -10,7 +10,7 @@ PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
 */5	*	*	*	*	root	/usr/libexec/atrun
 #
 # Save some entropy so that /dev/random can re-seed on boot.
-*/11	*	*	*	*	operator /usr/libexec/save-entropy
+@reboot	operator /usr/libexec/save-entropy
 #
 # Rotate log files every hour, if necessary.
 0	*	*	*	*	root	newsyslog
