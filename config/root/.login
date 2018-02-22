@@ -18,11 +18,10 @@ if ( "`tty`" =~ "/dev/ttyv0" ) then
 	else if (-f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf) then
 		rm /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
 	endif
-	echo "*********************************************************************"
-	echo "Starting Xorg. This might take a while when starting NomadBSD for the"
-	echo "first time. Stay tuned!"
-	echo "*********************************************************************"
-	service slim onestart; sleep 3; service slim onestart; sleep 3
-	service slim onestart
+	set msg="\nStarting Xorg...\n\nThis might take a while when starting"
+	set msg="$msg NomadBSD for the first time.\n\nStay tuned!\n"
+	dialog --infobox "$msg" 10 40
+	(service slim onestart; sleep 3; service slim onestart; sleep 3; \
+	service slim onestart) >& /dev/null
 endif
 
