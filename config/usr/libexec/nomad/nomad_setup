@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim: set tabstop=4:
 
 path_installdir="/usr/libexec/nomad"
 path_nomadcfg="/nomad.cfg"
@@ -154,18 +155,18 @@ mkgeli() {
 	mkdir /private/home
 	mkdir /private/etc
 	mkdir /private/home/nomad
-	ln -s /private/home /
+	unlink /home
+	ln -s /private/home /home
 	chown nomad:nomad /home/nomad
-
-	mv /etc/master.passwd /etc/passwd /etc/ppp /private/etc/
+	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
+	mv /etc/ppp /private/etc/
 	mv /etc/wpa_supplicant.conf /private/etc >/dev/null 2>&1
 	touch /private/etc/wpa_supplicant.conf
+	(cd /etc && ln -sf /private/etc/ppp; ln -sf /private/etc/wpa_supplicant.conf)
 	sysrc geli_devices="gpt/gprivatefs"
 	sysrc geli_gpt_gprivatefs_flags="-k /root/gprivatefs.key"
 	printf "/dev/gpt/gprivatefs.eli\t/private\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
-	printf "/private/etc\t/etc\t\tunionfs\trw,noatime\t0 0\n" >> /etc/fstab
-	mount_unionfs /private/etc /etc
 }
 
 mkhome() {
