@@ -2,6 +2,7 @@ arabic/aspell
 archivers/xarchiver
 audio/deadbeef
 audio/dsbmixer
+audio/sonata
 devel/git
 devel/gmake
 devel/pkgconf
