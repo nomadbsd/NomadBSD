@@ -6,7 +6,6 @@
 # Add the following line to /etc/rc.conf to enable gsched:
 #
 # gsched_enable="YES"
-# gsched_devices="dev1 dev2 ... devn"
 
 . /etc/rc.subr
 
@@ -20,9 +19,12 @@ load_rc_config ${name}
 
 gsched_start()
 {
-	for i in ${gsched_devices}; do
-		gsched insert $i
-	done
+	rootdev=`glabel status | grep gprootfs | awk -F" " '{ print $3 }'`
+	if [ -z "${rootdev}" ]; then
+		echo "Error: Couldn't find root device!"
+		exit 1
+	fi
+	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
+	gsched insert ${dev}
 }
-
 run_rc_command "$1"
