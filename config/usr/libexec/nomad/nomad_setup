@@ -188,6 +188,17 @@ mkhome() {
 	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
 }
 
+swconf()
+{
+	dialog --title "SOFTWARE" --yesno \
+		"\nWould you like to run bsdstats at boot time?" 6 60
+	if [ $ret -eq 0 ]; then
+		sysrc bsdstats_enable="YES"
+	else
+		sysrc bsdstats_enable="NO"
+	fi
+}
+
 [ -f $path_nomadcfg ] && exit 0
 
 growfs
@@ -202,6 +213,7 @@ setshell
 tzsetup
 setxkbdmodel
 setxkbdlayout
+swconf
 
 while [ true ]; do
 	eval $(cat $path_nomadcfg)
