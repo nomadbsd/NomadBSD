@@ -36,6 +36,7 @@ multimedia/vlc
 multimedia/x264
 net-im/pidgin
 net-mgmt/wifimgr
+net-p2p/transmission-qt5
 polish/aspell
 polish/hunspell
 ports-mgmt/pkg
