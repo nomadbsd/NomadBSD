@@ -67,7 +67,8 @@ my %ctgrs_de = (
 );
 my %ctgrs = (de => \%ctgrs_de);
 
-my @xterms= ("urxvt", "rxvt", "mrxvt", "xterm", "Terminal", "gnome-terminal");
+my @xterms= ("sakura", "urxvt", "rxvt", "mrxvt", "xterm", "Terminal",
+	     "gnome-terminal");
 
 # Where to look for desktop files.
 my @apps_paths = (
