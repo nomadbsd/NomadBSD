@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# PROVIDE: gsched
+# REQUIRE: LOGIN
+#
+# Add the following line to /etc/rc.conf to enable gsched:
+#
+# gsched_enable="YES"
+# gsched_devices="dev1 dev2 ... devn"
+
+. /etc/rc.subr
+
+name=gsched
+rcvar=gsched_enable
+start_cmd=gsched_start
+
+load_rc_config ${name}
+
+: ${gsched_enable:="NO"}
+
+gsched_start()
+{
+	for i in ${gsched_devices}; do
+		gsched insert $i
+	done
+}
+
+run_rc_command "$1"
