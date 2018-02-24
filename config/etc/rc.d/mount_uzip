@@ -5,7 +5,17 @@
 # REQUIRE: FILESYSTEMS
 
 . /etc/rc.subr 
+name=mount_uzip
+start_cmd=do_mount_uzip
 
-echo "Mounting uzip. Please wait ..."
-mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /usr/local
+required_modules="geom_uzip"
+
+do_mount_uzip()
+{
+	echo "Mounting uzip. Please wait ..."
+	mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /usr/local
+}
+
+load_rc_config $name
+run_rc_command "$1"
 
