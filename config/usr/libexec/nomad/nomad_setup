@@ -123,25 +123,6 @@ setxkbdlayout() {
 	echo "xkbdlayout=$layout" >> $path_nomadcfg
 }
 
-growfs() {
-	msg="Would you like to grow the filesystem to use the remaning"
-	msg="${msg} space of your flash drive?"
-	dialog --yesno "$msg" 6 60
-	if [ $? -eq 0 ]; then
-		clear
-		homedev=`glabel status | grep gprivatefs | awk -F" " '{ print $3 }'`;
-		if [ -z "${homedev}" ]; then
-			echo "Error: Couldn't find home partition!"
-			return
-		fi
-		dev=`echo ${homedev} | sed -E 's/(.*)p[0-9]/\1/'`
-		pno=`echo ${homedev} | sed -E 's/.*p([0-9])$/\1/'`
-		
-		gpart recover ${dev}
-		gpart resize -i ${pno} $dev
-	fi
-}
-
 mkgeli() {
 	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1 > /dev/null 2>&1
 	geli init -s 4096 -K /root/gprivatefs.key /dev/gpt/gprivatefs
@@ -170,6 +151,17 @@ mkgeli() {
 }
 
 mkhome() {
+	rootdev=`glabel status | grep gprootfs | awk -F" " '{ print $3 }'`
+	if [ -z "${rootdev}" ]; then
+		echo "Error: Couldn't find root device!"
+		exit 1
+	fi
+	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
+	gpart recover ${dev}
+	if ! gpart add -t freebsd-ufs -l gprivatefs ${dev}; then
+		echo "Error: Couldn't create partition"
+		exit 1
+	fi
 	msg="Would you like /home to be encrypted using geli?"
 	dialog --yesno "$msg" 6 60
 	ret=$?
@@ -202,7 +194,6 @@ swconf()
 
 [ -f $path_nomadcfg ] && exit 0
 
-growfs
 kbdmap
 mkhome
 clear
