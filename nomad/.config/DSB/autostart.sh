@@ -4,3 +4,4 @@ tint2&
 dsbmc -i&
 dsbbatmon&
 dsbmixer -i&
+redshift -l`getlalo`&
