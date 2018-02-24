@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LC_ALL=C
+export LC_ALL=C
 awk -F" " -v zone=`cat /var/db/zoneinfo` '
 	$3 == zone {
 		split($2, a, /[+-]/);
