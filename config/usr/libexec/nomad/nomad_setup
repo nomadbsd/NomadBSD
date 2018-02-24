@@ -244,4 +244,5 @@ printf "\nkeymap=\"$xkbdlayout\"\n" >> /tmp/rc.conf
 mv /tmp/rc.conf /etc/rc.conf
 
 sysrc gsched_enable=YES
+service gsched start
 
