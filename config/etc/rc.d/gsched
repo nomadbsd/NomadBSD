@@ -12,7 +12,7 @@
 name=gsched
 rcvar=gsched_enable
 start_cmd=gsched_start
-
+required_modules="geom_sched gsched_rr"
 load_rc_config ${name}
 
 : ${gsched_enable:="NO"}
