@@ -3,6 +3,7 @@ archivers/xarchiver
 audio/ario
 audio/deadbeef
 audio/dsbmixer
+audio/ncmpc
 devel/git
 devel/gmake
 devel/pkgconf
