@@ -1,9 +1,10 @@
 accessibility/redshift
 arabic/aspell
 archivers/xarchiver
-audio/ario
+audio/cantata
 audio/deadbeef
 audio/dsbmixer
+audio/musicpd
 audio/ncmpc
 devel/git
 devel/gmake
