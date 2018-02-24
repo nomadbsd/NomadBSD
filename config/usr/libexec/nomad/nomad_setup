@@ -143,7 +143,7 @@ growfs() {
 }
 
 mkgeli() {
-	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1
+	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1 > /dev/null 2>&1
 	geli init -s 4096 -K /root/gprivatefs.key /dev/gpt/gprivatefs
 	while [ true ]; do
 		geli attach -k /root/gprivatefs.key /dev/gpt/gprivatefs && break
@@ -242,4 +242,6 @@ sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
 sed "/^keymap=.*/d" < /etc/rc.conf > /tmp/rc.conf
 printf "\nkeymap=\"$xkbdlayout\"\n" >> /tmp/rc.conf
 mv /tmp/rc.conf /etc/rc.conf
+
+sysrc gsched_enable=YES
 
