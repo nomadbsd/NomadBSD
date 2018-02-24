@@ -179,6 +179,7 @@ mkhome() {
 	else
 		newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
 			-m 8 /dev/gpt/gprivatefs
+		mkdir /home
 		mount /dev/gpt/gprivatefs /home
 		mkdir /home/nomad
 		chown nomad:nomad /home/nomad
@@ -192,7 +193,7 @@ swconf()
 {
 	dialog --title "SOFTWARE" --yesno \
 		"\nWould you like to run bsdstats at boot time?" 6 60
-	if [ $ret -eq 0 ]; then
+	if [ $? -eq 0 ]; then
 		sysrc bsdstats_enable="YES"
 	else
 		sysrc bsdstats_enable="NO"
