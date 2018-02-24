@@ -140,10 +140,12 @@ image: nomadbsd.img
 nomadbsd.img: uzip
 	blksize=`echo "${FRAGSIZE} * 8" | bc`; \
 	uzipsz=`du -B $${blksize} -m ${UZIP_IMAGE}.uzip | cut -f1`; \
-	tot=`du -B $${blksize} -mc sys | tail -1 | cut -f1`; \
-	r=`du -B $${blksize} -mc sys/boot/kernel.old sys/git sys/usr/obj \
-		sys/usr/src sys/usr/share/doc sys/usr/local sys/var/cache/pkg \
-		sys/var/db/ports sys/var/db/portsnap sys/var/log | \
+	tot=`du -B $${blksize} -mc ${SYSDIR} | tail -1 | cut -f1`; \
+	r=`du -B $${blksize} -mc ${SYSDIR}/boot/kernel.old \
+		${SYSDIR}/git ${SYSDIR}/usr/obj ${SYSDIR}/usr/src \
+		${SYSDIR}/usr/share/doc ${SYSDIR}/usr/local \
+		${SYSDIR}/var/cache/pkg ${SYSDIR}/var/db/ports \
+		${SYSDIR}/var/db/portsnap ${SYSDIR}/var/log | \
 		tail -1 | cut -f1`; \
 	basesz=`expr $$tot - $$r + $$uzipsz`; \
 	touch nomadbsd.img; \
