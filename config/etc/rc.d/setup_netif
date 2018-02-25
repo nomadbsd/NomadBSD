@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # PROVIDE: setup_netifs
-# BEFORE: netif NETWORKING
+# REQUIRE: FILESYSTEMS
+# BEFORE: netif
 
 . /etc/rc.subr
 
@@ -9,7 +10,6 @@ setup_netifs_enable=${setup_netifs_enable-"NO"}
 
 name="setup_netifs"
 rcvar="setup_netifs_enable"
-load_rc_config $name
 start_cmd="${name}_start"
 
 setup_netifs_start() {
@@ -18,6 +18,8 @@ setup_netifs_start() {
 	sed -E '/^# -- setup_netifs start --/,/^# -- setup_netifs end --$/d' \
 		$rc_conf > /tmp/rc.conf.$$ && \
 	mv /tmp/rc.conf.$$ $rc_conf
+	mkdir /var/run/wpa_supplicant >/dev/null 2>&1
+
 	ethernets=`ifconfig | awk '
 	BEGIN {
 		n = 0;
@@ -49,7 +51,6 @@ setup_netifs_start() {
 	printf "# -- setup_netifs end --\n" >> $rc_conf
 }
 
-setup_netifs_start
 load_rc_config $name
 run_rc_command "$1"
 
