@@ -9,6 +9,39 @@ path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
 fragsize=4096
 blksize=$(echo "${fragsize} * 8" | bc)
 
+exitmenu() {
+	local ret opt
+
+	ret="/tmp/exitmenu.ret"
+	while [ true ]; do
+		dialog --title "LEAVE" --radiolist "$1" 15 60 3 \
+		"Reboot" "Reboot system" off \
+		"Shutdown" "Shutdown system" on \
+		"Exit" "Exit setup" off 2>${ret}
+		[ $? -ne 0 ] && continue
+		opt=`cat ${ret}`
+		rm -f ${ret}
+
+		case ${opt} in
+		Shutdown)
+			shutdown -p now;;
+		Exit)
+			exit 1;;
+		Reboot)
+			shutdown -r now;;
+		esac
+	done
+}
+
+errandout() {
+	local msg
+
+	msg=$1
+	msg="${msg}\n\nI'm afraid I can't continue. Sorry for the inconvenience."
+	msg="${msg}\n\nAll I can offer is:\n"
+	exitmenu "${msg}"
+}
+
 summary() {
 	local text
 
@@ -124,15 +157,57 @@ setxkbdlayout() {
 }
 
 mkgeli() {
+	local pwdfile cmdret
+
+	cmdret="/tmp/mkgeli_cmds.ret"
+	pwdfile="/tmp/geli.pwd"
 	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1 > /dev/null 2>&1
-	geli init -s 4096 -K /root/gprivatefs.key /dev/gpt/gprivatefs
 	while [ true ]; do
-		geli attach -k /root/gprivatefs.key /dev/gpt/gprivatefs && break
+		dialog --insecure --passwordform \
+			"Enter a password for geli volume" \
+			12 60 4 "Password" 1 0 "" 2 1 50 0 \
+			"Repeat password" 3 0 "" 4 1 50 0 2>${pwdfile}
+		if [ $? -ne 0 ]; then
+			dialog --title "GIVE UP?" --yesno "Exit setup?" 6 60
+			[ $? -eq 0 ] && exitmenu "Please choose:"
+			continue
+		fi
+		p1=`head -1 ${pwdfile}`	
+		p2=`tail -1 ${pwdfile}`
+		rm -f ${pwdfile}
+		if [ "$p1" != "$p2" ]; then
+			dialog --title ERROR --msgbox \
+				"\nPasswords do not match." 6 40
+		elif [ -z "$p1" ]; then
+			dialog --title ERROR --msgbox \
+				"\nPassword must not be empty." 6 40
+		else
+			break
+		fi
 	done
-	newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
-		-m 8 /dev/gpt/gprivatefs.eli
-	mkdir /private
-	mount /dev/gpt/gprivatefs.eli /private
+	(echo "$p1" | geli init -s 4096 -K /root/gprivatefs.key -J - \
+		/dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | dialog --progressbox \
+		20 75
+	if [ "`cat ${cmdret}`" -ne 0 ]; then
+		errandout "A fatal error occured!: Failed to init geli volume."
+	fi
+	(echo "$p1" | geli attach -k /root/gprivatefs.key -j - \
+		/dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | dialog --progressbox \
+		20 75
+	if [ "`cat ${cmdret}`" -ne 0 ]; then
+		errandout "A fatal error occured!: Failed to attach geli volume."
+	fi
+	(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
+		-m 8 /dev/gpt/gprivatefs.eli 2>&1; echo $?>${cmdret}) | \
+		dialog --progressbox 20 75
+	if [ "`cat ${cmdret}`" -ne 0 ]; then
+		errandout "A fatal error occured! Failed to create filesystem."
+	fi
+	rm -f ${cmdret}
+	mkdir /private > /dev/null 2>&1
+	if ! mount /dev/gpt/gprivatefs.eli /private; then
+		errandout "A fatal error occured!: Failed to mount filesystem."
+	fi
 	mkdir /private/home
 	mkdir /private/etc
 	mkdir /private/home/nomad
@@ -144,35 +219,42 @@ mkgeli() {
 	mv /etc/wpa_supplicant.conf /private/etc >/dev/null 2>&1
 	touch /private/etc/wpa_supplicant.conf
 	(cd /etc && ln -sf /private/etc/ppp; ln -sf /private/etc/wpa_supplicant.conf)
-	sysrc geli_devices="gpt/gprivatefs"
-	sysrc geli_gpt_gprivatefs_flags="-k /root/gprivatefs.key"
+	sysrc geli_devices="gpt/gprivatefs" > /dev/null 2>&1
+	sysrc geli_gpt_gprivatefs_flags="-k /root/gprivatefs.key" > /dev/null 2>&1
 	printf "/dev/gpt/gprivatefs.eli\t/private\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
 }
 
 mkhome() {
+	local cmdret
+
+	cmdret="/tmp/mkhome_newfs.ret"
 	rootdev=`glabel status | grep gprootfs | awk -F" " '{ print $3 }'`
 	if [ -z "${rootdev}" ]; then
-		echo "Error: Couldn't find root device!"
-		exit 1
+		errandout "A fatal error occured!: Failed find root device."
 	fi
 	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
 	gpart recover ${dev}
 	if ! gpart add -t freebsd-ufs -l gprivatefs ${dev}; then
-		echo "Error: Couldn't create partition"
-		exit 1
+		errandout "A fatal error occured!: Couldn't create partition."
 	fi
 	msg="Would you like /home to be encrypted using geli?"
 	dialog --yesno "$msg" 6 60
 	ret=$?
-	clear
 	if [ $ret -eq 0 ]; then
 		mkgeli
 	else
-		newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
-			-m 8 /dev/gpt/gprivatefs
+		(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
+			-m 8 /dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | \
+			dialog --progressbox 20 75
+		if [ "`cat ${cmdret}`" -ne 0 ]; then
+			errandout "A fatal error occured!: Couldn't create partition."
+		fi
+		rm -f ${cmdret}
 		mkdir /home
-		mount /dev/gpt/gprivatefs /home
+		if ! mount /dev/gpt/gprivatefs /home; then
+			errandout "A fatal error occured!: Couldn't create partition."
+		fi
 		mkdir /home/nomad
 		chown nomad:nomad /home/nomad
 		printf "/dev/gpt/gprivatefs\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
@@ -231,10 +313,7 @@ pw usermod nomad -L $lang -s $shell
 sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
     $path_xorg_input_tmpl > $path_xorg_input
 
-sed "/^keymap=.*/d" < /etc/rc.conf > /tmp/rc.conf
-printf "\nkeymap=\"$xkbdlayout\"\n" >> /tmp/rc.conf
-mv /tmp/rc.conf /etc/rc.conf
-
-sysrc gsched_enable=YES
+sysrc keymap="$xkbdlayout" >/dev/null 2>&1
+sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
 
