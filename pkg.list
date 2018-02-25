@@ -16,6 +16,7 @@ editors/leafpad
 editors/libreoffice
 editors/vim
 emulators/virtualbox-ose-additions
+ftp/filezilla
 french/aspell
 games/bsdtris
 german/aspell
