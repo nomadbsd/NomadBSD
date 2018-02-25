@@ -49,6 +49,7 @@ portuguese/hunspell
 print/gimp-gutenprint
 russian/aspell
 russian/hunspell
+security/fpm2
 security/pidgin-otr
 security/sudo
 shells/bash
