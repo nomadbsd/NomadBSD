@@ -19,7 +19,7 @@ load_rc_config ${name}
 
 gsched_start()
 {
-	rootdev=`glabel status | grep gprootfs | awk -F" " '{ print $3 }'`
+	rootdev=`glabel status | grep nomadroot | awk -F" " '{ print $3 }'`
 	if [ -z "${rootdev}" ]; then
 		echo "Error: Couldn't find root device!"
 		exit 1
