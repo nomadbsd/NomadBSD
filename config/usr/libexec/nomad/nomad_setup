@@ -8,6 +8,20 @@ path_xorg_input_tmpl=${path_installdir}/input-keyboard.conf.tmpl
 path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
 fragsize=4096
 blksize=$(echo "${fragsize} * 8" | bc)
+gptroot="nomadroot"
+gpthome="nomadhome"
+
+mainmenu() {
+	local msg
+
+	msg="\n\nBefore you can use NomadBSD, there are some things"
+	msg="${msg} to be set up."
+	msg="${msg} This menu will guide you through the setup process.\n\n"
+	msg="${msg}Ready to proceed?\n"
+
+	dialog --clear --title "SET UP NOMADBSD" --yesno "${msg}" 12 60
+	[ $? -ne 0 ] && exitmenu "Bummer :("
+}
 
 exitmenu() {
 	local ret opt
@@ -50,6 +64,7 @@ summary() {
 	text="${text}Shell:        $shell\n"
 	text="${text}Xkbdmodel:    $xkbdmodel\n"
 	text="${text}Xkbdlayout:   $xkbdlayout\n"
+	text="${text}Timezone:     `cat /var/db/zoneinfo`\n"
 
 	dialog --no-items --no-cancel --title "SUMMARY"   \
 	       --menu "$text" -1 -1 2 "I'm happy with it" \
@@ -63,10 +78,12 @@ change() {
 	text="${text}Language     $lang "
 	text="${text}Shell        $shell "
 	text="${text}Xkbdmodel    $xkbdmodel "
-	text="${text}Xkbdlayout   $xkbdlayout"
+	text="${text}Xkbdlayout   $xkbdlayout "
+	text="${text}Software     Software-settings "
+	text="${text}Timezone     `cat /var/db/zoneinfo`"
 
 	dialog --title "CHANGE SETTINGS" --ok-label "Change" \
-	       --menu "" -1 60 4 $text
+	       --menu "" -1 60 6 $text
 }
 
 setlang() {
@@ -161,7 +178,7 @@ mkgeli() {
 
 	cmdret="/tmp/mkgeli_cmds.ret"
 	pwdfile="/tmp/geli.pwd"
-	dd if=/dev/random of=/root/gprivatefs.key bs=64 count=1 > /dev/null 2>&1
+	dd if=/dev/random of=/root/${gpthome}.key bs=64 count=1 > /dev/null 2>&1
 	while [ true ]; do
 		dialog --insecure --passwordform \
 			"Enter a password for geli volume" \
@@ -185,58 +202,65 @@ mkgeli() {
 			break
 		fi
 	done
-	(echo "$p1" | geli init -s 4096 -K /root/gprivatefs.key -J - \
-		/dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | dialog --progressbox \
+	(echo "$p1" | geli init -s 4096 -K /root/${gpthome}.key -J - \
+		/dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | dialog --progressbox \
 		20 75
 	if [ "`cat ${cmdret}`" -ne 0 ]; then
-		errandout "A fatal error occured!: Failed to init geli volume."
+		errandout "Error: Failed to init geli volume."
 	fi
-	(echo "$p1" | geli attach -k /root/gprivatefs.key -j - \
-		/dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | dialog --progressbox \
+	(echo "$p1" | geli attach -k /root/${gpthome}.key -j - \
+		/dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | dialog --progressbox \
 		20 75
 	if [ "`cat ${cmdret}`" -ne 0 ]; then
-		errandout "A fatal error occured!: Failed to attach geli volume."
+		errandout "Error: Failed to attach geli volume."
 	fi
 	(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
-		-m 8 /dev/gpt/gprivatefs.eli 2>&1; echo $?>${cmdret}) | \
+		-m 8 /dev/gpt/${gpthome}.eli 2>&1; echo $?>${cmdret}) | \
 		dialog --progressbox 20 75
 	if [ "`cat ${cmdret}`" -ne 0 ]; then
-		errandout "A fatal error occured! Failed to create filesystem."
+		errandout "Error: Failed to create filesystem."
 	fi
 	rm -f ${cmdret}
-	mkdir /private > /dev/null 2>&1
-	if ! mount /dev/gpt/gprivatefs.eli /private; then
-		errandout "A fatal error occured!: Failed to mount filesystem."
+	mkdir /private > /dev/null 2>&1 || \
+		errandout "Error: Failed to create /private"
+	if ! mount /dev/gpt/${gpthome}.eli /private; then
+		errandout "Error: Failed to mount filesystem."
 	fi
-	mkdir /private/home
-	mkdir /private/etc
-	mkdir /private/home/nomad
-	unlink /home
-	ln -s /private/home /home
+	mkdir /private/home || errandout "Error: Failed to create /private/home"
+	mkdir /private/etc  || errandout "Error: Failed to create /private/etc"
+	mkdir /private/home/nomad || \
+		errandout "Error: Failed to create /private/home/nomad"
+	unlink /home >/dev/null 2>&1
+	ln -s /private/home /home || \
+		errandout "Error: Failed to create symlink /home -> /private/home"
 	chown nomad:nomad /home/nomad
 	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
 	mv /etc/ppp /private/etc/
 	mv /etc/wpa_supplicant.conf /private/etc >/dev/null 2>&1
 	touch /private/etc/wpa_supplicant.conf
 	(cd /etc && ln -sf /private/etc/ppp; ln -sf /private/etc/wpa_supplicant.conf)
-	sysrc geli_devices="gpt/gprivatefs" > /dev/null 2>&1
-	sysrc geli_gpt_gprivatefs_flags="-k /root/gprivatefs.key" > /dev/null 2>&1
-	printf "/dev/gpt/gprivatefs.eli\t/private\t\t\tufs\trw,noatime\t1 1\n" >> \
+	sysrc geli_devices="gpt/${gpthome}" > /dev/null 2>&1
+	sysrc geli_gpt_${gpthome}_flags="-k /root/${gpthome}.key" > /dev/null 2>&1
+	printf "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
 }
 
 mkhome() {
-	local cmdret
+	local cmdret home
 
 	cmdret="/tmp/mkhome_newfs.ret"
-	rootdev=`glabel status | grep gprootfs | awk -F" " '{ print $3 }'`
+	rootdev=`glabel status | grep ${gptroot} | awk -F" " '{ print $3 }'`
 	if [ -z "${rootdev}" ]; then
-		errandout "A fatal error occured!: Failed find root device."
+		errandout "Error: Failed find root device."
 	fi
 	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
+
+	if (glabel status | grep "gpt/${gpthome}"); then
+		errandout "Error: gpt/${gpthome} already exists."
+	fi
 	gpart recover ${dev}
-	if ! gpart add -t freebsd-ufs -l gprivatefs ${dev}; then
-		errandout "A fatal error occured!: Couldn't create partition."
+	if ! gpart add -t freebsd-ufs -l ${gpthome} ${dev}; then
+		errandout "Error: Couldn't create partition."
 	fi
 	msg="Would you like /home to be encrypted using geli?"
 	dialog --yesno "$msg" 6 60
@@ -245,19 +269,19 @@ mkhome() {
 		mkgeli
 	else
 		(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
-			-m 8 /dev/gpt/gprivatefs 2>&1; echo $?>${cmdret}) | \
+			-m 8 /dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | \
 			dialog --progressbox 20 75
 		if [ "`cat ${cmdret}`" -ne 0 ]; then
-			errandout "A fatal error occured!: Couldn't create partition."
+			errandout "Error: Couldn't create partition."
 		fi
 		rm -f ${cmdret}
 		mkdir /home
-		if ! mount /dev/gpt/gprivatefs /home; then
-			errandout "A fatal error occured!: Couldn't create partition."
+		if ! mount /dev/gpt/${gpthome} /home; then
+			errandout "Error: Couldn't create partition."
 		fi
 		mkdir /home/nomad
 		chown nomad:nomad /home/nomad
-		printf "/dev/gpt/gprivatefs\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
+		printf "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
 	fi
 	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
@@ -276,6 +300,7 @@ swconf()
 
 [ -f $path_nomadcfg ] && exit 0
 
+mainmenu
 kbdmap
 mkhome
 clear
@@ -304,6 +329,8 @@ while [ true ]; do
 	Language)    setlang ;;
 	Xkbdmodel)   setxkbdmodel ;;
 	Xkbdlayout)  setxkbdlayout ;;
+	Timezone)	 tzsetup ;;
+	Software)	 swconf ;;
 	esac
 done
 rm -f $selection
