@@ -76,6 +76,7 @@ vietnamese/aspell
 vietnamese/hunspell
 www/palemoon
 www/firefox
+x11/xbindkeys
 x11-drivers/xf86-input-keyboard
 x11-drivers/xf86-input-mouse
 x11-drivers/xf86-input-synaptics
