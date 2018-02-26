@@ -6,6 +6,8 @@ MEDIASIZE=	4
 # Size of swap partition in MB
 SWAPSIZE=	128
 FRAGSIZE=	4096
+GPTROOT=	nomadroot
+GPTSWAP=	nomadswap
 SYSDIR=		${PWD}/sys
 DISTDIR=	${PWD}/dists
 DISTSITE=	${URL}/${ARCH}/${RELEASE}
@@ -162,8 +164,8 @@ nomadbsd.img: uzip
 	mkdir -p ./mnt/EFI/BOOT; \
 	cp ${SYSDIR}/boot/boot1.efi ./mnt/EFI/BOOT; \
 	umount ./mnt; \
-	gpart add -t freebsd-swap -l gpswap -s ${SWAPSIZE}M $${mddev}; \
-	gpart add -t freebsd-ufs -l gprootfs -s $${basesz}M $${mddev}; \
+	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M $${mddev}; \
+	gpart add -t freebsd-ufs -l ${GPTROOT} -s $${basesz}M $${mddev}; \
 	newfs -E -U -O 1 -o time -b $${blksize} -f ${FRAGSIZE} \
 	    -m 8 /dev/$${mddev}p4 || exit 1; \
 	if [ ! -d mnt ]; then mkdir mnt || exit 1; sleep 1; fi; \
