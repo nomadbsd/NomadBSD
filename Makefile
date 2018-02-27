@@ -159,6 +159,7 @@ nomadbsd.img: uzip
 	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $${mddev} || exit 1;\
 	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 $${mddev} || exit 1;\
 	gpart add -t efi -l gpefiboot -a4k -s492k $${mddev} || exit 1; \
+	gpart set -a lenovofix $${mddev}; \
 	newfs_msdos /dev/$${mddev}p2 || exit 1; \
 	mount -t msdosfs /dev/$${mddev}p2 ./mnt || exit 1; \
 	mkdir -p ./mnt/EFI/BOOT; \
