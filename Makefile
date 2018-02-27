@@ -117,6 +117,7 @@ ${PKGDB}: initbase ${PKGLIST}
 .endfor
 	cp ${SYSDIR}/usr/local/etc/dsbmd.conf.sample \
 	    ${SYSDIR}/usr/local/etc/dsbmd.conf
+
 buildkernel: ${KERNELTARGET}
 
 ${KERNELTARGET}: initbase
@@ -210,6 +211,16 @@ ${UZIP_IMAGE}.img: init
 	(cd ${SYSDIR}/usr/local && tar -cf -	\
 	    --exclude '^etc' .) | (cd ${UZIP_MNT} && tar pxf -); \
 	(cd ${UZIP_MNT} && ln -s /usr.local.etc etc); \
+	if [ ! -d pkgcache ]; then mkdir pkgcache; fi; \
+	if [ ! -d ${UZIP_MNT}/nvidia ]; then mkdir ${UZIP_MNT}/nvidia; fi; \
+	pkg fetch -y -o pkgcache nvidia-driver-304; \
+	pkg fetch -y -o pkgcache nvidia-driver-340; \
+	(mkdir ${UZIP_MNT}/nvidia/304 && mkdir ${UZIP_MNT}/nvidia/340) || \
+	    exit 1; \
+	cat pkgcache/All/nvidia-driver-304*.txz | \
+	    (cd ${UZIP_MNT}/nvidia/304 && tar xf -); \
+	cat pkgcache/All/nvidia-driver-340*.txz | \
+	    (cd ${UZIP_MNT}/nvidia/340 && tar xf -); \
 	umount ${UZIP_MNT} || umount -f ${UZIP_MNT}; \
 	mdconfig -d -u $${mddev}; \
 	rmdir ${UZIP_MNT}
@@ -234,6 +245,7 @@ distclean:
 	rm -rf ${DISTDIR}/*
 
 clean: distclean baseclean uzipclean
+	rm -rf pkgcache
 
 allclean: clean
 	rm -f nomadbsd.img
