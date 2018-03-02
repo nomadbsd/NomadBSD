@@ -259,6 +259,7 @@ mkhome() {
 		errandout "Error: gpt/${gpthome} already exists."
 	fi
 	gpart recover ${dev}
+	gpart set -a lenovofix ${dev}
 	if ! gpart add -t freebsd-ufs -l ${gpthome} ${dev}; then
 		errandout "Error: Couldn't create partition."
 	fi
