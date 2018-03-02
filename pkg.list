@@ -55,6 +55,7 @@ security/gnupg
 security/pidgin-otr
 security/sudo
 shells/bash
+shells/fish
 shells/zsh
 sysutils/bsdstats
 sysutils/dsbbatmon
