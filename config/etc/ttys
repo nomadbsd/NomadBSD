@@ -31,8 +31,8 @@ console	none				unknown	off secure
 #
 ttyv0	"/usr/libexec/getty autologin"	xterm	on  secure
 # Virtual terminals
-ttyv1	"/usr/libexec/getty autologin"	xterm	on  secure
-ttyv2	"/usr/libexec/getty autologin"	xterm	on  secure
+ttyv1	"/usr/libexec/getty Pc"		xterm	on  secure
+ttyv2	"/usr/libexec/getty Pc"		xterm	on  secure
 
 # Serial terminals
 # The 'dialup' keyword identifies dialin lines to login, fingerd etc.
