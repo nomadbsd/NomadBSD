@@ -14,6 +14,6 @@ if ( "`tty`" =~ "/dev/ttyv0" ) then
 	nvidia_setup
 	(service slim onestart; sleep 3; service slim onestart; sleep 3; \
 	service slim onestart) >& /dev/null
-	lock -npv
+	lock -np
 endif
 
