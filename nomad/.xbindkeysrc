@@ -1,0 +1,5 @@
+"exec mixer vol +1"
+	XF86AudioRaiseVolume
+"exec mixer vol -1"
+	XF86AudioLowerVolume
+
