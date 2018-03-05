@@ -6,6 +6,7 @@ audio/deadbeef
 audio/dsbmixer
 audio/musicpd
 audio/ncmpc
+benchmarks/bonnie++
 devel/git
 devel/gmake
 devel/pkgconf
@@ -58,6 +59,7 @@ shells/bash
 shells/fish
 shells/zsh
 sysutils/bsdstats
+sysutils/ddrescue
 sysutils/dsbbatmon
 sysutils/dsbdriverd
 sysutils/dsblogoutmgr
@@ -66,6 +68,7 @@ sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/fusefs-ext4fuse
 sysutils/powerdxx
+sysutils/sleuthkit
 sysutils/smartmontools
 sysutils/tmux
 sysutils/xfburn
