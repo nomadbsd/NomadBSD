@@ -53,6 +53,7 @@ russian/aspell
 russian/hunspell
 security/fpm2
 security/gnupg
+security/nmap
 security/pidgin-otr
 security/sudo
 shells/bash
