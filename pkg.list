@@ -17,8 +17,8 @@ editors/leafpad
 editors/libreoffice
 editors/vim
 emulators/virtualbox-ose-additions
-ftp/filezilla
 french/aspell
+ftp/filezilla
 games/bsdtris
 german/aspell
 german/hunspell
@@ -78,9 +78,8 @@ ukrainian/aspell
 ukrainian/hunspell
 vietnamese/aspell
 vietnamese/hunspell
-www/palemoon
 www/firefox
-x11/xbindkeys
+www/palemoon
 x11-drivers/xf86-input-keyboard
 x11-drivers/xf86-input-mouse
 x11-drivers/xf86-input-synaptics
@@ -115,5 +114,6 @@ x11/sakura
 x11/setxkbmap
 x11/slim
 x11/tint
+x11/xbindkeys
 x11/xinit
 x11/xrandr
