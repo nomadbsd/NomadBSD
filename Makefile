@@ -1,6 +1,6 @@
 ARCH=		amd64
 RELEASE=	11.1-RELEASE
-URL=		ftp://ftp.freebsd.org/pub/FreeBSD/releases
+URL=		http://download.freebsd.org/ftp/releases
 # Media size in GB
 MEDIASIZE=	4
 # Size of swap partition in MB
