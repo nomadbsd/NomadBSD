@@ -578,7 +578,7 @@ sub merge_files {
 sub init {
 	my $fh;
 
-	warnx("$version_files already exists")
+	warnx("${version_file} already exists")
 		if (-f $version_file);
 	open($fh, '+>', $version_file)
 		or errx(1, "Failed to create $version_file");
@@ -671,7 +671,7 @@ foreach (<$fh>) {
 		or exit(1);
 }
 open(my $fh, '+>', $filelist)
-	or errx(1, "Failed to open $file_list: $!");
+	or errx(1, "Failed to open $filelist: $!");
 # Copy the new files to /
 foreach (`(cd $prepdir && tar cf - .) | (cd / && tar xPfv - 2>&1)`) {
 	print $fh "$1\n" if (/^x (.*)$/);
