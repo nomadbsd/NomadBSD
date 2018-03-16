@@ -199,7 +199,13 @@ sub rollback {
 		or errx(1, "Failed to open $filelist");
 	foreach (<$fh>) {
 		# Remove files
-		rm "/$_" if (-f "/$_");
+		unlink("/$_")
+		if (-f "/$_") {
+			if (yesno("Delete $_?")) {
+				unlink("/$_");
+			}
+			print "\n";
+		}
 	}
 	close($fh);
 	# Extract the backup
@@ -244,10 +250,9 @@ sub rm_old_files {
 	foreach (<$fh>) {
 		if (-f $_) {
 			if (yesno("Delete $_?")) {
-				print "rm /$i\n";
-			} else {
-				print "\n";
+				unlink("/$_");
 			}
+			print "\n";
 		}
 	}
 	close($fh);
