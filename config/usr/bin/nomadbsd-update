@@ -184,7 +184,7 @@ sub mkbackup {
 		printf("%d%% ${AB}%s", $lc++ * 100 / @lines,
 		    "Backing up $1 ... ${AO}");
 		system(qq(tar rf ${backup_file} "/$1" 2>/dev/null)) == 0
-			or errx(1, "Failed to back up /${filename}");
+			or errx(1, "Failed to back up /$1");
 		printf "${AB}${CG}OK${AO}\n";
 	}
 }
