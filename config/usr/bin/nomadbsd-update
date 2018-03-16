@@ -122,7 +122,8 @@ sub get_version_record {
 
 sub get_field {
 	my ($record, $field) = @_;
-	
+
+	chomp($record);	
 	foreach (split(/:/, $record)) {
 		return $1 if (/$field=([^:]*)(:|$)/);
 	}
