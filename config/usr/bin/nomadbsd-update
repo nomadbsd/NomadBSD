@@ -235,7 +235,7 @@ sub mk_oldfile_list {
 	open($fh, '+>', $oldfiles)
 		or errx(1, "Failed to open/create $oldfiles");
 	foreach (`diff -u ${tmpoldidx} ${tmpnewidx} | grep -E '^-[^-]+'`) {
-		print $fh "/$i\n";
+		print $fh "/$_\n";
 	}
 	close($fh);
 	unlink(${tmpnewidx});
