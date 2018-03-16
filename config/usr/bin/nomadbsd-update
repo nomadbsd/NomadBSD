@@ -199,7 +199,7 @@ sub rollback {
 		or errx(1, "Failed to open $filelist");
 	foreach (<$fh>) {
 		# Remove files
-		print "rm /$_" if (-f "/$_");
+		rm "/$_" if (-f "/$_");
 	}
 	close($fh);
 	# Extract the backup
