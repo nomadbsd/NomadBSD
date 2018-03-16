@@ -203,7 +203,7 @@ sub rollback {
 	}
 	close($fh);
 	# Extract the backup
-	print qq(system("cd / && tar xf ${backup_file}"));
+	system("cd / && tar xPf ${backup_file}");
 }
 
 sub mk_oldfile_list {
@@ -663,8 +663,9 @@ foreach (<$fh>) {
 open(my $fh, '+>', $filelist)
 	or errx(1, "Failed to open $file_list: $!");
 # Copy the new files to /
-foreach (`(cd $prepdir && tar cf - .)| (cd / && tar xfv - 2>&1)`) {
+foreach (`(cd $prepdir && tar cf - .)| (cd / && tar xPfv - 2>&1)`) {
 	print $fh "$1\n" if (/^x (.*)$/);
+	print "${AB}Extracting $1${AO}\n";
 }
 system("chown -R root /etc/*");
 system("cap_mkdb /etc/login.conf");
