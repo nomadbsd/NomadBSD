@@ -136,7 +136,7 @@ sub fetch_file {
 			or errx(1, "Failed to create ${wrkdir}");
 	}
 	printf("${AB}\r%s", "Fetching $file ... ${AO}");
-	system(qq(fetch ${url}/${file} -o ${wrkdir}/${file} 2>/dev/null)) == 0
+	system(qq(fetch -o "${wrkdir}/${file}" "${url}/${file}" 2>/dev/null)) == 0
 		or errx(1, "Failed to fetch $file");
 	print "${AB}${CG}OK${AO}\n";
 }
@@ -154,7 +154,7 @@ sub fetch_archive {
 	$chksum =~ s/.*=\s*([a-zA-Z0-9]+)$/$1/;
 	chomp($chksum);
 
-	if ($chksum ne get_field($tgtrecord, 'patchcs')) {
+	if ($chksum ne get_field($tgtrecord, 'archivecs')) {
 		errx(1, "Checksum of patch archive does not match");
 	}
 	mkdir(${prepdir})
