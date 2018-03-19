@@ -11,6 +11,7 @@ GPTSWAP=	nomadswap
 SYSDIR=		${PWD}/sys
 DISTDIR=	${PWD}/dists
 DISTSITE=	${URL}/${ARCH}/${RELEASE}
+PATCHDIR=	patchset
 DISTS=		base.txz
 PKGLIST=	pkg.list
 GIT_SITE=	https://github.com/mrclksr
@@ -228,6 +229,32 @@ ${UZIP_IMAGE}.img: init
 ${UZIP_IMAGE}.uzip: ${UZIP_IMAGE}.img
 	mkuzip -Z -j 2 -d -s 19456 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 
+patch: ${PATCHDIR}
+
+${PATCHDIR}:
+	if [ -z "${PATCHVERSION}" ]; then \
+		echo "PATCHVERSION not defined" >&2; exit 1; \
+	fi; \
+	mkdir ${PATCHDIR}
+	(cd config && tar cf - .) | (cd ${PATCHDIR} && tar xf -)
+	echo "${PATCHVERSION}" > ${PATCHDIR}/VERSION
+	mkdir ${PATCHDIR}/home
+	(tar cf - nomad) | (cd ${PATCHDIR}/home && tar xf -)
+	(cd ${PATCHDIR} && find . -type f -exec md5 {} \; > \
+	    ${.CURDIR}/nomadbsd-patch-${PATCHVERSION}.files)
+	(cd ${PATCHDIR} && \
+	    tar cfz ${.CURDIR}/nomadbsd-patch-${PATCHVERSION}.tgz .)
+	cs=$$(sha256 nomadbsd-patch-${PATCHVERSION}.tgz | \
+	    cut -d'=' -f2 | tr -d ' '); \
+	r="version=${PATCHVERSION}"; \
+	r="$${r}:archive=nomadbsd-patch-${PATCHVERSION}.tgz"; \
+	r="$${r}:archivecs=$${cs}"; \
+	r="$${r}:flist=nomadbsd-patch-${PATCHVERSION}.files"; \
+	echo $${r} >> nomadbsd-patch.index
+
+patchclean:
+	rm -rf ./${PATCHDIR}
+
 baseclean:
 	chflags -R noschg,nosunlnk ${SYSDIR}
 	rm -rf ${SYSDIR}
@@ -244,7 +271,7 @@ kernelclean:
 distclean:
 	rm -rf ${DISTDIR}/*
 
-clean: distclean baseclean uzipclean
+clean: distclean baseclean uzipclean patchclean
 	rm -rf pkgcache
 
 allclean: clean

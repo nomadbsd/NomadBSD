@@ -68,6 +68,7 @@ sysutils/dsbmc
 sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/fusefs-ext4fuse
+sysutils/fusefs-hfsfuse
 sysutils/powerdxx
 sysutils/sleuthkit
 sysutils/smartmontools
