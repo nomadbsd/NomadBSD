@@ -199,7 +199,6 @@ sub rollback {
 		or errx(1, "Failed to open $filelist");
 	foreach (<$fh>) {
 		# Remove files
-		unlink("/$_");
 		if (-f "/$_") {
 			if (yesno("Delete $_?")) {
 				unlink("/$_");
