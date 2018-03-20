@@ -7,5 +7,5 @@ if [ ! -f ~/.no_obmenu_init ]; then
 	~/bin/update_obmenu -u
 	touch ~/.no_obmenu_init
 fi
-exec openbox-session
+exec ck-launch-session dbus-launch --exit-with-session openbox-session
 
