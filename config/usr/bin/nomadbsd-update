@@ -77,7 +77,7 @@ sub get_last_line {
 	@lines = <$fh>; close($fh);
 	for ($lc = @lines - 1; $lc >= 0; $lc--) {
 		chomp($lines[$lc]);
-		return $lines[$lc] if ($lines[$lc] !~ /^$/);
+		return $lines[$lc] if ($lines[$lc]);
 	}
 }
 
