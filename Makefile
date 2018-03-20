@@ -22,8 +22,8 @@ PORTSLIST=	print/qpdfview
 qpdfview_OPTS=	"QT5 CUPS PS"
 
 # Path to the local ports tree. It will be mounted to ${SYSDIR}/usr/ports.
-#PORTSTREE=	/usr/ports
-PORTSTREE=	/home/ich/portstree
+PORTSTREE=	/usr/ports
+
 GIT_SITE=	https://github.com/mrclksr
 GIT_REPOS=	${GIT_SITE}/DSBDriverd.git
 GIT_REPOS+=	${GIT_SITE}/DSBMC.git
