@@ -14,6 +14,16 @@ DISTSITE=	${URL}/${ARCH}/${RELEASE}
 PATCHDIR=	patchset
 DISTS=		base.txz
 PKGLIST=	pkg.list
+
+# Because of special options, some packages must be installed using the
+# ports tree. Add each port as category/portname to PORTSLIST. The options
+# for OPTIONS_DEFAULT can be defined by setting portname_OPTS.
+PORTSLIST=	print/qpdfview
+qpdfview_OPTS=	"QT5 CUPS PS"
+
+# Path to the local ports tree. It will be mounted to ${SYSDIR}/usr/ports.
+#PORTSTREE=	/usr/ports
+PORTSTREE=	/home/ich/portstree
 GIT_SITE=	https://github.com/mrclksr
 GIT_REPOS=	${GIT_SITE}/DSBDriverd.git
 GIT_REPOS+=	${GIT_SITE}/DSBMC.git
@@ -36,7 +46,7 @@ UZIP_MNT=	uzip_mnt
 DISTS+=	src.txz
 .endif
 
-init: initbase buildkernel instpkgs fontpaths
+init: initbase buildkernel instpkgs fontpaths instports
 	(cd nomad  && tar cf - .) | (cd ${SYSDIR}/usr/home/nomad && tar xf -)
 	chroot ${SYSDIR} sh -c 'chown -R nomad:nomad /usr/home/nomad'
 .ifdef BUILDKERNEL
@@ -102,6 +112,20 @@ instpkgs: ${PKGDB}
 	if grep -q ^cups: ${SYSDIR}/etc/group; then \
 		chroot ${SYSDIR} sh -c 'pw groupmod cups -m root,nomad'; \
 	fi
+
+${SYSDIR}/usr/ports:
+	mkdir ${SYSDIR}/usr/ports
+
+instports: ${SYSDIR}/usr/ports
+.for p in ${PORTSLIST}
+	mount -t nullfs ${PORTSTREE} ${SYSDIR}/usr/ports
+	chroot ${SYSDIR} sh -c 'mount -t devfs devfs /dev'
+	chroot ${SYSDIR} sh -c 'pkg info --exists $p || \
+		(cd /usr/ports/$p && make BATCH=1 \
+		OPTIONS_DEFAULT=${${p:C,[a-z-]+/,,}_OPTS} install)'
+.endfor
+	umount ${SYSDIR}/usr/ports
+	umount ${SYSDIR}/dev
 
 ${PKGDB}: initbase ${PKGLIST}
 	export ASSUME_ALWAYS_YES=yes; \
@@ -251,6 +275,11 @@ ${PATCHDIR}:
 	r="$${r}:archivecs=$${cs}"; \
 	r="$${r}:flist=nomadbsd-patch-${PATCHVERSION}.files"; \
 	echo $${r} >> nomadbsd-patch.index
+
+unmount:
+	-umount ${SYSDIR}/usr/ports
+	-umount ${SYSDIR}/dev
+	-umount ${UZIP_MNT}
 
 patchclean:
 	rm -rf ./${PATCHDIR}
