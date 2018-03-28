@@ -123,9 +123,9 @@ instports: ${SYSDIR}/usr/ports
 	chroot ${SYSDIR} sh -c 'pkg info --exists $p || \
 		(cd /usr/ports/$p && make BATCH=1 \
 		OPTIONS_DEFAULT=${${p:C,[a-z-]+/,,}_OPTS} install)'
-.endfor
 	umount ${SYSDIR}/usr/ports
 	umount ${SYSDIR}/dev
+.endfor
 
 ${PKGDB}: initbase ${PKGLIST}
 	export ASSUME_ALWAYS_YES=yes; \
