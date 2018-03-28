@@ -23,4 +23,4 @@ A recent FreeBSD system
 ~~~
 
 ### Ready to use image
-Visit https://freeshell.de/~mk/projects/nomadbsd.html to download the recent image.
+Visit http://nomadbsd.org to download the recent image.
