@@ -51,29 +51,29 @@ GPTSWAP=nomadswap
 
 initbase()
 {
-	if ! grep -q ^nomad ${SYSDIR}/etc/passwd; then
-		chroot ${SYSDIR} sh -c 'pw useradd nomad -m \
+	if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
+		chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
 		    -G wheel,operator,video -s /bin/csh'
 	fi
 	(cd config && tar cf - .) | \
-	    (cd ${SYSDIR} && tar -xf - --uname root --gname wheel)
-	chroot ${SYSDIR} sh -c 'cap_mkdb /etc/login.conf'
-	(cd nomad  && tar cf - .) | (cd ${SYSDIR}/usr/home/nomad && tar xf -)
-	chroot ${SYSDIR} sh -c 'chown -R nomad:nomad /usr/home/nomad'
+	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
+	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
+	(cd nomad  && tar cf - .) | (cd "${SYSDIR}/usr/home/nomad" && tar xf -)
+	chroot "${SYSDIR}" sh -c 'chown -R nomad:nomad /usr/home/nomad'
 }
 
 mkfontpaths()
 {
-	[ ! -d ${XORG_CONF_D} ] && mkdir -p ${XORG_CONF_D}
+	[ ! -d "${XORG_CONF_D}" ] && mkdir -p "${XORG_CONF_D}"
 
-	for i in ${FONTSDIR}/*; do
+	for i in "${FONTSDIR}"/*; do
 		[ ! -d "$i" ] && continue
 		mkfontscale "$i/"
 		mkfontdir "$i/"
 	done
 	(echo "Section \"Files\""
 	IFS=
-	for i in ${FONTSDIR}/*; do \
+	for i in "${FONTSDIR}"/*; do \
 		[ ! -d "$i" ] && continue
 		n=$(head -1 "$i/fonts.scale")
 		r="s#${SYSDIR}(/.*)\$#\\1#"
@@ -91,102 +91,102 @@ mkfontpaths()
 	echo ${ns} | while read i; do \
 		echo "  FontPath \"$i\""
 	done
-	echo "EndSection") > ${FONTPATHS_FILE}
+	echo "EndSection") > "${FONTPATHS_FILE}"
 }
 
 createbase()
 {
-	[ ! -d ${SYSDIR} ] && mkdir ${SYSDIR}
-	BSDINSTALL_DISTDIR=${DISTDIR} BSDINSTALL_DISTSITE=${DISTSITE} \
-		bsdinstall jail ${SYSDIR}
-	BSDINSTALL_DISTDIR=${DISTDIR} DISTRIBUTIONS="kernel.txz src.txz" \
+	[ ! -d "${SYSDIR}" ] && mkdir "${SYSDIR}"
+	BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_DISTSITE=${DISTSITE} \
+		bsdinstall jail "${SYSDIR}"
+	BSDINSTALL_DISTDIR="${DISTDIR}" DISTRIBUTIONS="kernel.txz src.txz" \
 	BSDINSTALL_DISTSITE=${DISTSITE} bsdinstall distfetch
-	BSDINSTALL_DISTDIR=${DISTDIR} BSDINSTALL_CHROOT=${SYSDIR} \
+	BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_CHROOT="${SYSDIR}" \
 	    DISTRIBUTIONS="kernel.txz src.txz" bsdinstall distextract
 }
 
 updatebase()
 {
 	freebsd-update --currently-running ${RELEASE}
-		-f config/etc/freebsd-update.conf -b ${SYSDIR} fetch && \
+		-f config/etc/freebsd-update.conf -b "${SYSDIR}" fetch && \
 	freebsd-update --currently-running ${RELEASE} \
-		-f config/etc/freebsd-update.conf -b ${SYSDIR} install
+		-f config/etc/freebsd-update.conf -b "${SYSDIR}" install
 }
 
 instpkgs()
 {
 	export ASSUME_ALWAYS_YES=yes
-	cat ${PKGLIST} | xargs -J% pkg -c ${SYSDIR} install -y %
+	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y %
 }
 
 instgit()
 {
-	[ ! -d ${SYSDIR}/git ] && mkdir ${SYSDIR}/git
+	[ ! -d "${SYSDIR}/git" ] && mkdir "${SYSDIR}/git"
 
 	for r in ${GIT_REPOS}; do
 		rd=$(echo $r | sed -E 's#.*/(.*)\.git$#\1#')
 		repo_dirs="${repo_dirs} ${rd}"
-		if [ ! -d ${SYSDIR}/git/${rd} ]; then
-			chroot ${SYSDIR} sh -c "cd /git && git clone ${r}"
+		if [ ! -d "${SYSDIR}/git/${rd}" ]; then
+			chroot "${SYSDIR}" sh -c "cd /git && git clone ${r}"
 		fi
 	done
 	for r in ${repo_dirs}; do
-		chroot ${SYSDIR} sh -c "cd /git/${r}; \
+		chroot "${SYSDIR}" sh -c "cd /git/${r}; \
 			ls *.pro > /dev/null 2>&1 && qmake; make && make install"
 	done
 }
 
 postpkgcfg()
 {
-	cp ${SYSDIR}/usr/local/etc/dsbmd.conf.sample \
-		${SYSDIR}/usr/local/etc/dsbmd.conf
-	if grep -q ^cups: ${SYSDIR}/etc/group; then
-		chroot ${SYSDIR} sh -c 'pw groupmod cups -m root,nomad'
+	cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
+		"${SYSDIR}/usr/local/etc/dsbmd.conf"
+	if grep -q ^cups: "${SYSDIR}/etc/group"; then
+		chroot "${SYSDIR}" sh -c 'pw groupmod cups -m root,nomad'
 	fi
 	mkfontpaths
 }
 
 instports()
 {
-	[ ! -d ${SYSDIR}/usr/ports ] && mkdir ${SYSDIR}/usr/ports
-	if ! (mount | grep -q ${SYSDIR}/usr/ports); then
-		mount -t nullfs ${PORTSTREE} ${SYSDIR}/usr/ports
+	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
+	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
 	fi
-	if ! (mount | grep -q ${SYSDIR}/dev); then
-		chroot ${SYSDIR} sh -c 'mount -t devfs devfs /dev'
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	for p in ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
-		pkg --chroot ${SYSDIR} info --exists $p && continue
+		pkg --chroot "${SYSDIR}" info --exists $p && continue
 		echo "Building $p ..." >&2
 		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
 		echo "pname == $pname";
 		eval popts=\${${pname}_OPTS}
 		echo "popts == $popts";
-		chroot ${SYSDIR} sh -c "cd /usr/ports/$p && \
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" clean install" || bail
 	done
-	umount ${SYSDIR}/usr/ports
-	umount ${SYSDIR}/dev
+	umount "${SYSDIR}/usr/ports"
+	umount "${SYSDIR}/dev"
 }
 
 buildkernel()
 {
-	if [ ! -f ${SYSDIR}/usr/obj/usr/src/sys/NOMADBSD/kernel ]; then
+	if [ ! -f "${SYSDIR}/usr/obj/usr/src/sys/NOMADBSD/kernel" ]; then
 		(cd kernel && tar cf - .) | \
-		    (cd ${SYSDIR}/usr/src/sys/${ARCH}/conf && tar xf -)
-		chroot ${SYSDIR} sh -c \
+		    (cd "${SYSDIR}/usr/src/sys/${ARCH}/conf" && tar xf -)
+		chroot "${SYSDIR}" sh -c \
 		    'mount -t devfs devfs /dev; \
 		    cd /usr/src && make KERNCONF=NOMADBSD kernel'
-		umount ${SYSDIR}/dev
+		umount "${SYSDIR}/dev"
 	fi
 }
 
 instsrcdist()
 {
-		BSDINSTALL_DISTDIR=${DISTDIR} DISTRIBUTIONS=src.txz \
+		BSDINSTALL_DISTDIR="${DISTDIR}" DISTRIBUTIONS=src.txz \
 		    BSDINSTALL_DISTSITE=${DISTSITE} bsdinstall distfetch
-		BSDINSTALL_DISTDIR=${DISTDIR} BSDINSTALL_CHROOT=${SYSDIR} \
+		BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_CHROOT="${SYSDIR}" \
 		    DISTRIBUTIONS=src.txz bsdinstall distextract
 }
 
@@ -202,12 +202,12 @@ createimage()
 	fi
 	blksize=$((${FRAGSIZE} * 8))
 	uzipsz=$(du -B ${blksize} -m ${UZIP_IMAGE}.uzip | cut -f1)
-	tot=$(du -B ${blksize} -mc ${SYSDIR} | tail -1 | cut -f1)
-	r=$(du -B ${blksize} -mc ${SYSDIR}/boot/kernel.old \
-		${SYSDIR}/git ${SYSDIR}/usr/obj ${SYSDIR}/usr/src \
-		${SYSDIR}/usr/share/doc ${SYSDIR}/usr/local \
-		${SYSDIR}/var/cache/pkg ${SYSDIR}/var/db/ports \
-		${SYSDIR}/var/db/portsnap ${SYSDIR}/var/log | \
+	tot=$(du -B ${blksize} -mc "${SYSDIR}" | tail -1 | cut -f1)
+	r=$(du -B ${blksize} -mc "${SYSDIR}/boot/kernel.old" \
+		"${SYSDIR}/git" "${SYSDIR}/usr/obj" "${SYSDIR}/usr/src" \
+		"${SYSDIR}/usr/share/doc" "${SYSDIR}/usr/local" \
+		"${SYSDIR}/var/cache/pkg" "${SYSDIR}/var/db/ports" \
+		"${SYSDIR}/var/db/portsnap" "${SYSDIR}/var/log" | \
 		tail -1 | cut -f1)
 	basesz=$(($tot - $r + $uzipsz))
 	# Add 8% for "min free"
@@ -227,15 +227,15 @@ createimage()
 	newfs_msdos /dev/${mddev}p2 || bail
 	mount -t msdosfs /dev/${mddev}p2 ./mnt || bail
 	mkdir -p ./mnt/EFI/BOOT
-	cp ${SYSDIR}/boot/boot1.efi ./mnt/EFI/BOOT
+	cp "${SYSDIR}/boot/boot1.efi" ./mnt/EFI/BOOT
 	umount ./mnt
 	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M ${mddev} || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 	    -m 8 /dev/${mddev}p4 || bail
 	mount /dev/${mddev}p4 mnt || bail
-	(cd ${SYSDIR} && rm -rf var/tmp/*; rm -rf tmp/*)
-	(cd ${SYSDIR} && tar -cf -         \
+	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
+	(cd "${SYSDIR}" && tar -cf -         \
 	    --exclude '^boot/kernel.old'   \
 	    --exclude '^git*'              \
 	    --exclude '^pkgs/*'            \
@@ -251,9 +251,9 @@ createimage()
 	    --exclude '^var/db/ports/*'    \
 	    --exclude '^var/log/*' .) | (cd mnt && tar pxf -) || bail
 	mkdir mnt/var/log
-	(cd ${SYSDIR}/usr/home/nomad && tar cfz - .) > mnt/home.nomad.tgz
+	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > mnt/home.nomad.tgz
 	mkdir mnt/usr.local.etc
-	(cd ${SYSDIR}/usr/local/etc && tar cf - .) | \
+	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
  	    (cd mnt/usr.local.etc && tar vpxf -) || bail
 	mkdir mnt/uzip; mkdir mnt/usr/local
 	cp ${UZIP_IMAGE}.uzip mnt/uzip/usr.local.uzip || bail
@@ -277,41 +277,41 @@ createuzip()
 	mddev=$(mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s 6000m) || bail
 	newfs -O 1 -o time -b ${blksize} -f ${FRAGSIZE} -m 8 \
 	    /dev/${mddev} || bail
-	[ ! -d ${UZIP_MNT} ] && mkdir ${UZIP_MNT}
-	mount /dev/${mddev} ${UZIP_MNT} || bail
-	(cd ${SYSDIR}/usr/local && tar -cf -	\
-	    --exclude '^etc' .) | (cd ${UZIP_MNT} && tar pxf -) || bail
-	(cd ${UZIP_MNT} && ln -s /usr.local.etc etc)
+	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
+	mount /dev/${mddev} "${UZIP_MNT}" || bail
+	(cd "${SYSDIR}/usr/local" && tar -cf -	\
+	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) || bail
+	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
 	[ ! -d pkgcache ] && mkdir pkgcache
-	[ ! -d ${UZIP_MNT}/nvidia ] && mkdir ${UZIP_MNT}/nvidia
+	[ ! -d "${UZIP_MNT}/nvidia" ] && mkdir "${UZIP_MNT}/nvidia"
 	pkg fetch -y -o pkgcache nvidia-driver-304
 	pkg fetch -y -o pkgcache nvidia-driver-340
-	(mkdir ${UZIP_MNT}/nvidia/304 && mkdir ${UZIP_MNT}/nvidia/340) || bail
+	(mkdir "${UZIP_MNT}/nvidia/304" && mkdir "${UZIP_MNT}/nvidia/340") || bail
 	cat pkgcache/All/nvidia-driver-304*.txz | \
-	    (cd ${UZIP_MNT}/nvidia/304 && tar xf -)
+	    (cd "${UZIP_MNT}/nvidia/304" && tar xf -)
 	cat pkgcache/All/nvidia-driver-340*.txz | \
-	    (cd ${UZIP_MNT}/nvidia/340 && tar xf -)
-	umount ${UZIP_MNT} || umount -f ${UZIP_MNT}
+	    (cd "${UZIP_MNT}/nvidia/340" && tar xf -)
+	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
-	rmdir ${UZIP_MNT}
+	rmdir "${UZIP_MNT}"
 	mkuzip -Z -j 2 -d -s 19456 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 }
 
 createpatch()
 {
-	[ ! -d ${PATCHDIR} ] && mkdir ${PATCHDIR}
+	[ ! -d "${PATCHDIR}" ] && mkdir "${PATCHDIR}"
 	if [ -z "${PATCHVERSION}" ]; then
 		echo "PATCHVERSION not defined" >&2
 		bail
 	fi
-	(cd config && tar cf - .) | (cd ${PATCHDIR} && tar xf -)
-	echo "${PATCHVERSION}" > ${PATCHDIR}/VERSION
-	mkdir ${PATCHDIR}/home
-	(tar cf - nomad) | (cd ${PATCHDIR}/home && tar xf -)
-	(cd ${PATCHDIR} && find . -type f -exec md5 {} \; > \
-	    $(pwd)/nomadbsd-patch-${PATCHVERSION}.files)
-	(cd ${PATCHDIR} && \
-	    tar cfz $(pwd)/nomadbsd-patch-${PATCHVERSION}.tgz .)
+	(cd config && tar cf - .) | (cd "${PATCHDIR}" && tar xf -)
+	echo "${PATCHVERSION}" > "${PATCHDIR}/VERSION"
+	mkdir "${PATCHDIR}/home"
+	(tar cf - nomad) | (cd "${PATCHDIR}/home" && tar xf -)
+	(cd "${PATCHDIR}" && find . -type f -exec md5 {} \; > \
+	    "$(pwd)/nomadbsd-patch-${PATCHVERSION}.files")
+	(cd "${PATCHDIR}" && \
+	    tar cfz "$(pwd)/nomadbsd-patch-${PATCHVERSION}.tgz" .)
 	cs=$(sha256 nomadbsd-patch-${PATCHVERSION}.tgz | \
 	    cut -d'=' -f2 | tr -d ' ')
 	r="version=${PATCHVERSION}"
@@ -323,19 +323,19 @@ createpatch()
 
 cleanup()
 {
-	if (mount | grep ${SYSDIR}/usr/ports); then
-		umount ${SYSDIR}/usr/ports || umount -f ${SYSDIR}/usr/ports
+	if (mount | grep "${SYSDIR}/usr/ports"); then
+		umount "${SYSDIR}/usr/ports" || umount -f "${SYSDIR}/usr/ports"
 	fi
-	if (mount | grep ${SYSDIR}/dev); then
-		umount ${SYSDIR}/dev || umount -f ${SYSDIR}/dev
+	if (mount | grep "${SYSDIR}/dev"); then
+		umount "${SYSDIR}/dev" || umount -f "${SYSDIR}/dev"
 	fi
-	if (mount | grep ${UZIP_MNT}); then
-		umount ${UZIP_MNT} || umount -f ${UZIP_MNT}
+	if (mount | grep "${UZIP_MNT}"); then
+		umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
 	fi
-	if (mount | grep ${PWD}/mnt || mount | grep './mnt'); then
+	if (mount | grep "${PWD}/mnt" || mount | grep './mnt'); then
 		umount ./mnt || umount -f ./mnt
 	fi
-	rmdir ${UZIP_MNT} ./mnt 2>/dev/null
+	rmdir "${UZIP_MNT}" ./mnt 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
@@ -349,15 +349,15 @@ bail()
 
 baseclean()
 {
-	chflags -R noschg,nosunlnk ${SYSDIR}
-	rm -rf ${SYSDIR}
+	chflags -R noschg,nosunlnk "${SYSDIR}"
+	rm -rf "${SYSDIR}"
 }
 
 allclean()
 {
 	baseclean
-	rm -rf ./${PATCHDIR}
-	rm -rf ${DISTDIR}
+	rm -rf ./"${PATCHDIR}"
+	rm -rf "${DISTDIR}"
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
 }
 
