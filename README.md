@@ -15,11 +15,11 @@ A recent FreeBSD system
 
 ### Building the image
 ~~~ csh
-# make image
+# ./build all
 ~~~
 ### Writing the image to an USB memory stick
 ~~~ csh
-# dd if=nomadbsd.img of=/dev/da0 bs=10240 conv=sync
+# dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
 ~~~
 
 ### Ready to use image
