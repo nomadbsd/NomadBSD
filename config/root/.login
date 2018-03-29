@@ -12,6 +12,7 @@ if ( "`tty`" =~ "/dev/ttyv0" ) then
 	set msg="$msg NomadBSD for the first time.\n\nStay tuned!\n"
 	dialog --infobox "$msg" 10 40
 	nvidia_setup
+	intel_setup
 	(service slim onestart; sleep 3; service slim onestart; sleep 3; \
 	service slim onestart) >& /dev/null
 	lock -np
