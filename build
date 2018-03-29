@@ -107,9 +107,9 @@ createbase()
 
 updatebase()
 {
-	freebsd-update --currently-running ${RELEASE}
+	PAGER=cat freebsd-update --currently-running ${RELEASE}
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" fetch && \
-	freebsd-update --currently-running ${RELEASE} \
+	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" install
 }
 
