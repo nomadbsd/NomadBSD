@@ -125,6 +125,19 @@ at-xy ."         `--{__________) [0m"
 	     at-xy ."     |____/|_____/|_____/"
 ;
 
+: nomadbsd-logo ( x y -- )
+	2dup at-xy ."  _   _                           _" 1+
+	2dup at-xy ." | \ | | ___  _ __ ___   __ _  __| |" 1+
+	2dup at-xy ." |  \| |/ _ \| '_ ` _ \ / _` |/ _` |" 1+
+	2dup at-xy ." | |\  | (_) | | | | | | (_| | (_| |" 1+
+	2dup at-xy ." |_| \_|\___/|_| |_| |_|\__,_|\__,_|" 1+
+	2dup at-xy ."           ____ ____  ____" 1+
+	2dup at-xy ."          | __ ) ___||  _ \" 1+
+	2dup at-xy ."          |  _ \___ \| | | |" 1+
+	2dup at-xy ."          | |_) |__) | |_| |" 1+
+	2dup at-xy ."          |____/____/|____/"
+	     at-xy ."
+;
 : print-logo ( x y -- )
 	s" loader_logo" getenv
 	dup -1 = if
@@ -145,6 +158,11 @@ at-xy ."         `--{__________) [0m"
 	2dup s" beastie" compare-insensitive 0= if
 		2drop
 		beastie-logo
+		exit
+	then
+	2dup s" nomadbsd" compare-insensitive 0= if
+		2drop
+		nomadbsd-logo
 		exit
 	then
 	2dup s" none" compare-insensitive 0= if
