@@ -447,7 +447,8 @@ usage()
 
 help()
 {
-	exit 1
+	less build.hlp
+	exit 0
 }
 
 [ $# -lt 1 ] && usage
