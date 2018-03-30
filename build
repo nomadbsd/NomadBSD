@@ -29,17 +29,53 @@
 #
 # pkgcfg	Set up configuration files and users required by installed
 #			software packages.
+#
+# usrcfg	Install all files from nomad/ in ${SYSDIR]/home/nomad
+#
+# usrclean	Remove all files from ${SYSDIR}/home/nomad
+#
 # clean		Remove base system dir, distfiles, patch dir, and uzip images.
 #
 # vim: set tabstop=4:
 #
 . ./build.cfg
 
+if [ -z "${RELEASE}" ]; then
+	echo "RELEASE must not be empty" >&2
+	exit 1
+fi
+if [ -z "${SYSDIR}" ]; then
+	echo "SYSDIR must not be empty" >&2
+	exit 1
+fi
+if [ -z "${DISTDIR}" ]; then
+	echo "DISTDIR must not be empty" >&2
+	exit 1
+fi
+if [ -z "${PATCHDIR}" ]; then
+	echo "PATCHDIR must not be empty" >&2
+	exit 1
+fi
+
+if [ "$(realpath -q ${SYSDIR})" = "/" ]; then
+	echo "Refusing to use '/' as SYSDIR"
+	exit 1
+fi
+if [ "$(realpath -q ${DISTDIR})" = "/" ]; then
+	echo "Refusing to use '/' as DISTDIR"
+	exit 1
+fi
+if [ "$(realpath -q ${PATCHDIR})" = "/" ]; then
+	echo "Refusing to use '/' as PATCHDIR"
+	exit 1
+fi
+
 if [ ${RELEASE##*-} = "STABLE" ]; then
 	URL="${BASEURL}/snapshots"
 else
 	URL="${BASEURL}/release"
 fi
+
 DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
@@ -48,6 +84,12 @@ UZIP_IMAGE="uzip_image"
 UZIP_MNT="uzip_mnt"
 GPTROOT=nomadroot
 GPTSWAP=nomadswap
+
+instusrcfg()
+{
+	(cd nomad  && tar cf - .) | (cd "${SYSDIR}/usr/home/nomad" && tar xf -)
+	chroot "${SYSDIR}" sh -c 'chown -R nomad:nomad /usr/home/nomad'
+}
 
 initbase()
 {
@@ -58,8 +100,7 @@ initbase()
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
-	(cd nomad  && tar cf - .) | (cd "${SYSDIR}/usr/home/nomad" && tar xf -)
-	chroot "${SYSDIR}" sh -c 'chown -R nomad:nomad /usr/home/nomad'
+	instusrcfg
 }
 
 mkfontpaths()
@@ -112,6 +153,7 @@ updatebase()
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" install
 }
+
 
 instpkgs()
 {
@@ -347,6 +389,12 @@ bail()
 	exit 1
 }
 
+usrclean()
+{
+	rm -rf "${SYSDIR}/home/nomad/"*
+	rm -rf "${SYSDIR}/home/nomad/".* 2>/dev/null
+}
+
 baseclean()
 {
 	chflags -R noschg,nosunlnk "${SYSDIR}"
@@ -422,6 +470,8 @@ while [ $# -gt 0 ]; do
 	ports)	  instports;;
 	src)	  instsrcdist;;
 	uzip)	  createuzip;;
+	usrcfg)	  instusrcfg;;
+	usrclean) usrclean;;
 	-h)		  help;;
 	*)		  usage;;
 	esac
