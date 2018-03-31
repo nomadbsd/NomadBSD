@@ -25,6 +25,7 @@ user_pref("browser.newtabpage.storageVersion", 1);
 user_pref("browser.pagethumbnails.storage_version", 3);
 user_pref("browser.places.smartBookmarksVersion", 4);
 user_pref("browser.rights.3.shown", true);
+user_pref("browser.sessionstore.interval", "1800000");
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.slowStartup.averageTime", 11920);
 user_pref("browser.slowStartup.samples", 3);
