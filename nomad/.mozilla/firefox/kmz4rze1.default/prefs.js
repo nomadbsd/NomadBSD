@@ -40,6 +40,7 @@ user_pref("browser.pagethumbnails.storage_version", 3);
 user_pref("browser.places.smartBookmarksVersion", 8);
 user_pref("browser.safebrowsing.provider.mozilla.lastupdatetime", "1518987491830");
 user_pref("browser.safebrowsing.provider.mozilla.nextupdatetime", "1518991091830");
+user_pref("browser.sessionstore.interval", "1800000");
 user_pref("browser.sessionstore.upgradeBackup.latestBuildID", "20180215074142");
 user_pref("browser.shell.didSkipDefaultBrowserCheckOnFirstRun", true);
 user_pref("browser.slowStartup.averageTime", 8133);
