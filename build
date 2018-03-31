@@ -269,7 +269,7 @@ createimage()
 	newfs_msdos /dev/${mddev}p2 || bail
 	mount -t msdosfs /dev/${mddev}p2 ./mnt || bail
 	mkdir -p ./mnt/EFI/BOOT
-	cp "${SYSDIR}/boot/boot1.efi" ./mnt/EFI/BOOT
+	cp "${SYSDIR}/boot/boot1.efi" ./mnt/EFI/BOOT/BOOTX64.EFI
 	umount ./mnt
 	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M ${mddev} || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
