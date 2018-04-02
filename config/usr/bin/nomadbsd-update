@@ -23,7 +23,7 @@ my $tgtflist;
 my $tgtversion	 = -1;
 my $curversion	 = -1;
 my $version_file = qq(/VERSION);
-my $base_url	 = qq(http://freeshell.de/~mk/nomadbsd);
+my $base_url	 = qq(http://nomadbsd.org/download/updates);
 my $index_file	 = qq(nomadbsd-patch.index);
 my $wrkdir		 = qq(/tmp/nomadbsd-update.$$);
 my $filelist	 = qq(/var/db/nomadbsd-update.files);
@@ -164,6 +164,7 @@ sub fetch_archive {
 	system("cd ${prepdir} && tar xf ${wrkdir}/$_[0]") == 0
 		or errx(1, "Failed to extract patch archive to ${prepdir}");
 	print "${AB}${CG}OK${AO}\n";
+
 }
 
 sub mkbackup {
