@@ -173,8 +173,10 @@ instgit()
 		fi
 	done
 	for r in ${repo_dirs}; do
-		chroot "${SYSDIR}" sh -c "cd /git/${r}; \
-			ls *.pro > /dev/null 2>&1 && qmake; make && make install"
+		rname=$(echo $r | tr '-' '_')
+		eval build_cmd=\${${rname}_BUILD_CMD}
+		[ -z "${build_cmd}" ] && continue
+		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
 	done
 }
 
@@ -214,14 +216,11 @@ instports()
 
 buildkernel()
 {
-	if [ ! -f "${SYSDIR}/usr/obj/usr/src/sys/NOMADBSD/kernel" ]; then
-		(cd kernel && tar cf - .) | \
-		    (cd "${SYSDIR}/usr/src/sys/${ARCH}/conf" && tar xf -)
-		chroot "${SYSDIR}" sh -c \
-		    'mount -t devfs devfs /dev; \
-		    cd /usr/src && make KERNCONF=NOMADBSD kernel'
-		umount "${SYSDIR}/dev"
-	fi
+	(cd kernel && tar cf - .) | \
+		(cd "${SYSDIR}/usr/src/sys/${ARCH}/conf" && tar xf -)
+	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev; \
+	    cd /usr/src && make KERNCONF=NOMADBSD kernel'
+	umount "${SYSDIR}/dev"
 }
 
 instsrcdist()
