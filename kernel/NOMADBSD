@@ -73,13 +73,13 @@ options 	MAC			# TrustedBSD MAC Framework
 options 	KDTRACE_FRAME		# Ensure frames are compiled in
 options 	KDTRACE_HOOKS		# Kernel DTrace hooks
 options 	DDB_CTF			# Kernel ELF linker loads CTF data
-options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
+#options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
 options 	RACCT			# Resource accounting framework
 options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
 options 	RCTL			# Resource limits
 
 options		TERMINAL_NORM_ATTR=(FG_LIGHTBLUE|BG_BLACK)
-options		TERMINAL_KERN_ATTR=(FG_YELLOW|BG_BLACK)
+options		TERMINAL_KERN_ATTR=(FG_LIGHTCYAN|BG_BLACK)
 
 # Debugging support.  Always need this:
 options 	KDB			# Enable kernel debugger support.
