@@ -284,8 +284,8 @@ mkhome() {
 		chown nomad:nomad /home/nomad
 		printf "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
-		mkdir /home/pkgs
 	fi
+	mkdir /home/pkgs
 	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
 }
 
