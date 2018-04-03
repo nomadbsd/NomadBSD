@@ -204,9 +204,7 @@ instports()
 		pkg --chroot "${SYSDIR}" info --exists $p && continue
 		echo "Building $p ..." >&2
 		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
-		echo "pname == $pname";
 		eval popts=\${${pname}_OPTS}
-		echo "popts == $popts";
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" clean install" || bail
 	done
