@@ -6,3 +6,4 @@ dsbbatmon&
 dsbmixer -i&
 redshift -l`getlalo`&
 xbindkeys&
+compton&
