@@ -284,6 +284,7 @@ mkhome() {
 		chown nomad:nomad /home/nomad
 		printf "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n" >> \
 		/etc/fstab
+		mkdir /home/pkgs
 	fi
 	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
 }
@@ -344,4 +345,5 @@ sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
 sysrc keymap="$xkbdlayout" >/dev/null 2>&1
 sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
+mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 
