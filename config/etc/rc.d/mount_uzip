@@ -14,6 +14,13 @@ do_mount_uzip()
 {
 	echo "Mounting uzip. Please wait ..."
 	mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /usr/local
+
+	# Create and mount a writeable directory to /usr/local using
+	# unionfs, so users can install packages.
+	if [ ! -d /home/pkgs ]; then
+		mkdir /home/pkgs
+	fi
+	mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 }
 
 load_rc_config $name
