@@ -17,10 +17,12 @@ do_mount_uzip()
 
 	# Create and mount a writeable directory to /usr/local using
 	# unionfs, so users can install packages.
-	if [ ! -d /home/pkgs ]; then
-		mkdir /home/pkgs
+	if (mount | grep -q '/home '); then
+		if [ ! -d /home/pkgs ]; then
+			mkdir /home/pkgs
+		fi
+		mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 	fi
-	mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 }
 
 load_rc_config $name
