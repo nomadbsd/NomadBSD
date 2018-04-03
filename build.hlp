@@ -19,6 +19,8 @@ patch       Create a patch file for nomadbsd-update. Add a new record to the
 
 image       Build the NomadBSD image.
 
+kernel      Build a custom kernel using kernel/NOMADBSD
+
 ports       Build and install all ports defined in build.cfg
 
 pkgs        Install all packages from pkg.list
