@@ -164,7 +164,10 @@ sub fetch_archive {
 	system("cd ${prepdir} && tar xf ${wrkdir}/$_[0]") == 0
 		or errx(1, "Failed to extract patch archive to ${prepdir}");
 	print "${AB}${CG}OK${AO}\n";
-
+	# Execute the new update script from the archive if available.
+	if (-f ${prepdir}/usr/bin/nomadbsd-update) {
+		exec "${prepdir}/usr/bin/nomadbsd-update --skip-fetch --workdir $wrkdir";
+	}
 }
 
 sub mkbackup {
@@ -622,20 +625,30 @@ sub usage {
 }
 
 usage() if (@ARGV == 0);
-
-if ($ARGV[0] eq 'init') {
-	init();
-} elsif ($ARGV[0] eq 'remove-old') {
-	rm_old_files();
-	exit(0);
-} elsif ($ARGV[0] eq 'rollback') {
-	rollback();
-	exit(0);
-} elsif ($ARGV[0] ne 'update') {
-	usage();
+while (@ARGV) {
+	$_ = $ARGV[0];
+	if ($_ eq 'init') {
+		init();
+	} elsif ($_ eq 'remove-old') {
+		rm_old_files();
+		exit(0);
+	} elsif ($_ eq 'rollback') {
+		rollback();
+		exit(0);
+	} elsif ($_ eq '--self-invoked') {
+		$self_invoked = 1;
+	} elsif ($_ eq '--workdir') {
+		shift;
+		$wrkdir = $ARGV[0];
+		usage() if (!$wrkdir || !-d $wrkdir);
+	} elsif ($_ ne 'update') {
+		usage();
+	}
+	shift;
 }
 
-fetch_index();
+fetch_index() if (!$self_invoked);
+
 $curversion = get_cur_version();
 $tgtversion = get_target_version();
 
@@ -646,16 +659,19 @@ if ($curversion eq $tgtversion) {
 $currecord = get_version_record($curversion);
 $tgtrecord = get_version_record($tgtversion);
 
-fetch_file($base_url, get_field($tgtrecord, 'flist'));
-fetch_file($base_url, get_field($currecord, 'flist'));
+if (!$self_invoked) {
+	fetch_file($base_url, get_field($tgtrecord, 'flist'));
+	fetch_file($base_url, get_field($currecord, 'flist'));
+}
 
 $curflist = "$wrkdir/" . get_field($currecord, 'flist');
 $tgtflist = "$wrkdir/" . get_field($tgtrecord, 'flist');
 
-mkbackup();
-mk_oldfile_list();
-
-fetch_archive(get_field($tgtrecord, 'archive'));
+if (!$self_invoked) {
+	mkbackup();
+	mk_oldfile_list();
+	fetch_archive(get_field($tgtrecord, 'archive'));
+}
 
 open($fh, '<', $curflist)
 	or errx(1, "Failed to open $curflist");
