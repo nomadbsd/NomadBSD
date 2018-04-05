@@ -313,7 +313,7 @@
 <separator />
 	<item label="Update Menu" comment="--- auto ---">
 		<action name="Execute">
-			<command>/home/nomad/bin/update_obmenu -u</command>
+			<command>/usr/bin/update_obmenu -u</command>
 		</action>
 	</item>
 </menu>
