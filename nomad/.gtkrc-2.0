@@ -1,5 +1,5 @@
 # -- THEME AUTO-WRITTEN DO NOT EDIT
-include "/usr/local/share/themes/Arc/gtk-2.0/gtkrc"
+include "/home/nomad/.themes/Adapta/gtk-2.0/gtkrc"
 
 style "user-font" {
 	font_name = "Droid Sans 11"
