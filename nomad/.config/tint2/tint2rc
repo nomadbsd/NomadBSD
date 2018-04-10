@@ -93,7 +93,7 @@ urgent_nb_of_blink = 8
 task_maximum_size = 140 35
 task_padding = 6 2 6
 task_font = Droid Sans 10
-task_tooltip = 0
+task_tooltip = 1
 task_thumbnail = 1
 task_thumbnail_size = 210
 task_font_color = #000000 80
@@ -180,6 +180,6 @@ tooltip_show_timeout = 0.7
 tooltip_hide_timeout = 0.3
 tooltip_padding = 2 2
 tooltip_background_id = 1
-tooltip_font_color = #000000 80
+tooltip_font_color = #ffffff 80
 tooltip_font = sans 10
 
