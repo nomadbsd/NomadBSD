@@ -246,11 +246,11 @@ createimage()
 		"${SYSDIR}/git" "${SYSDIR}/usr/obj" "${SYSDIR}/usr/src" \
 		"${SYSDIR}/usr/share/doc" "${SYSDIR}/usr/local" \
 		"${SYSDIR}/var/cache/pkg" "${SYSDIR}/var/db/ports" \
-		"${SYSDIR}/var/db/portsnap" "${SYSDIR}/var/log" | \
-		tail -1 | cut -f1)
-	basesz=$(($tot - $r + $uzipsz))
+		"${SYSDIR}/var/db/portsnap" "${SYSDIR}/var/log" \
+		"${SYSDIR}/tmp" | tail -1 | cut -f1)
+	basesz=$((${tot} - $r + ${uzipsz}))
 	# Add 8% for "min free"
-	basesz=$(($basesz + $basesz * 8 / 100))
+	basesz=$((${basesz} + ${basesz} * 8 / 100))
 	touch ${IMAGE_NAME}
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
