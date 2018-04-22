@@ -68,6 +68,7 @@ sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/fusefs-ext4fuse
 sysutils/fusefs-hfsfuse
+sysutils/fusefs-sshfs
 sysutils/powerdxx
 sysutils/sleuthkit
 sysutils/smartmontools
@@ -80,6 +81,7 @@ ukrainian/hunspell
 vietnamese/aspell
 vietnamese/hunspell
 www/firefox
+www/lynx
 www/palemoon
 x11-drivers/xf86-input-keyboard
 x11-drivers/xf86-input-mouse
