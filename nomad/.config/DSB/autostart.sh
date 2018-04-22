@@ -7,3 +7,4 @@ dsbmixer -i&
 redshift -l`getlalo`&
 xbindkeys&
 compton&
+~/.config/DSB/dsbds.sh&
