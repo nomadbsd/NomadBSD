@@ -70,7 +70,7 @@ if [ "$(realpath -q ${PATCHDIR})" = "/" ]; then
 	exit 1
 fi
 
-if [ ${RELEASE##*-} = "STABLE" ]; then
+if [ ${RELEASE##*-} != "RELEASE" ]; then
 	URL="${BASEURL}/snapshots"
 else
 	URL="${BASEURL}/release"
