@@ -345,5 +345,7 @@ sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
 sysrc keymap="$xkbdlayout" >/dev/null 2>&1
 sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
+dialog --infobox "Creating font cache files ..." 3 40
+/usr/local/bin/fc-cache -f
 mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 
