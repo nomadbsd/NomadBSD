@@ -2,7 +2,7 @@
 # vim: set tabstop=4:
 
 path_installdir="/usr/libexec/nomad"
-path_nomadcfg="/nomad.cfg"
+path_nosetup="/var/db/nomadbsd.nosetup"
 selection="/tmp/selection.$$"
 path_xorg_input_tmpl=${path_installdir}/input-keyboard.conf.tmpl
 path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
@@ -515,7 +515,7 @@ swconf()
 	return ${ret}
 }
 
-[ -f $path_nomadcfg ] && exit 0
+[ -f $path_nosetup ] && exit 0
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout swconf"
 
@@ -536,7 +536,6 @@ while [ $j -lt $n ]; do
 done
 
 while [ true ]; do
-	eval $(cat $path_nomadcfg)
 	summary 2>$selection
 	if [ $? -ne 0 ]; then
 		giveup
@@ -574,6 +573,8 @@ sysrc keymap="${cfg_kbdmap%.kbd}" >/dev/null 2>&1
 
 sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
+
+touch ${path_nosetup}
 
 dialog --infobox "Creating font cache files ..." 3 40
 /usr/local/bin/fc-cache -f
