@@ -7,12 +7,12 @@ selection="/tmp/selection.$$"
 path_xorg_input_tmpl=${path_installdir}/input-keyboard.conf.tmpl
 path_xorg_input=/usr/local/etc/X11/xorg.conf.d/input-keyboard.conf
 fragsize=4096
-blksize=$(echo "${fragsize} * 8" | bc)
+blksize=$((${fragsize} * 8))
 gptroot="nomadroot"
 gpthome="nomadhome"
 
 mainmenu() {
-	local msg
+	local msg ret
 
 	msg="\n\nBefore you can use NomadBSD, there are some things"
 	msg="${msg} to be set up."
@@ -20,7 +20,11 @@ mainmenu() {
 	msg="${msg}Ready to proceed?\n"
 
 	dialog --clear --title "SET UP NOMADBSD" --yesno "${msg}" 12 60
-	[ $? -ne 0 ] && exitmenu "Bummer :("
+	ret=$?
+	if [ ${ret} -ne 0 ]; then
+		exitmenu "Bummer :("
+	fi
+	return ${ret}
 }
 
 exitmenu() {
@@ -31,9 +35,9 @@ exitmenu() {
 		dialog --title "LEAVE" --radiolist "$1" 15 60 3 \
 		"Reboot" "Reboot system" off \
 		"Shutdown" "Shutdown system" on \
-		"Exit" "Exit setup" off 2>${ret}
+		"Exit" "Exit setup" off >/dev/tty 2>${ret}
 		[ $? -ne 0 ] && continue
-		opt=`cat ${ret}`
+		opt=$(cat ${ret})
 		rm -f ${ret}
 
 		case ${opt} in
@@ -56,17 +60,51 @@ errandout() {
 	exitmenu "${msg}"
 }
 
+giveup() {
+	local ret
+	dialog --title "GIVE UP?" --yesno "Exit setup?" 6 60
+	ret=$?
+	if [ ${ret} -eq 0 ]; then
+		exitmenu "Please choose:"
+	fi
+	return ${ret}
+}
+
+str_at() {
+	local idx
+
+	idx=$1
+	shift
+	while [ $idx -gt 0 ]; do
+		idx=$((idx - 1))
+		shift
+	done
+	echo $1
+}
+
+count_args() {
+	echo $#
+}
+
 summary() {
-	local text
+	local text use_geli use_bsdstats
+	use_geli="No"
+	use_bsdstats="No"
 
+	[ ${cfg_use_geli} -ne 0 ] && use_geli="Yes"
+	[ ${cfg_run_bsdstats} -ne 0 ] && use_bsdstats="Yes"
+	
 	text="\n"
-	text="${text}Language:     $lang\n"
-	text="${text}Shell:        $shell\n"
-	text="${text}Xkbdmodel:    $xkbdmodel\n"
-	text="${text}Xkbdlayout:   $xkbdlayout\n"
-	text="${text}Timezone:     `cat /var/db/zoneinfo`\n"
+	text="${text}Language:         $cfg_lang\n"
+	text="${text}Shell:            $cfg_shell\n"
+	text="${text}Xkbdmodel:        $cfg_xkbdmodel\n"
+	text="${text}Xkbdlayout:       $cfg_xkbdlayout\n"
+	text="${text}GELI on /home:    $use_geli\n"
+	text="${text}Bsdstats on boot: $use_bsdstats\n"
+	text="${text}VT Keyboard map:  $cfg_kbdmap\n"
+	text="${text}Timezone:         $(cat /var/db/zoneinfo)\n"
 
-	dialog --no-items --no-cancel --title "SUMMARY"   \
+	dialog --no-items --title "SUMMARY"   \
 	       --menu "$text" -1 -1 2 "I'm happy with it" \
 	       "I want to change something"
 }
@@ -75,33 +113,56 @@ change() {
 	local text
 
 	text=""
-	text="${text}Language     $lang "
-	text="${text}Shell        $shell "
-	text="${text}Xkbdmodel    $xkbdmodel "
-	text="${text}Xkbdlayout   $xkbdlayout "
-	text="${text}Software     Software-settings "
-	text="${text}Timezone     `cat /var/db/zoneinfo`"
+	text="${text}Language      $cfg_lang "
+	text="${text}Shell         $cfg_shell "
+	text="${text}Xkbdmodel     $cfg_xkbdmodel "
+	text="${text}Xkbdlayout    $cfg_xkbdlayout "
+	text="${text}Software      Software-settings "
+	text="${text}VT_kbdmap     $cfg_kbdmap "
+	text="${text}Root_password ... "
+	text="${text}User_password ... "
+	text="${text}Timezone      $(cat /var/db/zoneinfo)"
 
 	dialog --title "CHANGE SETTINGS" --ok-label "Change" \
 	       --menu "" -1 60 6 $text
 }
 
 setlang() {
+	local eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
 	list=$(locale -a | grep '.UTF-8'| sort -n | uniq | cut -d. -f 1)
 	while [ true ]; do
-		dialog --clear --title "LANGUAGE" --no-items   \
+		echo "HERE"
+		dialog ${eflags} --clear \
+			   --title "LANGUAGE" --no-items \
 		       --menu "\nPlease select your language." \
 		       -1 -1 10 $list 2>${selection}
-		ret=$?; lang=$(cat $selection)
-		[ $ret -eq 0 -a ! -z "$lang" ] && break
+		ret=$?; lang=$(cat ${selection})
+		rm -f $selection
+		if [ ${ret} -eq 0 ]; then
+			if [ ! -z "${lang}" ]; then
+				cfg_lang=${lang}
+				return 0
+			fi
+		else
+			return ${ret}
+		fi
 	done
-	rm -f $selection
-	echo "lang=$lang" >> $path_nomadcfg
 }
 
 setshell() {
-	local opts
+	local i opts eflags ret shell
 
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
 	for i in `cat /etc/shells | sed '/^\#/d; /^$/d'`; do
 		if (echo $i | grep -q '/zsh$'); then
 			opts="${opts}$i on ";
@@ -110,87 +171,45 @@ setshell() {
 		fi
 	done
 	while [ true ]; do
-		dialog --clear --title "SHELL" --no-items \
+		dialog ${eflags} \
+			   --clear --title "SHELL" --no-items \
 		       --radiolist "\nPlease select your prefered shell." \
 		       -1 60 4 $opts 2>${selection}
-		ret=$?; shell=$(cat $selection)
-		[ $ret -eq 0 -a ! -z "$shell" ] && break
+		ret=$?; shell=$(cat ${selection})
+		rm -f ${selection}
+		if [ ${ret} -eq 0 ]; then
+			if [ ! -z "${shell}" ]; then
+				cfg_shell=${shell}
+				return 0
+			fi
+		else
+			return ${ret}
+		fi
 	done
-	rm -f $selection
-	echo "shell=$shell" >> $path_nomadcfg
 }
 
-getlist() {
-	baselst="/usr/local/share/X11/xkb/rules/base.lst"
+setpass() {
+	local pwdfile cmdret ret eflags
 
-	re=$(echo -n '^! '$1)
-	cat $baselst | awk -v re=$re -F " " '{
-		if ($0 ~ re) {
-			in_model = 1;
-		} else if (/^\! /) {
-			in_model = 0;
-		} else if (/^ /) {
-			if (in_model) {
-				printf("%s\t", $1);
-				for (i = 2; i <= NF; i++) {
-					printf("%s", $i);
-					if (i < NF)
-						printf(" ");
-				}
-				printf("\n");
-			}
-		}
-	}'
-}
-
-setxkbdmodel() {
-	local IFS=$(printf "\t");
-
-	models=$(getlist "model" | tr '\n' '\t')
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+		shift
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	pwdfile="/tmp/$1.pwd"
 	while [ true ]; do
-		dialog --clear --title "KEYBOARD MODEL" \
-		       --menu "\nPlease select your keyboard model.\n" \
-		       -1 60 8 $models 2>${selection}
-		ret=$?; model=$(cat ${selection})
-		[ $ret -eq 0 ] && break
-	done
-	rm -f $selection
-	echo "xkbdmodel=$model" >> $path_nomadcfg
-}
-
-setxkbdlayout() {
-	local IFS=$(printf "\t");
-
-	layouts=$(getlist "layout" | sort -n | tr '\n' '\t')
-	while [ true ]; do
-		dialog --clear --title "KEYBOARD LAYOUT" \
-		       --menu "\nPlease select your keyboard layout.\n" \
-	               -1 60 8 $layouts 2>${selection}
-		ret=$?; layout=$(cat ${selection})
-		[ $ret -eq 0 ] && break
-	done
-	rm -f $selection
-	echo "xkbdlayout=$layout" >> $path_nomadcfg
-}
-
-mkgeli() {
-	local pwdfile cmdret
-
-	cmdret="/tmp/mkgeli_cmds.ret"
-	pwdfile="/tmp/geli.pwd"
-	dd if=/dev/random of=/root/${gpthome}.key bs=64 count=1 > /dev/null 2>&1
-	while [ true ]; do
-		dialog --insecure --passwordform \
-			"Enter a password for geli volume" \
+		dialog ${eflags} \
+			   --insecure --passwordform \
+			"Set password for user $1" \
 			12 60 4 "Password" 1 0 "" 2 1 50 0 \
 			"Repeat password" 3 0 "" 4 1 50 0 2>${pwdfile}
-		if [ $? -ne 0 ]; then
-			dialog --title "GIVE UP?" --yesno "Exit setup?" 6 60
-			[ $? -eq 0 ] && exitmenu "Please choose:"
-			continue
+		ret=$?
+		if [ ${ret} -ne 0 ]; then
+			return ${ret}
 		fi
-		p1=`head -1 ${pwdfile}`	
-		p2=`tail -1 ${pwdfile}`
+		p1=$(head -1 ${pwdfile})
+		p2=$(tail -1 ${pwdfile})
 		rm -f ${pwdfile}
 		if [ "$p1" != "$p2" ]; then
 			dialog --title ERROR --msgbox \
@@ -202,22 +221,191 @@ mkgeli() {
 			break
 		fi
 	done
-	(echo "$p1" | geli init -s 4096 -K /root/${gpthome}.key -J - \
+	echo "${p1}" | pw usermod $1 -h 0
+}
+
+setpass_nomad() {
+	setpass $* nomad
+}
+
+setpass_root() {
+	setpass $* root
+}
+
+getlist() {
+	baselst="/usr/local/share/X11/xkb/rules/base.lst"
+
+	re=$(echo -n '^! '$1)
+	cat $baselst | awk -v re="$re" -F " " '{
+		if ($0 ~ re) {
+			in_model = 1;
+		} else if (/^\! /) {
+			in_model = 0;
+		} else if (/^ /) {
+			if (in_model) {
+				printf("%s\t", $1);
+				for (i = 2; i <= NF; i++) {
+					printf("%s", $i);
+					if (i < NF)
+						printf("_");
+				}
+				printf("\n");
+			}
+		}
+	}'
+}
+
+setkbdmap() {
+	local list eflags kmap ret
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	list=$(grep -E '^[a-z\.]+\.kbd:en:.*' \
+		   /usr/share/vt/keymaps/INDEX.keymaps | \
+		   sed -E 's/^([a-z\.]+):en:(.*)$/\1:\2/' | sort -n | \
+		   tr ' ' '_' | tr ':' ' ')
+	dialog ${eflags} --clear --title "KEYBOARD MODEL" \
+		   --menu "\nPlease select your keyboard model.\n" \
+		   -1 60 8 ${list} 2>${selection}
+	ret=$?; kmap=$(cat ${selection})
+	rm -f $selection
+	if [ ${ret} -eq 0 ]; then
+		cfg_kbdmap=${kmap}
+		kbdcontrol -l ${kmap}
+	fi
+
+	return ${ret}
+}
+
+setxkbdmodel() {
+	local eflags ret model models
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	models=$(getlist "model" | sort -n)
+	while [ true ]; do
+		dialog ${eflags} --clear --title "KEYBOARD MODEL" \
+		       --menu "\nPlease select your keyboard model.\n" \
+		       -1 60 8 ${models} 2>${selection}
+		ret=$?; model=$(cat ${selection})
+		rm -f ${selection}
+		if [ $ret -eq 0 ]; then
+			cfg_xkbdmodel=${model}
+			return 0
+		else
+			return ${ret}
+		fi
+	done
+}
+
+setxkbdlayout() {
+	local eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	layouts=$(getlist "layout" | sort -n)
+	while [ true ]; do
+		dialog ${eflags} --clear --title "KEYBOARD LAYOUT" \
+		       --menu "\nPlease select your keyboard layout.\n" \
+	               -1 60 8 $layouts 2>${selection}
+		ret=$?; layout=$(cat ${selection})
+		rm -f ${selection}
+		if [ $ret -eq 0 ]; then
+			cfg_xkbdlayout=${layout}
+			return 0
+		else
+			return ${ret}
+		fi
+	done
+}
+
+gelimenu() {
+	local pwdfile cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	pwdfile="/tmp/geli.pwd"
+	while [ true ]; do
+		dialog ${eflags} \
+			   --insecure --passwordform \
+			"Enter a password for geli volume" \
+			12 60 4 "Password" 1 0 "" 2 1 50 0 \
+			"Repeat password" 3 0 "" 4 1 50 0 2>${pwdfile}
+		ret=$?
+		if [ ${ret} -ne 0 ]; then
+			return ${ret}
+		fi
+		p1=$(head -1 ${pwdfile})
+		p2=$(tail -1 ${pwdfile})
+		rm -f ${pwdfile}
+		if [ "$p1" != "$p2" ]; then
+			dialog --title ERROR --msgbox \
+				"\nPasswords do not match." 6 40
+		elif [ -z "$p1" ]; then
+			dialog --title ERROR --msgbox \
+				"\nPassword must not be empty." 6 40
+		else
+			break
+		fi
+	done
+	cfg_gelipwd=${p1}
+
+	return 0
+}
+
+mkhomepart() {
+	local dev rootdev
+
+	rootdev=$(glabel status | grep ${gptroot} | awk -F" " '{ print $3 }')
+	if [ -z "${rootdev}" ]; then
+		errandout "Error: Failed find root device."
+	fi
+	dev=$(echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/')
+
+	if (glabel status | grep "gpt/${gpthome}"); then
+		errandout "Error: gpt/${gpthome} already exists."
+	fi
+	gpart recover ${dev}
+	gpart set -a lenovofix ${dev}
+	if ! gpart add -t freebsd-ufs -l ${gpthome} ${dev}; then
+		errandout "Error: Couldn't create partition."
+	fi
+}
+
+mkgeli() {
+	local pwdfile cmdret
+
+	mkhomepart
+	cmdret="/tmp/mkgeli_cmds.ret"
+	dd if=/dev/random of=/root/${gpthome}.key bs=64 count=1 > /dev/null 2>&1
+	(echo "${cfg_gelipwd}" | geli init -s 4096 -K /root/${gpthome}.key -J - \
 		/dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | dialog --progressbox \
 		20 75
-	if [ "`cat ${cmdret}`" -ne 0 ]; then
+	if [ "$(cat ${cmdret})" -ne 0 ]; then
 		errandout "Error: Failed to init geli volume."
 	fi
-	(echo "$p1" | geli attach -k /root/${gpthome}.key -j - \
+	(echo "${cfg_gelipwd}" | geli attach -k /root/${gpthome}.key -j - \
 		/dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | dialog --progressbox \
 		20 75
-	if [ "`cat ${cmdret}`" -ne 0 ]; then
+	if [ "$(cat ${cmdret})" -ne 0 ]; then
 		errandout "Error: Failed to attach geli volume."
 	fi
 	(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
 		-m 8 /dev/gpt/${gpthome}.eli 2>&1; echo $?>${cmdret}) | \
 		dialog --progressbox 20 75
-	if [ "`cat ${cmdret}`" -ne 0 ]; then
+	if [ "$(cat ${cmdret})" -ne 0 ]; then
 		errandout "Error: Failed to create filesystem."
 	fi
 	rm -f ${cmdret}
@@ -246,29 +434,13 @@ mkgeli() {
 }
 
 mkhome() {
-	local cmdret home
+	local cmdret
 
 	cmdret="/tmp/mkhome_newfs.ret"
-	rootdev=`glabel status | grep ${gptroot} | awk -F" " '{ print $3 }'`
-	if [ -z "${rootdev}" ]; then
-		errandout "Error: Failed find root device."
-	fi
-	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
-
-	if (glabel status | grep "gpt/${gpthome}"); then
-		errandout "Error: gpt/${gpthome} already exists."
-	fi
-	gpart recover ${dev}
-	gpart set -a lenovofix ${dev}
-	if ! gpart add -t freebsd-ufs -l ${gpthome} ${dev}; then
-		errandout "Error: Couldn't create partition."
-	fi
-	msg="Would you like /home to be encrypted using geli?"
-	dialog --yesno "$msg" 6 60
-	ret=$?
-	if [ $ret -eq 0 ]; then
+	if [ ${cfg_use_geli} -ne 0 ]; then
 		mkgeli
 	else
+		mkhomepart
 		(newfs -E -U -O 1 -o time -b ${blksize} -f ${fragsize} \
 			-m 8 /dev/gpt/${gpthome} 2>&1; echo $?>${cmdret}) | \
 			dialog --progressbox 20 75
@@ -289,36 +461,87 @@ mkhome() {
 	(cd /home/nomad && tar xf /home.nomad.tgz && chown -R nomad .)
 }
 
+homepart_menu() {
+	local cmdret home ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/homepart_menu.ret"
+	while [ true ]; do
+		dialog ${eflags} \
+			   --checklist "CONFIGURE /home" 8 50 1 \
+			   "GELI" "Encrypt /home using geli" off 2>${cmdret}
+		ret=$?
+		cfg_use_geli=0
+		if [ ${ret} -eq 0 ]; then
+			if [ "$(cat ${cmdret})" = "GELI" ]; then
+				gelimenu
+				ret=$?
+				if [ ${ret} -eq 3 ]; then
+					continue
+				elif [ ${ret} -eq 0 ]; then
+					cfg_use_geli=1
+					return 0
+				fi
+				return ${ret}
+			fi
+		fi
+		return ${ret}
+	done
+}
+
 swconf()
 {
-	dialog --title "SOFTWARE" --yesno \
-		"\nWould you like to run bsdstats at boot time?" 6 60
-	if [ $? -eq 0 ]; then
-		sysrc bsdstats_enable="YES"
-	else
-		sysrc bsdstats_enable="NO"
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
 	fi
+	cmdret="/tmp/swconf.ret"
+	dialog ${eflags} \
+		   --checklist "SOFTWARE" 8 60 1 \
+		   "BSDSTATS" "Run bsdstats at boot time" off 2>${cmdret}
+	ret=$?
+	cfg_run_bsdstats=0
+	if [ $? -eq 0 ]; then
+		[ "$(cat ${cmdret})" = "BSDSTATS" ] && cfg_run_bsdstats=1
+	fi
+	rm -f ${cmdret}
+	return ${ret}
 }
 
 [ -f $path_nomadcfg ] && exit 0
+menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
+menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout swconf"
 
-mainmenu
-kbdmap
-mkhome
-clear
-passwd
-clear
-passwd nomad
-setlang
-setshell
-tzsetup
-setxkbdmodel
-setxkbdlayout
-swconf
+n=$(count_args ${menus})
+j=0
+while [ $j -lt $n ]; do
+	m=$(str_at $j ${menus})
+	[ $m = "tzsetup" ] && m="tzsetup -n"
+	eval $m
+	ret=$?
+	if [ ${ret} -eq 3 ]; then
+		j=$(($j - 1))
+	elif [ ${ret} -eq 0 ]; then
+		j=$(($j + 1))
+	else
+		giveup
+	fi
+done
 
 while [ true ]; do
 	eval $(cat $path_nomadcfg)
 	summary 2>$selection
+	if [ $? -ne 0 ]; then
+		giveup
+		continue
+	fi
 	opt=$(cat $selection)
 
 	case $opt in
@@ -327,25 +550,33 @@ while [ true ]; do
 	esac
 
 	case $(cat $selection) in
-	Shell)       setshell ;;
-	Language)    setlang ;;
-	Xkbdmodel)   setxkbdmodel ;;
-	Xkbdlayout)  setxkbdlayout ;;
-	Timezone)	 tzsetup ;;
-	Software)	 swconf ;;
+	Shell)         setshell -n ;;
+	Language)      setlang -n ;;
+	Xkbdmodel)     setxkbdmodel -n ;;
+	Xkbdlayout)    setxkbdlayout -n ;;
+	VT_kbdmap)	   setkbdmap -n ;;
+	Timezone)	   tzsetup -n ;;
+	Software)	   swconf -n ;;
+	Root_password) setpass_root -n ;;
+	User_password) setpass_nomad -n ;;
 	esac
 done
 rm -f $selection
 
-pw usermod nomad -L $lang -s $shell
+mkhome
 
-sed -E "s/@XKBDMODEL@/$xkbdmodel/; s/@XKBDLAYOUT@/$xkbdlayout/" < \
+pw usermod nomad -L ${cfg_lang} -s ${cfg_shell}
+
+sed -E "s/@XKBDMODEL@/${cfg_xkbdmodel}/; s/@XKBDLAYOUT@/${cfg_xkbdlayout}/" < \
     $path_xorg_input_tmpl > $path_xorg_input
 
-sysrc keymap="$xkbdlayout" >/dev/null 2>&1
+sysrc keymap="${cfg_kbdmap%.kbd}" >/dev/null 2>&1
+
 sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
+
 dialog --infobox "Creating font cache files ..." 3 40
 /usr/local/bin/fc-cache -f
+
 mount -t unionfs -o rw,noatime /home/pkgs /usr/local
 
