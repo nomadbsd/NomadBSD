@@ -1,4 +1,24 @@
 [Default Applications]
+application/pdf=qpdfview.desktop
+application/msword=libreoffice-writer.desktop
+application/x-compressed-tar=xarchiver.desktop
+application/x-tar=xarchiver.desktop
+application/x-bzip-compressed-tar=xarchiver.desktop
+application/zip=xarchiver.desktop
+application/x-cd-image=xfburn.desktop
+image/x-xpixmap=mirage.desktop
+image/png=mirage.desktop
+image/jpeg=mirage.desktop
+image/gif=mirage.desktop
+image/x-eps=mirage.desktop
+image/x-xcf=gimp.desktop
+image/svg+xml=gimp.desktop
+video/x-ms-wmv=vlc.desktop
+video/x-flv=vlc.desktop
+video/x-matroska=vlc.desktop
+video/mpeg=vlc.desktop
+video/x-msvideo=vlc.desktop
+video/mp4=vlc.desktop
 x-scheme-handler/http=userapp-Pale Moon-XLIGBZ.desktop
 x-scheme-handler/https=userapp-Pale Moon-XLIGBZ.desktop
 x-scheme-handler/ftp=userapp-Pale Moon-XLIGBZ.desktop
