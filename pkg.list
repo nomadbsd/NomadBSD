@@ -120,5 +120,6 @@ x11/setxkbmap
 x11/slim
 x11/tint
 x11/xbindkeys
+x11/xev
 x11/xinit
 x11/xrandr
