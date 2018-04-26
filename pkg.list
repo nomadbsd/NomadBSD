@@ -40,11 +40,13 @@ misc/mc
 misc/qt5ct
 multimedia/vlc
 multimedia/x264
+net/mosh
 net-im/pidgin
 net-mgmt/wifimgr
 net-p2p/transmission-qt5
 polish/aspell
 polish/hunspell
+ports-mgmt/octopkg
 ports-mgmt/pkg
 portuguese/hunspell
 print/gimp-gutenprint
@@ -123,3 +125,4 @@ x11/xbindkeys
 x11/xev
 x11/xinit
 x11/xrandr
+x11/xterm
