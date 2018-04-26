@@ -40,10 +40,10 @@ misc/mc
 misc/qt5ct
 multimedia/vlc
 multimedia/x264
-net/mosh
 net-im/pidgin
 net-mgmt/wifimgr
 net-p2p/transmission-qt5
+net/mosh
 polish/aspell
 polish/hunspell
 ports-mgmt/octopkg
