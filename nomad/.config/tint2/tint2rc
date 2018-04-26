@@ -40,7 +40,7 @@ border_color_pressed = #ffffff 69
 
 #-------------------------------------
 # Panel
-panel_items = TSC
+panel_items = LTSC
 panel_size = 96% 35
 panel_margin = 0 0
 panel_padding = 7 0 7
@@ -135,7 +135,8 @@ launcher_icon_asb = 100 0 0
 launcher_icon_theme_override = 0
 startup_notifications = 0
 launcher_tooltip = 0
-
+launcher_icon_theme = Faenza-Cupertino
+launcher_item_app = /home/nomad/.config/tint2/logout.desktop
 #-------------------------------------
 # Clock
 time1_format = %H:%M
