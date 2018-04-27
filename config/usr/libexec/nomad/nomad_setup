@@ -174,7 +174,7 @@ setshell() {
 		dialog ${eflags} \
 			   --clear --title "SHELL" --no-items \
 		       --radiolist "\nPlease select your prefered shell." \
-		       -1 60 4 $opts 2>${selection}
+		       -1 60 10 $opts 2>${selection}
 		ret=$?; shell=$(cat ${selection})
 		rm -f ${selection}
 		if [ ${ret} -eq 0 ]; then
