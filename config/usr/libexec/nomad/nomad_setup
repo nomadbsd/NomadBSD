@@ -523,7 +523,6 @@ n=$(count_args ${menus})
 j=0
 while [ $j -lt $n ]; do
 	m=$(str_at $j ${menus})
-	[ $m = "tzsetup" ] && m="tzsetup -n"
 	eval $m
 	ret=$?
 	if [ ${ret} -eq 3 ]; then
@@ -554,7 +553,7 @@ while [ true ]; do
 	Xkbdmodel)     setxkbdmodel -n ;;
 	Xkbdlayout)    setxkbdlayout -n ;;
 	VT_kbdmap)	   setkbdmap -n ;;
-	Timezone)	   tzsetup -n ;;
+	Timezone)	   tzsetup ;;
 	Software)	   swconf -n ;;
 	Root_password) setpass_root -n ;;
 	User_password) setpass_nomad -n ;;
