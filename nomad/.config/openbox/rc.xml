@@ -326,6 +326,11 @@
       </action>
     </keybind>
     <!-- Keybindings for running applications -->
+    <keybind key="F2">
+      <action name="Execute">
+       <command>dsbexec</command>
+      </action>
+    </keybind>
     <keybind key="W-e">
       <action name="Execute">
         <startupnotify>
