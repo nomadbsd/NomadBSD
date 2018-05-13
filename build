@@ -77,12 +77,6 @@ RELEASE|BETA*)
 	URL="${BASEURL}/snapshots";;
 esac
 
-#if [ ${RELEASE##*-} != "RELEASE" ]; then
-#	URL="${BASEURL}/snapshots"
-#else
-#	URL="${BASEURL}/release"
-#fi
-
 DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
