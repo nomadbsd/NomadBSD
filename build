@@ -70,11 +70,18 @@ if [ "$(realpath -q ${PATCHDIR})" = "/" ]; then
 	exit 1
 fi
 
-if [ ${RELEASE##*-} != "RELEASE" ]; then
-	URL="${BASEURL}/snapshots"
-else
-	URL="${BASEURL}/release"
-fi
+case ${RELEASE##*-} in
+RELEASE|BETA*)
+	URL="${BASEURL}/releases";;
+*)
+	URL="${BASEURL}/snapshots";;
+esac
+
+#if [ ${RELEASE##*-} != "RELEASE" ]; then
+#	URL="${BASEURL}/snapshots"
+#else
+#	URL="${BASEURL}/release"
+#fi
 
 DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
