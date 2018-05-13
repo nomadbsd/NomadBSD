@@ -189,6 +189,8 @@ postpkgcfg()
 		chroot "${SYSDIR}" sh -c 'pw groupmod cups -m root,nomad'
 	fi
 	mkfontpaths
+	# Delete LLVM installed from ports/by pkg.
+	chroot "${SYSDIR}" sh -c 'pkg delete -y -f llvm\*' 2>/dev/null
 }
 
 instports()
