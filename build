@@ -259,17 +259,41 @@ createimage()
 		bail
 	fi
 	blksize=$((${FRAGSIZE} * 8))
-	uzipsz=$(du -B ${blksize} -m ${UZIP_IMAGE}.uzip | cut -f1)
-	tot=$(du -B ${blksize} -mc "${SYSDIR}" | tail -1 | cut -f1)
-	r=$(du -B ${blksize} -mc "${SYSDIR}/boot/kernel.old" \
-		"${SYSDIR}/git" "${SYSDIR}/usr/obj" "${SYSDIR}/usr/src" \
-		"${SYSDIR}/usr/share/doc" "${SYSDIR}/usr/local" \
-		"${SYSDIR}/var/cache/pkg" "${SYSDIR}/var/db/ports" \
-		"${SYSDIR}/var/db/portsnap" "${SYSDIR}/var/log" \
-		"${SYSDIR}/tmp" | tail -1 | cut -f1)
-	basesz=$((${tot} - $r + ${uzipsz}))
-	# Add 8% for "min free"
+	uzipsz=$(du -m ${UZIP_IMAGE}.uzip | cut -f1)
+
+	if [ -d tmpbase ]; then
+		echo "tmpbase already exists." >&2
+		bail
+	fi
+	mkdir tmpbase
+	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
+	(cd "${SYSDIR}" && tar -cf -         \
+	    --exclude '^boot/kernel.old'   \
+	    --exclude '^git*'              \
+	    --exclude '^pkgs/*'            \
+	    --exclude '^usr/obj*'          \
+	    --exclude '^usr/src*'          \
+	    --exclude '^usr/ports*'        \
+	    --exclude '^usr/*/doc/*'       \
+	    --exclude '^usr/local'         \
+	    --exclude '^home*'             \
+	    --exclude '^usr/home*'         \
+	    --exclude '^var/cache/pkg*'    \
+	    --exclude '^var/db/portsnap/*' \
+	    --exclude '^var/db/ports/*'    \
+	    --exclude '^var/log/*' .) | (cd tmpbase && tar pxf -) || bail
+	mkdir tmpbase/var/log
+	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > tmpbase/home.nomad.tgz
+	mkdir tmpbase/usr.local.etc
+	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
+ 	    (cd tmpbase/usr.local.etc && tar vpxf -) || bail
+	mkdir tmpbase/uzip; mkdir tmpbase/usr/local
+	cp ${UZIP_IMAGE}.uzip tmpbase/uzip/usr.local.uzip || bail
+
+	basesz=$(estimgsize tmpbase)
+	basesz=$((${basesz} + 200))
 	basesz=$((${basesz} + ${basesz} * 8 / 100))
+
 	touch ${IMAGE_NAME}
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
