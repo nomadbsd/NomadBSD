@@ -240,6 +240,14 @@ instsrcdist()
 		    DISTRIBUTIONS=src.txz bsdinstall distextract
 }
 
+estimgsize() {
+	nfiles=$(find "$1" | wc -l)
+	wasted=$(($nfiles * (${FRAGSIZE} / 2) / (1024 * 1024)))
+	size=$(du -mc -B ${FRAGSIZE} "$1" | tail -1 | cut -f 1)
+	size=$((${size} + ${wasted}))
+	echo ${size}
+}
+
 createimage()
 {
 	if [ -f ${IMAGE_NAME} ]; then
