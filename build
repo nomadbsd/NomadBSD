@@ -316,32 +316,12 @@ createimage()
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 	    -m 8 /dev/${mddev}p4 || bail
 	mount /dev/${mddev}p4 mnt || bail
-	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
-	(cd "${SYSDIR}" && tar -cf -         \
-	    --exclude '^boot/kernel.old'   \
-	    --exclude '^git*'              \
-	    --exclude '^pkgs/*'            \
-	    --exclude '^usr/obj*'          \
-	    --exclude '^usr/src*'          \
-	    --exclude '^usr/ports*'        \
-	    --exclude '^usr/*/doc/*'       \
-	    --exclude '^usr/local'         \
-	    --exclude '^home*'             \
-	    --exclude '^usr/home*'         \
-	    --exclude '^var/cache/pkg*'    \
-	    --exclude '^var/db/portsnap/*' \
-	    --exclude '^var/db/ports/*'    \
-	    --exclude '^var/log/*' .) | (cd mnt && tar pxf -) || bail
-	mkdir mnt/var/log
-	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > mnt/home.nomad.tgz
-	mkdir mnt/usr.local.etc
-	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
- 	    (cd mnt/usr.local.etc && tar vpxf -) || bail
-	mkdir mnt/uzip; mkdir mnt/usr/local
-	cp ${UZIP_IMAGE}.uzip mnt/uzip/usr.local.uzip || bail
+	(cd tmpbase && tar cf - .) | (cd mnt && tar pxf -) || bail
 	umount mnt || umount -f mnt
 	mdconfig -d -u ${mddev}
 	rmdir mnt
+	chflags -R noschg,nosunlnk tmpbase
+	rm -rf tmpbase
 }
 
 createuzip()
