@@ -216,10 +216,11 @@ instports()
 		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
 		eval popts=\${${pname}_OPTS}
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" clean install" || bail
+			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" clean reinstall" || bail
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
+	pkg -c "${SYSDIR}" autoremove
 }
 
 buildkernel()
