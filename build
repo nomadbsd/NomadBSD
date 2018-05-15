@@ -347,14 +347,6 @@ createuzip()
 	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) || bail
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
 	[ ! -d pkgcache ] && mkdir pkgcache
-	[ ! -d "${UZIP_MNT}/nvidia" ] && mkdir "${UZIP_MNT}/nvidia"
-	pkg fetch -y -o pkgcache nvidia-driver-304
-	pkg fetch -y -o pkgcache nvidia-driver-340
-	(mkdir "${UZIP_MNT}/nvidia/304" && mkdir "${UZIP_MNT}/nvidia/340") || bail
-	cat pkgcache/All/nvidia-driver-304*.txz | \
-	    (cd "${UZIP_MNT}/nvidia/304" && tar xf -)
-	cat pkgcache/All/nvidia-driver-340*.txz | \
-	    (cd "${UZIP_MNT}/nvidia/340" && tar xf -)
 	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
