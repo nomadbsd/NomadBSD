@@ -570,6 +570,11 @@ sed -E "s/@XKBDMODEL@/${cfg_xkbdmodel}/; s/@XKBDLAYOUT@/${cfg_xkbdlayout}/" < \
     $path_xorg_input_tmpl > $path_xorg_input
 
 sysrc keymap="${cfg_kbdmap%.kbd}" >/dev/null 2>&1
+if [ ${cfg_run_bsdstats} -ne 0 ]; then
+	sysrc bsdstats_enable=YES
+else
+	sysrc bsdstats_enable=NO
+fi
 
 sysrc gsched_enable=YES >/dev/null 2>&1
 service gsched start
