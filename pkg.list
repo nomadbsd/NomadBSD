@@ -122,8 +122,10 @@ x11/sakura
 x11/setxkbmap
 x11/slim
 x11/tint
+x11/xauth
 x11/xbindkeys
 x11/xev
 x11/xinit
+x11/xmessage
 x11/xrandr
 x11/xterm
