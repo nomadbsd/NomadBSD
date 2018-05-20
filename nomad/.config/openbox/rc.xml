@@ -326,18 +326,9 @@
       </action>
     </keybind>
     <!-- Keybindings for running applications -->
-    <keybind key="F2">
+    <keybind key="C-F2">
       <action name="Execute">
        <command>dsbexec</command>
-      </action>
-    </keybind>
-    <keybind key="W-e">
-      <action name="Execute">
-        <startupnotify>
-          <enabled>true</enabled>
-          <name>Konqueror</name>
-        </startupnotify>
-        <command>kfmclient openProfile filemanagement</command>
       </action>
     </keybind>
   </keyboard>
