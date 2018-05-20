@@ -104,7 +104,8 @@ my $fallback_icon_theme;
 my $xterm;
 my @ob_menu;
 my @blacklist;
-
+my @apps;
+my %cats_hash;
 ##############################################################################
 sub Xerr {
 	my ($ret, $msg) = @_;
@@ -301,7 +302,7 @@ sub parse_desktop_file {
 }
 
 sub add_submenu {
-	my ($id)  = @_;
+	my ($id, $label)  = @_;
 	my $idx   = 0;
 	my $label = translate($id);
 	my $icon = find_icon($category_icons{$id});
@@ -490,7 +491,7 @@ sub is_blacklisted {
 }
 
 read_blacklist();
-
+my %apps_hash;
 foreach $path (@apps_paths) {
 	foreach (`find $path -name "*.desktop" 2>/dev/null`) {
 		chomp;
@@ -499,11 +500,42 @@ foreach $path (@apps_paths) {
 		my %i;
 		if ((%i = parse_desktop_file($_))) {
 			next if (find_application($i{'Name'}));
-			if ($i{'Category'} && find_menu($i{'Category'}) == -1)
-				{ add_submenu($i{'Category'}) }
-			add_application(%i);
+			if ($i{'Category'} && find_menu($i{'Category'}) == -1) {
+				my $key = translate($i{'Category'});
+				$cats_hash{$key} = $i{'Category'};
+				push @apps, { %i };
+			}
 		}
 	}
+}
+
+foreach (sort {$b cmp $a} keys %cats_hash) {
+	next if (find_menu($cats_hash{$_}) != -1);
+	add_submenu($cats_hash{$_});
+}
+
+my @capps;
+foreach my $c (values %cats_hash) {
+	for (my $i = 0; $i < @apps; $i++) {
+		next if ($c ne $apps[$i]{'Category'});
+		my $j;
+		for ($j = 0; $j < @capps; $j++) {
+			if (lc($apps[$i]{'Name'}) le lc($capps[$j]{'Name'})) {
+				splice @capps, $j, 0, $apps[$i];
+				last;
+			}
+		}
+		if ($j == @capps) {
+			push @capps, $apps[$i];
+		}
+	}
+	for (my $i = @capps - 1; $i >= 0; $i--) {
+		next if (find_application($capps[$i]{'Name'}));
+		my $hp = $capps[$i];
+		my %h = %$hp;
+		add_application(%h);
+	}
+	@capps = ();
 }
 
 # Add an entry for this script to the Openbox root menu.
