@@ -161,9 +161,9 @@ updatebase()
 instpkgs()
 {
 	export ASSUME_ALWAYS_YES=yes
-	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y %
-	pkg fetch -y -o pkgcache nvidia-driver-304
-	pkg fetch -y -o pkgcache nvidia-driver-340
+	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
+	pkg fetch -y -o pkgcache nvidia-driver-304 || bail
+	pkg fetch -y -o pkgcache nvidia-driver-340 || bail
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
 	cat pkgcache/All/nvidia-driver-304*.txz | \
