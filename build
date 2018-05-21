@@ -94,6 +94,9 @@ instusrcfg()
 
 initbase()
 {
+	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
+	umount "${SYSDIR}/dev"
 	if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
 		chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
 		    -G wheel,operator,video -s /bin/csh'
