@@ -175,7 +175,7 @@ buildnvidia()
 	[ ! -d "nvidia" ] && mkdir "nvidia" 
 	for d in nvidia-driver-304 nvidia-driver-340; do
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-			make BATCH=1 clean package" || bail
+			make BATCH=1 OPTIONS_DEFAULT=LINUX clean package" || bail
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
