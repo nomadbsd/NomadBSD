@@ -158,17 +158,43 @@ updatebase()
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" install
 }
 
+buildnvidia()
+{
+	pkgname304=$(cd "${PORTSTREE}/x11/nvidia-driver-304" && make -VPKGNAME)
+	pkgname340=$(cd "${PORTSTREE}/x11/nvidia-driver-340" && make -VPKGNAME)
+
+	[ -f nvidia/${pkgname304}.txz -a -f nvidia/${pkgname340}.txz ] && return 0
+
+	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
+	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	fi
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
+	[ ! -d "nvidia" ] && mkdir "nvidia" 
+	for d in nvidia-driver-304 nvidia-driver-340; do
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
+			make BATCH=1 clean package" || bail
+		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
+		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
+	done
+	umount "${SYSDIR}/usr/ports"
+	umount "${SYSDIR}/dev"
+	pkg -c "${SYSDIR}" autoremove
+}
+
 instpkgs()
 {
 	export ASSUME_ALWAYS_YES=yes
 	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
-	pkg fetch -y -o pkgcache nvidia-driver-304 || bail
-	pkg fetch -y -o pkgcache nvidia-driver-340 || bail
+	buildnvidia
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
-	cat pkgcache/All/nvidia-driver-304*.txz | \
+	cat nvidia/nvidia-driver-304*.txz | \
 	    (cd "${SYSDIR}/usr/local/nvidia/304" && tar xf -)
-	cat pkgcache/All/nvidia-driver-340*.txz | \
+	cat nvidia/nvidia-driver-340*.txz | \
 	    (cd "${SYSDIR}/usr/local/nvidia/340" && tar xf -)
 }
 
@@ -424,6 +450,7 @@ allclean()
 	rm -rf ./"${PATCHDIR}"
 	rm -rf "${DISTDIR}"
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
+	rm -f nvidia
 }
 
 _init()
