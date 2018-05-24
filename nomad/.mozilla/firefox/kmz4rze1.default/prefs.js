@@ -80,6 +80,7 @@ user_pref("extensions.ui.locale.hidden", true);
 user_pref("extensions.webextensions.uuids", "{\"screenshots@mozilla.org\":\"c22b751a-1125-40cc-8e33-1a8b470066e6\",\"uBlock0@raymondhill.net\":\"8b8e59c4-e8a8-4132-8855-1cd06237e61f\"}");
 user_pref("gecko.handlerService.migrated", true);
 user_pref("idle.lastDailyNotification", 1522890396);
+user_pref("intl.locale.requested", "");
 user_pref("media.gmp-manager.buildID", "20180331100823");
 user_pref("media.gmp-manager.lastCheck", 1522890235);
 user_pref("media.gmp.storage.version.observed", 1);
