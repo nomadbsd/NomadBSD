@@ -445,7 +445,7 @@ allclean()
 	rm -rf ./"${PATCHDIR}"
 	rm -rf "${DISTDIR}"
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
-	rm -f nvidia
+	rm -rf nvidia
 }
 
 _init()
