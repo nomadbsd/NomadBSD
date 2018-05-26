@@ -332,14 +332,9 @@ createimage()
 	gpart create -s gpt ${mddev} || bail
 	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 ${mddev} || bail
-	gpart add -t efi -l gpefiboot -a4k -s492k ${mddev} || bail
+	gpart add -t efi -l gpefiboot -s 800K ${mddev} || bail
 	gpart set -a lenovofix ${mddev} || bail
-
-	newfs_msdos /dev/${mddev}p2 || bail
-	mount -t msdosfs /dev/${mddev}p2 ./mnt || bail
-	mkdir -p ./mnt/EFI/BOOT
-	cp "${SYSDIR}/boot/boot1.efi" ./mnt/EFI/BOOT/BOOTX64.EFI
-	umount ./mnt
+	dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p2 || bail
 	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M ${mddev} || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
