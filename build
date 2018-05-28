@@ -160,11 +160,6 @@ updatebase()
 
 buildnvidia()
 {
-	pkgname304=$(cd "${PORTSTREE}/x11/nvidia-driver-304" && make -VPKGNAME)
-	pkgname340=$(cd "${PORTSTREE}/x11/nvidia-driver-340" && make -VPKGNAME)
-
-	[ -f nvidia/${pkgname304}.txz -a -f nvidia/${pkgname340}.txz ] && return 0
-
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
 	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
 		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
@@ -173,16 +168,16 @@ buildnvidia()
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	[ ! -d "nvidia" ] && mkdir "nvidia" 
-	for d in nvidia-driver-304 nvidia-driver-340; do
+	for d in nvidia-driver-304 nvidia-driver-340 nvidia-driver; do
+		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
+		[ -f nvidia/${pkgname}.txz ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
 			make BATCH=1 OPTIONS_DEFAULT=LINUX clean package" || bail
-		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
-	pkg -c "${SYSDIR}" autoremove
 }
 
 instpkgs()
@@ -192,10 +187,11 @@ instpkgs()
 	buildnvidia
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
-	cat nvidia/nvidia-driver-304*.txz | \
-	    (cd "${SYSDIR}/usr/local/nvidia/304" && tar xf -)
-	cat nvidia/nvidia-driver-340*.txz | \
-	    (cd "${SYSDIR}/usr/local/nvidia/340" && tar xf -)
+	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
+	for v in 304 340 390; do
+		cat nvidia/nvidia-driver-${v}*.txz | \
+		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+	done
 }
 
 instgit()
@@ -249,7 +245,6 @@ instports()
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
-	pkg -c "${SYSDIR}" autoremove
 }
 
 buildkernel()
