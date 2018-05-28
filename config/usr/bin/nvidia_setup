@@ -920,7 +920,7 @@ Quadro Sync
 }
 
 find_driver() {
-	config=`pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2`
+	config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
 	for i in 390 340 304; do
 		data_${i} | while read ln; do
 			if (echo $config | grep -q -i -w "$ln"); then
@@ -932,34 +932,40 @@ find_driver() {
 	done
 }
 
-driver=`find_driver`
+driver=$(find_driver)
 
 if [ -z "${driver}" ]; then
 	# No NVIDIA device
 	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1
 	exit 0
-elif [ ${driver} -eq 390 ]; then
+fi
+	
+[ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
+mount_unionfs -o noatime \
+    /usr/local/nvidia/${driver}/usr/local/etc/libmap.d \
+    /usr/local/etc/libmap.d
+mount_unionfs -o noatime /usr/local/nvidia/${driver}/usr/local/lib \
+    /usr/local/lib
+mount_unionfs -o noatime /usr/local/nvidia/${driver}/boot /boot
+mount_unionfs -o noatime /usr/local/nvidia/${driver}/compat /compat
+
+# Access all those dirs to make the files appear.
+ls -R /usr/local/etc/libmap.d /usr/local/lib /boot /compat > /dev/null 2>&1
+
+if [ ${driver} -eq 390 ]; then
 	kldload nvidia
 	kldload nvidia-modeset
 else
-	# nvidia 340 or 304 driver needed
-
 	# Just in case there are nvidia modules loaded
 	kldunload nvidia >/dev/null 2>&1
 	kldunload nvidia-modeset >/dev/null 2>&1
-	
-	[ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
-	mount_unionfs -o noatime \
-	    /usr/local/nvidia/${driver}/usr/local/etc/libmap.d \
-	    /usr/local/etc/libmap.d
-	mount_unionfs -o noatime /usr/local/nvidia/${driver}/usr/local/lib \
-	    /usr/local/lib
-	mount_unionfs -o noatime /usr/local/nvidia/${driver}/boot /boot
-	mount_unionfs -o noatime /usr/local/nvidia/${driver}/compat /compat
+
+	# nvidia 340 or 304 driver needed
 	kldload nvidia
 fi
 if [ ! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf ]; then
 	cp /root/10-nvidia.conf /usr/local/etc/X11/xorg.conf.d/
 fi
+
 exit 0
 
