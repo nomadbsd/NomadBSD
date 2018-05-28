@@ -937,9 +937,10 @@ driver=$(find_driver)
 if [ -z "${driver}" ]; then
 	# No NVIDIA device
 	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1
+	rm -f /usr/local/etc/libmap.d/nvidia.conf > /dev/null 2>&1
 	exit 0
 fi
-	
+
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
 
 if [ ! -f /usr/local/etc/libmap.d/nvidia.conf ]; then
