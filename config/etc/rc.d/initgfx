@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# PROVIDE: initgfx
+# REQUIRE: LOGIN
+# BEFORE: slim
+
+. /etc/rc.subr
+
+name=initgfx
+start_cmd="do_initgfx"
+
+rcvar=initgfx_enable
+
+load_rc_config $name
+
+: ${initgfx_enable:="YES"}
+
+do_initgfx()
+{
+	/usr/bin/nvidia_setup
+	/usr/bin/intel_setup
+}
+
+run_rc_command "$1"
