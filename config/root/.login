@@ -8,14 +8,5 @@
 
 if ( "`tty`" =~ "/dev/ttyv0" ) then
 	/usr/libexec/nomad/nomad_setup
-	set msg="Trying to find and load the correct driver for your"
-	set msg="$msg graphics card ..."
-	dialog --infobox "$msg" 5 40
-	nvidia_setup
-	intel_setup
-	dialog --infobox "\nStarting Xorg...\n" 5 40
-	(service slim onestart; sleep 3; service slim onestart; sleep 3; \
-	service slim onestart) >& /dev/null
-	lock -np
 endif
 
