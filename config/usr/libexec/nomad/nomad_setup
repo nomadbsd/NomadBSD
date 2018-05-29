@@ -516,7 +516,6 @@ swconf()
 	return ${ret}
 }
 
-[ -f $path_nosetup ] && exit 0
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout swconf"
 
@@ -577,12 +576,15 @@ else
 fi
 
 sysrc gsched_enable=YES >/dev/null 2>&1
-service gsched start
+sysrc slim_enable=YES >/dev/null 2>&1
 
-touch ${path_nosetup}
+# Disable auto-login on ttyv0
+sed -i .bak 's/autologin/Pc/' /etc/ttys
+
+cp /usr/share/skel/dot.login /root/.login
 
 dialog --infobox "Creating font cache files ..." 3 40
 /usr/local/bin/fc-cache -f
-
-mount -t unionfs -o rw,noatime /home/pkgs /usr/local
+dialog --infobox "\nRebooting ...\n" 5 40
+shutdown -r now
 
