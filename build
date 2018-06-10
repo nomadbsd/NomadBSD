@@ -71,7 +71,7 @@ if [ "$(realpath -q ${PATCHDIR})" = "/" ]; then
 fi
 
 case ${RELEASE##*-} in
-RELEASE|BETA*)
+RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
 *)
 	URL="${BASEURL}/snapshots";;
