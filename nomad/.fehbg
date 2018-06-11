@@ -1,2 +1,2 @@
 #!/bin/sh
-feh  --bg-scale '/home/nomad/Wallpapers/7BQL85N-freebsd-wallpaper.jpg' 
+feh --bg-fill '/home/nomad/Wallpapers/NomadBSD.png'
