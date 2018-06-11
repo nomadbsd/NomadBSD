@@ -274,6 +274,7 @@ estimgsize() {
 
 createimage()
 {
+	[ ! -z ${mac} ] && IMAGE_NAME=${IMAGE_NAME%.img}.mac.img
 	if [ -f ${IMAGE_NAME} ]; then
 		echo "${IMAGE_NAME} already exists" >&2
 		bail
@@ -314,6 +315,10 @@ createimage()
 	mkdir tmpbase/uzip; mkdir tmpbase/usr/local
 	cp ${UZIP_IMAGE}.uzip tmpbase/uzip/usr.local.uzip || bail
 
+	if [ ! -z ${mac} ]; then
+		echo asmc_load=\"YES\" >> tmpbase/boot/loader.conf
+		echo atp_load=\"YES\" >> tmpbase/boot/loader.conf
+	fi
 	basesz=$(estimgsize tmpbase)
 	basesz=$((${basesz} + 200))
 	basesz=$((${basesz} + ${basesz} * 8 / 100))
@@ -327,8 +332,12 @@ createimage()
 	gpart create -s gpt ${mddev} || bail
 	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 ${mddev} || bail
-	gpart add -t efi -l gpefiboot -s 800K ${mddev} || bail
-	gpart set -a lenovofix ${mddev} || bail
+	if [ ! -z ${mac} ]; then
+		gpart add -t efi -l gpefiboot -s 200M ${mddev} || bail
+	else
+		gpart add -t efi -l gpefiboot -s 800K ${mddev} || bail
+		gpart set -a lenovofix ${mddev} || bail
+	fi
 	dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p2 || bail
 	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M ${mddev} || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
@@ -491,6 +500,8 @@ trap bail SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+	-m)	  	  mac=1;;
+	-h)		  help;;
 	all)	  all;;
 	clean)	  allclean;;
 	cleanup)  cleanup;;
@@ -507,7 +518,6 @@ while [ $# -gt 0 ]; do
 	uzip)	  createuzip;;
 	usrcfg)	  instusrcfg;;
 	usrclean) usrclean;;
-	-h)		  help;;
 	*)		  usage;;
 	esac
 	shift
