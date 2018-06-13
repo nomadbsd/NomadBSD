@@ -85,8 +85,7 @@ my @icon_prefix = (
 );
 
 # Pixmaps paths
-my @icon_paths = (
-	"$ENV{HOME}/.icons",
+my @pixmap_search_paths = (
 	"/usr/local/share/icons",
 	"/usr/local/share/pixmaps",
 	"/usr/share/pixmaps",
@@ -105,6 +104,7 @@ my $xterm;
 my @ob_menu;
 my @blacklist;
 my @apps;
+my @icon_search_paths;
 my %cats_hash;
 ##############################################################################
 sub Xerr {
@@ -179,44 +179,66 @@ sub find_icon_theme_dir
 	return "";
 }
 
+sub get_icon_search_paths {
+	my ($dir, $idir, $fh);
+	my (@list, @icon_paths);
+
+	if (!$icon_theme) {
+		lookup_icon_theme();
+	}
+	if (($dir = find_icon_theme_dir($icon_theme))) {
+		push @icon_paths, $dir;
+		my @inherits = get_inherits($dir);
+		foreach my $ih (@inherits) {
+			my $ihdir = find_icon_theme_dir($ih);
+			push @icon_paths, $ihdir if ($ihdir);
+		}
+	}
+	if (($dir = find_icon_theme_dir($fallback_icon_theme))) {
+		push @icon_paths, $dir;
+		my @inherits = get_inherits($dir);
+		foreach my $ih (@inherits) {
+			my $ihdir = find_icon_theme_dir($ih);
+			push @icon_paths, $ihdir if ($ihdir);
+		}
+	}
+	foreach $dir (@icon_paths) {
+		open($fh, '<', "$dir/index.theme") or next;
+		foreach (<$fh>) {
+			if (/^\[(.+)\]/) {
+				$idir = $1;
+			} elsif (/^Size=(.+)/) {
+				if ($1 >= 16) {
+					push @list, "$dir/$idir";
+				}
+			}
+		}
+		close $fh;
+	}
+	push @icon_search_paths, @list;
+	push @icon_search_paths, @pixmap_search_paths;
+}
+
 sub find_icon {
 	my ($i, $ih, $p, $path, $dir, @inherit, @tmp);
 	my ($icon) = @_;
-	my @exts = ('.png', '.svg', '.xpm');
+	my @exts = ('.svg', '.png', '.xpm');
 
-	if (!$icon_theme && !$fallback_icon_theme && lookup_icon_theme() == 0) {
-		@tmp = @icon_paths;
-
-		@icon_paths = ();
-
-		if (($dir = find_icon_theme_dir($icon_theme))) {
-			my @inherits = get_inherits($dir);
-			foreach $ih (@inherits) {
-				my $ihdir = find_icon_theme_dir($ih);
-				push @icon_paths, $ihdir if ($ihdir);
-			}
-		}
-		if (($dir = find_icon_theme_dir($fallback_icon_theme))) {
-			my @inherits = get_inherits($dir);
-			foreach $ih (@inherits) {
-				my $ihdir = find_icon_theme_dir($ih);
-				push @icon_paths, $ihdir if ($ihdir);
-			}
-		}
-	}
-	push @icon_paths, @tmp;
 	if ($icon !~ /.*\.[a-zA-Z]+$/) {
 		for ($i = 0; $i < @exts; $i++) {
 			$p = $icon . $exts[$i];
-			foreach $dir (@icon_paths) {
-				foreach (`find "$dir" -name "$p" 2>/dev/null`)
-					{ chomp; return ($_); }
+			foreach $dir (@icon_search_paths) {
+				return "$dir/$p" if (-f "$dir/$p");
+			}
+			foreach $dir (@icon_search_paths) {
+				foreach (glob(qq(${dir}/${icon}*))) {
+					return "$_" if (-f "$_");
+				}
 			}
 		}
 	} else {
-		foreach $dir (@icon_paths) {
-			foreach (`find "$dir" -name "$icon" 2>/dev/null`)
-				{ chomp; return ($_); }
+		foreach $dir (@icon_search_paths) {
+			return "$dir/$icon" if (-f "$dir/$icon");
 		}
 	}
 }
@@ -306,7 +328,6 @@ sub add_submenu {
 	my $idx   = 0;
 	my $label = translate($id);
 	my $icon = find_icon($category_icons{$id});
-
 	foreach (@ob_menu) {
 		last if (/^\<openbox_menu/);
 		$idx++;
@@ -491,7 +512,8 @@ sub is_blacklisted {
 }
 
 read_blacklist();
-my %apps_hash;
+get_icon_search_paths();
+
 foreach $path (@apps_paths) {
 	foreach (`find $path -name "*.desktop" 2>/dev/null`) {
 		chomp;
@@ -514,8 +536,9 @@ foreach (sort {$b cmp $a} keys %cats_hash) {
 	add_submenu($cats_hash{$_});
 }
 
-my @capps;
 foreach my $c (values %cats_hash) {
+	my @capps;
+
 	for (my $i = 0; $i < @apps; $i++) {
 		next if ($c ne $apps[$i]{'Category'});
 		my $j;
