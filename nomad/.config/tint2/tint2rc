@@ -185,10 +185,10 @@ mouse_scroll_down = next_task
 
 #-------------------------------------
 # System tray (notification area)
-systray_padding = 0 0 2
+systray_padding = 0 0 8
 systray_background_id = 0
 systray_sort = ascending
-systray_icon_size = 32
+systray_icon_size = 16
 systray_icon_asb = 100 0 0
 systray_monitor = 1
 systray_name_filter = 
