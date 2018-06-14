@@ -330,7 +330,7 @@ setxkbdlayout() {
 }
 
 gelimenu() {
-	local pwdfile cmdret ret eflags
+	local pwdfile cmdret ret eflags msg
 
 	if [ $# -gt 0 -a "$1" = "-n" ]; then
 		eflags=""
@@ -338,10 +338,11 @@ gelimenu() {
 		eflags="--extra-button --extra-label Go_back"
 	fi
 	pwdfile="/tmp/geli.pwd"
+	msg="Enter a password for geli volume\n\n"
+	msg="${msg}Use UP and DOWN keys to switch between fields"
+
 	while [ true ]; do
-		dialog ${eflags} \
-			   --insecure --passwordform \
-			"Enter a password for geli volume" \
+		dialog ${eflags} --insecure --passwordform "${msg}" \
 			12 60 4 "Password" 1 0 "" 2 1 50 0 \
 			"Repeat password" 3 0 "" 4 1 50 0 2>${pwdfile}
 		ret=$?
