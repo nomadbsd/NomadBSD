@@ -222,6 +222,11 @@ postpkgcfg()
 	fi
 	# Remove tesserac-data which uses ~1G.
 	rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
+	# Change default icon of Sakura
+	cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
+	"${SYSDIR}"/usr/local/share/pixmaps/terminal-tango.svg
+	(cd config/usr/local/share/slim && tar cf - .) | \
+	    (cd "${SYSDIR}"/usr/local/share/slim && tar xf -)
 	mkfontpaths
 }
 
