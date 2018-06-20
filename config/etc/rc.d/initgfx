@@ -19,6 +19,7 @@ do_initgfx()
 {
 	/usr/bin/nvidia_setup
 	/usr/bin/intel_setup
+	/usr/bin/radeon_setup
 }
 
 run_rc_command "$1"
