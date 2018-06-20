@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# vim: set tabstop=4:
+
+data_amdgpu() {
+cat << amdgpu_END
+OLAND
+HAINAN
+TAHITI
+PITCAIRN
+VERDE
+BONAIRE
+KABINI
+MULLINS
+KAVERI
+HAWAII
+TOPAZ
+TONGA
+CARRIZO
+CEDAR
+FIJI
+STONEY
+POLARIS11
+POLARIS10
+amdgpu_END
+}
+
+config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
+if ! (echo "${config}" | grep -q -i radeon); then
+	exit 0
+fi
+data_amdgpu | while read ln; do
+	if (echo "${config}" | grep -q -i -w "$ln"); then
+		kldload amdgpu
+		exit 0
+	fi
+done
+exit 0
+
