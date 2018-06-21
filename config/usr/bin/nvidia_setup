@@ -919,6 +919,16 @@ Quadro Sync
 304_END
 }
 
+xorg_cfg() {
+cat << xorg_cfg_END
+Section "Device"
+    Identifier    "NVIDIA CARD"
+    VendorName    "NVIDIA Corporation"
+    Driver        "nvidia"
+EndSection
+xorg_cfg_END
+}
+
 find_driver() {
 	config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
 	for i in 390 340 304; do
@@ -938,7 +948,7 @@ if [ -z "${driver}" ]; then
 	# No NVIDIA device
 	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1
 	rm -f /usr/local/etc/libmap.d/nvidia.conf > /dev/null 2>&1
-	exit 0
+	exit 1
 fi
 
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
@@ -971,7 +981,7 @@ else
 	kldload nvidia
 fi
 if [ ! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf ]; then
-	cp /root/10-nvidia.conf /usr/local/etc/X11/xorg.conf.d/
+	xorg_cfg > /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
 fi
 
 exit 0
