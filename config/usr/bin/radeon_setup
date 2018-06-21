@@ -2,38 +2,67 @@
 
 # vim: set tabstop=4:
 
+path_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf"
+
 data_amdgpu() {
 cat << amdgpu_END
-OLAND
-HAINAN
-TAHITI
-PITCAIRN
-VERDE
 BONAIRE
-KABINI
-MULLINS
-KAVERI
-HAWAII
-TOPAZ
-TONGA
+CAPE VERDE
 CARRIZO
-CEDAR
 FIJI
+HAINAN
+HAWAII
+ICELAND
+KABINI
+KAVERI
+MULLINS
+OLAND
+PITCAIRN
+POLARIS
 STONEY
-POLARIS11
-POLARIS10
+TAHITI
+TONGA
+TOPAZ
 amdgpu_END
+}
+
+xorg_cfg() {
+cat <<xorg_cfg_END
+Section "Device"
+	Identifier "AMD"
+	Driver "amdgpu"
+	Option "DRI" "3"
+	Option "TearFree" "true"
+EndSection
+xorg_cfg_END
+}
+
+write_xorg_cfg() {
+	[ ! -f ${path_xorg_cfg} ] && xorg_cfg > ${path_xorg_cfg}
+}
+
+rm_xorg_cfg() {
+	[ -f ${path_xorg_cfg} ] && rm -f ${path_xorg_cfg}
 }
 
 config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
 if ! (echo "${config}" | grep -q -i radeon); then
-	exit 0
+	rm_xorg_cfg
+	exit 1
 fi
 data_amdgpu | while read ln; do
 	if (echo "${config}" | grep -q -i -w "$ln"); then
-		kldload amdgpu
-		exit 0
+		kldload /boot/modules/amdgpu.ko
+		if [ ! -f /usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf ]; then
+			write_xorg_cfg
+		fi
+		exit 100
 	fi
 done
+if [ $? -ne 100 ]; then
+	# Not one of the listed models. Load radeonkms.
+	kldload /boot/modules/radeonkms.ko
+	rm_xorg_cfg
+fi
 exit 0
 
