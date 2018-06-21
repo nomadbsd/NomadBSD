@@ -1,108 +1,13 @@
 #!/bin/sh
 
-chipids()
-{
-cat <<END
-# Cherryview
-22B0
-22B1
-22B2
-22B3
-# Broadwell
-1602
-1606
-160B
-160E
-1612
-1616
-161B
-161E
-160A
-160D
-161A
-161D
-1622
-1626
-162B
-162E
-162A
-162D
-1632
-1636
-163B
-163E
-163A
-163D
-# Skylake
-1906
-190E
-1902
-190B
-190A
-1916
-1921
-191E
-1912
-191B
-191A
-191D
-1923
-1926
-1927
-192B
-192D
-1932
-193B
-193D
-192A
-193A
-# Gemini Lake
-3184
-3185
-# Kaby Lake
-5915
-5917
-5906
-590E
-5902
-5908
-590B
-590A
-5916
-5921
-591E
-5912
-591B
-591A
-591D
-5923
-5926
-5927
-593B
-END
-}
-
-matchid()
-{
-	config=$(pciconf -lv | grep ^vgapci | \
-		sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
-	for i in $config; do
-		vendor=$(echo "$i" | cut -d: -f2)
-		device=$(echo "$i" | cut -d: -f1)
-		[ "$vendor" != 8086 ] && continue
-		chipids | while read ln; do
-			[ "$ln" = "#" ] && continue
-			if (echo "$device" | grep -q -i "$ln"); then
-				exit 100
-			fi
-		done
-		[ $? -eq 100 ] && return 0
-	done
-
-	return 1
-}
-
-matchid || exit 0
-kldunload i915kms.ko >/dev/null 2>&1
-kldload /boot/modules/i915kms.ko
+config=$(pciconf -lv | grep ^vgapci | \
+	sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
+for i in $config; do
+	vendor=$(echo "$i" | cut -d: -f2)
+	if [ "$vendor" = 8086 ]; then
+		kldload /boot/modules/i915kms.ko
+		exit 0
+	fi
+done
+exit 1
 
