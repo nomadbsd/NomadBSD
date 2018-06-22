@@ -53,9 +53,7 @@ fi
 data_amdgpu | while read ln; do
 	if (echo "${config}" | grep -q -i -w "$ln"); then
 		kldload /boot/modules/amdgpu.ko
-		if [ ! -f /usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf ]; then
-			write_xorg_cfg
-		fi
+		write_xorg_cfg
 		exit 100
 	fi
 done
