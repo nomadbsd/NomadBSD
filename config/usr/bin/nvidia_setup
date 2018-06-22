@@ -944,12 +944,6 @@ find_driver() {
 
 driver=$(find_driver)
 
-# Stop here if i915kms.ko, radeonkms.ko, or amdgpu.ko is already loaded
-if (kldstat | grep -E -q 'i915kms|radeonkms|amdgpu'); then
-	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1
-	rm -f /usr/local/etc/libmap.d/nvidia.conf > /dev/null 2>&1
-	exit 1
-fi
 if [ -z "${driver}" ]; then
 	# No NVIDIA device
 	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1

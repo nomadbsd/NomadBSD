@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Stop here if nvidia.ko, radeonkms.ko, or amdgpu.ko is already loaded
-kldstat | grep -E -q 'nvidia|radeonkms|amdgpu' && exit 1
-
 config=$(pciconf -lv | grep ^vgapci | \
 	sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
 for i in $config; do
