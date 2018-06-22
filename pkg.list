@@ -93,6 +93,7 @@ x11-drivers/xf86-input-mouse
 x11-drivers/xf86-input-synaptics
 x11-drivers/xf86-input-wacom
 x11-drivers/xf86-video-ati
+x11-drivers/xf86-video-intel
 x11-drivers/xf86-video-scfb
 x11-drivers/xf86-video-vesa
 x11-fm/pcmanfm
