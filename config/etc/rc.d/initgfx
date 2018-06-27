@@ -15,11 +15,23 @@ load_rc_config $name
 
 : ${initgfx_enable:="YES"}
 
+path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
+
 do_initgfx()
 {
-	/usr/bin/nvidia_setup
-	/usr/bin/intel_setup
-	/usr/bin/radeon_setup
+	/usr/bin/nvidia_setup && found=1
+	/usr/bin/intel_setup  && found=1
+	/usr/bin/radeon_setup && found=1
+
+	if [ -z "${found}" ]; then
+		# Fallback to SCFB
+		(printf "Section \"Device\"\n"; \
+		 printf "\tIdentifier \"Card0\"\n"; \
+		 printf "\tDriver \"scfb\"\n"; \
+		 printf "EndSection\n") > ${path_scfb_cfg}
+	else
+		rm -f ${path_scfb_cfg}
+	fi
 }
 
 run_rc_command "$1"
