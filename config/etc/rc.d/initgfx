@@ -22,6 +22,7 @@ do_initgfx()
 	/usr/bin/nvidia_setup && found=1
 	/usr/bin/intel_setup  && found=1
 	/usr/bin/radeon_setup && found=1
+	pciconf -lv | grep -B3 display | grep -q -i virtualbox && found=1
 
 	if [ -z "${found}" ]; then
 		# Fallback to SCFB
