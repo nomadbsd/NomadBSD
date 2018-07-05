@@ -19,12 +19,14 @@ path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
 
 do_initgfx()
 {
+	found=0
+
 	/usr/bin/nvidia_setup && found=1
 	/usr/bin/intel_setup  && found=1
 	/usr/bin/radeon_setup && found=1
 	pciconf -lv | grep -B3 display | grep -q -i virtualbox && found=1
 
-	if [ -z "${found}" ]; then
+	if [ ${found} -eq 0 ]; then
 		# Fallback to SCFB
 		(printf "Section \"Device\"\n"; \
 		 printf "\tIdentifier \"Card0\"\n"; \
