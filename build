@@ -321,7 +321,6 @@ createimage()
 	cp ${UZIP_IMAGE}.uzip tmpbase/uzip/usr.local.uzip || bail
 
 	if [ ! -z ${mac} ]; then
-		echo asmc_load=\"YES\" >> tmpbase/boot/loader.conf
 		echo wsp_load=\"YES\" >> tmpbase/boot/loader.conf
 		sed -i -E '/.*lenovofix.*$/d' tmpbase/usr/libexec/nomad/nomad_setup
 	fi
