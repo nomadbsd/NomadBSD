@@ -12,3 +12,4 @@ gtk-font-name="Droid Sans 11"
 include "/home/nomad/.gtkrc.mine"
 
 # -- THEME AUTO-WRITTEN DO NOT EDIT
+gtk-cursor-theme-name=capitaine-cursors
