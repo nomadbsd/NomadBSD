@@ -222,6 +222,10 @@ postpkgcfg()
 	fi
 	# Remove tesserac-data which uses ~1G.
 	rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
+
+	# Remove desktop files for LXDE and Xfce preferred applications
+	rm "${SYSDIR}"/usr/local/share/applications/exo-preferred-applications.desktop
+	rm "${SYSDIR}"/usr/local/share/applications/libfm-pref-apps.desktop
 	# Change default icon of Sakura
 	cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
 	"${SYSDIR}"/usr/local/share/pixmaps/terminal-tango.svg
