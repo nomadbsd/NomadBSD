@@ -3,15 +3,15 @@
 NomadBSD is a live system for flash drives, based on FreeBSD.
 
 ### Screenshots
-![](http://freeshell.de/~mk/download/nomadbsd-ss1.png)
-![](http://freeshell.de/~mk/download/nomadbsd-ss2.png)
+![](http://nomadbsd.org/screenshots/nomadbsd-1.1-ss1.png)
+![](http://nomadbsd.org/screenshots/nomadbsd-1.1-ss2.png)
 
 ### Requirements for building the image
 A recent FreeBSD system
 
 ### Requirements for running NomadBSD
 * A 4GB (or more) flash drive
-* A System capable running FreeBSD 11.1 (amd64)
+* A System capable running FreeBSD 11.2 (amd64)
 
 ### Building the image
 ~~~ csh
