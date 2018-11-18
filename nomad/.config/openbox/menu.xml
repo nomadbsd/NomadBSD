@@ -300,11 +300,6 @@
 <action name="Reconfigure" />
 </item>
 <separator />
-<item label="Lock screen" icon="/usr/local/share/icons/Faenza/actions/48/system-lock-screen.png">
-        <action name="Execute">
-                <command>/usr/local/bin/metalock --pixmap_off</command>
-        </action>
-</item>
 <item label="Logout" icon="/usr/local/share/icons/Papirus/48x48/apps/gnome-logout.svg">
                 <action name="Execute">
                         <command>/usr/local/bin/dsblogoutmgr -l close_session</command>
