@@ -2,7 +2,7 @@
 pcmanfm --desktop&
 lxpanel&
 ~/.fehbg&
-dsbmc -i&
+(sleep 10; dsbmc -i)&
 dsbbatmon&
 dsbmixer -i&
 redshift -l`getlalo`&
