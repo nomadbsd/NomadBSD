@@ -75,7 +75,7 @@ str_at() {
 
 	idx=$1
 	shift
-	while [ $idx -gt 0 ]; do
+	while [ ${idx} -gt 0 ]; do
 		idx=$((idx - 1))
 		shift
 	done
@@ -95,36 +95,48 @@ summary() {
 	[ ${cfg_run_bsdstats} -ne 0 ] && use_bsdstats="Yes"
 	
 	text="\n"
-	text="${text}Language:         $cfg_lang\n"
-	text="${text}Shell:            $cfg_shell\n"
-	text="${text}Xkbdmodel:        $cfg_xkbdmodel\n"
-	text="${text}Xkbdlayout:       $cfg_xkbdlayout\n"
-	text="${text}GELI on /home:    $use_geli\n"
-	text="${text}Bsdstats on boot: $use_bsdstats\n"
-	text="${text}VT Keyboard map:  $cfg_kbdmap\n"
-	text="${text}Timezone:         $(cat /var/db/zoneinfo)\n"
+	text="${text}Language:          ${cfg_lang}\n"
+	text="${text}Shell:             ${cfg_shell}\n"
+	text="${text}Xkbdmodel:         ${cfg_xkbdmodel}\n"
+	text="${text}Xkbdlayout:        ${cfg_xkbdlayout}\n"
+	text="${text}GELI on /home:     ${use_geli}\n"
+	text="${text}BSD-Stats on boot: ${use_bsdstats}\n"
+	text="${text}VT Keyboard map:   ${cfg_kbdmap}\n"
+	text="${text}File manager:      ${cfg_fm}\n"
+	text="${text}Browser:           ${cfg_browser}\n"
+	text="${text}Email client:      ${cfg_email_client}\n"
+	text="${text}Timezone:          $(cat /var/db/zoneinfo)\n"
 
 	dialog --no-items --title "SUMMARY"   \
-	       --menu "$text" -1 -1 2 "I'm happy with it" \
+	       --menu "${text}" -1 -1 2 "I'm happy with it" \
 	       "I want to change something"
 }
 
 change() {
-	local text
+	local text use_geli use_bsdstats
+	use_geli="No"
+	use_bsdstats="No"
+
+	[ ${cfg_use_geli} -ne 0 ] && use_geli="Yes"
+	[ ${cfg_run_bsdstats} -ne 0 ] && use_bsdstats="Yes"
 
 	text=""
-	text="${text}Language      $cfg_lang "
-	text="${text}Shell         $cfg_shell "
-	text="${text}Xkbdmodel     $cfg_xkbdmodel "
-	text="${text}Xkbdlayout    $cfg_xkbdlayout "
-	text="${text}Software      Software-settings "
-	text="${text}VT_kbdmap     $cfg_kbdmap "
+	text="${text}Language      ${cfg_lang} "
+	text="${text}Shell         ${cfg_shell} "
+	text="${text}Xkbdmodel     ${cfg_xkbdmodel} "
+	text="${text}Xkbdlayout    ${cfg_xkbdlayout} "
+	text="${text}GELI_on_home  ${use_geli} "
+	text="${text}BSD-Stats     ${use_bsdstats} "
+	text="${text}File_manager  ${cfg_fm} "
+	text="${text}Browser       ${cfg_browser} "
+	text="${text}Email_client  ${cfg_email_client} "
+	text="${text}VT_kbdmap     ${cfg_kbdmap} "
 	text="${text}Root_password ... "
 	text="${text}User_password ... "
 	text="${text}Timezone      $(cat /var/db/zoneinfo)"
 
 	dialog --title "CHANGE SETTINGS" --ok-label "Change" \
-	       --menu "" -1 60 6 $text
+	       --menu "" -1 60 14 ${text}
 }
 
 setlang() {
@@ -137,13 +149,12 @@ setlang() {
 	fi
 	list=$(locale -a | grep '.UTF-8'| sort -n | uniq | cut -d. -f 1)
 	while [ true ]; do
-		echo "HERE"
 		dialog ${eflags} --clear \
 			   --title "LANGUAGE" --no-items \
 		       --menu "\nPlease select your language." \
-		       -1 -1 10 $list 2>${selection}
+		       -1 -1 10 ${list} 2>${selection}
 		ret=$?; lang=$(cat ${selection})
-		rm -f $selection
+		rm -f ${selection}
 		if [ ${ret} -eq 0 ]; then
 			if [ ! -z "${lang}" ]; then
 				cfg_lang=${lang}
@@ -174,7 +185,7 @@ setshell() {
 		dialog ${eflags} \
 			   --clear --title "SHELL" --no-items \
 		       --radiolist "\nPlease select your prefered shell." \
-		       -1 60 10 $opts 2>${selection}
+		       -1 60 10 ${opts} 2>${selection}
 		ret=$?; shell=$(cat ${selection})
 		rm -f ${selection}
 		if [ ${ret} -eq 0 ]; then
@@ -212,10 +223,10 @@ setpass() {
 		p1=$(head -1 ${pwdfile})
 		p2=$(tail -1 ${pwdfile})
 		rm -f ${pwdfile}
-		if [ "$p1" != "$p2" ]; then
+		if [ "${p1}" != "${p2}" ]; then
 			dialog --title ERROR --msgbox \
 				"\nPasswords do not match." 6 40
-		elif [ -z "$p1" ]; then
+		elif [ -z "${p1}" ]; then
 			dialog --title ERROR --msgbox \
 				"\nPassword must not be empty." 6 40
 		else
@@ -237,7 +248,7 @@ getlist() {
 	baselst="/usr/local/share/X11/xkb/rules/base.lst"
 
 	re=$(echo -n '^! '$1)
-	cat $baselst | awk -v re="$re" -F " " '{
+	cat $baselst | awk -v re="${re}" -F " " '{
 		if ($0 ~ re) {
 			in_model = 1;
 		} else if (/^\! /) {
@@ -320,7 +331,7 @@ setxkbdlayout() {
 	               -1 60 8 $layouts 2>${selection}
 		ret=$?; layout=$(cat ${selection})
 		rm -f ${selection}
-		if [ $ret -eq 0 ]; then
+		if [ ${ret} -eq 0 ]; then
 			cfg_xkbdlayout=${layout}
 			return 0
 		else
@@ -352,10 +363,10 @@ gelimenu() {
 		p1=$(head -1 ${pwdfile})
 		p2=$(tail -1 ${pwdfile})
 		rm -f ${pwdfile}
-		if [ "$p1" != "$p2" ]; then
+		if [ "${p1}" != "${p2}" ]; then
 			dialog --title ERROR --msgbox \
 				"\nPasswords do not match." 6 40
-		elif [ -z "$p1" ]; then
+		elif [ -z "${p1}" ]; then
 			dialog --title ERROR --msgbox \
 				"\nPassword must not be empty." 6 40
 		else
@@ -495,7 +506,21 @@ homepart_menu() {
 	done
 }
 
-swconf()
+desktopsettings()
+{
+	appsdir="/usr/local/share/applications"
+	mimelist="/home/nomad/.config/mimeapps.list"
+
+	mkdir /home/nomad/Desktop 2>/dev/null
+	# Create icons for browser and e-mail client on desktop
+	cp ${appsdir}/${cfg_browser}.desktop /home/nomad/Desktop
+	cp ${appsdir}/${cfg_email_client}.desktop /home/nomad/Desktop
+	sed -i .bak -E "s/BROWSER/${cfg_browser}.desktop/g" ${mimelist}
+	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}.desktop/g" ${mimelist}
+	rm -f ${mimelist}.bak 2>/dev/null
+}
+
+setbsdstats()
 {
 	local cmdret ret eflags
 
@@ -504,9 +529,9 @@ swconf()
 		else
 			eflags="--extra-button --extra-label Go_back"
 	fi
-	cmdret="/tmp/swconf.ret"
+	cmdret="/tmp/setbsdstats.ret"
 	dialog ${eflags} \
-		   --checklist "SOFTWARE" 8 60 1 \
+		   --checklist "BSDSTATS" 8 60 1 \
 		   "BSDSTATS" "Run bsdstats at boot time" off 2>${cmdret}
 	ret=$?
 	cfg_run_bsdstats=0
@@ -517,8 +542,71 @@ swconf()
 	return ${ret}
 }
 
+setfm()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/fmconf.ret"
+	dialog ${eflags} \
+			--radiolist "Choose your preferred file manager" 10 75 3 \
+			Thunar "Xfce file manager" on \
+			pcmanfm "PCMan file manager" off 2>${cmdret}
+	ret=$?
+	cfg_fm="$(cat ${cmdret})"
+	rm -f ${cmdret}
+	return ${ret}
+}
+
+setbrowser()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/setbrowser.ret"
+	dialog ${eflags} \
+			--radiolist "Choose your preferred browser" 10 75 3 \
+			firefox  "Web browser based on the browser portion of Mozilla" on \
+			palemoon "Open Source Goanna-based web browser" off 2>${cmdret}
+	ret=$?
+	cfg_browser="$(cat ${cmdret})"
+	rm -f ${cmdret}
+	return ${ret}
+}
+
+setemailclient()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/setemailclient.ret"
+	dialog ${eflags} \
+			--radiolist "Choose your preferred Email client" 10 75 3 \
+			sylpheed \
+		      "Lightweight, featureful, and fast GTK+ based e-mail client" on \
+			thunderbird \
+			  "Mozilla Thunderbird is standalone mail and news" off 2>${cmdret}
+	ret=$?
+	cfg_email_client="$(cat ${cmdret})"
+	rm -f ${cmdret}
+	return ${ret}
+}
+
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
-menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout swconf"
+menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
+menus="${menus} setfm setbrowser setemailclient"
 
 n=$(count_args ${menus})
 j=0
@@ -536,33 +624,37 @@ while [ $j -lt $n ]; do
 done
 
 while [ true ]; do
-	summary 2>$selection
+	summary 2>${selection}
 	if [ $? -ne 0 ]; then
 		giveup
 		continue
 	fi
-	opt=$(cat $selection)
+	opt=$(cat ${selection})
 
 	case $opt in
-	*change*) change 2>$selection ;;
+	*change*) change 2>${selection} ;;
 	*)        break ;;
 	esac
-
-	case $(cat $selection) in
+	case $(cat ${selection}) in
 	Shell)         setshell -n ;;
 	Language)      setlang -n ;;
 	Xkbdmodel)     setxkbdmodel -n ;;
 	Xkbdlayout)    setxkbdlayout -n ;;
 	VT_kbdmap)	   setkbdmap -n ;;
 	Timezone)	   tzsetup ;;
-	Software)	   swconf -n ;;
+	BSD-Stats)	   setbsdstats -n ;;
+	GELI_on_home)  homepart_menu -n ;;
+	File_manager)  setfm -n ;;
+	Browser)       setbrowser -n ;;
+	Email_client)  setemailclient -n ;;
 	Root_password) setpass_root -n ;;
 	User_password) setpass_nomad -n ;;
 	esac
 done
-rm -f $selection
+rm -f ${selection}
 
 mkhome
+desktopsettings
 
 pw usermod nomad -L ${cfg_lang} -s ${cfg_shell}
 
