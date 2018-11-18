@@ -1,38 +1,38 @@
 COMMAND     DESCRIPTION
-
 all         Set up base system, build and install kernel if BUILD_KERNEL is
             set to YES, intall packages, ports, software from Git repos,
             create uzip image, and finally build the NomadBSD image.
 
+clean       Remove base system dir, distfiles, patch dir, and uzip images.
+
+cleanup     Unmount filesystems, remove mount points, and detach md devices.
+
+git         Install software from Git repos defined in build.cfg
+
 init        Create base system, add the nomad user, and copy the
             configuration files to the base system.
+
+image       Build the NomadBSD image.
 
 initbase    Create nomad user, and copy all configuration files from
             config/ and nomad/ to base system.
 
-cleanup     Unmount filesystems, remove mount points, and detach md devices.
-
-uzip        Create uzip image.
+kernel      Build a custom kernel using kernel/NOMADBSD
 
 patch       Create a patch file for nomadbsd-update. Add a new record to the
             patch index.
 
-image       Build the NomadBSD image.
-
-kernel      Build a custom kernel using kernel/NOMADBSD
-
-ports       Build and install all ports defined in build.cfg
+pkgcfg      Set up configuration files and users required by installed
+            software packages.
 
 pkgs        Install all packages from pkg.list
 
-git         Install software from Git repos defined in build.cfg
+ports       Build and install all ports defined in build.cfg
 
-pkgcfg      Set up configuration files and users required by installed
-            software packages.
+uzip        Create uzip image.
+
+update      Update base system
 
 usrcfg      Install all files from nomad/ in ${SYSDIR]/home/nomad
 
 usrclean    Remove all files from ${SYSDIR}/home/nomad
-
-clean       Remove base system dir, distfiles, patch dir, and uzip images.
-
