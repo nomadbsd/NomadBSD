@@ -224,10 +224,12 @@ postpkgcfg()
 	rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
 
 	# Remove desktop files for LXDE and Xfce preferred applications
-	rm -f "${SYSDIR}"/usr/local/share/applications/exo-preferred-applications.desktop
+	rm -f "${SYSDIR}"/usr/local/share/applications/exo-*.desktop
 	rm -f "${SYSDIR}"/usr/local/share/applications/libfm-pref-apps.desktop
+
 	# Remove useless Xfce desktop file
 	rm -f "${SYSDIR}"/usr/local/share/applications/xfce4-about.desktop
+
 	# Change default icon of Sakura
 	cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
 	"${SYSDIR}"/usr/local/share/pixmaps/terminal-tango.svg
