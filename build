@@ -527,6 +527,7 @@ while [ $# -gt 0 ]; do
 	uzip)	  createuzip;;
 	usrcfg)	  instusrcfg;;
 	usrclean) usrclean;;
+	update)	  updatebase;;
 	*)		  usage;;
 	esac
 	shift
