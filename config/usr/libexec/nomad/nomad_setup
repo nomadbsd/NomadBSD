@@ -104,7 +104,7 @@ summary() {
 	text="${text}VT Keyboard map:   ${cfg_kbdmap}\n"
 	text="${text}File manager:      ${cfg_fm}\n"
 	text="${text}Browser:           ${cfg_browser}\n"
-	text="${text}Email client:      ${cfg_email_client}\n"
+	text="${text}E-mail client:     ${cfg_email_client}\n"
 	text="${text}Timezone:          $(cat /var/db/zoneinfo)\n"
 
 	dialog --no-items --title "SUMMARY"   \
@@ -129,7 +129,7 @@ change() {
 	text="${text}BSD-Stats     ${use_bsdstats} "
 	text="${text}File_manager  ${cfg_fm} "
 	text="${text}Browser       ${cfg_browser} "
-	text="${text}Email_client  ${cfg_email_client} "
+	text="${text}E-mail_client ${cfg_email_client} "
 	text="${text}VT_kbdmap     ${cfg_kbdmap} "
 	text="${text}Root_password ... "
 	text="${text}User_password ... "
@@ -601,7 +601,7 @@ setemailclient()
 	fi
 	cmdret="/tmp/setemailclient.ret"
 	dialog ${eflags} \
-			--radiolist "Choose your preferred Email client" 10 75 3 \
+			--radiolist "Choose your preferred e-mail client" 10 75 3 \
 			sylpheed \
 		      "Lightweight, featureful, and fast GTK+ based e-mail client" on \
 			thunderbird \
@@ -654,7 +654,7 @@ while [ true ]; do
 	GELI_on_home)  homepart_menu -n ;;
 	File_manager)  setfm -n ;;
 	Browser)       setbrowser -n ;;
-	Email_client)  setemailclient -n ;;
+	E-mail_client) setemailclient -n ;;
 	Root_password) setpass_root -n ;;
 	User_password) setpass_nomad -n ;;
 	esac
