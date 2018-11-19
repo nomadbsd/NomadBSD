@@ -510,14 +510,20 @@ desktopsettings()
 {
 	appsdir="/usr/local/share/applications"
 	mimelist="/home/nomad/.config/mimeapps.list"
+	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
 
 	mkdir /home/nomad/Desktop 2>/dev/null
+
 	# Create icons for browser and e-mail client on desktop
 	cp ${appsdir}/${cfg_browser}.desktop /home/nomad/Desktop
 	cp ${appsdir}/${cfg_email_client}.desktop /home/nomad/Desktop
 	sed -i .bak -E "s/BROWSER/${cfg_browser}.desktop/g" ${mimelist}
 	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}.desktop/g" ${mimelist}
 	rm -f ${mimelist}.bak 2>/dev/null
+
+	# Set file manager in dsbmc
+	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}/g" ${dsbmc_cfg}
+	rm -f ${dsbmc_cfg}.bak 2>/dev/null
 }
 
 setbsdstats()
