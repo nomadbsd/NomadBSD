@@ -509,14 +509,16 @@ homepart_menu() {
 desktopsettings()
 {
 	appsdir="/usr/local/share/applications"
+	desktop="/home/nomad/Desktop"
 	mimelist="/home/nomad/.config/mimeapps.list"
 	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
 
-	mkdir /home/nomad/Desktop 2>/dev/null
+	mkdir ${desktop} 2>/dev/null
 
-	# Create icons for browser and e-mail client on desktop
-	cp ${appsdir}/${cfg_browser}.desktop /home/nomad/Desktop
-	cp ${appsdir}/${cfg_email_client}.desktop /home/nomad/Desktop
+	# Create icons for browser, e-mail client and terminal on desktop
+	cp ${appsdir}/${cfg_browser}.desktop ${desktop}
+	cp ${appsdir}/${cfg_email_client}.desktop ${desktop}
+	cp ${appsdir}/sakura.desktop ${desktop}
 	sed -i .bak -E "s/BROWSER/${cfg_browser}.desktop/g" ${mimelist}
 	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}.desktop/g" ${mimelist}
 	rm -f ${mimelist}.bak 2>/dev/null
