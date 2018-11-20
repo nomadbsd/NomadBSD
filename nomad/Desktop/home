@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Home
+Icon=folder-home
+Terminal=false
+Type=Application
+Exec=xdg-open /home/nomad
