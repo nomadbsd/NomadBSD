@@ -84,6 +84,8 @@ FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
 UZIP_IMAGE="uzip_image"
 UZIP_MNT="uzip_mnt"
 GPTROOT=nomadroot
+TMP_BASE_DIR=tmpbase
+TMP_IMAGE_NAME=tmpbase.img
 
 instusrcfg()
 {
@@ -284,8 +286,26 @@ estimgsize() {
 	echo ${size}
 }
 
+createtmpimage()
+{
+	local mddev maxsize
+
+	touch ${TMP_IMAGE_NAME}
+	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
+	mddev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME} -s ${maxsize}k)
+	[ $? -ne 0 ] && bail
+	gpart destroy -F ${mddev}
+	gpart create -s gpt ${mddev} || bail
+	gpart add -t freebsd-ufs ${mddev} || bail
+	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
+	    -m ${UFS_MINFREE} /dev/${mddev}p1 || bail
+	mdconfig -d -u ${mddev}
+}
+
 createimage()
 {
+	local tmpimgdev used
+
 	[ ! -z ${mac} ] && IMAGE_NAME=${IMAGE_NAME%.img}.mac.img
 	if [ -f ${IMAGE_NAME} ]; then
 		echo "${IMAGE_NAME} already exists" >&2
@@ -298,11 +318,17 @@ createimage()
 	blksize=$((${FRAGSIZE} * 8))
 	uzipsz=$(du -m ${UZIP_IMAGE}.uzip | cut -f1)
 
-	if [ -d tmpbase ]; then
-		echo "tmpbase already exists." >&2
+	if [ -d ${TMP_BASE_DIR} ]; then
+		echo "${TMP_BASE_DIR} already exists." >&2
 		bail
 	fi
-	mkdir tmpbase
+	mkdir ${TMP_BASE_DIR}
+
+	createtmpimage
+	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
+	[ $? -ne 0 ] && bail
+	mount /dev/${tmpimgdev}p1 ${TMP_BASE_DIR} || bail
+
 	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
 	(cd "${SYSDIR}" && tar -cf -         \
 	    --exclude '^boot/kernel.old'   \
@@ -318,23 +344,23 @@ createimage()
 	    --exclude '^var/cache/pkg*'    \
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'    \
-	    --exclude '^var/log/*' .) | (cd tmpbase && tar pxf -) || bail
-	mkdir tmpbase/var/log
-	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > tmpbase/home.nomad.tgz
-	mkdir tmpbase/usr.local.etc
+	    --exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
+	mkdir ${TMP_BASE_DIR}/var/log
+	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
+		${TMP_BASE_DIR}/home.nomad.tgz
+	mkdir ${TMP_BASE_DIR}/usr.local.etc
 	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
- 	    (cd tmpbase/usr.local.etc && tar vpxf -) || bail
-	mkdir tmpbase/uzip; mkdir tmpbase/usr/local
-	cp ${UZIP_IMAGE}.uzip tmpbase/uzip/usr.local.uzip || bail
+ 	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
+	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
+	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
 
 	if [ ! -z ${mac} ]; then
-		echo wsp_load=\"YES\" >> tmpbase/boot/loader.conf
-		sed -i -E '/.*lenovofix.*$/d' tmpbase/usr/libexec/nomad/nomad_setup
+		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
+		sed -i -E '/.*lenovofix.*$/d' \
+			${TMP_BASE_DIR}/usr/libexec/nomad/nomad_setup
 	fi
-	basesz=$(estimgsize tmpbase)
-	basesz=$((${basesz} + 200))
-	basesz=$((${basesz} + ${basesz} * 8 / 100))
-
+	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
+	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
 	touch ${IMAGE_NAME}
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
@@ -353,14 +379,17 @@ createimage()
 	dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p2 || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-	    -m 8 /dev/${mddev}p3 || bail
+	    -m ${UFS_MINFREE} /dev/${mddev}p3 || bail
 	mount /dev/${mddev}p3 mnt || bail
-	(cd tmpbase && tar cf - .) | (cd mnt && tar pxf -) || bail
+	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd mnt && tar pxf -) || bail
 	umount mnt || umount -f mnt
 	mdconfig -d -u ${mddev}
 	rmdir mnt
-	chflags -R noschg,nosunlnk tmpbase
-	rm -rf tmpbase
+	chflags -R noschg,nosunlnk ${TMP_BASE_DIR}
+	umount ${TMP_BASE_DIR} || bail
+	mdconfig -d -u ${tmpimgdev}
+	rm -f ${TMP_IMAGE_NAME}
+	rm -rf ${TMP_BASE_DIR}
 }
 
 createuzip()
@@ -430,10 +459,15 @@ cleanup()
 	if (mount | grep "${PWD}/mnt" || mount | grep './mnt'); then
 		umount ./mnt || umount -f ./mnt
 	fi
-	rmdir "${UZIP_MNT}" ./mnt 2>/dev/null
+	if (mount | grep "${PWD}/${TMP_BASE_DIR}" || \
+	    mount | grep './${TMP_BASE_DIR}'); then
+		umount ./${TMP_BASE_DIR} || umount -f ./${TMP_BASE_DIR}
+	fi
+	rmdir "${UZIP_MNT}" ./mnt ./${TMP_BASE_DIR} 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
+	rm -f ./${TMP_BASE_DIR}.img 2>/dev/null
 }
 
 bail()
