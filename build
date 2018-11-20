@@ -84,7 +84,6 @@ FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
 UZIP_IMAGE="uzip_image"
 UZIP_MNT="uzip_mnt"
 GPTROOT=nomadroot
-GPTSWAP=nomadswap
 
 instusrcfg()
 {
@@ -352,11 +351,10 @@ createimage()
 		gpart set -a lenovofix ${mddev} || bail
 	fi
 	dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p2 || bail
-	gpart add -t freebsd-swap -l ${GPTSWAP} -s ${SWAPSIZE}M ${mddev} || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-	    -m 8 /dev/${mddev}p4 || bail
-	mount /dev/${mddev}p4 mnt || bail
+	    -m 8 /dev/${mddev}p3 || bail
+	mount /dev/${mddev}p3 mnt || bail
 	(cd tmpbase && tar cf - .) | (cd mnt && tar pxf -) || bail
 	umount mnt || umount -f mnt
 	mdconfig -d -u ${mddev}
