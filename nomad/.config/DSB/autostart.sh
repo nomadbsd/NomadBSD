@@ -1,6 +1,6 @@
 #!/bin/sh
-pcmanfm --desktop&
-lxpanel&
+DESKTOP
+PANEL&
 ~/.fehbg&
 (sleep 10; dsbmc -i)&
 (sleep 3; dsbbatmon)&
