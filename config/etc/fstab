@@ -1,5 +1,4 @@
 /dev/gpt/nomadroot	/			ufs	  rw,noatime       1 1
-/dev/gpt/nomadswap	none			swap	  sw	           0 0
 tmpfs			/tmp			tmpfs	  rw,mode=1777     0 0	
 tmpfs			/var/log		tmpfs	  rw               0 0
 tmpfs			/var/run		tmpfs     rw		   0 0
