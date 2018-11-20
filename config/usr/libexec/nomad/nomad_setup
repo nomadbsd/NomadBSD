@@ -87,20 +87,15 @@ count_args() {
 }
 
 summary() {
-	local text use_geli use_bsdstats
-	use_geli="No"
-	use_bsdstats="No"
-
-	[ ${cfg_use_geli} -ne 0 ] && use_geli="Yes"
-	[ ${cfg_run_bsdstats} -ne 0 ] && use_bsdstats="Yes"
+	local text
 	
 	text="\n"
 	text="${text}Language:          ${cfg_lang}\n"
 	text="${text}Shell:             ${cfg_shell}\n"
 	text="${text}Xkbdmodel:         ${cfg_xkbdmodel}\n"
 	text="${text}Xkbdlayout:        ${cfg_xkbdlayout}\n"
-	text="${text}GELI on /home:     ${use_geli}\n"
-	text="${text}BSD-Stats on boot: ${use_bsdstats}\n"
+	text="${text}GELI on /home:     ${cfg_use_geli}\n"
+	text="${text}BSD-Stats on boot: ${cfg_run_bsdstats}\n"
 	text="${text}VT Keyboard map:   ${cfg_kbdmap}\n"
 	text="${text}Desktop:           ${cfg_desktop}\n"
 	text="${text}Panel:             ${cfg_panel}\n"
@@ -115,20 +110,15 @@ summary() {
 }
 
 change() {
-	local text use_geli use_bsdstats
-	use_geli="No"
-	use_bsdstats="No"
-
-	[ ${cfg_use_geli} -ne 0 ] && use_geli="Yes"
-	[ ${cfg_run_bsdstats} -ne 0 ] && use_bsdstats="Yes"
+	local text
 
 	text=""
 	text="${text}Language      ${cfg_lang} "
 	text="${text}Shell         ${cfg_shell} "
 	text="${text}Xkbdmodel     ${cfg_xkbdmodel} "
 	text="${text}Xkbdlayout    ${cfg_xkbdlayout} "
-	text="${text}GELI_on_home  ${use_geli} "
-	text="${text}BSD-Stats     ${use_bsdstats} "
+	text="${text}GELI_on_home  ${cfg_use_geli} "
+	text="${text}BSD-Stats     ${cfg_run_bsdstats} "
 	text="${text}Desktop       ${cfg_desktop} "
 	text="${text}Panel         ${cfg_panel} "
 	text="${text}File_manager  ${cfg_fm} "
@@ -454,7 +444,7 @@ mkhome() {
 	local cmdret
 
 	cmdret="/tmp/mkhome_newfs.ret"
-	if [ ${cfg_use_geli} -ne 0 ]; then
+	if [ ${cfg_use_geli} = "Yes" ]; then
 		mkgeli
 	else
 		mkhomepart
@@ -492,7 +482,7 @@ homepart_menu() {
 			   --checklist "CONFIGURE /home" 8 50 1 \
 			   "GELI" "Encrypt /home using geli" off 2>${cmdret}
 		ret=$?
-		cfg_use_geli=0
+		cfg_use_geli="No"
 		if [ ${ret} -eq 0 ]; then
 			if [ "$(cat ${cmdret})" = "GELI" ]; then
 				gelimenu
@@ -500,7 +490,7 @@ homepart_menu() {
 				if [ ${ret} -eq 3 ]; then
 					continue
 				elif [ ${ret} -eq 0 ]; then
-					cfg_use_geli=1
+					cfg_use_geli="Yes"
 					return 0
 				fi
 				return ${ret}
@@ -556,9 +546,9 @@ setbsdstats()
 		   --checklist "BSDSTATS" 8 60 1 \
 		   "BSDSTATS" "Run bsdstats at boot time" off 2>${cmdret}
 	ret=$?
-	cfg_run_bsdstats=0
+	cfg_run_bsdstats="No"
 	if [ $? -eq 0 ]; then
-		[ "$(cat ${cmdret})" = "BSDSTATS" ] && cfg_run_bsdstats=1
+		[ "$(cat ${cmdret})" = "BSDSTATS" ] && cfg_run_bsdstats="Yes"
 	fi
 	rm -f ${cmdret}
 	return ${ret}
@@ -728,7 +718,7 @@ sed -E "s/@XKBDMODEL@/${cfg_xkbdmodel}/; s/@XKBDLAYOUT@/${cfg_xkbdlayout}/" < \
     $path_xorg_input_tmpl > $path_xorg_input
 
 sysrc keymap="${cfg_kbdmap%.kbd}" >/dev/null 2>&1
-if [ ${cfg_run_bsdstats} -ne 0 ]; then
+if [ ${cfg_run_bsdstats} = "Yes" ]; then
 	sysrc bsdstats_enable=YES
 else
 	sysrc bsdstats_enable=NO
