@@ -102,6 +102,8 @@ summary() {
 	text="${text}GELI on /home:     ${use_geli}\n"
 	text="${text}BSD-Stats on boot: ${use_bsdstats}\n"
 	text="${text}VT Keyboard map:   ${cfg_kbdmap}\n"
+	text="${text}Desktop:           ${cfg_desktop}\n"
+	text="${text}Panel:             ${cfg_panel}\n"
 	text="${text}File manager:      ${cfg_fm}\n"
 	text="${text}Browser:           ${cfg_browser}\n"
 	text="${text}E-mail client:     ${cfg_email_client}\n"
@@ -127,6 +129,8 @@ change() {
 	text="${text}Xkbdlayout    ${cfg_xkbdlayout} "
 	text="${text}GELI_on_home  ${use_geli} "
 	text="${text}BSD-Stats     ${use_bsdstats} "
+	text="${text}Desktop       ${cfg_desktop} "
+	text="${text}Panel         ${cfg_panel} "
 	text="${text}File_manager  ${cfg_fm} "
 	text="${text}Browser       ${cfg_browser} "
 	text="${text}E-mail_client ${cfg_email_client} "
@@ -512,6 +516,7 @@ desktopsettings()
 	desktop="/home/nomad/Desktop"
 	mimelist="/home/nomad/.config/mimeapps.list"
 	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
+	autostart="/home/nomad/.config/DSB/autostart.sh"
 
 	mkdir ${desktop} 2>/dev/null
 
@@ -526,6 +531,15 @@ desktopsettings()
 	# Set file manager in dsbmc
 	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}/g" ${dsbmc_cfg}
 	rm -f ${dsbmc_cfg}.bak 2>/dev/null
+
+	# set panel and desktop
+	if [ "${cfg_desktop}" = "Yes" ]; then
+		sed -i .bak -E 's/DESKTOP/pcmanfm --desktop\&/' ${autostart}
+	else
+		sed -i .bak -E '/DESKTOP/d' ${autostart}
+	fi
+	sed -i .bak -E "s/PANEL/${cfg_panel}/g" ${autostart}
+	rm -f ${autostart}.bak 2>/dev/null
 }
 
 setbsdstats()
@@ -546,6 +560,48 @@ setbsdstats()
 	if [ $? -eq 0 ]; then
 		[ "$(cat ${cmdret})" = "BSDSTATS" ] && cfg_run_bsdstats=1
 	fi
+	rm -f ${cmdret}
+	return ${ret}
+}
+
+setdesktop()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/setdesktop.ret"
+	dialog ${eflags} \
+		   --checklist "DESKTOP" 8 65 1 \
+		   "Desktop" "Create desktop using pcmanfm" on 2>${cmdret}
+	ret=$?
+	cfg_desktop="No"
+	if [ $? -eq 0 ]; then
+		[ "$(cat ${cmdret})" = "Desktop" ] && cfg_desktop="Yes"
+	fi
+	rm -f ${cmdret}
+	return ${ret}
+}
+
+setpanel()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/setpanel.ret"
+	dialog ${eflags} \
+			--radiolist "Choose your preferred panel" 10 75 3 \
+			lxpanel "Lightweight X11 desktop panel" on \
+			tint2 "Lightweight freedesktop-compliant panel/taskbar/systray/clock" off 2>${cmdret}
+	ret=$?
+	cfg_panel="$(cat ${cmdret})"
 	rm -f ${cmdret}
 	return ${ret}
 }
@@ -614,7 +670,7 @@ setemailclient()
 
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
-menus="${menus} setfm setbrowser setemailclient"
+menus="${menus} setdesktop setpanel setfm setbrowser setemailclient"
 
 n=$(count_args ${menus})
 j=0
@@ -652,6 +708,8 @@ while [ true ]; do
 	Timezone)	   tzsetup ;;
 	BSD-Stats)	   setbsdstats -n ;;
 	GELI_on_home)  homepart_menu -n ;;
+	Desktop)	   setdesktop -n ;;
+	Panel)		   setpanel -n ;;
 	File_manager)  setfm -n ;;
 	Browser)       setbrowser -n ;;
 	E-mail_client) setemailclient -n ;;
