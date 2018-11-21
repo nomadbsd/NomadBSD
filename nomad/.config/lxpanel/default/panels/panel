@@ -8,7 +8,7 @@ Global {
   widthtype=percent
   width=100
   height=24
-  transparent=1
+  transparent=0
   tintcolor=#384449
   alpha=255
   setdocktype=1
