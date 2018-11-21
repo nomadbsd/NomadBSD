@@ -86,6 +86,9 @@ UZIP_MNT="uzip_mnt"
 GPTROOT=nomadroot
 TMP_BASE_DIR=tmpbase
 TMP_IMAGE_NAME=tmpbase.img
+KERNCONF_DIR="${SYSDIR}/usr/src/sys/${ARCH}/conf"
+KERNCONF_NOMADBSD="${KERNCONF_DIR}/NOMADBSD"
+KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
 
 instusrcfg()
 {
@@ -263,10 +266,13 @@ instports()
 
 buildkernel()
 {
-	(cd kernel && tar cf - .) | \
-		(cd "${SYSDIR}/usr/src/sys/${ARCH}/conf" && tar xf -)
-	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev; \
-	    cd /usr/src && make KERNCONF=NOMADBSD kernel'
+	local makeopts="KERNCONF=NOMADBSD ${BUILDKERNEL_OPTS}"
+
+	sed -e '/DEBUG=-g/d; /WITH_CTF=1/d; /^ident.*GENERIC/d' < \
+		${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
+	KERNELOPTS >> ${KERNCONF_NOMADBSD}
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+	    cd /usr/src && make ${makeopts} kernel"
 	umount "${SYSDIR}/dev"
 }
 
