@@ -35,3 +35,8 @@ if ($?prompt) then
 		bindkey -k down history-search-forward
 	endif
 endif
+
+if ($TERM == "xterm") then
+	bindkey ^[[3~ delete-char
+endif
+
