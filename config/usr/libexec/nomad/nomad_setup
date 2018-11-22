@@ -95,6 +95,7 @@ summary() {
 	text="${text}Xkbdmodel:         ${cfg_xkbdmodel}\n"
 	text="${text}Xkbdlayout:        ${cfg_xkbdlayout}\n"
 	text="${text}GELI on /home:     ${cfg_use_geli}\n"
+	text="${text}Editor:            ${cfg_editor}\n"
 	text="${text}BSD-Stats on boot: ${cfg_run_bsdstats}\n"
 	text="${text}VT Keyboard map:   ${cfg_kbdmap}\n"
 	text="${text}Desktop:           ${cfg_desktop}\n"
@@ -118,6 +119,7 @@ change() {
 	text="${text}Xkbdmodel     ${cfg_xkbdmodel} "
 	text="${text}Xkbdlayout    ${cfg_xkbdlayout} "
 	text="${text}GELI_on_home  ${cfg_use_geli} "
+	text="${text}Editor        ${cfg_editor} "
 	text="${text}BSD-Stats     ${cfg_run_bsdstats} "
 	text="${text}Desktop       ${cfg_desktop} "
 	text="${text}Panel         ${cfg_panel} "
@@ -185,6 +187,40 @@ setshell() {
 		if [ ${ret} -eq 0 ]; then
 			if [ ! -z "${shell}" ]; then
 				cfg_shell=${shell}
+				return 0
+			fi
+		else
+			return ${ret}
+		fi
+	done
+}
+
+genlogincfg() {
+cat <<GENLOGINCFG_END
+me:\\
+        :setenv=EDITOR=${cfg_editor}:
+GENLOGINCFG_END
+}
+
+seteditor() {
+	local i opts eflags ret editor
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	opts="ee on vim off vi off"
+	while [ true ]; do
+		dialog ${eflags} \
+			   --clear --title "EDITOR" --no-items \
+		       --radiolist "\nPlease select your prefered editor." \
+		       -1 35 5 ${opts} 2>${selection}
+		ret=$?; editor=$(cat ${selection})
+		rm -f ${selection}
+		if [ ${ret} -eq 0 ]; then
+			if [ ! -z "${editor}" ]; then
+				cfg_editor=${editor}
 				return 0
 			fi
 		else
@@ -507,6 +543,14 @@ desktopsettings()
 	mimelist="/home/nomad/.config/mimeapps.list"
 	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
 	autostart="/home/nomad/.config/DSB/autostart.sh"
+	xinitrc="/home/nomad/.xinitrc"
+
+	genlogincfg >> /root/.login_conf
+	genlogincfg >> /home/nomad/.login_conf
+	awk -v line="export EDITOR=${cfg_editor}" '{
+		if (/#!/) { print $0; print line } else print $0;
+	}' ${xinitrc} >> ${xinitrc}.tmp
+	mv ${xinitrc}.tmp ${xinitrc}
 
 	mkdir ${desktop} 2>/dev/null
 
@@ -660,7 +704,7 @@ setemailclient()
 
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
-menus="${menus} setdesktop setpanel setfm setbrowser setemailclient"
+menus="${menus} seteditor setdesktop setpanel setfm setbrowser setemailclient"
 
 n=$(count_args ${menus})
 j=0
@@ -698,6 +742,7 @@ while [ true ]; do
 	Timezone)	   tzsetup ;;
 	BSD-Stats)	   setbsdstats -n ;;
 	GELI_on_home)  homepart_menu -n ;;
+	Editor)		   seteditor -n ;;
 	Desktop)	   setdesktop -n ;;
 	Panel)		   setpanel -n ;;
 	File_manager)  setfm -n ;;
