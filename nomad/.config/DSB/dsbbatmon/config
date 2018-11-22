@@ -1,0 +1,8 @@
+autoshutdown = true
+shutdown_cap = 5
+shutdown_cmd = "shutdown -p now"
+suspend_cmd = "sudo acpiconf -s 3"
+suspend = false
+use_icon_theme = true
+poll_interval = 5
+
