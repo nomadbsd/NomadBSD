@@ -2,7 +2,6 @@
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
-export EDITOR=vim
 export PS1="%m:%d%% "
 bindkey -e
 # End of lines configured by zsh-newuser-install
