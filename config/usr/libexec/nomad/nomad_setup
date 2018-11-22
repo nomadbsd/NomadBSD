@@ -171,7 +171,7 @@ setshell() {
 		eflags="--extra-button --extra-label Go_back"
 	fi
 	for i in `cat /etc/shells | sed '/^\#/d; /^$/d'`; do
-		if (echo $i | grep -q '/zsh$'); then
+		if (echo $i | grep -q '/fish$'); then
 			opts="${opts}$i on ";
 		else
 			opts="${opts}$i off ";
