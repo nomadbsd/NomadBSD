@@ -574,6 +574,9 @@ desktopsettings()
 	fi
 	sed -i .bak -E "s/PANEL/${cfg_panel}/g" ${autostart}
 	rm -f ${autostart}.bak 2>/dev/null
+
+	# Update Openbox menu
+	su -l nomad -c '/usr/bin/update_obmenu -u'
 }
 
 setbsdstats()
@@ -755,9 +758,10 @@ done
 rm -f ${selection}
 
 mkhome
-desktopsettings
 
 pw usermod nomad -L ${cfg_lang} -s ${cfg_shell}
+
+desktopsettings
 
 sed -E "s/@XKBDMODEL@/${cfg_xkbdmodel}/; s/@XKBDLAYOUT@/${cfg_xkbdlayout}/" < \
     $path_xorg_input_tmpl > $path_xorg_input
