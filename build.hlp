@@ -7,6 +7,9 @@ clean       Remove base system dir, distfiles, patch dir, and uzip images.
 
 cleanup     Unmount filesystems, remove mount points, and detach md devices.
 
+continue    Continue where the build failed. Use this to resume from a failed
+            "build all", after removing the error source(s).
+
 git         Install software from Git repos defined in build.cfg
 
 init        Create base system, add the nomad user, and copy the

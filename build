@@ -14,6 +14,8 @@
 #
 # cleanup	Unmount filesystems, remove mount points, and detach md devices.
 #
+# continue	Continue where the build failed.
+#
 # uzip		Create uzip image.
 #
 # patch		Create a patch file for nomadbsd-update. Add a new record to the
@@ -512,25 +514,54 @@ _init()
 
 all()
 {
+	local i stages
+
+	stages="instpkgs instgit instports postpkgcfg" 
+	stages="${stages} createuzip createimage cleanup"
+
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
-			updatebase
+		echo updatebase > ".failed-stage"
+		updatebase
 	fi 
 	if [ ! -z "${BUILD_KERNEL}" ]; then
 		case ${BUILD_KERNEL} in
 		[yY][eE][sS])
+			echo buildkernel > ".failed-stage"
 			buildkernel
 			;;
 		esac
 	fi
-	instpkgs
-	instgit
-	instports
-	postpkgcfg
-	createuzip
-	createimage
-	cleanup
+	for i in ${stages}; do
+		echo $i > ".failed-stage"
+		$i
+	done
+	rm -f ".failed-stage"
+}
+
+continue_build()
+{
+	local i stages stage_found failed_stage
+	stages="updatebase buildkernel instpkgs instgit instports postpkgcfg" 
+	stages="${stages} createuzip createimage cleanup"
+
+	stage_found=0
+	failed_stage=$(cat .failed-stage)
+	if [ -z "${failed_stage}" ]; then
+		echo "There is nothing to continue" >&2
+		exit 1
+	fi
+	for i in ${stages}; do
+		if  [ ${stage_found} -eq 1 ]; then
+			echo $i > ".failed-stage"
+			$i
+		elif [ "${failed_stage}" = $i ]; then
+			stage_found=1
+			$i
+		fi
+	done
+	rm -f ".failed-stage"
 }
 
 usage()
@@ -557,6 +588,7 @@ while [ $# -gt 0 ]; do
 	all)	  all;;
 	clean)	  allclean;;
 	cleanup)  cleanup;;
+	continue) continue_build;;
 	git)	  instgit;;
 	image)	  createimage;;
 	init)	  init;;
