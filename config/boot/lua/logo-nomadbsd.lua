@@ -17,7 +17,7 @@ local nomadbsd_logo = {
 drawer.addLogo("nomadbsd", {
 	requires_color = true,
 	graphic = nomadbsd_logo,
-	shift = {x = -2, y = -3},
+	shift = {x = -2, y = -2},
 })
 
 return true
