@@ -258,7 +258,8 @@ instports()
 		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
 		eval popts=\${${pname}_OPTS}
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" clean reinstall" || bail
+			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
+			OPTIONS_UNSET=DOCS clean reinstall" || bail
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
