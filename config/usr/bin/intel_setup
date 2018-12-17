@@ -203,7 +203,7 @@ for i in $config; do
 			kldload /boot/kernel/i915kms.ko && exit 0
 		fi
 		if i915_drm_next_ids | grep -iq ${device}; then
-			kldload /boot/modules/i915kms.ko
+			kldload /boot/modules/i915kms.ko && exit 0
 		fi
 		exit 1
 	fi
