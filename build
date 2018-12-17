@@ -270,9 +270,10 @@ instports()
 buildkernel()
 {
 	local makeopts="KERNCONF=NOMADBSD ${BUILDKERNEL_OPTS}"
-
-	sed -e '/DEBUG=-g/d; /WITH_CTF=1/d; /^ident.*GENERIC/d' < \
-		${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
+	local regx="/DEBUG=-g/d; /WITH_CTF=1/d; /^ident.*GENERIC/d;"
+	      regx="${regx}/^options.*DDB/d; /^options.*KDB/d;"
+	      regx="${regx}/^options.*GDB/d"
+	sed -e "${regx}" < ${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
 	KERNELOPTS >> ${KERNCONF_NOMADBSD}
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 	    cd /usr/src && make ${makeopts} kernel"
