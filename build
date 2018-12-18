@@ -299,7 +299,7 @@ buildkernel()
 	sed -e "${regx}" < ${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
 	KERNELOPTS >> ${KERNCONF_NOMADBSD}
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-	    cd /usr/src && make ${makeopts} kernel"
+	    cd /usr/src && make ${makeopts} kernel" || bail
 	umount "${SYSDIR}/dev"
 }
 
