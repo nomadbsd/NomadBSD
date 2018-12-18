@@ -186,6 +186,29 @@ buildnvidia()
 	umount "${SYSDIR}/dev"
 }
 
+builddrmlegacy()
+{
+	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
+	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	fi
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
+	# Build, and copy the kmods to /boot/drm_legacy
+	if [ ! -d "${SYSDIR}/boot/drm_legacy" ]; then
+		mkdir "${SYSDIR}/boot/drm_legacy" || bail
+	fi
+	chroot "${SYSDIR}" \
+	    sh -c 'cd /usr/ports/graphics/drm-legacy-kmod && \
+			   make clean && make && \
+			   (cd work/stage/boot/modules && tar cf - . | \
+			   (cd /boot/drm_legacy && tar xvf -)); \
+			   make clean; kldxref /boot/drm_legacy'
+	umount "${SYSDIR}/usr/ports"
+	umount "${SYSDIR}/dev"
+}
+
 instpkgs()
 {
 	export ASSUME_ALWAYS_YES=yes
@@ -517,7 +540,7 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit instports postpkgcfg" 
+	stages="instpkgs instgit instports builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
 	_init
@@ -544,7 +567,8 @@ all()
 continue_build()
 {
 	local i stages stage_found failed_stage
-	stages="updatebase buildkernel instpkgs instgit instports postpkgcfg" 
+	stages="updatebase buildkernel instpkgs instgit instports"
+	stages="${stages} builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
 	stage_found=0
