@@ -200,7 +200,8 @@ for i in $config; do
 	device=$(echo "$i" | cut -d: -f1)
 	if [ "$vendor" = 8086 ]; then
 		if i915_drm_legacy_ids | grep -iq ${device}; then
-			kldload /boot/kernel/i915kms.ko && exit 0
+			kldconfig -m /boot/drm_legacy >/dev/null 2>&1
+			kldload /boot/drm_legacy/i915kms.ko && exit 0
 		fi
 		if i915_drm_next_ids | grep -iq ${device}; then
 			kldload /boot/modules/i915kms.ko && exit 0
