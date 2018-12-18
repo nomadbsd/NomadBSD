@@ -1,0 +1,2 @@
+suspend = "zenity --warning --text=\"I'm sorry, Nomad. I'm afraid I can't do that.\\n\\nSuspending the system will turn off the USB ports.\" --width=300"
+
