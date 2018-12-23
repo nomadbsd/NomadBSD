@@ -577,6 +577,16 @@ desktopsettings()
 
 	# Update Openbox menu
 	su -l nomad -c '/usr/bin/update_obmenu -u' >/dev/null 2>&1
+
+	# Set default browser
+	xdg-settings set default-web-browser ${cfg_browser}.desktop >/dev/null 2>&1
+
+	# Set default e-Mail client
+	xdg-mime default ${cfg_email_client}.desktop \
+		x-scheme-handler/mailto >/dev/null 2>&1
+
+	# Set default filemanager
+	xdg-mime default ${cfg_fm}.desktop inode/directory >/dev/null 2>&1
 }
 
 setbsdstats()
