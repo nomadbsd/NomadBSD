@@ -576,7 +576,7 @@ desktopsettings()
 	rm -f ${autostart}.bak 2>/dev/null
 
 	# Update Openbox menu
-	su -l nomad -c '/usr/bin/update_obmenu -u'
+	su -l nomad -c '/usr/bin/update_obmenu -u' >/dev/null 2>&1
 }
 
 setbsdstats()
@@ -768,9 +768,9 @@ sed -E "s/@XKBDMODEL@/${cfg_xkbdmodel}/; s/@XKBDLAYOUT@/${cfg_xkbdlayout}/" < \
 
 sysrc keymap="${cfg_kbdmap%.kbd}" >/dev/null 2>&1
 if [ ${cfg_run_bsdstats} = "Yes" ]; then
-	sysrc bsdstats_enable=YES
+	sysrc bsdstats_enable=YES >/dev/null 2>&1
 else
-	sysrc bsdstats_enable=NO
+	sysrc bsdstats_enable=NO >/dev/null 2>&1
 fi
 
 sysrc gsched_enable=YES >/dev/null 2>&1
