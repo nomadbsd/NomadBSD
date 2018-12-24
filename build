@@ -14,8 +14,6 @@
 #
 # cleanup	Unmount filesystems, remove mount points, and detach md devices.
 #
-# continue	Continue where the build failed.
-#
 # uzip		Create uzip image.
 #
 # patch		Create a patch file for nomadbsd-update. Add a new record to the
@@ -31,6 +29,8 @@
 #
 # pkgcfg	Set up configuration files and users required by installed
 #			software packages.
+#
+# resume	Continue where the build failed.
 #
 # usrcfg	Install all files from nomad/ in ${SYSDIR]/home/nomad
 #
@@ -564,7 +564,7 @@ all()
 	rm -f ".failed-stage"
 }
 
-continue_build()
+resumebuild()
 {
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit instports"
@@ -613,7 +613,6 @@ while [ $# -gt 0 ]; do
 	all)	  all;;
 	clean)	  allclean;;
 	cleanup)  cleanup;;
-	continue) continue_build;;
 	git)	  instgit;;
 	image)	  createimage;;
 	init)	  init;;
@@ -623,6 +622,7 @@ while [ $# -gt 0 ]; do
 	pkgcfg)	  postpkgcfg;;
 	pkgs)	  instpkgs;;
 	ports)	  instports;;
+	resume)	  resumebuild;;
 	src)	  instsrcdist;;
 	uzip)	  createuzip;;
 	usrcfg)	  instusrcfg;;
