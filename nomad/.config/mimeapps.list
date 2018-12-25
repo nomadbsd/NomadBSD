@@ -24,6 +24,7 @@ x-scheme-handler/http=BROWSER
 x-scheme-handler/https=BROWSER
 x-scheme-handler/ftp=BROWSER
 x-scheme-handler/chrome=BROWSER
+x-scheme-handler/mailto=EMAILCLIENT
 text/html=BROWSER
 application/x-extension-htm=BROWSER
 application/x-extension-html=BROWSER
