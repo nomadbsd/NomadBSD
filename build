@@ -178,7 +178,7 @@ buildnvidia()
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		[ -f nvidia/${pkgname}.txz ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-			make BATCH=1 OPTIONS_DEFAULT=LINUX clean package" || bail
+			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
 		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
