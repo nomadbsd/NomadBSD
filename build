@@ -201,7 +201,7 @@ builddrmlegacy()
 	fi
 	chroot "${SYSDIR}" \
 	    sh -c 'cd /usr/ports/graphics/drm-legacy-kmod && \
-			   make clean && make && \
+			   make clean && make BATCH=1 && \
 			   (cd work/stage/boot/modules && tar cf - . | \
 			   (cd /boot/drm_legacy && tar xvf -)); \
 			   make clean; kldxref /boot/drm_legacy'
