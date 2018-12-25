@@ -52,6 +52,7 @@ user_pref("browser.search.countryCode", "DE");
 user_pref("browser.search.region", "DE");
 user_pref("browser.sessionstore.interval", 1800000);
 user_pref("browser.sessionstore.upgradeBackup.latestBuildID", "20180626144220");
+user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.shell.didSkipDefaultBrowserCheckOnFirstRun", true);
 user_pref("browser.slowStartup.averageTime", 10664);
 user_pref("browser.slowStartup.samples", 3);

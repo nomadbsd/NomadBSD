@@ -26,6 +26,7 @@ user_pref("browser.places.smartBookmarksVersion", 4);
 user_pref("browser.rights.3.shown", true);
 user_pref("browser.sessionstore.interval", 1800000);
 user_pref("browser.shell.checkDefaultBrowser", false);
+user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.slowStartup.averageTime", 11920);
 user_pref("browser.slowStartup.samples", 3);
 user_pref("browser.startup.homepage", "https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/index.html");
