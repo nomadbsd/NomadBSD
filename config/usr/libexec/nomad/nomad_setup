@@ -180,7 +180,7 @@ setshell() {
 	while [ true ]; do
 		dialog ${eflags} \
 			   --clear --title "SHELL" --no-items \
-		       --radiolist "\nPlease select your prefered shell." \
+		       --radiolist "\nPlease select your preferred shell." \
 		       -1 60 10 ${opts} 2>${selection}
 		ret=$?; shell=$(cat ${selection})
 		rm -f ${selection}
@@ -214,7 +214,7 @@ seteditor() {
 	while [ true ]; do
 		dialog ${eflags} \
 			   --clear --title "EDITOR" --no-items \
-		       --radiolist "\nPlease select your prefered editor." \
+		       --radiolist "\nPlease select your preferred editor." \
 		       -1 35 5 ${opts} 2>${selection}
 		ret=$?; editor=$(cat ${selection})
 		rm -f ${selection}
