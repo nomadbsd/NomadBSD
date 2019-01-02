@@ -17,6 +17,7 @@ devel/qt5-qmake
 devel/xdg-user-dirs
 editors/leafpad
 editors/libreoffice
+editors/scite
 editors/vim
 emulators/virtualbox-ose-additions
 french/aspell
