@@ -1,8 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Version=1.0
-Type=Application
-NoDisplay=true
-Exec=/usr/local/lib/palemoon/palemoon %u
-Name=Pale Moon
-Comment=Custom definition for Pale Moon
