@@ -578,6 +578,9 @@ desktopsettings()
 
 	# Update Openbox menu
 	su -l nomad -c '/usr/bin/update_obmenu -u' >/dev/null 2>&1
+
+	# Create localized XDG standard dirs.
+	su -l nomad -c '/usr/local/bin/xdg-user-dirs-update' >/dev/null 2>&1
 }
 
 setbsdstats()
