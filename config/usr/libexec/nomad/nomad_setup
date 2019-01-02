@@ -540,7 +540,7 @@ desktopsettings()
 {
 	appsdir="/usr/local/share/applications"
 	desktop="/home/nomad/Desktop"
-	mimelist="/home/nomad/.config/mimeapps.list"
+	mimelist="/home/nomad/.local/share/applications/mimeapps.list"
 	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
 	autostart="/home/nomad/.config/DSB/autostart.sh"
 	xinitrc="/home/nomad/.xinitrc"
