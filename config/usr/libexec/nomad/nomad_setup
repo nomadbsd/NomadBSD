@@ -617,7 +617,7 @@ setdesktop()
 	cmdret="/tmp/setdesktop.ret"
 	dialog ${eflags} \
 		   --checklist "DESKTOP" 8 65 1 \
-		   "Desktop" "Create desktop using pcmanfm" on 2>${cmdret}
+		   "Desktop" "Create desktop using pcmanfm" off 2>${cmdret}
 	ret=$?
 	cfg_desktop="No"
 	if [ $? -eq 0 ]; then
@@ -639,8 +639,8 @@ setpanel()
 	cmdret="/tmp/setpanel.ret"
 	dialog ${eflags} \
 			--radiolist "Choose your preferred panel" 10 75 3 \
-			lxpanel "Lightweight X11 desktop panel" on \
-			tint2 "Lightweight freedesktop-compliant panel/taskbar/systray/clock" off 2>${cmdret}
+			lxpanel "Lightweight X11 desktop panel" off \
+			tint2 "Lightweight freedesktop-compliant panel/taskbar/systray/clock" on 2>${cmdret}
 	ret=$?
 	cfg_panel="$(cat ${cmdret})"
 	rm -f ${cmdret}
