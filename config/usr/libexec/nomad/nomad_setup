@@ -103,6 +103,7 @@ summary() {
 	text="${text}File manager:      ${cfg_fm}\n"
 	text="${text}Browser:           ${cfg_browser}\n"
 	text="${text}E-mail client:     ${cfg_email_client}\n"
+	text="${text}Eye candy:         ${cfg_compton}\n"
 	text="${text}Timezone:          $(cat /var/db/zoneinfo)\n"
 
 	dialog --no-items --title "SUMMARY"   \
@@ -129,6 +130,7 @@ change() {
 	text="${text}VT_kbdmap     ${cfg_kbdmap} "
 	text="${text}Root_password ... "
 	text="${text}User_password ... "
+	text="${text}Eye_candy     ${cfg_compton} "
 	text="${text}Timezone      $(cat /var/db/zoneinfo)"
 
 	dialog --title "CHANGE SETTINGS" --ok-label "Change" \
@@ -576,6 +578,11 @@ desktopsettings()
 	sed -i .bak -E "s/PANEL/${cfg_panel}/g" ${autostart}
 	rm -f ${autostart}.bak 2>/dev/null
 
+	# Activate compton
+	if [ "${cfg_compton}" = "Yes" ]; then
+		echo 'compton&' >> ${autostart}
+	fi
+
 	# Update Openbox menu
 	su -l nomad -c '/usr/bin/update_obmenu -u' >/dev/null 2>&1
 
@@ -709,9 +716,32 @@ setemailclient()
 	return ${ret}
 }
 
+seteyecandy()
+{
+	local cmdret ret eflags
+
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+			eflags=""
+		else
+			eflags="--extra-button --extra-label Go_back"
+	fi
+	cmdret="/tmp/seteyecandy.ret"
+	dialog ${eflags} \
+		   --checklist "EYE CANDY" 8 65 1 \
+		   "Compton" "Use compton for desktop effects" on 2>${cmdret}
+	ret=$?
+	cfg_compton="No"
+	if [ $? -eq 0 ]; then
+		[ "$(cat ${cmdret})" = "Compton" ] && cfg_compton="Yes"
+	fi
+	rm -f ${cmdret}
+	return ${ret}
+}
+
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
 menus="${menus} seteditor setdesktop setpanel setfm setbrowser setemailclient"
+menus="${menus} seteyecandy"
 
 n=$(count_args ${menus})
 j=0
@@ -757,7 +787,8 @@ while [ true ]; do
 	E-mail_client) setemailclient -n ;;
 	Root_password) setpass_root -n ;;
 	User_password) setpass_nomad -n ;;
-	esac
+	Eye_candy)	   seteyecandy -n ;;
+esac
 done
 rm -f ${selection}
 
