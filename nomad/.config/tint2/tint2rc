@@ -113,7 +113,7 @@ border_color_pressed = #777777 100
 #-------------------------------------
 # Panel
 panel_items = LTSC
-panel_size = 100% 35
+panel_size = 100% 28
 panel_margin = 0 0
 panel_padding = 4 2 4
 panel_background_id = 7
@@ -210,10 +210,10 @@ launcher_item_app = ~/.config/tint2/logout.desktop
 # Clock
 time1_format = %H:%M
 time2_format = %A %d %B
-time1_font = Droid Sans 11
+time1_font = Droid Sans 9
 time1_timezone = 
 time2_timezone = 
-time2_font = Droid Sans 8
+time2_font = Droid Sans 7
 clock_font_color = #eeeeee 100
 clock_padding = 10 0
 clock_background_id = 7
