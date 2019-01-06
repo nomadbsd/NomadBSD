@@ -212,12 +212,15 @@ seteditor() {
 	else
 		eflags="--extra-button --extra-label Go_back"
 	fi
-	opts="ee on vim off vi off"
 	while [ true ]; do
 		dialog ${eflags} \
-			   --clear --title "EDITOR" --no-items \
+			   --clear --title "EDITOR" \
 		       --radiolist "\nPlease select your preferred editor." \
-		       -1 35 5 ${opts} 2>${selection}
+		       -1 75 5 \
+				ee "Easy editor" on \
+				vim "Vi IMproved, a programmer's text editor" off \
+				vi "Bug-for-bug compatible replacement for 4BSD's vi" off \
+				2>${selection}
 		ret=$?; editor=$(cat ${selection})
 		rm -f ${selection}
 		if [ ${ret} -eq 0 ]; then
