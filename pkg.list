@@ -8,6 +8,7 @@ audio/dsbmixer
 audio/musicpd
 audio/ncmpc
 benchmarks/bonnie++
+devel/dconf
 devel/git
 devel/gmake
 devel/pkgconf
@@ -118,6 +119,7 @@ x11-themes/qt5-style-plugins
 x11-wm/compton
 x11-wm/obconf
 x11-wm/openbox
+x11-wm/plank
 x11/arandr
 x11/dsbautostart
 x11/lxpanel
