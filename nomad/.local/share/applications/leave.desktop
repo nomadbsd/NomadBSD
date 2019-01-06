@@ -5,5 +5,5 @@ Icon=system-log-out
 Terminal=false
 StartupNotify=false
 Type=Application
+NoDisplay=true
 Categories=System;Utility;Application
-
