@@ -268,7 +268,7 @@ sub parse_desktop_file {
 	my %info;
 	my ($type, $default_comment, $default_name, $terminal, $command);
 	my ($lang1, $lang2, $name, $comment, $category, $path, $icon, $x);
-	my ($dt_entry_section);
+	my ($no_display, $dt_entry_section);
 
 	$lang1 = $lang;
 	$lang2 = ($lang =~ /(.*)_/) ? $1 : $lang;
@@ -296,7 +296,7 @@ sub parse_desktop_file {
 		$terminal	 = $1 if (/^Terminal\s*=\s*(.*)/);
 		$path		 = $1 if (/^Path\s*=\s*(.*)/);
 		$icon		 = $1 if (/^Icon\s*=\s*(.*)$/);
-	
+		$no_display	 = $1 if (/^NoDisplay\s*=\s*(.*)$/);
 		if (/^Categories\s*=(\S*)/) {
 			foreach $x (split(/;/, $1)) {
 				foreach (@categories)
@@ -319,7 +319,7 @@ sub parse_desktop_file {
 	$info{'Exec'}	  = $command;
 	$info{'Category'} = $category ? $category : "Application";
 	$info{'Path'}	  = $path;
-
+	$info{'NoDisplay'}= lc($no_display);
 	return (%info);
 }
 
@@ -522,6 +522,7 @@ foreach $path (@apps_paths) {
 		my %i;
 		if ((%i = parse_desktop_file($_))) {
 			next if (find_application($i{'Name'}));
+			next if ($i{'NoDisplay'} eq 'true');
 			if ($i{'Category'} && find_menu($i{'Category'}) == -1) {
 				my $key = translate($i{'Category'});
 				$cats_hash{$key} = $i{'Category'};
