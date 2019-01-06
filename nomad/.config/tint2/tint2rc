@@ -119,7 +119,7 @@ panel_padding = 4 2 4
 panel_background_id = 7
 wm_menu = 1
 panel_dock = 0
-panel_position = bottom center horizontal
+panel_position = top center horizontal
 panel_layer = normal
 panel_monitor = all
 panel_shrink = 0
@@ -204,7 +204,6 @@ launcher_icon_theme = Papirus
 launcher_icon_theme_override = 0
 startup_notifications = 1
 launcher_tooltip = 0
-launcher_item_app = ~/.config/tint2/logout.desktop
 
 #-------------------------------------
 # Clock
