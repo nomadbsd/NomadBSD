@@ -27,8 +27,8 @@ alias l='ls -l'
 alias g='egrep -i'
  
 # # be paranoid
-# alias cp='cp -ip'
-# alias mv='mv -i'
+alias cp='cp -ip'
+alias mv='mv -i'
 alias rm='rm -i'
 
 
