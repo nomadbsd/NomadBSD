@@ -589,7 +589,6 @@ desktopsettings()
 
 	# Create "plank" dock items for browser, e-mail client, filemanager,
 	# gimp, vlc, terminal, etc.
-
 	mkdir -p ${plank_launcher_dir} >/dev/null 2>&1
 	mkdockitem ${appsdir}/${cfg_browser}.desktop > \
 		${plank_launcher_dir}/browser.dockitem
@@ -611,10 +610,13 @@ desktopsettings()
 		${plank_launcher_dir}/geany.dockitem
 	mkdockitem ${appsdir}/octopkg.desktop > \
 		${plank_launcher_dir}/octopkg.dockitem
+	mkdockitem ${appsdir}/libreoffice-startcenter.desktop > \
+		${plank_launcher_dir}/loffice.dockitem
+
 	# Define order of plank's dock items
 	local items
 	items="['home.dockitem', 'sakura.dockitem', 'browser.dockitem',"
-	items="${items} 'email.dockitem', 'calculator.dockitem',"
+	items="${items} 'email.dockitem', 'loffice.dockitem', 'calculator.dockitem',"
 	items="${items} 'editor.dockitem', 'geany.dockitem',"
 	items="${items} 'vlc.dockitem', 'gimp.dockitem', 'octopkg.dockitem',"
 	items="${items} 'leave.dockitem']"
