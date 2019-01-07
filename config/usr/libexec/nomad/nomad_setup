@@ -563,14 +563,22 @@ homepart_menu() {
 	done
 }
 
+mkdockitem()
+{
+	echo "[PlankDockItemPreferences]"
+	echo "Launcher=file://$1"
+}
+
 desktopsettings()
 {
 	appsdir="/usr/local/share/applications"
-	desktop="/home/nomad/Desktop"
+	usrappsdir="/home/nomad/.local/share/applications"
 	mimelist="/home/nomad/.local/share/applications/mimeapps.list"
 	dsbmc_cfg="/home/nomad/.config/DSB/dsbmc/config"
 	autostart="/home/nomad/.config/DSB/autostart.sh"
 	xinitrc="/home/nomad/.xinitrc"
+	plank_ini="/home/nomad/.config/plank.ini"
+	plank_launcher_dir="/home/nomad/.config/plank/dock1/launchers"
 
 	genlogincfg >> /root/.login_conf
 	genlogincfg >> /home/nomad/.login_conf
@@ -579,40 +587,58 @@ desktopsettings()
 	}' ${xinitrc} >> ${xinitrc}.tmp
 	mv ${xinitrc}.tmp ${xinitrc}
 
-	mkdir ${desktop} 2>/dev/null
+	# Create "plank" dock items for browser, e-mail client, filemanager,
+	# gimp, vlc, terminal, etc.
 
-	# Create icons for browser, e-mail client and terminal on desktop
-	cp ${appsdir}/${cfg_browser}.desktop ${desktop}
-	cp ${appsdir}/${cfg_email_client}.desktop ${desktop}
-	cp ${appsdir}/sakura.desktop ${desktop}
+	mkdir -p ${plank_launcher_dir} >/dev/null 2>&1
+	mkdockitem ${appsdir}/${cfg_browser}.desktop > \
+		${plank_launcher_dir}/browser.dockitem
+	mkdockitem ${appsdir}/${cfg_email_client}.desktop > \
+		${plank_launcher_dir}/email.dockitem
+	mkdockitem ${appsdir}/sakura.desktop > \
+		${plank_launcher_dir}/sakura.dockitem
+	mkdockitem ${usrappsdir}/home.desktop > \
+		${plank_launcher_dir}/home.dockitem
+	mkdockitem ${usrappsdir}/leave.desktop > \
+		${plank_launcher_dir}/leave.dockitem
+	mkdockitem ${appsdir}/gimp.desktop > ${plank_launcher_dir}/gimp.dockitem
+	mkdockitem ${appsdir}/vlc.desktop > ${plank_launcher_dir}/vlc.dockitem
+	mkdockitem ${appsdir}/galculator.desktop > \
+		${plank_launcher_dir}/calculator.dockitem
+	mkdockitem ${appsdir}/${cfg_gui_editor}.desktop > \
+		${plank_launcher_dir}/editor.dockitem
+	mkdockitem ${appsdir}/geany.desktop > \
+		${plank_launcher_dir}/geany.dockitem
+
+	# Define order of plank's dock items
+	local items
+	items="['home.dockitem', 'sakura.dockitem', 'browser.dockitem',"
+	items="${items} 'email.dockitem', 'calculator.dockitem',"
+	items="${items} 'editor.dockitem', 'geany.dockitem',"
+	items="${items} 'vlc.dockitem', 'gimp.dockitem', 'leave.dockitem']"
+	echo "dock-items=${items}" >> ${plank_ini}
+
 	sed -i .bak -E "s/BROWSER/${cfg_browser}.desktop/g" ${mimelist}
 	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}.desktop/g" ${mimelist}
 	sed -i .bak -E "s/EMAILCLIENT/${cfg_email_client}.desktop/g" ${mimelist}
+	sed -i .bak -E "s/GUIEDITOR/${cfg_gui_editor}.desktop/g" ${mimelist}
 	rm -f ${mimelist}.bak 2>/dev/null
 
 	# Set file manager in dsbmc
 	sed -i .bak -E "s/FILEMANAGER/${cfg_fm}/g" ${dsbmc_cfg}
 	rm -f ${dsbmc_cfg}.bak 2>/dev/null
 
-	# set panel and desktop
-	if [ "${cfg_desktop}" = "Yes" ]; then
-		sed -i .bak -E 's/DESKTOP/pcmanfm --desktop\&/' ${autostart}
-	else
-		sed -i .bak -E '/DESKTOP/d' ${autostart}
-	fi
-	sed -i .bak -E "s/PANEL/${cfg_panel}/g" ${autostart}
-	rm -f ${autostart}.bak 2>/dev/null
-
-	# Activate compton
-	if [ "${cfg_compton}" = "Yes" ]; then
-		echo 'compton&' >> ${autostart}
-	fi
-
 	# Update Openbox menu
 	su -l nomad -c '/usr/bin/update_obmenu -u' >/dev/null 2>&1
 
 	# Create localized XDG standard dirs.
 	su -l nomad -c '/usr/local/bin/xdg-user-dirs-update' >/dev/null 2>&1
+
+	# Create dconf file from plank.ini
+	su -l nomad -c "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/"
+
+	# Make nomad the owner of all the files under /home/nomad
+	chown -R nomad /home/nomad
 }
 
 setbsdstats()
