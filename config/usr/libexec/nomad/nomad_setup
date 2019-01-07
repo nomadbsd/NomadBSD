@@ -663,48 +663,6 @@ setbsdstats()
 	return ${ret}
 }
 
-setdesktop()
-{
-	local cmdret ret eflags
-
-	if [ $# -gt 0 -a "$1" = "-n" ]; then
-			eflags=""
-		else
-			eflags="--extra-button --extra-label Go_back"
-	fi
-	cmdret="/tmp/setdesktop.ret"
-	dialog ${eflags} \
-		   --checklist "DESKTOP" 8 65 1 \
-		   "Desktop" "Create desktop using pcmanfm" off 2>${cmdret}
-	ret=$?
-	cfg_desktop="No"
-	if [ $? -eq 0 ]; then
-		[ "$(cat ${cmdret})" = "Desktop" ] && cfg_desktop="Yes"
-	fi
-	rm -f ${cmdret}
-	return ${ret}
-}
-
-setpanel()
-{
-	local cmdret ret eflags
-
-	if [ $# -gt 0 -a "$1" = "-n" ]; then
-			eflags=""
-		else
-			eflags="--extra-button --extra-label Go_back"
-	fi
-	cmdret="/tmp/setpanel.ret"
-	dialog ${eflags} \
-			--radiolist "Choose your preferred panel" 10 75 3 \
-			lxpanel "Lightweight X11 desktop panel" off \
-			tint2 "Lightweight freedesktop-compliant panel/taskbar/systray/clock" on 2>${cmdret}
-	ret=$?
-	cfg_panel="$(cat ${cmdret})"
-	rm -f ${cmdret}
-	return ${ret}
-}
-
 setfm()
 {
 	local cmdret ret eflags
@@ -767,32 +725,9 @@ setemailclient()
 	return ${ret}
 }
 
-seteyecandy()
-{
-	local cmdret ret eflags
-
-	if [ $# -gt 0 -a "$1" = "-n" ]; then
-			eflags=""
-		else
-			eflags="--extra-button --extra-label Go_back"
-	fi
-	cmdret="/tmp/seteyecandy.ret"
-	dialog ${eflags} \
-		   --checklist "EYE CANDY" 8 65 1 \
-		   "Compton" "Use compton for desktop effects" on 2>${cmdret}
-	ret=$?
-	cfg_compton="No"
-	if [ $? -eq 0 ]; then
-		[ "$(cat ${cmdret})" = "Compton" ] && cfg_compton="Yes"
-	fi
-	rm -f ${cmdret}
-	return ${ret}
-}
-
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
-menus="${menus} seteditor setdesktop setpanel setfm setbrowser setemailclient"
-menus="${menus} seteyecandy"
+menus="${menus} seteditor setguieditor setfm setbrowser setemailclient"
 
 n=$(count_args ${menus})
 j=0
@@ -831,14 +766,12 @@ while [ true ]; do
 	BSD-Stats)	   setbsdstats -n ;;
 	GELI_on_home)  homepart_menu -n ;;
 	Editor)		   seteditor -n ;;
-	Desktop)	   setdesktop -n ;;
-	Panel)		   setpanel -n ;;
+	GUI_editor)	   setguieditor -n ;;
 	File_manager)  setfm -n ;;
 	Browser)       setbrowser -n ;;
 	E-mail_client) setemailclient -n ;;
 	Root_password) setpass_root -n ;;
 	User_password) setpass_nomad -n ;;
-	Eye_candy)	   seteyecandy -n ;;
 esac
 done
 rm -f ${selection}
