@@ -609,13 +609,15 @@ desktopsettings()
 		${plank_launcher_dir}/editor.dockitem
 	mkdockitem ${appsdir}/geany.desktop > \
 		${plank_launcher_dir}/geany.dockitem
-
+	mkdockitem ${appsdir}/octopkg.desktop > \
+		${plank_launcher_dir}/octopkg.dockitem
 	# Define order of plank's dock items
 	local items
 	items="['home.dockitem', 'sakura.dockitem', 'browser.dockitem',"
 	items="${items} 'email.dockitem', 'calculator.dockitem',"
 	items="${items} 'editor.dockitem', 'geany.dockitem',"
-	items="${items} 'vlc.dockitem', 'gimp.dockitem', 'leave.dockitem']"
+	items="${items} 'vlc.dockitem', 'gimp.dockitem', 'octopkg.dockitem',"
+	items="${items} 'leave.dockitem']"
 	echo "dock-items=${items}" >> ${plank_ini}
 
 	sed -i .bak -E "s/BROWSER/${cfg_browser}.desktop/g" ${mimelist}
