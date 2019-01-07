@@ -29,15 +29,15 @@ alias g='egrep -i'
 # # be paranoid
 # alias cp='cp -ip'
 # alias mv='mv -i'
-# alias rm='rm -i'
+alias rm='rm -i'
 
 
-# # set prompt: ``username@hostname$ '' 
-# PS1="`whoami`@`hostname | sed 's/\..*//'`"
-# case `id -u` in
-# 	0) PS1="${PS1}# ";;
-# 	*) PS1="${PS1}$ ";;
-# esac
+# set prompt: ``username@hostname$ '' 
+PS1="`whoami`@`hostname | sed 's/\..*//'`"
+case `id -u` in
+	0) PS1="${PS1}# ";;
+	*) PS1="${PS1}$ ";;
+esac
 
 # search path for cd(1)
 # CDPATH=:$HOME
