@@ -21,9 +21,9 @@ do_initgfx()
 {
 	found=0
 
-	/usr/bin/nvidia_setup && found=1
-	/usr/bin/intel_setup  && found=1
-	/usr/bin/radeon_setup && found=1
+	/usr/bin/nvidia_setup  && found=1
+	/usr/bin/intel_setup   && found=1
+	/usr/bin/ati_amd_setup && found=1
 	pciconf -lv | grep -B3 display | grep -q -i virtualbox && found=1
 
 	if [ ${found} -eq 0 ]; then
