@@ -168,25 +168,22 @@ setshell() {
 	else
 		eflags="--extra-button --extra-label Go_back"
 	fi
-	for i in `cat /etc/shells | sed '/^\#/d; /^$/d'`; do
-		if (echo $i | grep -q '/fish$'); then
-			opts="${opts}$i on ";
-		else
-			opts="${opts}$i off ";
-		fi
-	done
 	while [ true ]; do
 		dialog ${eflags} \
-			   --clear --title "SHELL" --no-items \
+			   --clear --title "SHELL" \
 		       --radiolist "\nPlease select your preferred shell." \
-		       -1 60 10 ${opts} 2>${selection}
+		       -1 75 10 \
+		       fish "The friendly interactive shell" on \
+		       zsh  "The Z shell" off \
+		       bash "GNU Bourne-Again SHell" off \
+		       csh  "Shell with file name completion and command line editing" off \
+		       sh   "Bourne shell" off 2>${selection}
 		ret=$?; shell=$(cat ${selection})
 		rm -f ${selection}
 		if [ ${ret} -eq 0 ]; then
-			if [ ! -z "${shell}" ]; then
-				cfg_shell=${shell}
-				return 0
-			fi
+			cfg_shell=$(grep "/${shell}\$" /etc/shells)
+			[ -z "${cfg_shell}" ] && continue
+			return 0
 		else
 			return ${ret}
 		fi
