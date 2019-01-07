@@ -635,8 +635,8 @@ desktopsettings()
 	su -l nomad -c '/usr/local/bin/xdg-user-dirs-update' >/dev/null 2>&1
 
 	# Create dconf file from plank.ini
-	su -l nomad -c "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/"
-
+	su -l nomad -c "dbus-launch --exit-with-session sh -c \" \
+		cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\""
 	# Make nomad the owner of all the files under /home/nomad
 	chown -R nomad /home/nomad
 }
