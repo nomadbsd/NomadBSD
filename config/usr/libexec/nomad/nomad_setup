@@ -227,6 +227,35 @@ seteditor() {
 	done
 }
 
+setguieditor()
+{
+	if [ $# -gt 0 -a "$1" = "-n" ]; then
+		eflags=""
+	else
+		eflags="--extra-button --extra-label Go_back"
+	fi
+	while [ true ]; do
+		dialog ${eflags} \
+			   --clear --title "GUI EDITOR" \
+		       --radiolist "\nPlease select your preferred GUI editor." \
+		       -1 75 5 \
+				leafpad "GTK+ based simple text editor" on \
+				gvim    "Vim with a GTK+ frontend" off \
+				vim     "Vim running in a X terminal" off \
+				2>${selection}
+		ret=$?; editor=$(cat ${selection})
+		rm -f ${selection}
+		if [ ${ret} -eq 0 ]; then
+			if [ ! -z "${editor}" ]; then
+				cfg_gui_editor=${editor}
+				return 0
+			fi
+		else
+			return ${ret}
+		fi
+	done
+}
+
 setpass() {
 	local pwdfile cmdret ret eflags msg
 
