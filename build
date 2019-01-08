@@ -209,6 +209,18 @@ builddrmlegacy()
 	umount "${SYSDIR}/dev"
 }
 
+buildxdgutils()
+{
+	if [ ! -d "${SYSDIR}/tmp" ]; then
+		mkdir "${SYSDIR}/tmp"
+		chmod a=rwxt "${SYSDIR}tmp"
+	fi
+	(cd extra-ports && tar cf - xdg-utils) | (cd "${SYSDIR}/tmp" && tar xf -)
+	chroot "${SYSDIR}" \
+		sh -c "cd /tmp/xdg-utils && \
+		make BATCH=1 deinstall install clean" || bail
+}
+
 instpkgs()
 {
 	export ASSUME_ALWAYS_YES=yes
@@ -286,6 +298,7 @@ instports()
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
 			OPTIONS_UNSET=DOCS clean reinstall" || bail
 	done
+	buildxdgutils
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
 }
