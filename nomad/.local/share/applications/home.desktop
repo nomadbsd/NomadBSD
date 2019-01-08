@@ -4,4 +4,5 @@ Icon=folder-home
 Terminal=false
 Type=Application
 NoDisplay=true
+StartupNotify=true
 Exec=xdg-open /home/nomad
