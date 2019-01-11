@@ -121,12 +121,21 @@ rollback() {
 		rm -f ${ret}
 		case ${opt} in
 		Yes)
+			# Check for singel user mode. Is there a better way doing this?
+			if ! (ps ax | head | grep '/sbin/init -s'); then
+				errandout "Error: Please boot into single user mode."
+			fi
 			if [ ! -f ${backupfile} ]; then
 				errandout "Error: Couldn't find ${backupfile}"
 			fi
+			# Make sure / is mounted rw. Do not rely on /etc/fstab.
+			mount -u -o rw /dev/gpt/${gptroot} / || \
+				errandout "Error: Failed to mount /dev/gpt/${gptroot} rw"
 			dialog --infobox "Deleting home partition ..." 5 40
 			delhome
 			dialog --infobox "Deleting /var ..." 5 40
+			umount -f /var/log
+			umount -f /var/run
 			rm -rf /var
 			dialog --infobox "Restoring files from backup ..." 5 40
 			(cd / && tar xf ${backupfile} 2>/dev/null)
