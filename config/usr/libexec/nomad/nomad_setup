@@ -43,11 +43,11 @@ exitmenu() {
 
 		case ${opt} in
 		Shutdown)
-			shutdown -p now;;
+			exec shutdown -p now;;
 		Exit)
 			exit 1;;
 		Reboot)
-			shutdown -r now;;
+			exec shutdown -r now;;
 		esac
 	done
 }
