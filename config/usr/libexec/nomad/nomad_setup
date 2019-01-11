@@ -133,6 +133,8 @@ rollback() {
 			umount -f /var/log
 			umount -f /var/run
 			rm -rf /var
+			dialog --infobox "Deleting /etc ..." 5 40
+			rm -rf /etc
 			dialog --infobox "Restoring files from backup ..." 5 40
 			(cd / && tar xf ${backupfile} 2>/dev/null)
 			pwd_mkdb -p /etc/master.passwd
