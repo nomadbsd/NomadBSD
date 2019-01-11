@@ -10,6 +10,7 @@ fragsize=4096
 blksize=$((${fragsize} * 8))
 gptroot="nomadroot"
 gpthome="nomadhome"
+backupfile="/nomadbsd-backup.tar.xz"
 
 mainmenu() {
 	local msg ret
@@ -84,6 +85,61 @@ str_at() {
 
 count_args() {
 	echo $#
+}
+
+delhome()
+{
+	local dev idx rootdev
+
+	rootdev=$(glabel status | grep "gpt/${gpthome}" | \
+			  awk -F" " '{ print $3 }')
+	if [ -z "${rootdev}" ]; then
+		errandout "Error: Unable to find gpt/${gpthome}"
+	fi
+	dev=$(echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/')
+	idx=$(echo ${rootdev} | sed -E "s/${dev}p([0-9]+)/\1/")
+	umount -f /private 2>/dev/null
+	umount -f /home 2>/dev/null
+	gpart delete -i ${idx} ${dev} || \
+		errandout "Error: Failed to delete gpt/${gpthome}"
+	rm -rf /private
+	rm -rf /home
+}
+
+rollback() {
+	local msg ret opt
+
+	ret="/tmp/askrollback.ret"
+	msg="YOU ARE ABOUT TO RESET NOMADBSD."
+	msg="${msg} ALL YOUR FILES WILL BE LOST!\n\nARE YOU SURE?"
+	while [ true ]; do
+		dialog --title "!!! WARNING !!!!" --radiolist "${msg}" 15 60 3 \
+			"Yes" "Reset NomadBSD" off \
+			"No"  "Leave NomadBSD as it is" on >/dev/tty 2>${ret}
+		[ $? -ne 0 ] && exitmenu "What do you want to do next?\n"
+		opt=$(cat ${ret})
+		rm -f ${ret}
+		case ${opt} in
+		Yes)
+			if [ ! -f ${backupfile} ]; then
+				errandout "Error: Couldn't find ${backupfile}"
+			fi
+			dialog --infobox "Deleting home partition ..." 5 40
+			delhome
+			dialog --infobox "Deleting /var ..." 5 40
+			rm -rf /var
+			dialog --infobox "Restoring files from backup ..." 5 40
+			(cd / && tar xf ${backupfile} 2>/dev/null)
+			pwd_mkdb -p /etc/master.passwd
+			exitmenu "Resetting NomadBSD done.\n"
+			exit 0
+			;;
+		No)
+			exitmenu "What do you want to do next?\n"
+			exit 0
+			;;
+		esac
+	done
 }
 
 summary() {
@@ -728,6 +784,15 @@ setemailclient()
 	rm -f ${cmdret}
 	return ${ret}
 }
+
+if [ $# -gt 0 ]; then
+	if [ $1 = "reset" ]; then
+		rollback
+		exit 0
+	else
+		errandout "Error: Unknown command: $1"
+	fi
+fi
 
 menus="mainmenu tzsetup setkbdmap setlang setpass_root setpass_nomad"
 menus="${menus} setshell homepart_menu setxkbdmodel setxkbdlayout setbsdstats"
