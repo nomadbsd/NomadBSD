@@ -121,10 +121,6 @@ rollback() {
 		rm -f ${ret}
 		case ${opt} in
 		Yes)
-			# Check for singel user mode. Is there a better way doing this?
-			if ! (ps ax | head | grep '/sbin/init -s'); then
-				errandout "Error: Please boot into single user mode."
-			fi
 			if [ ! -f ${backupfile} ]; then
 				errandout "Error: Couldn't find ${backupfile}"
 			fi
@@ -796,6 +792,11 @@ setemailclient()
 
 if [ $# -gt 0 ]; then
 	if [ $1 = "reset" ]; then
+		# Check for singel user mode. Is there a better way doing this?
+		if ! (ps ax | head | grep '/sbin/init -s'); then
+			errandout \
+			    "Error: Please boot into single user mode to reset NomadBSD."
+		fi
 		# Mount /tmp if not mounted
 		if ! mount | grep /tmp; then
 			mount -t tmpfs -o rw tmpfs /tmp || \
