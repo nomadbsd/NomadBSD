@@ -796,6 +796,11 @@ setemailclient()
 
 if [ $# -gt 0 ]; then
 	if [ $1 = "reset" ]; then
+		# Mount /tmp if not mounted
+		if ! mount | grep /tmp; then
+			mount -t tmpfs -o rw tmpfs /tmp || \
+				errandout "Error: Failed to mount tmpfs on /tmp"
+		fi
 		rollback
 		exit 0
 	else
