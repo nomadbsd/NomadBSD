@@ -397,6 +397,8 @@ createimage()
 	mkdir ${TMP_BASE_DIR}/usr.local.etc
 	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
  	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
+	(cd ${TMP_BASE_DIR} && tar cfJ nomadbsd-backup.tar.xz \
+		etc root var usr.local.etc)
 	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
 	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
 
