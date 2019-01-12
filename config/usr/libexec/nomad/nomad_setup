@@ -153,6 +153,8 @@ rollback() {
 
 			umount -f /var/log 2>/dev/null
 			umount -f /var/run 2>/dev/null
+			dialog --infobox "Deleting home partition ..." 5 40
+			delhome
 			for d in ${dirs}; do
 				delsysdir $d
 			done
