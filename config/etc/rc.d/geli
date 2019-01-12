@@ -42,9 +42,14 @@ required_modules="geom_eli:g_eli"
 geli_start()
 {
 	devices=`geli_make_list`
+	ttydev=$(tty) || ttydev="/dev/console"
 	keymap=$(basename ${keymap} .kbd)
-	kbdcontrol < /dev/ttyv0 -l ${keymap} > /dev/null 2>&1
+	errmsg=$(kbdcontrol < ${ttydev} -l ${keymap} 2>&1)
 
+	if [ -n "${errmsg}" ]; then
+		echo "Warning: Failed to set keymap '${keymap}': ${errmsg}"
+		echo "Take this into account when entering your geli password."
+	fi
 	if [ -z "${geli_tries}" ]; then
 		if [ -n "${geli_attach_attempts}" ]; then
 			# Compatibility with rc.d/gbde.
