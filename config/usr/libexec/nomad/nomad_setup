@@ -122,8 +122,15 @@ delhome()
 	rm -rf /home
 }
 
+delsysdir()
+{
+	dialog --infobox "Deleting $1 ..." 5 40
+	rm -rf "$1"
+}
+
 rollback() {
-	local msg ret opt
+	local d msg ret opt
+	local dirs="/root /etc /var /usr.local.etc"
 
 	ret="/tmp/askrollback.ret"
 	msg="YOU ARE ABOUT TO RESET NOMADBSD."
@@ -143,14 +150,12 @@ rollback() {
 			# Make sure / is mounted rw. Do not rely on /etc/fstab.
 			mount -u -o rw /dev/gpt/${gptroot} / || \
 				errandout "Error: Failed to mount /dev/gpt/${gptroot} rw"
-			dialog --infobox "Deleting home partition ..." 5 40
-			delhome
-			dialog --infobox "Deleting /var ..." 5 40
-			umount -f /var/log
-			umount -f /var/run
-			rm -rf /var
-			dialog --infobox "Deleting /etc ..." 5 40
-			rm -rf /etc
+
+			umount -f /var/log 2>/dev/null
+			umount -f /var/run 2>/dev/null
+			for d in ${dirs}; do
+				delsysdir $d
+			done
 			dialog --infobox "Restoring files from backup ..." 5 40
 			(cd / && tar xf ${backupfile} 2>/dev/null)
 			pwd_mkdb -p /etc/master.passwd
