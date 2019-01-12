@@ -87,20 +87,36 @@ count_args() {
 	echo $#
 }
 
+getrootdev()
+{
+	local rootdev
+	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
+	[ "${rootdev}" != "gpt/${gptroot}" ] && return
+	rootdev=$(glabel status | grep ${gptroot} | awk -F" " '{ print $3 }')
+	echo "${rootdev}" | sed -E 's/(.*)p[0-9]/\1/'
+}
+
 delhome()
 {
-	local dev idx rootdev
+	local idx rootdev homedev
 
-	rootdev=$(glabel status | grep "gpt/${gpthome}" | \
-			  awk -F" " '{ print $3 }')
+	rootdev=$(getrootdev)
 	if [ -z "${rootdev}" ]; then
-		errandout "Error: Unable to find gpt/${gpthome}"
+		errandout "Error: Failed to find root device."
 	fi
-	dev=$(echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/')
-	idx=$(echo ${rootdev} | sed -E "s/${dev}p([0-9]+)/\1/")
+	homedev=$(glabel status | awk -v dev=${rootdev} \
+								  -v label="gpt/${gpthome}" -F" " '{
+		if ($1 == label && $3 ~ dev) {
+			print $3
+		}
+	}')
+	if [ -z "${homedev}" ]; then
+		errandout "Error: Unable to find gpt/${gpthome} on ${rootdev}"
+	fi
+	idx=$(echo ${homedev} | sed -E "s/${rootdev}p([0-9]+)/\1/")
 	umount -f /private 2>/dev/null
 	umount -f /home 2>/dev/null
-	gpart delete -i ${idx} ${dev} || \
+	gpart delete -i ${idx} ${rootdev} || \
 		errandout "Error: Failed to delete gpt/${gpthome}"
 	rm -rf /private
 	rm -rf /home
@@ -499,14 +515,12 @@ gelimenu() {
 }
 
 mkhomepart() {
-	local dev rootdev
-
-	rootdev=$(glabel status | grep ${gptroot} | awk -F" " '{ print $3 }')
-	if [ -z "${rootdev}" ]; then
-		errandout "Error: Failed find root device."
+	local dev
+	
+	dev=$(getrootdev)
+	if [ -z "${dev}" ]; then
+		errandout "Error: Failed to find root device."
 	fi
-	dev=$(echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/')
-
 	if (glabel status | grep "gpt/${gpthome}"); then
 		errandout "Error: gpt/${gpthome} already exists."
 	fi
