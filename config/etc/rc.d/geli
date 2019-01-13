@@ -42,13 +42,15 @@ required_modules="geom_eli:g_eli"
 geli_start()
 {
 	devices=`geli_make_list`
-	local ttydev=$(tty) || ttydev="/dev/console"
-	local keymap=$(basename ${keymap} .kbd)
-	local errmsg=$(kbdcontrol < ${ttydev} -l ${keymap} 2>&1)
+	if [ -n "${keymap}" ]; then
+		local ttydev=$(tty) || ttydev="/dev/console"
+		local keymap=$(basename ${keymap} .kbd)
+		local errmsg=$(kbdcontrol < ${ttydev} -l ${keymap} 2>&1)
 
-	if [ -n "${errmsg}" ]; then
-		echo "Warning: Failed to set keymap '${keymap}': ${errmsg}"
-		echo "Take this into account when entering your geli password."
+		if [ -n "${errmsg}" ]; then
+			echo "Warning: Failed to set keymap '${keymap}': ${errmsg}"
+			echo "Take this into account when entering your geli password."
+		fi
 	fi
 	if [ -z "${geli_tries}" ]; then
 		if [ -n "${geli_attach_attempts}" ]; then
