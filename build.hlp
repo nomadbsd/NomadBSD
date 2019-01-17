@@ -7,6 +7,8 @@ clean       Remove base system dir, distfiles, patch dir, and uzip images.
 
 cleanup     Unmount filesystems, remove mount points, and detach md devices.
 
+drmlegacy   Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
+
 git         Install software from Git repos defined in build.cfg
 
 init        Create base system, add the nomad user, and copy the

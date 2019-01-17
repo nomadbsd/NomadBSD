@@ -38,6 +38,8 @@
 #
 # clean		Remove base system dir, distfiles, patch dir, and uzip images.
 #
+# drmlegacy	Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
+#
 # vim: set tabstop=4:
 #
 . ./build.cfg
@@ -615,6 +617,7 @@ while [ $# -gt 0 ]; do
 	all)	  all;;
 	clean)	  allclean;;
 	cleanup)  cleanup;;
+	drmlegacy)builddrmlegacy;;
 	git)	  instgit;;
 	image)	  createimage;;
 	init)	  init;;
