@@ -300,6 +300,9 @@ buildkernel()
 	      regx="${regx}/^options.*GDB/d"
 	sed -e "${regx}" < ${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
 	KERNELOPTS >> ${KERNCONF_NOMADBSD}
+	if [ "${ARCH}" = "i386" ]; then
+		makeopts="${makeopts} LD=ld.lld"
+	fi
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 	    cd /usr/src && make ${makeopts} kernel" || bail
 	umount "${SYSDIR}/dev"
@@ -339,7 +342,7 @@ createtmpimage()
 
 createimage()
 {
-	local tmpimgdev used
+	local tmpimgdev used pn
 
 	[ ! -z ${mac} ] && IMAGE_NAME=${IMAGE_NAME%.img}.mac.img
 	if [ -f ${IMAGE_NAME} ]; then
@@ -403,21 +406,29 @@ createimage()
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
 	[ $? -ne 0 ] && bail
 	[ ! -d mnt ] && mkdir mnt
+	pn=0
 	gpart destroy -F ${mddev}
 	gpart create -s gpt ${mddev} || bail
 	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
-	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i 1 ${mddev} || bail
-	if [ ! -z ${mac} ]; then
-		gpart add -t efi -l gpefiboot -s 200M ${mddev} || bail
-	else
-		gpart add -t efi -l gpefiboot -s 800K ${mddev} || bail
+	pn=$((${pn} + 1))
+	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${pn} ${mddev} || bail
+	if [ "${ARCH}" != "i386" ]; then
+		if [ ! -z ${mac} ]; then
+			gpart add -t efi -l gpefiboot -s 200M ${mddev} || bail
+		else
+			gpart add -t efi -l gpefiboot -s 800K ${mddev} || bail
+		fi
+		pn=$((${pn} + 1))
+		dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p${pn} || bail
+	fi
+	if [ -z ${mac} ]; then
 		gpart set -a lenovofix ${mddev} || bail
 	fi
-	dd if="${SYSDIR}"/boot/boot1.efifat of=/dev/${mddev}p2 || bail
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
+	pn=$((${pn} + 1))
 	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-	    -m ${UFS_MINFREE} /dev/${mddev}p3 || bail
-	mount /dev/${mddev}p3 mnt || bail
+	    -m ${UFS_MINFREE} /dev/${mddev}p${pn} || bail
+	mount /dev/${mddev}p${pn} mnt || bail
 	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd mnt && tar pxf -) || bail
 	umount mnt || umount -f mnt
 	mdconfig -d -u ${mddev}
