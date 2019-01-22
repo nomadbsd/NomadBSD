@@ -14,27 +14,86 @@ rcvar=initgfx_enable
 load_rc_config $name
 
 : ${initgfx_enable:="YES"}
+: ${initgfx_menu:="YES"}
 
 path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
+path_vesa_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf"
+initgfx_autodetect=0
+initgfx_use_vesa=0
+initgfx_use_scfb=0
+
+gfx_menu()
+{
+	local ret="/tmp/gfx_menu.ret"
+	local driver msg efiboot
+	if sysctl machdep.bootmethod | grep -q BIOS; then
+		efiboot=0
+		driver="VESA"
+	else
+		efiboot=1
+		driver="SCFB"
+	fi
+	msg="If you encountered graphics driver problems, you can choose"
+	msg="${msg} ${driver} here. The ${driver} driver doesn't support accelerated"
+	msg="${msg} graphics, but will work on most systems."
+	opts="Autodetect:Autodetect accelerated graphics driver:on"
+	if [ ${efiboot} -eq 1 ]; then
+		opts="${opts}:SCFB:System Console Frame Buffer:off"
+	else
+		opts="${opts}:VESA:Non-accelerated generic video driver:off"
+	fi
+	while [ true ]; do
+		local IFS=:
+		TERM=xterm dialog --title "Graphics driver" --radiolist "${msg}" \
+			15 60 3 ${opts} 2>${ret}
+		[ $? -ne 0 ] && continue
+		opt=$(cat ${ret})
+		rm -f ${ret}
+		case ${opt} in
+			Autodetect)
+				initgfx_autodetect=1
+				;;
+			SCFB)
+				initgfx_use_scfb=1
+				;;
+			VESA)
+				initgfx_use_vesa=1
+				;;
+		esac
+		return
+	done
+}
 
 do_initgfx()
 {
-	found=0
+	local cfg_path driver
+	
+	rm -f ${path_vesa_cfg}
+	rm -f ${path_scfb_cfg}
 
-	/usr/bin/nvidia_setup  && found=1
-	/usr/bin/intel_setup   && found=1
-	/usr/bin/ati_amd_setup && found=1
-	pciconf -lv | grep -B3 display | grep -q -i virtualbox && found=1
+	# In VirtualBox we are done here
+	pciconf -lv | grep -B3 display | grep -q -i virtualbox && return
 
-	if [ ${found} -eq 0 ]; then
-		# Fallback to SCFB
-		(printf "Section \"Device\"\n"; \
-		 printf "\tIdentifier \"Card0\"\n"; \
-		 printf "\tDriver \"scfb\"\n"; \
-		 printf "EndSection\n") > ${path_scfb_cfg}
+	if checkyesno initgfx_menu; then
+		gfx_menu
 	else
-		rm -f ${path_scfb_cfg}
+		initgfx_autodetect=1
 	fi
+	if [ ${initgfx_autodetect} -eq 1 ]; then
+		for i in nvidia intel ati_amd; do
+			/usr/bin/${i}_setup && return
+		done
+	fi
+	if [ ${initgfx_use_vesa} -eq 1 ]; then
+		driver="vesa"
+	else
+		driver="scfb"
+	fi
+	eval cfg_path=\${path_${driver}_cfg}
+	(printf "Section \"Device\"\n"; \
+	 printf "\tIdentifier \"Card0\"\n"; \
+	 printf "\tDriver \"${driver}\"\n"; \
+	 printf "EndSection\n") > ${cfg_path}
 }
 
 run_rc_command "$1"
