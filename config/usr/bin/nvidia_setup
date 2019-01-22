@@ -962,7 +962,7 @@ mount_unionfs -o noatime \
     /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/drivers \
     /usr/local/lib/xorg/modules/drivers
 mount_unionfs -o noatime \
-    /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/extensions \
+    /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/extensions/.nvidia \
     /usr/local/lib/xorg/modules/extensions
 mount_unionfs -o noatime /usr/local/nvidia/${driver}/boot /boot
 mount_unionfs -o noatime /usr/local/nvidia/${driver}/compat /compat
