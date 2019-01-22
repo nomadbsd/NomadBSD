@@ -149,13 +149,25 @@ mkfontpaths()
 
 createbase()
 {
+	local version srcurl
 	[ ! -d "${SYSDIR}" ] && mkdir "${SYSDIR}"
 	BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_DISTSITE=${DISTSITE} \
 		bsdinstall jail "${SYSDIR}"
 	BSDINSTALL_DISTDIR="${DISTDIR}" DISTRIBUTIONS="kernel.txz src.txz" \
 	BSDINSTALL_DISTSITE=${DISTSITE} bsdinstall distfetch
 	BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_CHROOT="${SYSDIR}" \
-	    DISTRIBUTIONS="kernel.txz src.txz" bsdinstall distextract
+	    DISTRIBUTIONS="kernel.txz" bsdinstall distextract
+	version=$(echo ${RELEASE} | cut -d'-' -f1)
+	case ${RELEASE##*-} in
+	RELEASE)
+		srcurl="${SRCURL}/releng"
+		svnlite checkout ${srcurl}/${version} "${SYSDIR}/usr/src" || bail
+		;;
+	*)
+		BSDINSTALL_DISTDIR="${DISTDIR}" BSDINSTALL_CHROOT="${SYSDIR}" \
+	    DISTRIBUTIONS="src.txz" bsdinstall distextract || bail
+	    ;;
+	esac
 }
 
 updatebase()
@@ -164,6 +176,11 @@ updatebase()
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" fetch && \
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" install
+	if [ "${RELEASE##*-}" = "RELEASE" ]; then
+		version=$(echo ${RELEASE} | cut -d'-' -f1)
+		srcurl="${SRCURL}/releng"
+		(cd "${SYSDIR}/usr/src" && svnlite up) || bail
+	fi
 }
 
 buildnvidia()
