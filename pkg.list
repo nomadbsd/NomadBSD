@@ -122,6 +122,7 @@ x11-wm/obconf
 x11-wm/openbox
 x11-wm/plank
 x11/arandr
+x11/dmenu
 x11/dsbautostart
 x11/metalock
 x11/sakura
