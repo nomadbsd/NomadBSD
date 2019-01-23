@@ -2,4 +2,6 @@
 	XF86AudioRaiseVolume
 "exec mixer vol -1"
 	XF86AudioLowerVolume
+"exec dmenu_run"
+	m:0x4 + c:65
 
