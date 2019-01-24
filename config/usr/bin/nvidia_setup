@@ -973,9 +973,6 @@ else
 	# nvidia 340 or 304 driver needed
 	kldload nvidia
 fi
-if [ ! -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf ]; then
-	xorg_cfg > /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
-fi
-
+xorg_cfg > /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
 exit 0
 
