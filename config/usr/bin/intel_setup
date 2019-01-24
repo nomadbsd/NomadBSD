@@ -193,6 +193,21 @@ cat <<END_DRM_NEXT_IDS
 END_DRM_NEXT_IDS
 }
 
+path_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/10-intel.conf"
+accel_method="sna"
+
+xorg_cfg() {
+cat << xorg_cfg_END
+Section "Device"
+    Identifier "Intel Graphics"
+    Driver     "intel"
+    Option     "AccelMethod"    "${accel_method}"
+    Option     "TripleBuffer"   "true"
+    Option     "HotPlug"        "true"
+EndSection
+xorg_cfg_END
+}
+
 config=$(pciconf -lv | grep ^vgapci | \
 	sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
 for i in $config; do
@@ -200,10 +215,13 @@ for i in $config; do
 	device=$(echo "$i" | cut -d: -f1)
 	if [ "$vendor" = 8086 ]; then
 		if i915_drm_legacy_ids | grep -iq ${device}; then
+			accel_method="uxa"
+			xorg_cfg > "${path_xorg_cfg}"
 			kldconfig -m /boot/drm_legacy >/dev/null 2>&1
 			kldload /boot/drm_legacy/i915kms.ko && exit 0
 		fi
 		if i915_drm_next_ids | grep -iq ${device}; then
+			xorg_cfg > "${path_xorg_cfg}"
 			kldload /boot/modules/i915kms.ko && exit 0
 		fi
 		exit 1
