@@ -944,19 +944,14 @@ driver=$(find_driver)
 
 if [ -z "${driver}" ]; then
 	# No NVIDIA device
-	rm -f /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf > /dev/null 2>&1
-	rm -f /usr/local/etc/libmap.d/nvidia.conf > /dev/null 2>&1
 	exit 1
 fi
 
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
 
-if [ ! -f /usr/local/etc/libmap.d/nvidia.conf ]; then
-	cmp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
-	    /usr/local/etc/libmap.d/nvidia.conf || \
-	cp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
-	   /usr/local/etc/libmap.d
-fi
+cp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
+   /usr/local/etc/libmap.d
+
 ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
 mount_unionfs -o noatime \
     /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/drivers \
