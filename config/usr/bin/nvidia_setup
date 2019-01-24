@@ -927,6 +927,13 @@ EndSection
 xorg_cfg_END
 }
 
+rc_conf_d_ldconfig() {
+cat << rc_conf_d_END
+#!/bin/sh
+ldconfig_paths="\${ldconfig_paths} $1"
+rc_conf_d_END
+}
+
 find_driver() {
 	config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
 	for i in 390 340 304; do
@@ -950,7 +957,10 @@ fi
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
 
 cp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
-   /usr/local/etc/libmap.d
+	/usr/local/etc/libmap.d
+
+rc_conf_d_ldconfig /usr/local/nvidia/${driver}/usr/local/lib > \
+	/etc/rc.conf.d/ldconfig
 
 ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
 mount_unionfs -o noatime \
