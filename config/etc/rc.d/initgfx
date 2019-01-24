@@ -16,8 +16,11 @@ load_rc_config $name
 : ${initgfx_enable:="YES"}
 : ${initgfx_menu:="YES"}
 
+path_intel_cfg="/usr/local/etc/X11/xorg.conf.d/10-intel.conf"
+path_nvdia_cfg="/usr/local/etc/X11/xorg.conf.d/10-nvidia.conf"
 path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
 path_vesa_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf"
+
 initgfx_autodetect=0
 initgfx_use_vesa=0
 initgfx_use_scfb=0
@@ -68,6 +71,8 @@ do_initgfx()
 {
 	local cfg_path driver
 	
+	rm -f ${path_intel_cfg}
+	rm -f ${path_nvidia_cfg}
 	rm -f ${path_vesa_cfg}
 	rm -f ${path_scfb_cfg}
 
