@@ -82,7 +82,13 @@ do_initgfx()
 	# In VirtualBox we are done here
 	pciconf -lv | grep -B3 display | grep -q -i virtualbox && return
 
-	if checkyesno initgfx_menu; then
+	# Do not show menu if syscons is disabled or initgfx_menu="NO"
+	syscons_disabled=$(kenv | awk -F '["=]+' '
+		/hw.syscons.disable/ { print $2 }')
+	if [ ${syscons_disabled:=0} -eq 0 ]; then
+		sysons_disabled=$(sysctl -n hw.syscons.disable 2>/dev/null)
+	fi
+	if [ ${syscons_disabled:=0} -eq 0 ] && checkyesno initgfx_menu; then
 		gfx_menu
 	else
 		initgfx_autodetect=1
