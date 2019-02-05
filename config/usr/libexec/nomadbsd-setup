@@ -221,6 +221,10 @@ sub bootstrap_gui {
 	my $path_vesa_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms);
 	
+	print "Creating font cache. This might take a moment.\n" .
+		  "The setup is starting soon. Please wait ...\n";
+	system("/usr/local/bin/fc-cache");
+
 	$efiboot = 1;
 	$efiboot = 0 if (`sysctl machdep.bootmethod` =~ /BIOS/);
 	unlink($path_vesa_cfg);
@@ -788,8 +792,6 @@ sub commit {
 	status("Disabling auto-login on ttyv0");
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
-	status("Creating font cache files");
-	system("/usr/local/bin/fc-cache -f");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	exit 0;
 }
@@ -814,7 +816,6 @@ sub dummy_commit {
 		status("Setting keyboard map ($cfg_kbdlayout, $cfg_kbdvariant) " .
 			   "for X and vt");
 		status("Disabling auto-login on ttyv0");
-		status("Creating font cache files");
 		exit 0;
 }
 
