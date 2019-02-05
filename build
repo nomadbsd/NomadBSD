@@ -300,13 +300,22 @@ instports()
 	fi
 	for p in ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
-		pkg --chroot "${SYSDIR}" info --exists $p && continue
+		if pkg --chroot "${SYSDIR}" info --exists $p; then
+			# Check whether the ports version is newer than the
+			# installed version.
+			p1=$(pkg --chroot "${SYSDIR}" info $p | head -1)
+			p2=$(cd ${SYSDIR}/usr/ports/$p && make -VPKGNAME);
+			result=$(pkg version -t $p2 $p1)
+
+			[ $result = '<' -o $result = '=' ] && continue
+			echo "Building newer version from ports ..."
+		fi
 		echo "Building $p ..." >&2
 		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
 		eval popts=\${${pname}_OPTS}
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
-			OPTIONS_UNSET=DOCS clean reinstall" || bail
+			OPTIONS_UNSET=DOCS clean deinstall install" || bail
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
