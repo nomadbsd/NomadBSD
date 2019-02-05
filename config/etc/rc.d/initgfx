@@ -39,7 +39,8 @@ gfx_menu()
 	fi
 	msg="If you encountered graphics driver problems, you can choose"
 	msg="${msg} ${driver} here. The ${driver} driver doesn't support accelerated"
-	msg="${msg} graphics, but will work on most systems."
+	msg="${msg} graphics, but will work on most systems.\n\n"
+	msg="${msg} Press <SPACE> to activate an item"
 	opts="Autodetect:Autodetect accelerated graphics driver:on"
 	if [ ${efiboot} -eq 1 ]; then
 		opts="${opts}:SCFB:System Console Frame Buffer:off"
