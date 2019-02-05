@@ -1,0 +1,5 @@
+include "/usr/local/share/themes/Adapta/gtk-2.0/gtkrc"
+gtk-icon-theme-name="Papirus"
+gtk-fallback-icon-theme = "hicolor"
+gtk-cursor-theme-name=capitaine-cursors
+

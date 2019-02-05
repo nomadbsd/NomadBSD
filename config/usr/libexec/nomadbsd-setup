@@ -1,0 +1,950 @@
+#!/usr/local/bin/perl
+#
+# Copyright (c) 2019 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+use utf8;
+use strict;
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
+my $dummy;
+my $gptroot			= "nomadroot";
+my $gpthome			= "nomadhome";
+my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
+my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
+my $path_zoneinfo	= "/usr/share/zoneinfo/zone.tab";
+my $fragsize		= 4096;
+my $blksize			= $fragsize * 8;
+my $path_templates	= "/usr/share/nomadbsd-setup";
+my $path_xkbd_conf	= "/usr/local/etc/X11/xorg.conf.d/10-input-keyboard.conf";
+my $path_xinitrc	= "$path_templates/xinitrc";
+
+my $cfg_fm;
+my $cfg_locale;
+my $cfg_timezone;
+my $cfg_shell;
+my $cfg_password;
+my $cfg_geli_password;
+my $cfg_kbdlayout;
+my $cfg_kbdvariant;
+my $cfg_editor;
+my $cfg_browser;
+my $cfg_gui_editor;
+my $cfg_email_client;
+
+##############################################################################
+# This section is for defining data.
+#
+# 
+my @file_manager_list = (
+	'Thunar		Xfce file manager',
+	'pcmanfm	PCMan file manager'
+);
+
+my @shell_list = (
+	'fish		The friendly interactive shell',
+	'zsh		The Z shell',
+	'bash		GNU Bourne-Again SHell',
+	'csh		Shell with file name completion and command line editing',
+	'sh			Bourne shell'
+);
+
+my @editor_list = (
+	'ee			Easy editor',
+	'vim		Vi IMproved, a programmer\'s text editor',
+	'vi			Bug-for-bug compatible replacement for 4BSD\'s vi'
+);
+
+my @gui_editor_list = (
+	'leafpad	GTK+ based simple text editor',
+	'gvim		Vim with a GTK+ frontend',
+	'vim		Vim running in a X terminal'
+);
+
+my @browser_list = (
+	'firefox	Web browser based on the browser portion of Mozilla',
+	'palemoon	Open Source Goanna-based web browser'
+);
+
+my @email_client_list = (
+	'sylpheed	Lightweight, featureful, and fast GTK+ based e-mail client',
+	'thunderbird	Mozilla Thunderbird is standalone mail and news'
+);
+
+my %locales = (
+	af_ZA	=>	'Afrikaans - South Africa',
+	ar_AE	=>	'Arabic - United Arab Emirates',
+	ar_EG	=>	'Arabic - Egypt',
+	ar_JO	=>	'Arabic - Jordan',
+	ar_MA	=>	'Arabic - Morocco',
+	ar_QA	=>	'Arabic - Qatar',
+	ar_SA	=>	'Arabic - Saudi Arabia',
+	be_BY	=>	'Belarusian - Belarus',
+	bg_BG	=>	'Bulgarian - Bulgaria',
+	ca_ES	=>	'Catalan - Catalan',
+	cs_CZ	=>	'Czech - Czech Republic',
+	da_DK	=>	'Danish - Denmark',
+	de_AT	=>	'German - Austria',
+	de_CH	=>	'German - Switzerland',
+	de_DE	=>	'German - Germany',
+	el_GR	=>	'Greek - Greece',
+	en_AU	=>	'English - Australia',
+	en_CA	=>	'English - Canada',
+	en_GB	=>	'English - United Kingdom',
+	en_IE	=>	'English - Ireland',
+	en_NZ	=>	'English - New Zealand',
+	en_PH	=>	'English - Philippines',
+	en_US	=>	'English - United States',
+	en_ZA	=>	'English - South Africa',
+	es_AR	=>	'Spanish - Argentina',
+	es_CR	=>	'Spanish - Costa Rica',
+	es_ES	=>	'Spanish - Spain',
+	es_MX	=>	'Spanish - Mexico',
+	et_EE	=>	'Estonian - Estonia',
+	eu_ES	=>	'Basque - Basque',
+	fi_FI	=>	'Finnish - Finland',
+	fr_BE	=>	'French - Belgium',
+	fr_CA	=>	'French - Canada',
+	fr_CH	=>	'French - Switzerland',
+	fr_FR	=>	'French - France',
+	he_IL	=>	'Hebrew - Israel',
+	hi_IN	=>	'Hindi - India',
+	hr_HR	=>	'Croatian - Croatia',
+	hu_HU	=>	'Hungarian - Hungary',
+	hy_AM	=>	'Armenian - Armenia',
+	is_IS	=>	'Icelandic - Iceland',
+	it_CH	=>	'Italian - Switzerland',
+	it_IT	=>	'Italian - Italy',
+	ja_JP	=>	'Japanese - Japan',
+	kk_KZ	=>	'Kazakh - Kazakhstan',
+	ko_KR	=>	'Korean - Korea',
+	lt_LT	=>	'Lithuanian - Lithuania',
+	lv_LV	=>	'Latvian - Latvia',
+	mn_MN	=>	'Mongolian - Mongolia',
+	nb_NO	=>	'Norwegian (Bokmål) - Norway',
+	nl_BE	=>	'Dutch - Belgium',
+	nl_NL	=>	'Dutch - The Netherlands',
+	nn_NO	=>	'Norwegian (Nynorsk) - Norway',
+	pl_PL	=>	'Polish - Poland',
+	pt_BR	=>	'Portuguese - Brazil',
+	pt_PT	=>	'Portuguese - Portugal',
+	ro_RO	=>	'Romanian - Romania',
+	ru_RU	=>	'Russian - Russia',
+	sk_SK	=>	'Slovak - Slovakia',
+	sl_SI	=>	'Slovenian - Slovenia',
+	sv_FI	=>	'Swedish - Finland',
+	sv_SE	=>	'Swedish - Sweden',
+	tr_TR	=>	'Turkish - Turkey',
+	uk_UA	=>	'Ukrainian - Ukraine',
+	zh_CN	=>	'Chinese - China',
+	zh_HK	=>	'Chinese - Hong Kong SAR',
+	zh_TW	=>	'Chinese - Taiwan'
+);
+##############################################################################
+
+#
+# Translate some X layout codes to vt(4) layout codes.
+#
+my %xklc_to_vtklc = qw(
+	at			de
+	gb			uk
+	latam		latinamerican
+);
+
+#
+# Translate some X keyboard variants to vt(4) keyboard variants.
+#
+my %xkv_to_vtkv = qw(
+	mac			macbook
+	dvorak-l	dvorakl
+	dvorak-r	dvorakr
+	de_mac		macbook
+	fr_mac		macbook
+	us-mac		macbook
+	winkeys		win
+);
+
+#
+# Write the given message to stderr and the log file, and terminate
+# the script with exit 1.
+#
+sub bail {
+	my ($msg) = @_;
+	my $fh;
+
+	$msg .= "\n";
+	print STDERR $msg;
+	exit 1
+}
+
+#
+# Write a status message to stdout (the frontend). The frontend treats
+# lines starting with a '!' as status messsage that tells the user what
+# is happening.
+#
+sub status {
+	my $ofh = select STDOUT;
+	$| = 1;
+	print "!$_[0] ...\n";
+	select $ofh;
+}
+
+#
+# Initialize environment for the graphical setup.
+# 
+# Depending on the boot method, set up and start an X server with
+# the SCFB driver (EFI) or the VESA (BIOS) driver. Create a temporary
+# xinitrc file that starts the setup GUI and other programs.
+#
+sub bootstrap_gui {
+	my $path_scfb_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
+	my $path_vesa_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
+	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms);
+	
+	$efiboot = 1;
+	$efiboot = 0 if (`sysctl machdep.bootmethod` =~ /BIOS/);
+	unlink($path_vesa_cfg);
+	unlink($path_scfb_cfg);
+
+	foreach (`pciconf -lv`) {
+		if (/^vgapci/) {
+			$in_vgapci = 1;
+		} elsif (/^\S*/) {
+			$in_vgapci = 0;
+		} elsif ($in_vgapci && /\s*display\s*=\s*.VirtualBox/) {
+			$vbox = 1;
+			last
+		}
+	}
+	# 
+	# Make sure we don't create a config file for VESA or SCFB
+	# if i915kms, radeonkms, nvidia, or amdgpu has already been
+	# loaded. 
+	#
+	foreach (`kldstat`) {
+		my $m;
+		if (/(\S+)\.ko$/) {
+			$m = $1
+		} else {
+			next
+		}
+		foreach my $k (qw(i915kms radeonkms nvidia amdgpu)) {
+			$kms = 1 if ($m =~ /$k/);
+		}
+	}
+	if (!$kms && !$vbox) {
+		if ($efiboot == 0) {
+			system("cp $path_templates/video-vesa.conf $path_vesa_cfg");
+		} else {
+			system("cp $path_templates/video-scfb.conf $path_scfb_cfg");
+		}
+	}
+	$ENV{XINITRC} = $path_xinitrc;
+	$ENV{PATH}	  = "$ENV{PATH}:/usr/local/bin";
+	exec("/usr/local/bin/xinit");
+}
+
+#
+# 1. Get the device mounted on /, which must be gpt/$gptroot
+# 2. Get the device name from glabel
+# 3. Return the device name without the '/dev' prefix and slice.
+#
+sub get_rootdev {
+	my ($rootdev, @output);
+	
+	@output = `df /`;
+	# Skip header
+	$rootdev = (split(/\s+/, $output[1]))[0];
+	$rootdev =~ s#/dev/##;
+	return if ($rootdev ne "gpt/$gptroot");
+	foreach (`glabel status`) {
+		$_ =~ s/\s+//;
+		my ($l, $s, $d) = split(/\s+/, $_);
+		next if ($l ne "gpt/$gptroot");
+		return $1 if (/([a-zA-Z0-9]+)[sp][0-9]{1,}[a-f]?$/);
+	}
+}
+
+#
+# Return the device and slice the /home partition is stored on.
+# It must match the label gpt/$gpthome, and must be on the
+# root device.
+#
+sub get_homedev {
+	my ($rootdev, $homedev, @output);
+	
+	$rootdev = get_rootdev();
+	bail("Couldn't find root device") if (!$rootdev);
+	@output = `df /`;
+	# Skip header
+	$homedev = (split(/\s+/, $output[1]))[0];
+	$homedev =~ s#/dev/##;
+	bail("gpt/$gpthome not mounted on /home")
+		if ($output[1] ne "gpt/$gpthome");
+	@output = `glabel status`;
+	# Skip header
+	shift @output;
+	foreach (@output) {
+		chomp;
+		# Remove leading spaces
+		$_ =~ s/^\s+//;
+		my ($l, $s, $d) = split(/\s+/, $_);
+		if ($l eq "gpt/$gpthome") {
+			return $d if ($d =~ /$rootdev[ps]{1}[0-9]{1,}[a-f]?$/);
+			bail("gpt/$gpthome not on $rootdev");
+		}
+	}
+	bail("Couldn't find gpt/$gpthome");
+}
+
+#
+# Takes a reference to an array, and prints its content to stdout, while
+# replacing the field delimiter tabs by a |.
+#
+sub print_array_data {
+	my ($ref) = @_;
+	foreach (@$ref) {
+		$_ =~ s/\t+/|/;
+		print "$_\n";
+	}
+}
+
+#
+# Print the list of locales sorted by name, not by locale code.
+#
+sub print_locales {
+	foreach my $name (sort { $locales{$a} cmp $locales{$b} } keys %locales) {
+		print "$name|$locales{$name}\n";
+    }
+}
+
+#
+# Print a sorted list of timezone records of the form:
+#
+#	timezone|region code
+#
+sub print_timezones {
+	my @list;
+	open(my $fh, '<', $path_zoneinfo) or die "$!";
+	foreach (<$fh>) {
+		next if (/^#/ || /^$/);
+		chomp;
+		my ($region, $unused, $tz) = split(/\t+/, $_);
+		push @list, "$tz|$region";
+	}
+	close $fh;
+	foreach (sort @list) {
+		print "$_\n";
+	}
+}
+
+#
+# Print a list of records of the form:
+#
+#	lang code|lang name
+#
+# Example:
+#
+#	us|English (US)
+#
+sub print_kbdlayout_list {
+	my ($in_layout, @layout_descs, @layouts, @tmplist);
+	
+	open(my $fh, '<', $xkbdlist) or die "$!";
+	foreach (<$fh>) {
+		chomp;
+		if (/^\!\s+layout$/) {
+			$in_layout  = 1;
+		} elsif (/^\!/ && $in_layout) {
+			last;
+		} elsif ($in_layout) {
+			if (/\s+(\S+)\s+(.*)$/) {
+				push @layout_descs, $2;
+				push @layouts, $1;
+			}
+		}
+	}
+	close $fh;
+	for (my $l; $l < @layouts; $l++) {
+		push @tmplist, "$layout_descs[$l]|$layouts[$l]";
+	}
+	foreach (sort @tmplist) {
+		my ($ld, $l) = split(/\|/, $_);
+		# Layout code|Layout descr.
+		print "$l|$ld\n";
+	}
+}
+
+#
+# Print a list of records of the form:
+#
+#	Variant code|variant descr.|layout code
+#
+# Example:
+#
+#	us|English (US)
+#
+sub print_kbdvariant_list {
+	my ($layout) = @_;
+	my ($in_variant, @variant_descs, @variant_layout);
+	my (@variant_names, @tmplist);
+	
+	open(my $fh, '<', $xkbdlist) or die "$!";
+	foreach (<$fh>) {
+		chomp;
+		if (/^\!\s+variant$/) {
+			$in_variant = 1;
+		} elsif (/^\!/ && $in_variant) {
+			last;
+		} elsif ($in_variant) {
+			if (/\s+(\S+)\s+(\S+):\s+(.*)/) {
+				next if ($layout && $layout ne $2);
+				push @variant_descs, $3;
+				push @variant_layout, $2;
+				push @variant_names, $1;
+			}
+		}
+	}
+	close $fh;
+	for (my $i = 0; $i < @variant_layout; $i++) {
+		# Change order of fields, so that we can sort after layout
+		# and variant description.
+		my $rec = "$variant_descs[$i]|$variant_names[$i]|" .
+				  "$variant_layout[$i]";
+		push @tmplist, $rec;
+	}
+	foreach (sort @tmplist) {
+		my ($vd, $vn, $l) = split(/\|/, $_);
+		# Variant code|variant descr.|layout code
+		print "$vn|$vd|$l\n";
+	}
+}
+
+#
+# Take a X keyboard layout code, and a X keyboard variant. 
+# Return the best matching vt(4) keymap name.
+#
+sub xkbdtovt {
+	my ($xl, $xv) = @_;
+	my ($fallback, @vtkbdmaps);
+	
+	open(my $fh, '<', $vtkbdlist) or bail("Couldn't open $vtkbdlist");
+	foreach (<$fh>) {
+		chomp;
+		push @vtkbdmaps, $1 if (/^([a-z-.]+\.kbd).*:en:.*/);
+	}
+	close $fh;
+	# Resolve lang code.
+	$xl = $xklc_to_vtklc{$xl} if ($xklc_to_vtklc{$xl});
+	# Resolve variant name
+	$xv = $xkv_to_vtkv{$xv} if ($xkv_to_vtkv{$xv});
+	foreach (@vtkbdmaps) {
+		my ($l, $v) = split(/\./, $_);
+		return $_ if ($l eq $xl and $v eq $xv);
+		# Use <lang code>.kbd as fallback if available.
+		$fallback = $_ if ($l eq $xl and $v eq 'kbd');
+	}
+	return $fallback;
+}
+
+#
+# Return a list of keyboard model names and their descriptions.
+#
+# Example record:
+#	pc105|Generic 105-key PC (intl.)
+#
+sub print_xkbdmodels {
+	my ($in_model, @models);
+
+	open(my $fh, '<', $xkbdlist) or die "$!";
+	foreach (<$fh>) {
+		if (/^\!\s+model$/) {
+			$in_model = 1;
+		} elsif (/^\!/ && $in_model) {
+			last;
+		} elsif ($in_model) {
+			# Swap description and ID/code in order to sort the list.
+			push @models, "$2|$1" if (/\s+(\S+)\s+(.*)$/);
+		}
+	}
+	close $fh;
+	foreach (sort @models) {
+		my ($d, $c) = split(/\|/, $_);
+		print "$c|$d\n";
+	}
+}
+
+sub set_password {
+	my ($user, $pass) = @_;
+	open(my $fh, "| pw usermod $user -h 0") or bail("Failed to execute 'pw'");
+	print $fh $pass;
+	if (!close($fh)) {
+		bail("Failed to set password for user $user");
+	}
+}
+
+sub set_timezone {
+	my ($tz) = @_;
+	# This needs fixing
+	system("echo $tz > /var/db/zoneinfo");
+	system("cp /usr/share/zoneinfo/$tz /etc/localtime");
+}
+
+sub set_shell {
+	my ($user, $sh) = @_;
+	my $shpath = $sh;
+	
+	if ($sh !~ /^\//) {
+		open(my $fh, "</etc/shells") or bail("Couldn't open /etc/shells");
+		foreach (<$fh>) {
+			if (/\/$sh$/) {
+				$shpath = $_; last
+			}
+		}
+		close($fh);
+	}
+	system("pw usermod $user -s $shpath");
+}
+	
+sub mkhomepart {
+	my $dev = get_rootdev();
+
+	bail("Failed to find root device.") if (!$dev);
+	#
+	# Check if gpt/${gpthome} already exists.
+	#
+	foreach (`glabel status`) {
+		$_ =~ s/\s+//;
+		my ($l, $s, $d) = split(/\s+/, $_);
+		if ($l eq "gpt/$gpthome") {
+			bail("Error: gpt/$gpthome already exists");
+		}
+	}
+	system("gpart recover $dev");
+	system("gpart set -a lenovofix $dev");
+	system("gpart add -t freebsd-ufs -l $gpthome $dev") == 0
+		or bail("Couldn't create home partition: gpart failed.");
+}
+
+sub mkhome {
+	my $cmd = "newfs -E -U -O 1 -o time -b $blksize -f $fragsize " .
+			  "-m 8 /dev/gpt/$gpthome 2>&1";
+	mkhomepart();
+	status("Creating filesystem on /dev/gpt/$gpthome");
+	system($cmd) == 0
+		or bail("Couldn't create filesystem on /dev/gpt/$gpthome");
+	if (! -d "/home") {
+		status("Creating /home");
+		system("mkdir /home") == 0
+			or bail("Failed to create directory /home");
+	}
+	status("Mounting /dev/gpt/${gpthome} on /home");
+	system("mount /dev/gpt/${gpthome} /home") == 0
+		or bail("Couldn't mount /dev/gpt/${gpthome} on /home");
+	status("Creating /home/nomad");
+	system("mkdir /home/nomad") == 0
+		or bail("Couldn't create /home/nomad");
+	system("chown nomad:nomad /home/nomad");
+	status("Adding fstab entry for /home");
+	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
+	print $fh "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n";
+	close($fh);
+}
+
+sub mkgeli {
+	my $geli_init	= "geli init -s 4096 -K /root/$gpthome.key -J - " .
+					  "/dev/gpt/$gpthome";
+	my $geli_attach	= "geli attach -k /root/${gpthome}.key -j - " .
+					  "/dev/gpt/$gpthome";
+	my $newfscmd	= "newfs -E -U -O 1 -o time -b $blksize -f " .
+					  "$fragsize -m 8 /dev/gpt/$gpthome.eli";
+	status("Creating partition for /private/home");
+	mkhomepart();
+	system("dd if=/dev/random of=/root/$gpthome.key bs=64 count=1");
+	status("Initializing geli volume");
+	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
+	print $fh "${cfg_geli_password}\n";
+	bail("Failed to init geli volume.")	if (!close($fh));
+	status("Attaching geli volume");
+	open(my $fh, "|$geli_attach") or bail("Couldn't attach geli volume");
+	print $fh "$cfg_geli_password\n";
+	bail("Failed to attach geli volume.") if (!close($fh));
+	status("Creating filesystem on /dev/gpt/${gpthome}.eli");
+	system($newfscmd) == 0 or bail("Couldn't create filesystem");
+	if (! -d "/private") {
+		system("unlink /private >/dev/null 2>&1");
+		status("Creating /private");
+		system("mkdir /private") == 0 or bail("Failed to create /private");
+	}
+	status("Mounting /dev/gpt/${gpthome}.eli on /private");
+	system("mount /dev/gpt/$gpthome.eli /private") == 0
+		or bail("Failed to mount filesystem.");
+	status("Creating /private/home");
+	system("mkdir /private/home") == 0
+		or bail("Failed to create /private/home");
+	status("Creating /private/etc");
+	system("mkdir /private/etc") == 0
+		or bail("Failed to create /private/etc");
+	status("Creating /private/home/nomad");
+	system("mkdir /private/home/nomad") == 0
+		or bail("Failed to create /private/home/nomad");
+	system("unlink /home >/dev/null 2>&1");
+	system("rmdir -rf /home 2>&1");
+	status("Symlinking /home to /private/home");
+	
+	system("ln -s /private/home /home") == 0
+		or bail("Failed to create symlink /home -> /private/home");
+	system("chown nomad:nomad /home/nomad");
+	
+	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
+	system("mv /etc/ppp /private/etc/");
+	system("mv /etc/wpa_supplicant.conf /private/etc");
+	system("touch /private/etc/wpa_supplicant.conf");
+	system("cd /etc && ln -sf /private/etc/ppp; " .
+		   "ln -sf /private/etc/wpa_supplicant.conf");
+	system("sysrc -f /etc/rc.conf.in in geli_devices=\"gpt/${gpthome}\"");
+	system("sysrc -f /etc/rc.conf.in " .
+		   "geli_gpt_${gpthome}_flags=\"-k /root/${gpthome}.key\"");
+	status("Adding fstab entry for /dev/gpt/${gpthome}.eli");
+	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
+	print $fh "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
+	close($fh);
+}
+
+sub desktopsettings {
+	my $appsdir		= "/usr/local/share/applications";
+	my $usrappsdir	= "/home/nomad/.local/share/applications";
+	my $mimelist	= "/home/nomad/.config/mimeapps.list";
+	my $dsbmc_cfg	= "/home/nomad/.config/DSB/dsbmc/config";
+	my $autostart	= "/home/nomad/.config/DSB/autostart.sh";
+	my $xinitrc		= "/home/nomad/.xinitrc";
+	my $plank_ini	= "/home/nomad/.config/plank.ini";
+	my $plank_launcher_dir	= "/home/nomad/.config/plank/dock1/launchers";
+	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
+	
+	my @apps = (
+		'home', 'sakura', $cfg_browser, $cfg_email_client,
+		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
+		'vlc', 'gimp', 'octopkg', 'leave'
+	);
+	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
+		open(my $fh, ">>$_") or bail("Couldn't open $_");
+		print $fh $logincfg_rec;
+		close($fh);
+	}
+	open(my $fh, $xinitrc) or bail("Couldn't open $xinitrc");
+	my @xinit = <$fh>;
+	close($fh);
+	open(my $fh, ">$xinitrc") or bail("Couldn't open $xinitrc");
+	foreach (@xinit) {
+		if (/#!/) {
+			print $fh "$_";
+			print $fh "export EDITOR=$cfg_editor\n";
+		} else {
+			print $fh "$_";
+		}
+	}
+	close($fh);
+
+	# Create "plank" dock items for browser, e-mail client, filemanager,
+	# gimp, vlc, terminal, etc.
+	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
+	foreach (@apps) {
+		my $desktopfile = "$appsdir/$_.desktop";
+		$desktopfile = "$usrappsdir/$_.desktop" if (! -f $desktopfile);
+		next if (! -f $desktopfile);
+		open(my $fh, ">${plank_launcher_dir}/$_.dockitem") or next;
+		print $fh "[PlankDockItemPreferences]\n" .
+				  "Launcher=file://$desktopfile\n";
+		close($fh);
+	}
+	# Define order of plank's dock items
+	my $items;
+	foreach (@apps) {
+		$items .= ", " if ($items);
+		$items .= "'$_.dockitem'";
+	}
+	open(my $fh, ">>$plank_ini") or bail("Couldn't open $plank_ini");
+	print $fh "dock-items=[$items]\n";
+	close($fh);
+	system("sed -i .bak -E 's/BROWSER/${cfg_browser}.desktop/g' ${mimelist}");
+	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
+	system("sed -i .bak -E 's/EMAILCLIENT/${cfg_email_client}.desktop/g' " .
+		   "${mimelist}");
+	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
+		   "${mimelist}");
+	system("rm -f ${mimelist}.bak 2>/dev/null");
+	
+	# Set file manager in dsbmc
+	system("sed -i .bak -E 's/FILEMANAGER/${cfg_fm}/g' ${dsbmc_cfg}");
+	system("rm -f ${dsbmc_cfg}.bak 2>/dev/null");
+
+	# Update Openbox menu
+	system("su -l nomad -c '/usr/bin/update_obmenu -u'");
+	
+	# Create localized XDG standard dirs.
+	system("su -l nomad -c '/usr/local/bin/xdg-user-dirs-update'");
+	
+	# Create dconf file from plank.ini
+	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
+	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
+
+	# Make nomad the owner of all the files under /home/nomad
+	system("chown -R nomad /home/nomad");
+}
+
+sub set_kbdmap {
+	my $vtkbdmap = xkbdtovt($cfg_kbdlayout, $cfg_kbdvariant);
+	open(my $in, "<$path_templates/input-keyboard.conf") or
+		bail("Couldn't open $path_templates/input-keyboard.conf");
+	open(my $out, ">$path_xkbd_conf")
+		or bail("Couldn't open $path_xkbd_conf");
+	foreach (<$in>) {
+		$_ =~ s/\@XKBDLAYOUT\@/$cfg_kbdlayout/;
+		$_ =~ s/\@XKBDVARIANT\@/$cfg_kbdvariant/;
+		print $out $_;
+	}
+	close($in); close($out);
+	system("kbdcontrol -l $vtkbdmap");
+	system("sysrc -f /etc/rc.conf.in keymap=$vtkbdmap");
+}
+
+#
+# Read the configuration from stdin, and do the installation
+#
+sub commit {
+	while ($_ = <STDIN>) {
+		my $ofh = select STDIN;
+		$| = 1;
+		select $ofh;
+		chomp;
+		$cfg_locale		   = $1 if (/^cfg_locale\s*=\s*(.*)/);
+		$cfg_fm		   	   = $1 if (/^cfg_file_manager\s*=\s*(.*)/);
+		$cfg_timezone	   = $1 if (/^cfg_timezone\s*=\s*(.*)/);
+		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
+		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
+		$cfg_geli_password = $1 if (/^cfg_geli_password\s*=\s*(.*)/);
+		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
+		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
+		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
+		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
+		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
+		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
+	}
+	STDOUT->autoflush(1);
+	if ($dummy) {
+			dummy_commit();
+			exit 0;
+	}
+	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
+	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
+	status("Setting timezone");
+	set_timezone($cfg_timezone);
+	system("cap_mkdb /etc/login.conf");
+	
+	if ($cfg_geli_password) {
+		mkgeli();
+	} else {
+		mkhome();
+	}
+	status("Creating /home/pkgs");
+	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
+	status("Extracting dot files and directories for user nomad");
+	system("cd /home/nomad && tar xvf /home.nomad.tgz 2>&1 && " .
+		   "chown -R nomad .");
+	foreach (qw(root nomad)) {
+		status("Setting password for $_");
+		set_password($_, $cfg_password);
+	}
+	status("Setting shell for user nomad");
+	set_shell("nomad", $cfg_shell);
+	status("Setting locale for user nomad");
+	system("pw usermod nomad -L ${cfg_locale}") == 0
+			or bail("Failed to set locale $cfg_locale");
+	status("Configuring desktop");
+	desktopsettings();
+	status("Setting keyboard map for X and vt");
+	set_kbdmap();
+	status("Disabling auto-login on ttyv0");
+	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
+	system("cp /usr/share/skel/dot.login /root/.login");
+	status("Creating font cache files");
+	system("/usr/local/bin/fc-cache -f");
+	system("mv /etc/rc.conf.in /etc/rc.conf");
+	exit 0;
+}
+
+sub dummy_commit {
+		status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
+		status("Setting timezone $cfg_timezone");
+		if ($cfg_geli_password) {
+			status("Creating geli encrypted /home with " .
+				   "geli password $cfg_geli_password");
+		} else {
+			status("Creating /home");
+		}
+		status("Creating /home/pkgs");
+		status("Extracting dot files and directories for user nomad");
+		foreach (qw(root nomad)) {
+			status("Setting password for $_ to $cfg_password");
+		}
+		status("Setting shell $cfg_shell for user nomad");
+		status("Setting locale $cfg_locale for user nomad");
+		status("Configuring desktop");
+		status("Setting keyboard map ($cfg_kbdlayout, $cfg_kbdvariant) " .
+			   "for X and vt");
+		status("Disabling auto-login on ttyv0");
+		status("Creating font cache files");
+		exit 0;
+}
+
+sub usage {
+	print "Usage: nomadbsd-setup [options] command [args ...]\n" .
+		  "OPTIONS\n" .
+		  "-h             Print this\n" .
+		  "-n             Dummy mode. Only writes messages to stdout\n" .
+		  "               without doing anything\n" .
+		  "COMMANDS\n" .
+		  "locales        Print list of locales\n" .
+		  "filemanagers   Print a list of file managers\n" .
+		  "emailclients   Print a list of email client\n" .
+		  "browsers       Print a list of browsers\n" .
+		  "editors        Print a list of editors\n" .
+		  "guieditors     Print a list of GUI editors\n" .
+		  "kbdmodels      Print a list of X keyboard models\n" .
+		  "kbdlayouts     Print a list of keyboard layouts\n" .
+		  "kbdvariants    Print a list of keyboard varinats\n" .
+		  "timezones      Print a list of time zones\n" .
+		  "commit         Read configuration from stdin, and apply it\n" .
+		  "               to the device.\n" .
+		  "bootstrap-gui  Set up an X server and start the front end\n";
+		exit 0;
+}
+
+#
+# Take an array of flag character and the expected number of arguments.
+# If $ARGV[0] containes a flag not in the given array, or @ARGV doesn't
+# have the required number of arguments, exit with an error.
+# If $ARGV[0] contains a valid flag and @ARGV has the expected number of
+# arguments, return the flag character. If $ARGV[0] doesn't start with
+# a '-', return an empty string.
+#
+sub check_args {
+	my $nargs;
+	if ($ARGV[0] =~ /^-([A-Za-z0-9])([A-Za-z0-9]+)/) {
+		# -Xarg
+		$nargs = @ARGV;
+		for (my $i = 0; $i < @_ - 1; $i++) {
+			next if ($_[$i] ne $1);
+			if ($_[$i + 1] == 0) {
+				# An argument was given, but this option doesn't
+				# expect an argument.
+				print STDERR "-$_[$i] has no arguments\n";
+				exit 1;
+			}
+		}
+	} elsif ($ARGV[0] =~ /^-([A-Za-z0-9]{1})/) {
+		# -X
+		$nargs = @ARGV - 1;
+	} else {
+		return "";
+	}
+	for (my $i = 0; $i < @_ - 1; $i++) {
+		next if ($_[$i] ne $1);
+		if ($nargs < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+			exit 1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+				exit 1
+			}
+		}
+		return $1;
+	}
+	print STDERR "Invalid option '$ARGV[0]'\n";
+	exit 1;
+}
+
+while ((my $flag = check_args('h', 0, 'n', 0))) {
+	usage()	   if ($flag eq 'h');
+	$dummy = 1 if ($flag eq 'n');
+	shift;
+}
+
+while (@ARGV) {
+	if ($ARGV[0] eq "locales") {
+		print_locales();
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdlayouts") {
+		print_kbdlayout_list();
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdmodels") {
+		print_xkbdmodels();
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdvariants") {
+		my $variant;
+		
+		shift @ARGV;
+		my $f = check_args('l', 1);
+		if ($f eq 'l') {
+			shift;
+			$variant = pop @ARGV;
+		}
+		print_kbdvariant_list($variant);
+		exit 0;
+	} elsif ($ARGV[0] eq "timezones") {
+		print_timezones();
+		exit 0;
+	} elsif ($ARGV[0] eq "shells") {
+		print_array_data(\@shell_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "editors") {
+		print_array_data(\@editor_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "emailclients") {
+		print_array_data(\@email_client_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "browsers") {
+		print_array_data(\@browser_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "guieditors") {
+		print_array_data(\@gui_editor_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "filemanagers") {
+		print_array_data(\@file_manager_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "commit") {
+		commit();
+		exit 0;
+	} elsif ($ARGV[0] eq "bootstrap-gui") {
+		bootstrap_gui();
+		exit 0;
+	} else {
+		print STDERR "Unknown command: $ARGV[0]\n";
+		usage();
+	}
+	shift;
+}
+usage();
