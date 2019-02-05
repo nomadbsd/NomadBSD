@@ -427,6 +427,8 @@ createimage()
 		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
 		sed -i -E '/.*lenovofix.*$/d' \
 			${TMP_BASE_DIR}/usr/libexec/nomad/nomad_setup
+		sed -i -E '/.*lenovofix.*$/d' \
+			${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup
 	fi
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
