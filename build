@@ -522,6 +522,14 @@ createpatch()
 	echo ${r} >> nomadbsd-patch.index
 }
 
+build_setupgui()
+{
+	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+		cd /tmp/nomadbsd-setup-gui && qmake && make && make install" || bail
+	umount "${SYSDIR}/dev"
+}
+
 cleanup()
 {
 	if (mount | grep "${SYSDIR}/usr/ports"); then
@@ -584,7 +592,7 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit instports builddrmlegacy postpkgcfg"
+	stages="instpkgs instgit build_setupgui instports builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
 	_init
@@ -611,7 +619,7 @@ all()
 resumebuild()
 {
 	local i stages stage_found failed_stage
-	stages="updatebase buildkernel instpkgs instgit instports"
+	stages="updatebase buildkernel instpkgs instgit build_setupgui instports"
 	stages="${stages} builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
