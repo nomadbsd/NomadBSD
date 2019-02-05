@@ -7,6 +7,6 @@
 # vim: set tabstop=4:
 
 if ( "`tty`" =~ "/dev/ttyv0" ) then
-	/usr/libexec/nomad/nomad_setup
+	/usr/libexec/nomadbsd-setup bootstrap-gui
 endif
 
