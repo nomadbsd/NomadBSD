@@ -77,21 +77,6 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 void SetupWizard::accept()
 {
 	system(REBOOT_CMD);
-	
-	qDebug() << "locale == "    << cfg_locale
-		 << " layout == "   << cfg_kbdlayout
-		 << " variant == "  << cfg_kbdvariant
-		 << " timezone == " << cfg_timezone
-		 << " password == " << cfg_password;
-	qDebug() << "Use Geli: "    << cfg_geli;
-	if (cfg_use_geli)
-		qDebug() << "Geli password: " << cfg_geli_password;
-	qDebug() << "apps: "
-		 << cfg_shell
-		 << cfg_editor
-		 << cfg_email_client
-		 << cfg_gui_editor
-		 << cfg_browser;
 	QDialog::accept();
 }
 
