@@ -524,6 +524,7 @@ sub set_timezone {
 	# This needs fixing
 	system("echo $tz > /var/db/zoneinfo");
 	system("cp /usr/share/zoneinfo/$tz /etc/localtime");
+	system("adjkerntz -a");
 }
 
 sub set_shell {
