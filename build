@@ -457,7 +457,7 @@ createimage()
 	fi
 	gpart add -t freebsd-ufs -l ${GPTROOT} -s ${basesz}M ${mddev} || bail
 	pn=$((${pn} + 1))
-	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
+	newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 	    -m ${UFS_MINFREE} /dev/${mddev}p${pn} || bail
 	mount /dev/${mddev}p${pn} mnt || bail
 	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd mnt && tar pxf -) || bail
