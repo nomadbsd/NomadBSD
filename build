@@ -32,6 +32,8 @@
 #
 # resume	Continue where the build failed.
 #
+# setupgui	(Re)build and (re)install nomadbsd-setup-gui
+#
 # usrcfg	Install all files from nomad/ in ${SYSDIR]/home/nomad
 #
 # usrclean	Remove all files from ${SYSDIR}/home/nomad
@@ -680,6 +682,7 @@ while [ $# -gt 0 ]; do
 	pkgs)	  instpkgs;;
 	ports)	  instports;;
 	resume)	  resumebuild;;
+	setupgui) build_setupgui;;
 	src)	  instsrcdist;;
 	uzip)	  createuzip;;
 	usrcfg)	  instusrcfg;;

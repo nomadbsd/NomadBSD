@@ -34,6 +34,8 @@ ports       Build and install all ports defined in build.cfg
 resume      Continue where the build failed. Use this to resume from a failed
             "build all", after removing the error source(s).
 
+setupgui    (Re)build and (re)install nomadbsd-setup-gui
+
 uzip        Create uzip image.
 
 update      Update base system
