@@ -91,6 +91,8 @@ do_initgfx()
 	fi
 	if [ ${syscons_disabled:=0} -eq 0 ] && checkyesno initgfx_menu; then
 		gfx_menu
+	elif [ -n ${initgfx_default} ]; then
+		initgfx_autodetect=0
 	else
 		initgfx_autodetect=1
 	fi
@@ -101,8 +103,10 @@ do_initgfx()
 	fi
 	if [ ${initgfx_use_vesa} -eq 1 ]; then
 		driver="vesa"
-	else
+	elif [ ${initgfx_use_scfb} -eq 1 ]; then
 		driver="scfb"
+	elif [ -n ${initgfx_default} ]; then
+		driver=${initgfx_default}
 	fi
 	eval cfg_path=\${path_${driver}_cfg}
 	(printf "Section \"Device\"\n"; \
