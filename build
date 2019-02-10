@@ -19,6 +19,8 @@
 # patch		Create a patch file for nomadbsd-update. Add a new record to the
 #			patch index.
 #
+# handbook	Build and install the NomadBSD handbook.
+#
 # image		Build the NomadBSD image.
 #
 # ports		Build and install all ports defined in build.cfg
@@ -114,6 +116,7 @@ initbase()
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
+	insthandbook
 	instusrcfg
 }
 
@@ -536,6 +539,24 @@ build_setupgui()
 	umount "${SYSDIR}/dev"
 }
 
+insthandbook()
+{
+	local i
+
+	if [ ! -d handbook ]; then
+		git clone https://github.com/nomadbsd/handbook.git
+	else
+		(cd handbook && git pull)
+	fi
+	(cd handbook && make)
+	if [ ! -d "${SYSDIR}/home/nomad/handbook" ]; then
+		mkdir "${SYSDIR}/home/nomad/handbook"
+	fi
+	for i in style.css handbook.html images; do
+		cp -r handbook/$i "${SYSDIR}/home/nomad/handbook/"
+	done
+}
+
 cleanup()
 {
 	if (mount | grep "${SYSDIR}/usr/ports"); then
@@ -586,6 +607,7 @@ allclean()
 	rm -rf "${DISTDIR}"
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
 	rm -rf nvidia
+	rm -rf handbook
 }
 
 _init()
@@ -673,6 +695,7 @@ while [ $# -gt 0 ]; do
 	cleanup)  cleanup;;
 	drmlegacy)builddrmlegacy;;
 	git)	  instgit;;
+	handbook) insthandbook;;
 	image)	  createimage;;
 	init)	  init;;
 	initbase) initbase;;

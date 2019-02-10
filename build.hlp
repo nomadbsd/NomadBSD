@@ -11,6 +11,8 @@ drmlegacy   Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
 
 git         Install software from Git repos defined in build.cfg
 
+handbook    Build and install the NomadBSD handbook.
+
 init        Create base system, add the nomad user, and copy the
             configuration files to the base system.
 
