@@ -423,6 +423,8 @@ createimage()
 	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
 	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
 
+	rm -rf "${TMP_BASE_DIR}/root/.subversion"
+
 	if [ ! -z ${mac} ]; then
 		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
 		sed -i -E '/.*lenovofix.*$/d' \
