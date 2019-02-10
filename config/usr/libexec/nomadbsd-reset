@@ -82,10 +82,12 @@ delsysdir()
 rollback() {
 	local d msg ret opt
 	local dirs="/root /etc /var /usr.local.etc"
+	local dev=$(getrootdev)
 
 	ret="/tmp/askrollback.ret"
 	msg="YOU ARE ABOUT TO RESET NOMADBSD."
-	msg="${msg} ALL YOUR FILES WILL BE LOST!\n\nARE YOU SURE?"
+	msg="${msg} ALL YOUR FILES WILL BE LOST!\n\n"
+	msg="${msg}ARE YOU SURE YOU WANT TO RESET NOMADBSD ON /dev/$dev?"
 	while [ true ]; do
 		dialog --title "!!! WARNING !!!!" --radiolist "${msg}" 15 60 3 \
 			"Yes" "Reset NomadBSD" off \
