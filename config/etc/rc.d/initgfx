@@ -103,7 +103,7 @@ do_initgfx()
 		*)
 			echo "Error: Unknown driver ${initgfx_default}. " \
 				 "Use scfb or vesa" >&2
-			exit 1
+			initgfx_autodetect=1
 			;;
 		esac
 	else
