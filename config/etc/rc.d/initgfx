@@ -89,10 +89,23 @@ do_initgfx()
 	if [ ${syscons_disabled:=0} -eq 0 ]; then
 		sysons_disabled=$(sysctl -n hw.syscons.disable 2>/dev/null)
 	fi
-	if [ ${syscons_disabled:=0} -eq 0 ] && checkyesno initgfx_menu; then
-		gfx_menu
-	elif [ -n ${initgfx_default} ]; then
-		initgfx_autodetect=0
+	if checkyesno initgfx_menu; then
+		if [ ${syscons_disabled:=0} -eq 0 ]; then
+			gfx_menu
+		else
+			initgfx_autodetect=1
+		fi
+	elif [ -n "${initgfx_default}" ]; then
+		case ${initgfx_default} in
+		vesa|scfb)
+			initgfx_autodetect=0
+			;;
+		*)
+			echo "Error: Unknown driver ${initgfx_default}. " \
+				 "Use scfb or vesa" >&2
+			exit 1
+			;;
+		esac
 	else
 		initgfx_autodetect=1
 	fi
@@ -105,7 +118,7 @@ do_initgfx()
 		driver="vesa"
 	elif [ ${initgfx_use_scfb} -eq 1 ]; then
 		driver="scfb"
-	elif [ -n ${initgfx_default} ]; then
+	elif [ -n "${initgfx_default}" ]; then
 		driver=${initgfx_default}
 	fi
 	eval cfg_path=\${path_${driver}_cfg}
