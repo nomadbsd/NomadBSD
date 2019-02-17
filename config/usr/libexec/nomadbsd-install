@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim: set tabstop=4:
-
+arch=@ARCH@
 idx=0
 username="nomad"
 swapsize=$((2 * `sysctl -n hw.realmem` / (1024 * 1024)))
@@ -69,12 +69,23 @@ gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $disk || \
 idx=$((idx + 1))
 gpart bootcode -b /boot/pmbr -p /boot/gptboot -i $idx $disk || \
 	bail "Couldn't install boot code"
-gpart add -t efi -l gpefiboot -s 800K $disk || \
-	bail "Couldn't create EFI partition"
-idx=$((idx + 1))
-dd if=/boot/boot1.efifat of=/dev/${disk}p$idx
-gpart set -a lenovofix $disk
-
+if [ "$arch" != "i386" ]; then
+	case $arch in
+	amd64)
+		gpart add -t efi -l gpefiboot -s 800K $disk || \
+			bail "Couldn't create EFI partition"
+		;;
+	mac)
+		gpart add -t efi -l gpefiboot -s 200M $disk || \
+			bail "Couldn't create EFI partition"
+		;;
+	esac
+	idx=$((idx + 1))
+	dd if=/boot/boot1.efifat of=/dev/${disk}p$idx
+fi
+if [ "$arch" != "mac" ]; then
+	gpart set -a lenovofix $disk
+fi
 if [ $swapsize -gt 0 ]; then
 	gpart add -t freebsd-swap -l nomadswap -s ${swapsize}M $disk || \
 		bail "Couldn't create swap partition"
@@ -118,4 +129,3 @@ chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
 umount /mnt
 dialog --msgbox "Installation finished.\n\nHit OK to reboot" 8 40
 shutdown -r now
-
