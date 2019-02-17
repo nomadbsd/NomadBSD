@@ -1,0 +1,121 @@
+#!/bin/sh
+# vim: set tabstop=4:
+
+idx=0
+username="nomad"
+swapsize=$((2 * `sysctl -n hw.realmem` / (1024 * 1024)))
+ret="/tmp/nomadbsd-install.$$"
+
+bail() {
+	echo $1 >&2
+	exit 1
+}
+
+fstab() {
+cat <<FSTAB_END
+/dev/gpt/nomadroot /    ufs   rw,noatime   1 1
+tmpfs              /tmp tmpfs rw,mode=1777 0 0
+FSTAB_END
+}
+
+if ! (mount | grep -q '/tmp'); then
+	mount /tmp
+fi
+
+items=$(camcontrol devlist | awk -F " " '{
+	split($0, a, "[<>]"); descr = a[2];
+	n = split($NF, a, "[,()]");
+	for (i = 2; i <= n; i++) {
+		if (a[i] ~ /(ada|da|nvme)[0-9]/) {
+			if (cnt++ > 0)
+				items = sprintf("%s:%s:%s:off", items, a[i], descr);
+			else
+				items = sprintf("%s:%s:on", a[i], descr);
+		}
+	}
+}
+END { print items }')
+
+OIFS=$IFS
+IFS=:
+dialog --radiolist 'Choose the disk you want to install NomadBSD on' \
+	-1 45 5 $items 2>$ret || exit 0
+IFS=$OIFS
+disk=$(cat $ret)
+dialog --title "Swap partition" --inputbox \
+	"Set swap size in MB. Set to 0 if you don't want a swap partition" \
+	10 35 $swapsize 2>$ret || exit 0
+swapsize=$(cat $ret);
+dialog --inputbox \
+	'Choose a username\n\nLog in with the password you chose for nomad/root' \
+	12 35 $username 2>$ret || exit 0
+username=$(cat $ret)
+
+msg="Last chance to quit! If you proceed, all the data on $disk will be lost."
+msg="$msg\n\nAre you sure you want to proceed?"
+dialog --title "Last chance to quit" --yesno "$msg" -1 -1 || exit 0
+
+if ! (mount | grep -q '/usr/local'); then
+	service mount_uzip onestart
+fi
+if ! (mount | grep -q '/home'); then
+	mount /home
+fi
+gpart destroy -F $disk
+dd if=/dev/zero of=/dev/$disk count=100
+gpart create -s gpt $disk || bail "Couldn't create GPT partition scheme"
+gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $disk || \
+	bail "Couldn't create partition"
+idx=$((idx + 1))
+gpart bootcode -b /boot/pmbr -p /boot/gptboot -i $idx $disk || \
+	bail "Couldn't install boot code"
+gpart add -t efi -l gpefiboot -s 800K $disk || \
+	bail "Couldn't create EFI partition"
+idx=$((idx + 1))
+dd if=/boot/boot1.efifat of=/dev/${disk}p$idx
+gpart set -a lenovofix $disk
+
+if [ $swapsize -gt 0 ]; then
+	gpart add -t freebsd-swap -l nomadswap -s ${swapsize}M $disk || \
+		bail "Couldn't create swap partition"
+	idx=$((idx + 1))
+fi
+gpart add -t freebsd-ufs -l nomadroot $disk || \
+	bail "Couldn't create partition"
+idx=$((idx + 1))
+newfs -t -U /dev/${disk}p$idx || bail "Couldn't create UFS filesystem"
+mount /dev/${disk}p$idx /mnt || bail "Failed to mount /dev/${disk}p$idx"
+(cd / && tar cf -						\
+	--exclude '^mnt*'					\
+	--exclude '^uzip*'					\
+	--exclude '^home.nomad.tgz'			\
+	--exclude '^nomadbsd-backup.tar.xz'	\
+	--exclude '^etc/rc.d/mount_uzip'	\
+	--exclude '^home/pkgs*' .) | (cd /mnt && tar xvf -)
+unlink /mnt/usr/local/etc
+mv /mnt/usr.local.etc /mnt/usr/local/etc
+mkdir /mnt/mnt
+
+fstab > /mnt/etc/fstab
+if [ $swapsize -gt 0 ]; then
+	printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/nomadswap" >> /mnt/etc/fstab
+fi
+sed -i .bak -E "/^local_startup/d" /mnt/etc/rc.conf
+sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/$username/g" /mnt/etc/master.passwd
+sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/$username/g" /mnt/etc/group
+sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
+
+for i in $(find /mnt/home/nomad/ -type f); do
+	if (file "$i" | grep -q text); then
+		sed -i '' -E "s/[[:<:]]nomad[[:>:]]/$username/g" "$i"
+	fi
+done
+rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
+rm -f /mnt/usr/libexec/nomad*
+
+mv /mnt/home/nomad /mnt/home/$username
+chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+umount /mnt
+dialog --msgbox "Installation finished.\n\nHit OK to reboot" 8 40
+shutdown -r now
+
