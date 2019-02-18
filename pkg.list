@@ -56,6 +56,7 @@ ports-mgmt/octopkg
 ports-mgmt/pkg
 portuguese/hunspell
 print/gimp-gutenprint
+print/qpdfview
 russian/aspell
 russian/hunspell
 security/fpm2
