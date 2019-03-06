@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+<menu id="AudioVideo" label="AudioVideo" comment="--- auto ---">
+	<item icon="/usr/local/share/pixmaps/asunder.png" label="Asunder CD Ripper" comment="--- auto ---">
+		<action name="Execute">
+			<command>asunder</command>
+		</action>
+	</item>
+	<item label="Cantata" comment="--- auto ---">
+		<action name="Execute">
+			<command>cantata </command>
+		</action>
+	</item>
+	<item label="DeaDBeeF" comment="--- auto ---">
+		<action name="Execute">
+			<command>deadbeef </command>
+		</action>
+	</item>
+	<item label="DSBMixer" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbmixer</command>
+		</action>
+	</item>
+	<item label="VLC media player" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/bin/vlc --started-from-file </command>
+		</action>
+	</item>
+	<item label="Xfburn" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfburn</command>
+		</action>
+	</item>
+</menu>
+<menu id="Development" label="Development" comment="--- auto ---">
+	<item label="Geany" comment="--- auto ---">
+		<action name="Execute">
+			<command>geany </command>
+		</action>
+	</item>
+</menu>
+<menu id="Graphics" label="Graphics" comment="--- auto ---">
+	<item label="GNU Image Manipulation Program" comment="--- auto ---">
+		<action name="Execute">
+			<command>gimp-2.10 </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/gtkam-camera.png" label="Gtkam Digital Camera Browser" comment="--- auto ---">
+		<action name="Execute">
+			<command>gtkam</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/mirage.png" label="Mirage" comment="--- auto ---">
+		<action name="Execute">
+			<command>mirage </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/xsane.xpm" label="XSane - Scanning" comment="--- auto ---">
+		<action name="Execute">
+			<command>xsane</command>
+		</action>
+	</item>
+</menu>
+<menu id="Network" label="Network" comment="--- auto ---">
+	<item icon="/usr/local/share/pixmaps/filezilla.png" label="FileZilla" comment="--- auto ---">
+		<action name="Execute">
+			<command>filezilla</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/firefox.png" label="Firefox Web Browser" comment="--- auto ---">
+		<action name="Execute">
+			<command>firefox </command>
+		</action>
+	</item>
+	<item label="HexChat" comment="--- auto ---">
+		<action name="Execute">
+			<command>hexchat --existing </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/palemoon.png" label="Pale Moon" comment="--- auto ---">
+		<action name="Execute">
+			<command>palemoon </command>
+		</action>
+	</item>
+	<item label="Pidgin Internet Messenger" comment="--- auto ---">
+		<action name="Execute">
+			<command>pidgin</command>
+		</action>
+	</item>
+	<item label="Qtransmission Bittorrent Client" comment="--- auto ---">
+		<action name="Execute">
+			<command>transmission-qt </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/sylpheed.png" label="Sylpheed" comment="--- auto ---">
+		<action name="Execute">
+			<command>sylpheed </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/thunderbird.png" label="Thunderbird" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunderbird </command>
+		</action>
+	</item>
+	<item label="WiFi Networks Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>wifimgr </command>
+		</action>
+	</item>
+</menu>
+<menu id="Office" label="Office" comment="--- auto ---">
+	<item label="LibreOffice" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice </command>
+		</action>
+	</item>
+	<item label="LibreOffice Base" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --base </command>
+		</action>
+	</item>
+	<item label="LibreOffice Calc" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --calc </command>
+		</action>
+	</item>
+	<item label="LibreOffice Draw" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --draw </command>
+		</action>
+	</item>
+	<item label="LibreOffice Impress" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --impress </command>
+		</action>
+	</item>
+	<item label="LibreOffice Math" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --math </command>
+		</action>
+	</item>
+	<item label="LibreOffice Writer" comment="--- auto ---">
+		<action name="Execute">
+			<command>libreoffice --writer </command>
+		</action>
+	</item>
+	<item label="qpdfview" comment="--- auto ---">
+		<action name="Execute">
+			<command>qpdfview --unique </command>
+		</action>
+	</item>
+</menu>
+<menu id="Settings" label="Settings" comment="--- auto ---">
+	<item label="ARandR" comment="--- auto ---">
+		<action name="Execute">
+			<command>arandr</command>
+		</action>
+	</item>
+	<item label="Authorizations" comment="--- auto ---">
+		<action name="Execute">
+			<command>polkit-gnome-authorization</command>
+		</action>
+	</item>
+	<item label="Customize Look and Feel" comment="--- auto ---">
+		<action name="Execute">
+			<command>lxappearance</command>
+		</action>
+	</item>
+	<item label="Desktop Preferences" comment="--- auto ---">
+		<action name="Execute">
+			<command>pcmanfm --desktop-pref</command>
+		</action>
+	</item>
+	<item label="DSBAutostart" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbautostart</command>
+		</action>
+	</item>
+	<item label="DSBDisplaySettings" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbds</command>
+		</action>
+	</item>
+	<item label="File Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunar-settings</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/obconf.png" label="Openbox Configuration Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>obconf </command>
+		</action>
+	</item>
+	<item label="Panel" comment="--- auto ---">
+		<action name="Execute">
+			<command>xfce4-panel --preferences</command>
+		</action>
+	</item>
+	<item label="Qt5 Settings" comment="--- auto ---">
+		<action name="Execute">
+			<command>qt5ct</command>
+		</action>
+	</item>
+	<item label="Tint2 Settings" comment="--- auto ---">
+		<action name="Execute">
+			<command>tint2conf</command>
+		</action>
+	</item>
+</menu>
+<menu id="System" label="System" comment="--- auto ---">
+	<item label="Bulk Rename" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/lib/Thunar/ThunarBulkRename </command>
+		</action>
+	</item>
+	<item label="DSBBatmon" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbbatmon</command>
+		</action>
+	</item>
+	<item label="DSBMC" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbmc</command>
+		</action>
+	</item>
+	<item label="DSBSu" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbsu</command>
+		</action>
+	</item>
+	<item label="File Manager PCManFM" comment="--- auto ---">
+		<action name="Execute">
+			<command>pcmanfm </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/mc.png" label="Midnight Commander" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/bin/sakura -e mc</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/octopi_green.png" label="OctoPkg" comment="--- auto ---">
+		<action name="Execute">
+			<command>octopkg</command>
+		</action>
+	</item>
+	<item label="Printer configuration" comment="--- auto ---">
+		<action name="Execute">
+			<command>xdg-open http://localhost:631</command>
+		</action>
+	</item>
+	<item label="Thunar File Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>thunar </command>
+		</action>
+	</item>
+	<item label="Tint2" comment="--- auto ---">
+		<action name="Execute">
+			<command>tint2</command>
+		</action>
+	</item>
+</menu>
+<menu id="Utility" label="Utility" comment="--- auto ---">
+	<item label="compton" comment="--- auto ---">
+		<action name="Execute">
+			<command>compton</command>
+		</action>
+	</item>
+	<item label="DSBExec" comment="--- auto ---">
+		<action name="Execute">
+			<command>dsbexec</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/fpm2/logo.png" label="Figaro's Password Manager 2" comment="--- auto ---">
+		<action name="Execute">
+			<command>fpm2 </command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/galculator.xpm" label="Galculator" comment="--- auto ---">
+		<action name="Execute">
+			<command>galculator</command>
+		</action>
+	</item>
+	<item label="gVim" comment="--- auto ---">
+		<action name="Execute">
+			<command>gvim -f </command>
+		</action>
+	</item>
+	<item label="Kvantum Manager" comment="--- auto ---">
+		<action name="Execute">
+			<command>kvantummanager</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/leafpad.png" label="Leafpad" comment="--- auto ---">
+		<action name="Execute">
+			<command>leafpad </command>
+		</action>
+	</item>
+	<item label="Plank" comment="--- auto ---">
+		<action name="Execute">
+			<command>plank</command>
+		</action>
+	</item>
+	<item icon="/usr/local/share/pixmaps/terminal-tango.svg" label="Sakura" comment="--- auto ---">
+		<action name="Execute">
+			<command>sakura</command>
+		</action>
+	</item>
+	<item label="Vim" comment="--- auto ---">
+		<action name="Execute">
+			<command>/usr/local/bin/sakura -e vim </command>
+		</action>
+	</item>
+	<item label="Xarchiver" comment="--- auto ---">
+		<action name="Execute">
+			<command>xarchiver </command>
+		</action>
+	</item>
+</menu>
+<menu id="root-menu" label="Openbox 3">
+	<menu id="AudioVideo" icon="" comment="--- auto ---"/>
+	<menu id="Development" icon="" comment="--- auto ---"/>
+	<menu id="Graphics" icon="" comment="--- auto ---"/>
+	<menu id="Network" icon="" comment="--- auto ---"/>
+	<menu id="Office" icon="" comment="--- auto ---"/>
+	<menu id="Settings" icon="" comment="--- auto ---"/>
+	<menu id="System" icon="" comment="--- auto ---"/>
+	<menu id="Utility" icon="" comment="--- auto ---"/>
+<separator />
+<menu id="client-list-menu" />
+<separator />
+<item label="Reconfigure">
+<action name="Reconfigure" />
+</item>
+<separator />
+<item label="Exit">
+<action name="Exit" />
+<item label="Logout" icon="/usr/local/share/icons/Papirus/48x48/apps/gnome-logout.svg">
+	<action name="Execute">
+		<command>/usr/local/bin/dsblogoutmgr -l close_session</command>
+	</action>
+</item>
+</menu>
+</openbox_menu>
