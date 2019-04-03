@@ -50,6 +50,13 @@ InstallWizard::InstallWizard(QWidget *parent) : QWizard(parent)
 	QIcon winIcon = qh_loadIcon("drive-harddisk", 0);
 	setWindowTitle(tr("NomadBSD Installation Wizard"));
 	setWindowIcon(winIcon);
+
+	setButtonText(QWizard::NextButton,   tr("Next"));
+	setButtonText(QWizard::BackButton,   tr("Back"));
+	setButtonText(QWizard::CommitButton, tr("Commit"));
+	setButtonText(QWizard::FinishButton, tr("Finish"));
+	setButtonText(QWizard::CancelButton, tr("Cancel"));
+
 	addPage(new WelcomePage);
 	addPage(new SettingsPage);
 	addPage(new SummaryPage);
