@@ -64,7 +64,7 @@ public:
 				  "for the inconvenience\n"));
 		msgBox.setInformativeText(message);
 		msgBox.exec();
-		QCoreApplication::exit(1);
+		std::exit(1);
 	}
 
 	static void cancelMenu()
