@@ -2,47 +2,49 @@
 #
 # COMMANDS
 #
-# all		Set up base system, build and install kernel if BUILD_KERNEL is
-#			set to YES, intall packages, ports, software from Git repos,
-#			create uzip image, and finally build the NomadBSD image.
+# all		 Set up base system, build and install kernel if BUILD_KERNEL is
+#			 set to YES, intall packages, ports, software from Git repos,
+#			 create uzip image, and finally build the NomadBSD image.
 #
-# init		Create base system, add the nomad user, and copy the
-#			configuration files to the base system.
+# init		 Create base system, add the nomad user, and copy the
+#			 configuration files to the base system.
 #
-# initbase	Create nomad user, and copy all configuration files from
-#			config/ and nomad/ to base system.
+# initbase	 Create nomad user, and copy all configuration files from
+#			 config/ and nomad/ to base system.
 #
-# cleanup	Unmount filesystems, remove mount points, and detach md devices.
+# cleanup	 Unmount filesystems, remove mount points, and detach md devices.
 #
-# uzip		Create uzip image.
+# uzip		 Create uzip image.
 #
-# patch		Create a patch file for nomadbsd-update. Add a new record to the
-#			patch index.
+# patch		 Create a patch file for nomadbsd-update. Add a new record to the
+#			 patch index.
 #
-# handbook	Build and install the NomadBSD handbook.
+# handbook	 Build and install the NomadBSD handbook.
 #
-# image		Build the NomadBSD image.
+# image		 Build the NomadBSD image.
 #
-# ports		Build and install all ports defined in build.cfg
+# ports		 Build and install all ports defined in build.cfg
 #
-# pkgs		Install all packages from pkg.list
+# pkgs		 Install all packages from pkg.list
 #
-# git		Install software from Git repos defined in build.cfg
+# git		 Install software from Git repos defined in build.cfg
 #
-# pkgcfg	Set up configuration files and users required by installed
-#			software packages.
+# pkgcfg	 Set up configuration files and users required by installed
+#			 software packages.
 #
-# resume	Continue where the build failed.
+# resume	 Continue where the build failed.
 #
-# setupgui	(Re)build and (re)install nomadbsd-setup-gui
+# setupgui	 (Re)build and (re)install nomadbsd-setup-gui
 #
-# usrcfg	Install all files from nomad/ in ${SYSDIR]/home/nomad
+# installgui (Re)build and (re)install nomadbsd-install-gui
 #
-# usrclean	Remove all files from ${SYSDIR}/home/nomad
+# usrcfg	 Install all files from nomad/ in ${SYSDIR]/home/nomad
 #
-# clean		Remove base system dir, distfiles, patch dir, and uzip images.
+# usrclean	 Remove all files from ${SYSDIR}/home/nomad
 #
-# drmlegacy	Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
+# clean		 Remove base system dir, distfiles, patch dir, and uzip images.
+#
+# drmlegacy	 Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
 #
 # vim: set tabstop=4:
 #
@@ -543,6 +545,14 @@ build_setupgui()
 	umount "${SYSDIR}/dev"
 }
 
+build_installgui()
+{
+	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+		cd /tmp/nomadbsd-install-gui && qmake && make && make install" || bail
+	umount "${SYSDIR}/dev"
+}
+
 insthandbook()
 {
 	local i
@@ -624,8 +634,9 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit build_setupgui instports builddrmlegacy postpkgcfg"
-	stages="${stages} createuzip createimage cleanup"
+	stages="instpkgs instgit build_setupgui buil_installgui instports "
+	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage "
+	stages="${stages} cleanup"
 
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -692,30 +703,31 @@ trap bail SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	-m)	  	  mac=1;;
-	-h)		  help;;
-	all)	  all;;
-	clean)	  allclean;;
-	cleanup)  cleanup;;
-	drmlegacy)builddrmlegacy;;
-	git)	  instgit;;
-	handbook) insthandbook;;
-	image)	  createimage;;
-	init)	  init;;
-	initbase) initbase;;
-	kernel)	  buildkernel;;
-	patch)	  createpatch;;
-	pkgcfg)	  postpkgcfg;;
-	pkgs)	  instpkgs;;
-	ports)	  instports;;
-	resume)	  resumebuild;;
-	setupgui) build_setupgui;;
-	src)	  instsrcdist;;
-	uzip)	  createuzip;;
-	usrcfg)	  instusrcfg;;
-	usrclean) usrclean;;
-	update)	  updatebase;;
-	*)		  usage;;
+	-m)			mac=1;;
+	-h)			help;;
+	all)		all;;
+	clean)		allclean;;
+	cleanup)	cleanup;;
+	drmlegacy)	builddrmlegacy;;
+	git)		instgit;;
+	handbook)	insthandbook;;
+	image)		createimage;;
+	init)		init;;
+	initbase)	initbase;;
+	kernel)		buildkernel;;
+	patch)		createpatch;;
+	pkgcfg)		postpkgcfg;;
+	pkgs)		instpkgs;;
+	ports)		instports;;
+	resume)		resumebuild;;
+	setupgui)	build_setupgui;;
+	installgui) build_installgui;;
+	src)		instsrcdist;;
+	uzip)		createuzip;;
+	usrcfg)		instusrcfg;;
+	usrclean)	usrclean;;
+	update)		updatebase;;
+	*)			usage;;
 	esac
 	shift
 done

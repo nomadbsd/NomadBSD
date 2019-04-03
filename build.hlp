@@ -21,6 +21,8 @@ image       Build the NomadBSD image.
 initbase    Create nomad user, and copy all configuration files from
             config/ and nomad/ to base system.
 
+installgui  (Re)build and (re)install nomadbsd-install-gui
+
 kernel      Build a custom kernel using kernel/NOMADBSD
 
 patch       Create a patch file for nomadbsd-update. Add a new record to the
