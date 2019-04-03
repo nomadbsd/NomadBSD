@@ -26,130 +26,217 @@
 
 arch=@ARCH@
 idx=0
-username="nomad"
-swapsize=$((2 * `sysctl -n hw.realmem` / (1024 * 1024)))
-ret="/tmp/nomadbsd-install.$$"
+rootfs_label="nbsdrootfs"
+swap_label="nbsdswap"
 
 bail() {
-	echo $1 >&2
+	echo "nomadbsd-install: $1" >&2
 	exit 1
+}
+
+status() {
+	echo "!$1"
+	[ -n "${dummy}" ] && sleep 5
 }
 
 fstab() {
 cat <<FSTAB_END
-/dev/gpt/nomadroot /    ufs   rw,noatime   1 1
-tmpfs              /tmp tmpfs rw,mode=1777 0 0
+/dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
+tmpfs                    /tmp tmpfs rw,mode=1777 0 0
 FSTAB_END
 }
 
-if ! (mount | grep -q '/tmp'); then
-	mount /tmp
-fi
-
-items=$(camcontrol devlist | awk -F " " '{
-	split($0, a, "[<>]"); descr = a[2];
-	n = split($NF, a, "[,()]");
-	for (i = 2; i <= n; i++) {
-		if (a[i] ~ /(ada|da|nvme)[0-9]/) {
-			if (cnt++ > 0)
-				items = sprintf("%s:%s:%s:off", items, a[i], descr);
-			else
-				items = sprintf("%s:%s:on", a[i], descr);
-		}
-	}
+getrootdev()
+{
+	local rootdev
+	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
+	[ "${rootdev}" != "gpt/nomadroot" ] && return
+	rootdev=$(glabel status | grep nomadroot | awk -F" " '{ print $3 }')
+	echo "${rootdev}" | sed -E 's/(.*)p[0-9]/\1/'
 }
-END { print items }')
 
-OIFS=$IFS
-IFS=:
-dialog --radiolist 'Choose the disk you want to install NomadBSD on' \
-	-1 45 5 $items 2>$ret || exit 0
-IFS=$OIFS
-disk=$(cat $ret)
-dialog --title "Swap partition" --inputbox \
-	"Set swap size in MB. Set to 0 if you don't want a swap partition" \
-	10 35 $swapsize 2>$ret || exit 0
-swapsize=$(cat $ret);
-dialog --inputbox \
-	'Choose a username\n\nLog in with the password you chose for nomad/root' \
-	12 35 $username 2>$ret || exit 0
-username=$(cat $ret)
-
-msg="Last chance to quit! If you proceed, all the data on $disk will be lost."
-msg="$msg\n\nAre you sure you want to proceed?"
-dialog --title "Last chance to quit" --yesno "$msg" -1 -1 || exit 0
-
-if ! (mount | grep -q '/usr/local'); then
-	service mount_uzip onestart
-fi
-if ! (mount | grep -q '/home'); then
-	mount /home
-fi
-gpart destroy -F $disk
-dd if=/dev/zero of=/dev/$disk count=100
-gpart create -s gpt $disk || bail "Couldn't create GPT partition scheme"
-gpart add -t freebsd-boot -l gpboot -b 40 -s 512K $disk || \
-	bail "Couldn't create partition"
-idx=$((idx + 1))
-gpart bootcode -b /boot/pmbr -p /boot/gptboot -i $idx $disk || \
-	bail "Couldn't install boot code"
-if [ "$arch" != "i386" ]; then
-	case $arch in
-	amd64)
-		gpart add -t efi -l gpefiboot -s 800K $disk || \
-			bail "Couldn't create EFI partition"
-		;;
-	mac)
-		gpart add -t efi -l gpefiboot -s 200M $disk || \
-			bail "Couldn't create EFI partition"
-		;;
-	esac
-	idx=$((idx + 1))
-	dd if=/boot/boot1.efifat of=/dev/${disk}p$idx
-fi
-if [ "$arch" != "mac" ]; then
-	gpart set -a lenovofix $disk
-fi
-if [ $swapsize -gt 0 ]; then
-	gpart add -t freebsd-swap -l nomadswap -s ${swapsize}M $disk || \
-		bail "Couldn't create swap partition"
-	idx=$((idx + 1))
-fi
-gpart add -t freebsd-ufs -l nomadroot $disk || \
-	bail "Couldn't create partition"
-idx=$((idx + 1))
-newfs -t -U /dev/${disk}p$idx || bail "Couldn't create UFS filesystem"
-mount /dev/${disk}p$idx /mnt || bail "Failed to mount /dev/${disk}p$idx"
-(cd / && tar cf -						\
-	--exclude '^mnt*'					\
-	--exclude '^uzip*'					\
-	--exclude '^home.nomad.tgz'			\
-	--exclude '^nomadbsd-backup.tar.xz'	\
-	--exclude '^etc/rc.d/mount_uzip'	\
-	--exclude '^home/pkgs*' .) | (cd /mnt && tar xvf -)
-unlink /mnt/usr/local/etc
-mv /mnt/usr.local.etc /mnt/usr/local/etc
-mkdir /mnt/mnt
-
-fstab > /mnt/etc/fstab
-if [ $swapsize -gt 0 ]; then
-	printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/nomadswap" >> /mnt/etc/fstab
-fi
-sed -i .bak -E "/^local_startup/d" /mnt/etc/rc.conf
-sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/$username/g" /mnt/etc/master.passwd
-sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/$username/g" /mnt/etc/group
-sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
-
-for i in $(find /mnt/home/nomad/ -type f); do
-	if (file "$i" | grep -q text); then
-		sed -i '' -E "s/[[:<:]]nomad[[:>:]]/$username/g" "$i"
+devlist() {
+	local rootdev=$(getrootdev)
+	local list=$(camcontrol devlist | awk -F " " '{
+		split($0, a, "[<>]"); descr = a[2];
+		n = split($NF, a, "[,()]");
+		for (i = 2; i <= n; i++) {
+			if (a[i] ~ /(ada|da|nvd)[0-9]/) {
+				printf("%s|%s\n", a[i], descr);
+			}
+		}
+	}')
+	if [ -n "${rootdev}" ]; then
+		echo "$list" | grep -v "^${rootdev}"
+	else
+		echo "$list"
 	fi
-done
-rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
-rm -f /mnt/usr/libexec/nomad*
+}
 
-mv /mnt/home/nomad /mnt/home/$username
-chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
-umount /mnt
-dialog --msgbox "Installation finished.\n\nHit OK to reboot" 8 40
-shutdown -r now
+commit() {
+	exit 2
+	status "Creating GPT partition scheme ..."
+	gpart destroy -F ${disk}
+	dd if=/dev/zero of=/dev/${disk} count=100
+	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
+	status "Creating boot partition ..."
+	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
+		bail "Couldn't create partition"
+	idx=$((idx + 1))
+	status "Installing boot code ..."
+	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${idx} ${disk} || \
+		bail "Couldn't install boot code"
+	if [ "$arch" != "i386" ]; then
+		status "Creating EFI partition ..."
+		case ${arch} in
+		amd64)
+			gpart add -t efi -l gpefiboot -s 800K ${disk} || \
+				bail "Couldn't create EFI partition"
+			;;
+		mac)
+			gpart add -t efi -l gpefiboot -s 200M ${disk} || \
+				bail "Couldn't create EFI partition"
+			;;
+		esac
+		idx=$((idx + 1))
+		dd if=/boot/boot1.efifat of=/dev/${disk}p${idx}
+	fi
+	if [ "${arch}" != "mac" ]; then
+		status "Setting lenovofix ..."
+		gpart set -a lenovofix ${disk}
+	fi
+	if [ ${swapsize} -gt 0 ]; then
+		status "Creating swap partition ..."
+		gpart add -t freebsd-swap -l ${swap_label} -s ${swapsize}M ${disk} || \
+			bail "Couldn't create swap partition"
+		idx=$((idx + 1))
+	fi
+	status "Creating partition for / ..."
+	gpart add -t freebsd-ufs -l ${rootfs_label} ${disk} || \
+		bail "Couldn't create partition"
+	idx=$((idx + 1))
+	status "Creating UFS filesystem ..."
+	newfs -t -U /dev/${disk}p${idx} || bail "Couldn't create UFS filesystem"
+	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	mount /dev/${disk}p${idx} /mnt || \
+		bail "Failed to mount /dev/${disk}p${idx}"
+	status "Copying files ..."
+	(cd / && tar cf -						\
+		--exclude '^dev*'					\
+		--exclude '^var/run*'				\
+		--exclude '^mnt*'					\
+		--exclude '^uzip*'					\
+		--exclude '^home.nomad.tgz'			\
+		--exclude '^nomadbsd-backup.tar.xz'	\
+		--exclude '^etc/rc.d/mount_uzip'	\
+		--exclude '^home/pkgs*' .) | (cd /mnt && tar xmvf - 2>&1)
+	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
+	status "Creating /mnt/dev ..."
+	mkdir /mnt/dev
+	status "Creating /mnt/var/run ..."
+	mkdir /mnt/var/run
+	unlink /mnt/usr/local/etc
+	mv /mnt/usr.local.etc /mnt/usr/local/etc
+	status "Creating /mnt/mnt ..."
+	mkdir /mnt/mnt
+	status "Writing fstab ..."
+	fstab > /mnt/etc/fstab
+	if [ ${swapsize} -gt 0 ]; then
+		status "Adding swap entry to fstab ..."
+		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
+			>> /mnt/etc/fstab
+	fi
+	sed -i .bak -E "/^local_startup/d" /mnt/etc/rc.conf
+	status "Changing username ..."
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
+	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
+	status "Replacing nomad by ${username} in config files ..."
+	for i in $(find /mnt/home/nomad/ -type f); do
+		if (file "$i" | grep -q text); then
+			sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" "$i"
+		fi
+	done
+	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
+	rm -f /mnt/usr/libexec/nomad*
+	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
+	mv /mnt/home/nomad /mnt/home/${username}
+	if [ -L /mnt/home -a -d /mnt/private/home/${username} ]; then
+		unlink /mnt/home
+		mv /mnt/private/home /mnt
+		rmdir /mnt/private
+	fi
+	status "Running pwd_mkdb on /etc/master.passwd ..."
+	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+	status "Unmounting /mnt ..."
+	umount /mnt
+	status "Done!"
+}
+
+dummy_commit() {
+	status "Creating GPT partition scheme ..."
+	echo "foo bar"
+	sleep 2
+	status "Creating boot partition ..."
+	echo "asdasdad"
+	sleep 3
+
+	status "Installing boot code ..."
+	status "Creating EFI partition ..."
+	status "Setting lenovofix ..."
+	status "Creating swap partition ..."
+	status "Creating partition for / ..."
+	status "Creating UFS filesystem ..."
+	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	status "Copying files ..."
+	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
+	status "Creating /mnt/mnt ..."
+	status "Writing fstab ..."
+	status "Adding swap entry to fstab ..."
+	status "Changing username ..."
+	status "Replacing nomad by $username in config files ..."
+	status "Moving /mnt/home/nomad to /mnt/home/${username} ..."
+	status "Running pwd_mkdb on /etc/master.passwd ..."
+	status "Unmounting /mnt ..."
+	status "Done!"
+}
+
+if [ $1 = "devlist" ]; then
+	devlist
+elif [ $1 = "commit" ]; then
+	shift
+	while [ $# -gt 0 ]; do
+		case $1 in
+		-n)
+			dummy=1
+			;;
+		-u)
+			username=$2
+			shift
+			;;
+		-s)
+			swapsize=$2
+			shift
+			;;
+		-d)
+			disk=$2
+			shift
+			;;
+		-*)
+			exit 1
+			;;
+		esac
+		shift
+	done
+	[ -z "$username" ] && bail "Username not defined"
+	[ -z "$swapsize" ] && bail "Swap size not defined"
+	[ -z "$disk"     ] && bail "Target device not defined"
+	if [ -n "$dummy" ]; then
+		dummy_commit
+	else
+		commit
+	fi
+else
+	bail "Unknown command '$1'"
+fi
+exit 0
