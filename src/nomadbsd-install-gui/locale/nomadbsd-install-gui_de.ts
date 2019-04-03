@@ -135,6 +135,11 @@ Wir entschuldigen uns für die Unannehmlichkeiten
         <source>&lt;b&gt;Username*&lt;/b&gt;</source>
         <translation>&lt;b&gt;Benutzername*&lt;/b&gt;</translation>
     </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="175"/>
+        <source>&lt;i&gt;* The installation script will adopt nomad&apos;s complete account. Only the username changes.&lt;/i&gt;</source>
+        <translation>&lt;i&gt;* Das Installations-Skript übernimmt nomads komplettes Benutzerkonto. Es ändert sich lediglich der Benutzername.&lt;/i&gt;</translation>
+    </message>
 </context>
 <context>
     <name>SummaryPage</name>
