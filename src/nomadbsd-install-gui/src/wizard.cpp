@@ -172,8 +172,8 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
         usernamele->setValidator(new QRegExpValidator(chars));
 	usernamele->setPlaceholderText(cfg_username);
 
-	info->setText(tr(("<i>* The installation script will adopt nomad's " \
-			  "complete account. Only the username changes.")));
+	info->setText(tr("<i>* The installation script will adopt nomad's " \
+			  "complete account. Only the username changes.</i>"));
 	info->setWordWrap(true);
 	
 	vbox->addWidget(ulabel);
