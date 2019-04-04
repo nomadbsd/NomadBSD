@@ -195,6 +195,19 @@ dummy_commit() {
 	status "Done!"
 }
 
+usage() {
+	echo "Usage: $(basename "$0") devlist"
+	echo "       $(basename "$0") commit [-n] -u user -s swap -d dev"
+	exit 1
+}
+
+[ $# -lt 1 ] && usage
+case $1 in
+-*)
+	usage
+	;;
+esac
+
 if [ $1 = "devlist" ]; then
 	devlist
 elif [ $1 = "commit" ]; then
@@ -217,7 +230,7 @@ elif [ $1 = "commit" ]; then
 			shift
 			;;
 		-*)
-			exit 1
+			usage
 			;;
 		esac
 		shift
