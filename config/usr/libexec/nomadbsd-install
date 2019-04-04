@@ -174,12 +174,7 @@ commit() {
 
 dummy_commit() {
 	status "Creating GPT partition scheme ..."
-	echo "foo bar"
-	sleep 2
 	status "Creating boot partition ..."
-	echo "asdasdad"
-	sleep 3
-
 	status "Installing boot code ..."
 	status "Creating EFI partition ..."
 	status "Setting lenovofix ..."
