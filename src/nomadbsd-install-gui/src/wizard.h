@@ -38,9 +38,13 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QCoreApplication>
+#include <sys/types.h>
+#include <signal.h>
 
 #define SHUTDOWN_CMD	"shutdown -p now"
 #define REBOOT_CMD	"shutdown -r now"
+
+extern pid_t pid;
 
 class InstallWizard : public QWizard
 {
@@ -80,8 +84,11 @@ public:
 		msgBox.setStandardButtons(QMessageBox::Cancel);
 		msgBox.setButtonText(QMessageBox::Cancel, tr("Cancel"));
 		msgBox.exec();
-		if (msgBox.clickedButton() == leave)
+		if (msgBox.clickedButton() == leave) {
+			if (pid > (pid_t)-1)
+				kill(0, SIGKILL);
 			QCoreApplication::exit(1);
+		}
 	}
 };
 

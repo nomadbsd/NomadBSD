@@ -44,6 +44,7 @@ static QString cfg_username = "settler";
 static QString cfg_disk;
 static QString cfg_disk_descr;
 //////////////////////////////////////////////////////////////////////////////
+pid_t pid = (pid_t)-1;
 
 InstallWizard::InstallWizard(QWidget *parent) : QWizard(parent)
 {
@@ -306,6 +307,7 @@ void CommitPage::initializePage()
 			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap);
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(cmd);
+	pid = (pid_t)proc.processId();
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -338,7 +340,7 @@ void CommitPage::readCmdOutput()
 {
 	QByteArray line;
 
-	//proc.setReadChannel(QProcess::StandardOutput);
+	proc.setReadChannel(QProcess::StandardOutput);
 	while (!(line = proc.readLine()).isEmpty()) {
 		if (line[0] == '!') {
 			// Status message
