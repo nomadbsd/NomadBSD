@@ -198,6 +198,12 @@ dummy_commit() {
 usage() {
 	echo "Usage: $(basename "$0") devlist"
 	echo "       $(basename "$0") commit [-n] -u user -s swap -d dev"
+	echo "Options"
+	echo "-n     Dummy mode. Do not write anything to disk."
+	echo "-d     Define target disk."
+	echo "-s     Define size of the swap partition in MB. If set to 0,"
+	echo "       no swap partition will be created."
+	echo "-u     Define the username to replace nomad."
 	exit 1
 }
 
