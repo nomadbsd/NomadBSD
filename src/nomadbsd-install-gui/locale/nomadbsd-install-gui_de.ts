@@ -36,7 +36,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="375"/>
         <source>Press &quot;Finish&quot; to reboot</source>
-        <translation>Drücken Sie \&quot;Abschließen\&quot;, um den Computer neu zu starten</translation>
+        <translation>Drücken Sie &quot;Abschließen&quot;, um den Computer neu zu starten</translation>
     </message>
 </context>
 <context>
