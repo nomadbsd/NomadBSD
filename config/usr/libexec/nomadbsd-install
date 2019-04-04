@@ -74,7 +74,6 @@ devlist() {
 }
 
 commit() {
-	exit 2
 	status "Creating GPT partition scheme ..."
 	gpart destroy -F ${disk}
 	dd if=/dev/zero of=/dev/${disk} count=100
