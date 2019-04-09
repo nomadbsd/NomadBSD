@@ -74,6 +74,7 @@ sysutils/dsblogoutmgr
 sysutils/dsbmc
 sysutils/dsbmc-cli
 sysutils/dsbmd
+sysutils/dunst
 sysutils/fusefs-ext4fuse
 sysutils/fusefs-hfsfuse
 sysutils/fusefs-sshfs
