@@ -8,4 +8,5 @@ dsbmc -i&
 dsbbatmon&
 dsbmixer -i&
 redshift -l$(getlalo)&
+dunst&
 xbindkeys&
