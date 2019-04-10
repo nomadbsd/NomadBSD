@@ -634,7 +634,7 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit build_setupgui buil_installgui instports "
+	stages="instpkgs instgit build_setupgui build_installgui instports "
 	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage "
 	stages="${stages} cleanup"
 
