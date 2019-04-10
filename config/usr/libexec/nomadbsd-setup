@@ -711,10 +711,6 @@ sub desktopsettings {
 	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
 		   "${mimelist}");
 	system("rm -f ${mimelist}.bak 2>/dev/null");
-	
-	# Set file manager in dsbmc
-	system("sed -i .bak -E 's/FILEMANAGER/${cfg_fm}/g' ${dsbmc_cfg}");
-	system("rm -f ${dsbmc_cfg}.bak 2>/dev/null");
 
 	# Update Openbox menu
 	system("su -l nomad -c '/usr/bin/update_obmenu -u'");
