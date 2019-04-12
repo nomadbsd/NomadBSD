@@ -98,6 +98,8 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
+	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo.png"));
+	setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 	layout->addWidget(title);
 	layout->addWidget(intro);
 	setLayout(layout);
