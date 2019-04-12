@@ -90,6 +90,8 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 			  "</b><br/><br/>"));
 	intro->setText(tr("This program will install your NomadBSD with its " \
 			  "current configuration on a hard disk.\n\n"));
+	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo.png"));
+	setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 	intro->setWordWrap(true);
 	layout->addWidget(title);
 	layout->addWidget(intro);
