@@ -293,6 +293,12 @@ postpkgcfg()
 	"${SYSDIR}"/usr/local/share/pixmaps/terminal-tango.svg
 	(cd config/usr/local/share/slim && tar cf - .) | \
 	    (cd "${SYSDIR}"/usr/local/share/slim && tar xf -)
+
+	# Use the bright audio status icons from Papirus-Dark in Papirus-Light
+	cp "${SYSDIR}"/usr/local/share/icons/Papirus-Dark/16x16/actions/audio-volume* \
+		"${SYSDIR}"/usr/local/share/icons/Papirus-Light/16x16/actions
+	cp "${SYSDIR}"/usr/local/share/icons/Papirus-Dark/16x16/actions/audio-volume* \
+			"${SYSDIR}"/usr/local/share/icons/Papirus/16x16/actions
 	mkfontpaths
 }
 
