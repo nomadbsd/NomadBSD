@@ -127,7 +127,7 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
 	QLabel	    *label = new QLabel;
 	QProcess    proc;
         QByteArray  line;
-       
+
   	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(BACKEND_GET_LOCALES);
 	(void)proc.waitForStarted(-1);
@@ -157,8 +157,8 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
 	proc.waitForFinished(-1);
 	if (proc.exitCode() != 0) {
 		SetupWizard::errAndOut(
-		    QString("Command '%1' returned with an error.")
-			.arg(BACKEND_GET_LOCALES));
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_LOCALES));
 	}
 	label->setStyleSheet("font-weight: bold;");
 	label->setText(tr("Please select your language/locale"));
@@ -237,8 +237,8 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	proc.waitForFinished(-1);
 	if (proc.exitCode() != 0) {
 		SetupWizard::errAndOut(
-		    QString("Command '%1' returned with an error.")
-			.arg(BACKEND_GET_KBDLAYOUTS));
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_KBDLAYOUTS));
 	}
 	//
 	// Read keyboard variants.
@@ -268,8 +268,8 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	proc.waitForFinished(-1);
 	if (proc.exitCode() != 0) {
 		SetupWizard::errAndOut(
-		    QString("Command '%1' returned with an error.")
-			.arg(BACKEND_GET_KBDVARIANTS));
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
 	llabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
@@ -309,7 +309,7 @@ void KbdLayoutPage::kbdLayoutSelected(int row)
 	// removing items.
 	//
 	variantls->disconnect();
-	
+
 	for (int i = variantls->count(); i > 0; i--) {
 		QListWidgetItem *item = variantls->takeItem(0);
 		delete(item);
@@ -401,8 +401,8 @@ TimezonePage::TimezonePage(QWidget *parent) : QWizardPage(parent)
 	proc.waitForFinished(-1);
 	if (proc.exitCode() != 0) {
 		SetupWizard::errAndOut(
-		    QString("Command '%1' returned with an error.")
-			.arg(BACKEND_GET_TIMEZONES));
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_TIMEZONES));
 	}
 	title->setStyleSheet("font-weight: bold;");
 	vbox->addWidget(title);
@@ -463,6 +463,9 @@ void PasswordPage::initializePage()
 	intro->setText(tr("The password you choose here will be used "	\
 			  "for your user account (nomad), and for the "	\
 			  "administration account (root)\n\n"));
+	pass->setPl1Text(tr("Password:"));
+	pass->setPl2Text(tr("Repeat password:"));
+	pass->setStatusText(tr("Passwords do not match"));
 }
 
 void PasswordPage::passwordChanged()
@@ -502,7 +505,7 @@ GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
 
 	passContainer->setEnabled(cfg_use_geli);
 	gelicb->setTristate(false);
-	
+
 	layout->addWidget(title);
 	layout->addWidget(intro);
 	layout->addWidget(gelicb);
@@ -512,7 +515,7 @@ GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
 	connect(pass, SIGNAL(passwordChanged()), this,
 	    SLOT(passwordChanged()));
 	connect(gelicb, SIGNAL(toggled(bool)), this, SLOT(setGeli(bool)));
-}	
+}
 
 void GeliPage::initializePage()
 {
@@ -525,6 +528,9 @@ void GeliPage::initializePage()
 			  "geli(8). If you don't know what geli(8) is, "  \
 			  "you should skip this page.\n\n"));
 	pwdLabel->setText(tr("Define a password required to decrypt /home"));
+	pass->setPl1Text(tr("Password:"));
+	pass->setPl2Text(tr("Repeat password:"));
+	pass->setStatusText(tr("Passwords do not match"));
 }
 
 void GeliPage::passwordChanged()
@@ -617,8 +623,8 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		proc.waitForFinished(-1);
 		if (proc.exitCode() != 0) {
 			SetupWizard::errAndOut(
-			    QString("Command '%1' returned with an error.")
-			        .arg(apps[n].command));
+			    tr("Command '%1' returned with an error.")
+			    .arg(apps[n].command));
 		}
 		if ((*apps[n].box)->count() == 0)
 			*apps[n].cfg_var = "";
@@ -629,7 +635,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		catLabel[n]->setStyleSheet("font-weight: bold;");
 		vbox->addWidget(catLabel[n]);
 		vbox->addWidget(*apps[n].box);
-		layout->addLayout(vbox);	
+		layout->addLayout(vbox);
 	}
 	setLayout(layout);
 }
@@ -775,7 +781,7 @@ void CommitPage::initializePage()
 	}
 	// Terminate config list
 	proc.closeWriteChannel();
-	
+
 	connect(&proc, SIGNAL(readyReadStandardOutput()), this,
 	    SLOT(readCmdOutput()));
 	connect(&proc, SIGNAL(readyReadStandardError()), this,
@@ -817,7 +823,7 @@ void CommitPage::readCmdOutput()
 
 void CommitPage::readError()
 {
-	QByteArray line;	
+	QByteArray line;
 
 	proc.setReadChannel(QProcess::StandardError);
 	while (!(line = proc.readLine()).isEmpty()) {
@@ -829,9 +835,8 @@ void CommitPage::readError()
 void CommitPage::cleanup(int exitCode, QProcess::ExitStatus /* exitStatus */)
 {
 	if (exitCode != 0) {
-		SetupWizard::errAndOut(
-		    QString("%1 returned with error code %2")
-			.arg(BACKEND_COMMIT).arg(exitCode));
+		SetupWizard::errAndOut(tr("%1 returned with error code %2")
+		    .arg(BACKEND_COMMIT).arg(exitCode));
 	}
 	statusMsg->setText(tr("Press \"Finish\" to reboot"));
 	emit completeChanged();
