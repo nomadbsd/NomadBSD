@@ -36,6 +36,9 @@ public:
 	PasswordWidget(QWidget *parent = 0);
 	bool	isValid(void);
 	QString	password(void);
+	void setPl1Text(const QString &);
+	void setPl2Text(const QString &);
+	void setStatusText(const QString &);
 signals:
 	void passwordChanged(void);
 public slots:
@@ -44,6 +47,8 @@ public slots:
 private:
 	bool	  valid;
 	QLabel	  *status;
+	QLabel	  *pl1;
+	QLabel	  *pl2;
 	QLineEdit *pfield1;
 	QLineEdit *pfield2;
 };

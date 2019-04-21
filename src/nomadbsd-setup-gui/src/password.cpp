@@ -35,12 +35,12 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	status		  = new QLabel(tr("Passwords do not match"));
 	pfield1		  = new QLineEdit;
 	pfield2		  = new QLineEdit;
-	QLabel	    *pl1  = new QLabel("Password:");
-	QLabel	    *pl2  = new QLabel("Repeat password:");
+	pl1		  = new QLabel(tr("Password:"));
+	pl2		  = new QLabel(tr("Repeat password:"));
 	QVBoxLayout *vbox = new QVBoxLayout;
 	QFormLayout *form = new QFormLayout;
 	QRegExp	    chars = QRegExp("[ -~]+");
-	
+
 	pfield1->setEchoMode(QLineEdit::Password);
 	pfield2->setEchoMode(QLineEdit::Password);
 
@@ -50,10 +50,10 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	pl1->setStyleSheet("font-weight: bold;");
 	pl2->setStyleSheet("font-weight: bold;");
 	status->setStyleSheet("font-style: italic;");
-	
+
 	form->addRow(pl1, pfield1);
 	form->addRow(pl2, pfield2);
-	
+
 	vbox->addLayout(form);
 	vbox->addWidget(status);
 	setLayout(vbox);
@@ -98,4 +98,19 @@ QString PasswordWidget::password()
 bool PasswordWidget::isValid()
 {
 	return (valid);
+}
+
+void PasswordWidget::setPl1Text(const QString &text)
+{
+	pl1->setText(text);
+}
+
+void PasswordWidget::setPl2Text(const QString &text)
+{
+	pl2->setText(text);
+}
+
+void PasswordWidget::setStatusText(const QString &text)
+{
+	status->setText(text);
 }
