@@ -3,8 +3,8 @@
 NomadBSD is a live system for flash drives, based on FreeBSD.
 
 ### Screenshots
-![](http://nomadbsd.org/screenshots/nomadbsd-1.1-ss1.png)
-![](http://nomadbsd.org/screenshots/nomadbsd-1.1-ss2.png)
+![](http://nomadbsd.org/screenshots/nomadbsd-1.2-ss1.png)
+![](http://nomadbsd.org/screenshots/nomadbsd-1.2-ss2.png)
 
 ### Requirements for building the image
 A recent FreeBSD system
