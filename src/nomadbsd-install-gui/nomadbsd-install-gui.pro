@@ -6,7 +6,8 @@ TARGET	     = $${PROGRAM}
 TEMPLATE     = app
 INSTALLS     = target desktopfile
 RESOURCES    = resources.qrc
-TRANSLATIONS = locale/$${PROGRAM}_de.ts
+TRANSLATIONS = locale/$${PROGRAM}_de.ts \
+               locale/$${PROGRAM}_ru.ts
 QT	    += widgets
 INCLUDEPATH += . lib
 DEFINES	    += PROGRAM=\\\"$${PROGRAM}\\\"
