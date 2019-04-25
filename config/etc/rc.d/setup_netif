@@ -13,6 +13,11 @@ rcvar="setup_netifs_enable"
 start_cmd="${name}_start"
 
 setup_netifs_start() {
+	mods=$(/usr/local/libexec/dsbdriverd -l 2>/dev/null | \
+		awk -F ':+' '/[Ee]thernet|[Nn]etwork]/ { print $2 }')
+	for m in ${mods}; do
+		kldstat -v | grep -q -E "${m#if_}|$m" || kldload $m
+	done
 	mkdir /var/run/wpa_supplicant >/dev/null 2>&1
 
 	ethernets=$(ifconfig | awk '
