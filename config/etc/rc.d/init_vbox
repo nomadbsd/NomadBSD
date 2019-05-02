@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# PROVIDE: init_vbox
+# REQUIRE: DAEMON
+# BEFORE: LOGIN power_profile
+
+. /etc/rc.subr
+
+init_vbox_enable=${init_vbox_enable-"NO"}
+
+name="init_vbox"
+rcvar="init_vbox_enable"
+start_cmd="${name}_start"
+
+init_vbox_start() {
+	if pciconf -lv | grep -B3 display | grep -q -i virtualbox; then
+		#
+		# We are running in VirtualBox
+		#
+		if [ "${economy_cx_lowest}" != "Cmax" ]; then
+			sysrc economy_cx_lowest=Cmax
+		fi
+		if [ "${performance_cx_lowest}" != "NONE" ]; then
+			sysrc performance_cx_lowest=NONE
+		fi
+		case "${vboxguest_enable}" in
+		[Yy][eE][sS])
+			;;
+		*)
+			service vboxguest onestart
+			;;
+		esac
+		case "${vboxservice_enable}" in
+		[Yy][eE][sS])
+			;;
+		*)
+			service vboxservice onestart
+			;;
+		esac
+		if ! grep -E -q 'kern.hz="?100"?$' /boot/loader.conf; then
+			msg="Changing kern.hz requires a reboot to take "
+			msg="${msg}effect.\n\nRebooting ..."
+			if grep -q '^kern.hz=' /boot/loader.conf; then
+				sed -i '.bak' -E 's/^kern.hz=.*/kern.hz=100/g' \
+					/boot/loader.conf
+			else
+				cp /boot/loader.conf /boot/loader.conf.bak
+				echo "kern.hz=100" >> /boot/loader.conf
+			fi
+			TERM=xterm dialog --infobox "${msg}" 8 60
+			sleep 5
+			shutdown -r now
+		fi
+	else
+		#
+		# We are running on hardware
+		#
+		if grep -E -q 'kern.hz="?100"?$' /boot/loader.conf; then
+			msg="Changing kern.hz requires a reboot to take "
+			msg="${msg}effect.\n\nRebooting ..."
+			sed -i '.bak' -E '/^kern.hz/d'
+			TERM=xterm dialog --infobox "${msg}" 8 60
+			sleep 5
+			shutdown -r now
+		fi
+		if [ "${economy_cx_lowest}" != "C2" ]; then
+			sysrc economy_cx_lowest=C2
+		fi
+		if [ "${performance_cx_lowest}" != "C2" ]; then
+			sysrc performance_cx_lowest=C2
+		fi
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"
+
