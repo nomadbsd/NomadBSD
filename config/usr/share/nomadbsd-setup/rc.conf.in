@@ -30,4 +30,5 @@ performance_cx_lowest="C2"
 initgfx_enable="YES"
 gsched_enable="YES"
 slim_enable="YES"
+init_vbox_enable="YES"
 
