@@ -935,7 +935,9 @@ rc_conf_d_END
 }
 
 find_driver() {
-	config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
+	unit=$(sysctl -n hw.pci.default_vgapci_unit)
+	config=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | \
+			cut -d"'" -f 2)
 	for i in 390 340 304; do
 		data_${i} | while read ln; do
 			if (echo $config | grep -q -i -w "$ln"); then

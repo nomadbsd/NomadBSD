@@ -45,7 +45,8 @@ rm_xorg_cfg() {
 	[ -f ${path_xorg_cfg} ] && rm -f ${path_xorg_cfg}
 }
 
-config=$(pciconf -lv | grep -B3 display | grep device | cut -d"'" -f 2)
+unit=$(sysctl -n hw.pci.default_vgapci_unit)
+config=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | cut -d"'" -f 2)
 if ! (echo "${config}" | grep -q -i radeon); then
 	rm_xorg_cfg
 	exit 1
