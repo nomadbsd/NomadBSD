@@ -1,10 +1,10 @@
 #!/bin/sh
 
-for i in 15 9; do
-	pkill -$i gvfsd
-	pkill -$i dbus-daemon
-	pkill -$i dsbus-launch
-	[ $i -ne 9 ] && sleep 1
+uid=$(id| sed -E 's/.*uid=([0-9]+).*/\1/')
+for s in 15 9; do
+	for p in dbus-launch gvfsd-fuse dbus-daemon; do
+		pgrep -U ${uid} -q $p && pkill -$s $p
+	done
 done
 openbox --exit
 
