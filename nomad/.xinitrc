@@ -24,6 +24,9 @@ done
 # GNOME
 # exec /usr/local/bin/gnome-session
 
+# MATE
+# exec ck-launch-session dbus-launch --exit-with-session mate-session
+
 # KDE
 # exec ck-launch-session startkde
 #
