@@ -86,6 +86,8 @@ sysutils/smartmontools
 sysutils/tmux
 sysutils/xfburn
 textproc/aspell
+textproc/en-aspell
+textproc/en-hunspell
 textproc/hunspell
 ukrainian/aspell
 ukrainian/hunspell
