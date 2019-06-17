@@ -35,6 +35,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QProgressBar>
 
 #include "password.h"
 
@@ -302,10 +303,11 @@ public slots:
 protected:
 	void initializePage();
 private:
-	QLabel	 *errorMsg;
-	QLabel	 *commandMsg;
-	QLabel	 *statusMsg;
-	QString	 commandMsgBuf;
-	QString	 errorMsgBuf;
-	QProcess proc;
+	QLabel	     *errorMsg;
+	QLabel	     *commandMsg;
+	QLabel	     *statusMsg;
+	QString	     commandMsgBuf;
+	QString	     errorMsgBuf;
+	QProcess     proc;
+	QProgressBar *progBar;
 };

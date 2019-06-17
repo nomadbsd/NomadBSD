@@ -212,6 +212,13 @@ sub status {
 	select $ofh;
 }
 
+sub progress {
+	my $ofh = select STDOUT;
+	$| = 1;
+	print "%$_[0]\n";
+	select $ofh;
+}
+
 #
 # Initialize environment for the graphical setup.
 # 
@@ -746,6 +753,8 @@ sub set_kbdmap {
 # Read the configuration from stdin, and do the installation
 #
 sub commit {
+	my ($nfiles, $n);
+
 	while ($_ = <STDIN>) {
 		my $ofh = select STDIN;
 		$| = 1;
@@ -782,9 +791,24 @@ sub commit {
 	}
 	status("Creating /home/pkgs");
 	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
+	status("Counting files to copy");
+	progress(0);
+	foreach (`tar tf /home.nomad.tgz`) {
+		$nfiles++;
+	}
+	$nfiles = 1 if (!$nfiles);
 	status("Extracting dot files and directories for user nomad");
-	system("cd /home/nomad && tar xvf /home.nomad.tgz 2>&1 && " .
-		   "chown -R nomad .");
+	open(my $fh, "-|", "cd /home/nomad && tar xvf /home.nomad.tgz 2>&1")
+		or bail("Failed to open pipe to 'tar xvf /home.nomad.tgz'");
+	while (defined($_ = <$fh>)) {
+		next if (! /^x/);
+		chomp;
+		my $p = int(++$n * 100 / $nfiles);
+		print ">$_\n";
+		progress($p);
+	}
+	close($fh);
+	system("cd /home/nomad && chown -R nomad .");
 	foreach (qw(root nomad)) {
 		status("Setting password for $_");
 		set_password($_, $cfg_password);
@@ -806,26 +830,29 @@ sub commit {
 }
 
 sub dummy_commit {
-		status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
-		status("Setting timezone $cfg_timezone");
-		if ($cfg_geli_password) {
-			status("Creating geli encrypted /home with " .
-				   "geli password $cfg_geli_password");
-		} else {
-			status("Creating /home");
-		}
-		status("Creating /home/pkgs");
-		status("Extracting dot files and directories for user nomad");
-		foreach (qw(root nomad)) {
-			status("Setting password for $_ to $cfg_password");
-		}
-		status("Setting shell $cfg_shell for user nomad");
-		status("Setting locale $cfg_locale for user nomad");
-		status("Configuring desktop");
-		status("Setting keyboard map ($cfg_kbdlayout, $cfg_kbdvariant) " .
-			   "for X and vt");
-		status("Disabling auto-login on ttyv0");
-		exit 0;
+	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
+	status("Setting timezone $cfg_timezone");
+	if ($cfg_geli_password) {
+		status("Creating geli encrypted /home with " .
+			   "geli password $cfg_geli_password");
+	} else {
+		status("Creating /home");
+	}
+	status("Creating /home/pkgs");
+	status("Extracting dot files and directories for user nomad");
+	for (my $p = 0; $p < 100; $p++) {
+		print "%$p\n"; usleep(50000);
+	}
+	foreach (qw(root nomad)) {
+		status("Setting password for $_ to $cfg_password");
+	}
+	status("Setting shell $cfg_shell for user nomad");
+	status("Setting locale $cfg_locale for user nomad");
+	status("Configuring desktop");
+	status("Setting keyboard map ($cfg_kbdlayout, $cfg_kbdvariant) " .
+		   "for X and vt");
+	status("Disabling auto-login on ttyv0");
+	exit 0;
 }
 
 sub usage {
