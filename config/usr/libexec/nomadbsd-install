@@ -39,6 +39,11 @@ status() {
 	[ -n "${dummy}" ] && sleep 5
 }
 
+progress() {
+	echo "%$1"
+	[ -n "${dummy}" ] && sleep 1
+}
+
 fstab() {
 cat <<FSTAB_END
 /dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
@@ -119,6 +124,11 @@ commit() {
 	status "Mounting /dev/${disk}p$idx on /mnt ..."
 	mount /dev/${disk}p${idx} /mnt || \
 		bail "Failed to mount /dev/${disk}p${idx}"
+	status "Counting files to copy ..."
+	progress 0
+	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|home.nomad.tgz|";
+	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip|home/pkgs.*)"
+	nfiles=$(find / 2>/dev/null | egrep -v "$re" | wc -l)
 	status "Copying files ..."
 	(cd / && tar cf -						\
 		--exclude '^dev*'					\
@@ -128,12 +138,18 @@ commit() {
 		--exclude '^home.nomad.tgz'			\
 		--exclude '^nomadbsd-backup.tar.xz'	\
 		--exclude '^etc/rc.d/mount_uzip'	\
-		--exclude '^home/pkgs*' .) | (cd /mnt && tar xmvf - 2>&1)
-	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
+		--exclude '^home/pkgs*' .) | \
+		(cd /mnt && tar xmvf - 2>&1) | while read x; do
+			n=$(($n + 1))
+			p=$(($n * 100 / $nfiles))
+			echo ">$x"
+			progress $p
+		done
 	status "Creating /mnt/dev ..."
 	mkdir /mnt/dev
 	status "Creating /mnt/var/run ..."
 	mkdir /mnt/var/run
+	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
 	unlink /mnt/usr/local/etc
 	mv /mnt/usr.local.etc /mnt/usr/local/etc
 	status "Creating /mnt/mnt ..."
@@ -150,9 +166,17 @@ commit() {
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
 	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
+
+	status "Counting config files ..."
+	progress 0
+	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
+
 	status "Replacing nomad by ${username} in config files ..."
 	for i in $(find /mnt/home/nomad/ -type f); do
 		if (file "$i" | grep -q text); then
+			n=$(($n + 1))
+			p=$(($n * 100 / $nfiles))
+			progress $p
 			sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" "$i"
 		fi
 	done

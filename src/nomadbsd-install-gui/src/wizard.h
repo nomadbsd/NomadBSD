@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QProgressBar>
 #include <QCoreApplication>
 #include <sys/types.h>
 #include <signal.h>
@@ -163,10 +164,11 @@ public slots:
 protected:
 	void initializePage();
 private:
-	QLabel	 *errorMsg;
-	QLabel	 *commandMsg;
-	QLabel	 *statusMsg;
-	QString	 commandMsgBuf;
-	QString	 errorMsgBuf;
-	QProcess proc;
+	QLabel	     *errorMsg;
+	QLabel	     *commandMsg;
+	QLabel	     *statusMsg;
+	QString	     commandMsgBuf;
+	QString	     errorMsgBuf;
+	QProcess     proc;
+	QProgressBar *progBar;
 };

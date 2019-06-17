@@ -269,6 +269,7 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 	statusMsg	       = new QLabel;
 	commandMsg	       = new QLabel;
 	errorMsg	       = new QLabel;
+	progBar		       = new QProgressBar;
 	QWidget	    *container = new QWidget;
 	QVBoxLayout *vbox      = new QVBoxLayout(container);
 	QVBoxLayout *layout    = new QVBoxLayout;
@@ -276,6 +277,10 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 
 	sa->setWidget(container);
 	sa->setWidgetResizable(true);
+
+	progBar->setRange(0, 0);
+	progBar->setValue(0);
+	progBar->setVisible(false);
 
 	layout->addWidget(statusMsg, 0, Qt::AlignCenter);
 	layout->addWidget(sa);
@@ -285,6 +290,7 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 
 	errorMsg->setStyleSheet("color: red;");
 	vbox->addWidget(commandMsg, 1, Qt::AlignLeft);
+	vbox->addWidget(progBar, 1, Qt::AlignCenter);
 	vbox->addWidget(errorMsg, 1, Qt::AlignLeft);
 	setLayout(layout);
 }
@@ -341,19 +347,43 @@ void CommitPage::catchError(QProcess::ProcessError /* perr */)
 void CommitPage::readCmdOutput()
 {
 	QByteArray line;
+	QFontMetrics fm(commandMsg->font());
+	const int maxc = fm.width("m") * 50;
 
 	proc.setReadChannel(QProcess::StandardOutput);
 	while (!(line = proc.readLine()).isEmpty()) {
-		if (line[0] == '!') {
+		if (line[0] == '%' && isdigit(line[1])) {
+			// Progress
+			line.remove(0, 1);
+			int n = line.toInt(0, 10);
+			n = n < 0 ? 0 : n;
+			if (!progBar->isVisible())
+				progBar->setVisible(true);
+			progBar->setRange(0, !!n * 100);
+			progBar->setValue(n);
+		} else if (line[0] == '!') {
 			// Status message
 			line.remove(0, 1);
 			errorMsgBuf = "";
+			commandMsgBuf = "";
 			errorMsg->setText("");
 			commandMsg->setText("");
 			statusMsg->setText(line);
+			progBar->setValue(0);
+			progBar->setVisible(false);
+		} else if (line[0] == '>') {
+			// Single line output
+			line.remove(0, 1);
+			//
+			// Use elided version of the string with "..." in the
+			// middle if the string is too long.
+			//
+			QString s = fm.elidedText(line, Qt::ElideMiddle, maxc);
+			commandMsg->setText(s);
 		} else {
 			// Command output
-			commandMsg->setText(line);
+			commandMsgBuf.append(line);
+			commandMsg->setText(commandMsgBuf);
 		}
 	}
 }
