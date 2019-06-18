@@ -744,9 +744,9 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 	statusMsg->setStyleSheet("font-weight: bold;");
 	commandMsg->setStyleSheet("font-style: italic;");
 	errorMsg->setStyleSheet("color: red;");
-	vbox->addWidget(commandMsg, 1, Qt::AlignCenter);
+	vbox->addWidget(commandMsg, 1, Qt::AlignLeft);
 	vbox->addWidget(progBar, 1, Qt::AlignCenter);
-	vbox->addWidget(errorMsg, 1, Qt::AlignCenter);
+	vbox->addWidget(errorMsg, 1, Qt::AlignLeft);
 	setLayout(layout);
 }
 
@@ -835,11 +835,11 @@ void CommitPage::readCmdOutput()
 		} else if (line[0] == '>') {
 			// Single line output
 			line.remove(0, 1);
-
+			//
 			// Use elided version of the string with "..." in the
 			// middle if the string is too long.
-			QString s = fm.elidedText(line,
-					Qt::ElideMiddle, maxc);
+			//
+			QString s = fm.elidedText(line,	Qt::ElideMiddle, maxc);
 			commandMsg->setText(s);
 		} else {
 			// Command output
