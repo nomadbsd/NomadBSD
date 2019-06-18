@@ -220,6 +220,42 @@ sub progress {
 }
 
 #
+# A wrapper for the newfs program which outputs the progress in %.
+# It takes a newfs command with all its parameters as a string.
+#
+sub newfswrp {
+	my $cmd = $_[0];
+	my (@sbb, $ngroups, $sbbc, $fh, $p);
+
+	open($fh, "$cmd |") or
+		bail("Couldn't execute $cmd");
+	progress(0);
+	while ((defined($_ = <$fh>))) {
+		chomp;
+		if (/^\tusing ([0-9]+) cylinder/) {
+			$ngroups = $1;
+		} elsif (/^super-block backups.*at:$/) {
+			last;
+		}
+	}
+	if ($ngroups <= 0) {
+		print STDERR "Warning: Failed to parse newfs output\n";
+		$ngroups = 1;
+	}
+	#
+	# Change the input separator to a space character so that we can
+	# read single space-separated records printed out by newfs.
+	#
+	local $/ = ' ';
+	while ((defined($_ = <$fh>))) {
+		next if (!/^[0-9]+/);
+		$p = int(++$sbbc * 100 / $ngroups);
+		progress($p);
+	}
+	bail("\"$cmd\" failed") if (!close($fh));
+}
+
+#
 # Initialize environment for the graphical setup.
 # 
 # Depending on the boot method, set up and start an X server with
@@ -572,11 +608,10 @@ sub mkhomepart {
 
 sub mkhome {
 	my $cmd = "newfs -t -E -U -O 1 -o time -b $blksize -f $fragsize " .
-			  "-m 8 /dev/gpt/$gpthome 2>&1";
+			  "-m 8 /dev/gpt/$gpthome";
 	mkhomepart();
 	status("Creating filesystem on /dev/gpt/$gpthome");
-	system($cmd) == 0
-		or bail("Couldn't create filesystem on /dev/gpt/$gpthome");
+	newfswrp($cmd);
 	if (! -d "/home") {
 		status("Creating /home");
 		system("mkdir /home") == 0
@@ -614,7 +649,7 @@ sub mkgeli {
 	print $fh "$cfg_geli_password\n";
 	bail("Failed to attach geli volume.") if (!close($fh));
 	status("Creating filesystem on /dev/gpt/${gpthome}.eli");
-	system($newfscmd) == 0 or bail("Couldn't create filesystem");
+	newfswrp($newfscmd);
 	if (! -d "/private") {
 		system("unlink /private >/dev/null 2>&1");
 		status("Creating /private");
