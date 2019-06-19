@@ -229,7 +229,7 @@ sub newfswrp {
 
 	open($fh, "$cmd |") or
 		bail("Couldn't execute $cmd");
-	progress(0);
+	progress(-1);
 	while ((defined($_ = <$fh>))) {
 		chomp;
 		if (/^\tusing ([0-9]+) cylinder/) {
@@ -827,7 +827,7 @@ sub commit {
 	status("Creating /home/pkgs");
 	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
 	status("Counting files to copy");
-	progress(0);
+	progress(-1);
 	foreach (`tar tf /home.nomad.tgz`) {
 		$nfiles++;
 	}
