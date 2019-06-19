@@ -352,15 +352,14 @@ void CommitPage::readCmdOutput()
 
 	proc.setReadChannel(QProcess::StandardOutput);
 	while (!(line = proc.readLine()).isEmpty()) {
-		if (line[0] == '%' && isdigit(line[1])) {
+		if (line[0] == '%') {
 			// Progress
 			line.remove(0, 1);
 			int n = line.toInt(0, 10);
-			n = n < 0 ? 0 : n;
 			if (!progBar->isVisible())
 				progBar->setVisible(true);
-			progBar->setRange(0, !!n * 100);
-			progBar->setValue(n);
+			progBar->setRange(0, n < 0 ? 0 : 100);
+			progBar->setValue(n < 0 ? 0 : n);
 		} else if (line[0] == '!') {
 			// Status message
 			line.remove(0, 1);
