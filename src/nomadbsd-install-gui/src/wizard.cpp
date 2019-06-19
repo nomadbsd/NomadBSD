@@ -268,7 +268,6 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 {
 	statusMsg	       = new QLabel;
 	commandMsg	       = new QLabel;
-	errorMsg	       = new QLabel;
 	progBar		       = new QProgressBar;
 	QWidget	    *container = new QWidget;
 	QVBoxLayout *vbox      = new QVBoxLayout(container);
@@ -288,10 +287,8 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 	statusMsg->setStyleSheet("font-weight: bold;");
 	commandMsg->setStyleSheet("font-family: monospace;");
 
-	errorMsg->setStyleSheet("color: red;");
 	vbox->addWidget(commandMsg, 1, Qt::AlignLeft);
 	vbox->addWidget(progBar, 1, Qt::AlignCenter);
-	vbox->addWidget(errorMsg, 1, Qt::AlignLeft);
 	setLayout(layout);
 }
 
@@ -365,7 +362,6 @@ void CommitPage::readCmdOutput()
 			line.remove(0, 1);
 			errorMsgBuf = "";
 			commandMsgBuf = "";
-			errorMsg->setText("");
 			commandMsg->setText("");
 			statusMsg->setText(line);
 			progBar->setValue(0);
@@ -392,18 +388,16 @@ void CommitPage::readError()
 	QByteArray line;	
 
 	proc.setReadChannel(QProcess::StandardError);
-	while (!(line = proc.readLine()).isEmpty()) {
+	while (!(line = proc.readLine()).isEmpty())
 		errorMsgBuf.append(line);
-		errorMsg->setText(errorMsgBuf);
-	}
 }
 
 void CommitPage::cleanup(int exitCode, QProcess::ExitStatus /* exitStatus */)
 {
 	if (exitCode != 0) {
 		InstallWizard::errAndOut(
-		    QString("%1 returned with error code %2")
-			.arg(BACKEND_COMMIT).arg(exitCode));
+		    QString("%1 returned with error code %2:\n\"%3\"")
+			.arg(BACKEND_COMMIT).arg(exitCode).arg(errorMsgBuf));
 	}
 	statusMsg->setText(tr("Press \"Finish\" to reboot"));
 	emit completeChanged();
