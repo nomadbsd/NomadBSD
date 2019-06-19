@@ -218,7 +218,7 @@ for i in $config; do
 		if i915_drm_legacy_ids | grep -iq ${device}; then
 			accel_method="uxa"
 			xorg_cfg > "${path_xorg_cfg}"
-			kldconfig -m /boot/drm_legacy >/dev/null 2>&1
+			kldconfig -im /boot/drm_legacy >/dev/null 2>&1
 			kldload /boot/drm_legacy/i915kms.ko && exit 0
 		fi
 		if i915_drm_next_ids | grep -iq ${device}; then
