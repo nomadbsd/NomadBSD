@@ -208,7 +208,7 @@ commit() {
 	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
 
 	status "Counting config files ..."
-	progress 0
+	progress -1
 	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
 
 	status "Replacing nomad by ${username} in config files ..."
