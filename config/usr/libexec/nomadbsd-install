@@ -159,10 +159,12 @@ commit() {
 	mount /dev/${disk}p${idx} /mnt || \
 		bail "Failed to mount /dev/${disk}p${idx}"
 	status "Counting files to copy ..."
-	progress 0
+	progress -1
 	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|home.nomad.tgz|";
 	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip|home/pkgs.*)"
-	nfiles=$(find / 2>/dev/null | egrep -v "$re" | wc -l)
+	nfiles=$(find / \( -type f -or -type d -or 	 \
+			 -type l -or -type p \) 2>/dev/null | \
+			 egrep -v "$re" | wc -l | tr -d ' ')
 	status "Copying files ..."
 	(cd / && tar cf -						\
 		--exclude '^dev*'					\
@@ -173,12 +175,16 @@ commit() {
 		--exclude '^nomadbsd-backup.tar.xz'	\
 		--exclude '^etc/rc.d/mount_uzip'	\
 		--exclude '^home/pkgs*' .) | \
-		(cd /mnt && tar xmvf - 2>&1) | while read x; do
-			n=$(($n + 1))
-			p=$(($n * 100 / $nfiles))
-			echo ">$x"
-			progress $p
-		done
+		(cd /mnt && tar xmvf - 2>&1) | awk -v nfiles=$nfiles '{
+			while (getline > 0) {
+				if ($0 !~ /^x/)
+					continue;
+				p = int(++n * 100 / nfiles);
+				print ">" $0;
+				print "%" p;
+				fflush();
+			}
+		}'
 	status "Creating /mnt/dev ..."
 	mkdir /mnt/dev
 	status "Creating /mnt/var/run ..."
