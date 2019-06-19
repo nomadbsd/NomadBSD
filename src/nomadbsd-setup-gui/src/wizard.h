@@ -303,7 +303,6 @@ public slots:
 protected:
 	void initializePage();
 private:
-	QLabel	     *errorMsg;
 	QLabel	     *commandMsg;
 	QLabel	     *statusMsg;
 	QString	     commandMsgBuf;
