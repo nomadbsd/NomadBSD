@@ -1,0 +1,50 @@
+#!/bin/sh
+
+msg="I see you have more than one monitor connected. You can use ARandr "
+msg="${msg}(Main menu -> Settings) to configure a multihead setup"
+msg_expt=15000
+msg_icon="display"
+path_default_layout=~/.screenlayout/default.sh
+
+default_layout() {
+cat <<END
+#!/bin/sh
+# Just enable all connected outputs
+xrandr --auto
+END
+}
+
+#
+# Count all connected outputs.
+#
+noutputs=$(xrandr | awk '
+	BEGIN {
+		n = 0;
+	}
+	/^[^ ]+ connected/ {
+		outputs[n++] = $1;
+	}
+	END {
+		print n;
+	}
+')
+
+#
+# Enable all outputs and inform the user about how to configure
+# a multi head system.
+#
+if [ ${noutputs} -gt 1 ]; then
+	#
+	# If the default script doesn't exist yet, we enable all
+	# connected outputs and create the script.
+	#
+	if [ ! -x "${path_default_layout}" ]; then 
+		xrandr --auto
+		cfgdir=$(dirname "${path_default_layout}")
+		[ ! -d "${cfgdir}" ] && mkdir "${cfgdir}"
+		default_layout > "${path_default_layout}"
+		chmod a+x "${path_default_layout}"
+	fi
+	notify-send -t ${msg_expt} -i ${msg_icon} "$msg"
+fi
+
