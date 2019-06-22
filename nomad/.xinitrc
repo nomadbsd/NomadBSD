@@ -13,6 +13,8 @@ for s in 15 9; do
 	done
 done
 
+cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
+sh ~/.config/DSB/autostart.sh
 ############################################################################
 # Uncomment one of the following lines depending on the DE/WM you intend to
 # start:
@@ -32,6 +34,5 @@ done
 #
 ###########################################################################
 
-cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
 exec ck-launch-session dbus-launch --exit-with-session openbox-session
 
