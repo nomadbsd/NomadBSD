@@ -1,4 +1,6 @@
 #!/bin/sh
+chkmultihead&
+~/.screenlayout/default.sh&
 ~/.config/DSB/dsbds.sh&
 ~/.fehbg&
 compton&
