@@ -237,8 +237,12 @@ builddrmlegacy()
 
 instpkgs()
 {
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
 	export ASSUME_ALWAYS_YES=yes
 	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
+	umount "${SYSDIR}/dev"
 	buildnvidia
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
