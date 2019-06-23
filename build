@@ -256,7 +256,9 @@ instpkgs()
 instgit()
 {
 	[ ! -d "${SYSDIR}/git" ] && mkdir "${SYSDIR}/git"
-
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
 	for r in ${GIT_REPOS}; do
 		rd=$(echo $r | sed -E 's#.*/(.*)\.git$#\1#')
 		repo_dirs="${repo_dirs} ${rd}"
@@ -270,6 +272,7 @@ instgit()
 		[ -z "${build_cmd}" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
 	done
+	umount "${SYSDIR}/dev"
 }
 
 postpkgcfg()
