@@ -1,6 +1,6 @@
 #!/bin/sh
 
-msg="I see you have more than one monitor connected. You can use ARandr "
+msg="I see you have more than one monitor connected. You can use ARandR "
 msg="${msg}(Main menu -> Settings) to configure a multihead setup"
 msg_expt=15000
 msg_icon="display"
