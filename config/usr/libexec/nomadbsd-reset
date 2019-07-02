@@ -24,8 +24,8 @@
 #
 # vim: set tabstop=4:
 
-gptroot="nomadroot"
-gpthome="nomadhome"
+rootlabel="nomadroot"
+homelabel="nomadhome"
 backupfile="/nomadbsd-backup.tar.xz"
 
 exitmenu() {
@@ -65,9 +65,9 @@ getrootdev()
 {
 	local rootdev
 	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
-	[ "${rootdev}" != "gpt/${gptroot}" ] && return
-	rootdev=$(glabel status | grep ${gptroot} | awk -F" " '{ print $3 }')
-	echo "${rootdev}" | sed -E 's/(.*)p[0-9]/\1/'
+	[ "${rootdev}" != "label/${rootlabel}" ] && return
+	rootdev=$(glabel status | grep ${rootlabel} | awk -F" " '{ print $3 }')
+	echo "${rootdev}" | sed -E 's/(.*)s[0-9][a-f]/\1/'
 }
 
 delhome()
@@ -79,19 +79,19 @@ delhome()
 		errandout "Error: Failed to find root device."
 	fi
 	homedev=$(glabel status | awk -v dev=${rootdev} \
-								  -v label="gpt/${gpthome}" -F" " '{
+								  -v label="label/${homelabel}" -F" " '{
 		if ($1 == label && $3 ~ dev) {
 			print $3
 		}
 	}')
 	if [ -z "${homedev}" ]; then
-		errandout "Error: Unable to find gpt/${gpthome} on ${rootdev}"
+		errandout "Error: Unable to find label/${homelabel} on ${rootdev}"
 	fi
-	idx=$(echo ${homedev} | sed -E "s/${rootdev}p([0-9]+)/\1/")
+	idx=$(echo ${homedev} | sed -E "s/${rootdev}s([0-9]+)/\1/")
 	umount -f /private 2>/dev/null
 	umount -f /home 2>/dev/null
 	gpart delete -i ${idx} ${rootdev} || \
-		errandout "Error: Failed to delete gpt/${gpthome}"
+		errandout "Error: Failed to delete label/${homelabel}"
 	rm -rf /private
 	rm -rf /home
 }
@@ -124,8 +124,8 @@ rollback() {
 				errandout "Error: Couldn't find ${backupfile}"
 			fi
 			# Make sure / is mounted rw. Do not rely on /etc/fstab.
-			mount -u -o rw /dev/gpt/${gptroot} / || \
-				errandout "Error: Failed to mount /dev/gpt/${gptroot} rw"
+			mount -u -o rw /dev/label/${rootlabel} / || \
+				errandout "Error: Failed to mount /dev/label/${rootlabel} rw"
 
 			umount -f /var/log 2>/dev/null
 			umount -f /var/run 2>/dev/null
