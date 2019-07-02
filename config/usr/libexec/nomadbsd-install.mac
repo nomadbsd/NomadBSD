@@ -1,0 +1,302 @@
+#!/bin/sh
+#
+# Copyright (c) 2019 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# vim: set tabstop=4:
+
+idx=0
+rootfs_label="nbsdrootfs"
+swap_label="nbsdswap"
+
+bail() {
+	echo "nomadbsd-install: $1" >&2
+	exit 1
+}
+
+status() {
+	echo "!$1"
+	[ -n "${dummy}" ] && sleep 5
+}
+
+progress() {
+	echo "%$1"
+	[ -n "${dummy}" ] && sleep 1
+}
+
+fstab() {
+cat <<FSTAB_END
+/dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
+tmpfs                    /tmp tmpfs rw,mode=1777 0 0
+FSTAB_END
+}
+
+getrootdev()
+{
+	local rootdev
+	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
+	[ "${rootdev}" != "gpt/nomadroot" ] && return
+	rootdev=$(glabel status | grep nomadroot | awk -F" " '{ print $3 }')
+	echo "${rootdev}" | sed -E 's/(.*)p[0-9]/\1/'
+}
+
+devlist() {
+	local rootdev=$(getrootdev)
+	local list=$(camcontrol devlist | awk -F " " '{
+		split($0, a, "[<>]"); descr = a[2];
+		n = split($NF, a, "[,()]");
+		for (i = 2; i <= n; i++) {
+			if (a[i] ~ /(ada|da|nvd)[0-9]/) {
+				printf("%s|%s\n", a[i], descr);
+			}
+		}
+	}')
+	if [ -n "${rootdev}" ]; then
+		echo "$list" | grep -v "^${rootdev}"
+	else
+		echo "$list"
+	fi
+}
+
+newfswrp() {
+	fifo="/tmp/newfs.fifo"
+	[ ! -f "${fifo}" ] && rm -f "${fifo}"
+	mkfifo "${fifo}"
+	$1 > "${fifo}"&
+	pid=$!
+	echo "%0"
+	cat "${fifo}" | awk '{
+		while (getline > 0) {
+			if ($0 ~ /^\tusing.*/) {
+				n = split($0, a, " ");
+				if (n < 2 || a[2] <= 0) {
+					print "ERROR" | "cat >&2"
+					exit(1);
+				}
+				ngroups = a[2];
+			} else if ($0 ~ /^super-block backups.*at:$/) {
+				RS=" ";
+				getblocks = 1;
+			} else if (getblocks == 1) {
+				if ($0 !~ /^[0-9]+/)
+					continue;
+				p = int(++gc * 100 / ngroups);
+				print "%" p;
+				fflush();
+			}
+		}
+	}'
+	wait $pid
+	retval=$?
+	rm -f "${fifo}"
+	[ $retval -ne 0 ] && bail "Command '$1' failed"
+}
+
+commit() {
+	status "Creating GPT partition scheme ..."
+	gpart destroy -F ${disk}
+	dd if=/dev/zero of=/dev/${disk} count=100
+	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
+	status "Creating boot partition ..."
+	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
+		bail "Couldn't create partition"
+	idx=$((idx + 1))
+	status "Installing boot code ..."
+	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${idx} ${disk} || \
+		bail "Couldn't install boot code"
+	gpart add -t efi -l gpefiboot -s 200M ${disk} || \
+		bail "Couldn't create EFI partition"
+	idx=$((idx + 1))
+	dd if=/boot/boot1.efifat of=/dev/${disk}p${idx}
+	if [ ${swapsize} -gt 0 ]; then
+		status "Creating swap partition ..."
+		gpart add -t freebsd-swap -l ${swap_label} -s ${swapsize}M ${disk} || \
+			bail "Couldn't create swap partition"
+		idx=$((idx + 1))
+	fi
+	status "Creating partition for / ..."
+	gpart add -t freebsd-ufs -l ${rootfs_label} ${disk} || \
+		bail "Couldn't create partition"
+	idx=$((idx + 1))
+	status "Creating UFS filesystem ..."
+	newfswrp "newfs -t -U /dev/${disk}p${idx}"
+	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	mount /dev/${disk}p${idx} /mnt || \
+		bail "Failed to mount /dev/${disk}p${idx}"
+	status "Counting files to copy ..."
+	progress -1
+	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|home.nomad.tgz|";
+	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip|home/pkgs.*)"
+	nfiles=$(find / \( -type f -or -type d -or 	 \
+			 -type l -or -type p \) 2>/dev/null | \
+			 egrep -v "$re" | wc -l | tr -d ' ')
+	status "Copying files ..."
+	(cd / && tar cf -						\
+		--exclude '^dev*'					\
+		--exclude '^var/run*'				\
+		--exclude '^mnt*'					\
+		--exclude '^uzip*'					\
+		--exclude '^home.nomad.tgz'			\
+		--exclude '^nomadbsd-backup.tar.xz'	\
+		--exclude '^etc/rc.d/mount_uzip'	\
+		--exclude '^home/pkgs*' .) | \
+		(cd /mnt && tar xmvf - 2>&1) | awk -v nfiles=$nfiles '{
+			while (getline > 0) {
+				if ($0 !~ /^x/)
+					continue;
+				p = int(++n * 100 / nfiles);
+				print ">" $0;
+				print "%" p;
+				fflush();
+			}
+		}'
+	status "Creating /mnt/dev ..."
+	mkdir /mnt/dev
+	status "Creating /mnt/var/run ..."
+	mkdir /mnt/var/run
+	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
+	unlink /mnt/usr/local/etc
+	mv /mnt/usr.local.etc /mnt/usr/local/etc
+	status "Creating /mnt/mnt ..."
+	mkdir /mnt/mnt
+	status "Writing fstab ..."
+	fstab > /mnt/etc/fstab
+	if [ ${swapsize} -gt 0 ]; then
+		status "Adding swap entry to fstab ..."
+		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
+			>> /mnt/etc/fstab
+	fi
+	sed -i .bak -E "/^local_startup/d" /mnt/etc/rc.conf
+	status "Changing username ..."
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
+	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
+
+	status "Counting config files ..."
+	progress -1
+	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
+
+	status "Replacing nomad by ${username} in config files ..."
+	for i in $(find /mnt/home/nomad/ -type f); do
+		if (file "$i" | grep -q text); then
+			n=$(($n + 1))
+			p=$(($n * 100 / $nfiles))
+			progress $p
+			sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" "$i"
+		fi
+	done
+	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
+	rm -f /mnt/usr/libexec/nomad*
+	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
+	mv /mnt/home/nomad /mnt/home/${username}
+	if [ -L /mnt/home -a -d /mnt/private/home/${username} ]; then
+		unlink /mnt/home
+		mv /mnt/private/home /mnt
+		rmdir /mnt/private
+	fi
+	status "Running pwd_mkdb on /etc/master.passwd ..."
+	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+	status "Unmounting /mnt ..."
+	umount /mnt
+	status "Done!"
+}
+
+dummy_commit() {
+	status "Creating GPT partition scheme ..."
+	status "Creating boot partition ..."
+	status "Installing boot code ..."
+	status "Creating EFI partition ..."
+	status "Creating swap partition ..."
+	status "Creating partition for / ..."
+	status "Creating UFS filesystem ..."
+	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	status "Copying files ..."
+	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
+	status "Creating /mnt/mnt ..."
+	status "Writing fstab ..."
+	status "Adding swap entry to fstab ..."
+	status "Changing username ..."
+	status "Replacing nomad by $username in config files ..."
+	status "Moving /mnt/home/nomad to /mnt/home/${username} ..."
+	status "Running pwd_mkdb on /etc/master.passwd ..."
+	status "Unmounting /mnt ..."
+	status "Done!"
+}
+
+usage() {
+	echo "Usage: $(basename "$0") devlist"
+	echo "       $(basename "$0") commit [-n] -u user -s swap -d dev"
+	echo "Options"
+	echo "-n     Dummy mode. Do not write anything to disk."
+	echo "-d     Define target disk."
+	echo "-s     Define size of the swap partition in MB. If set to 0,"
+	echo "       no swap partition will be created."
+	echo "-u     Define the username to replace nomad."
+	exit 1
+}
+
+[ $# -lt 1 ] && usage
+case $1 in
+-*)
+	usage
+	;;
+esac
+
+if [ $1 = "devlist" ]; then
+	devlist
+elif [ $1 = "commit" ]; then
+	shift
+	while [ $# -gt 0 ]; do
+		case $1 in
+		-n)
+			dummy=1
+			;;
+		-u)
+			username=$2
+			shift
+			;;
+		-s)
+			swapsize=$2
+			shift
+			;;
+		-d)
+			disk=$2
+			shift
+			;;
+		-*)
+			usage
+			;;
+		esac
+		shift
+	done
+	[ -z "$username" ] && bail "Username not defined"
+	[ -z "$swapsize" ] && bail "Swap size not defined"
+	[ -z "$disk"     ] && bail "Target device not defined"
+	if [ -n "$dummy" ]; then
+		dummy_commit
+	else
+		commit
+	fi
+else
+	bail "Unknown command '$1'"
+fi
+exit 0
