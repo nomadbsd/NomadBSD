@@ -125,9 +125,11 @@ public slots:
 	void diskSelected(int row);
 	void usernameChanged(const QString &username);
 	void swapChanged(int mb);
+	void lenovofixChanged(int state);
 private:
 	QSpinBox    *swapsb;
 	QLineEdit   *usernamele;
+	QCheckBox   *lenovofixCb;
 	QListWidget *diskls;
 };
 
@@ -144,7 +146,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 3;
+	static const int nkeys = 4;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *text;

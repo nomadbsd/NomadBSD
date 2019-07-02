@@ -39,10 +39,12 @@
 // Global variables to hold the configuration
 //
 //////////////////////////////////////////////////////////////////////////////
-static QString cfg_swap	    = "2048";
-static QString cfg_username = "settler";
+static QString cfg_swap	     = "2048";
+static QString cfg_username  = "settler";
+static QString cfg_lenovofix = "0";
 static QString cfg_disk;
 static QString cfg_disk_descr;
+
 //////////////////////////////////////////////////////////////////////////////
 pid_t pid = (pid_t)-1;
 
@@ -108,6 +110,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	swapsb		    = new QSpinBox;
 	diskls		    = new QListWidget(this);
 	usernamele	    = new QLineEdit;
+	lenovofixCb	    = new QCheckBox;
 	QVBoxLayout *vbox   = new QVBoxLayout;
 	QLabel	    *dlabel = new QLabel;
 	QLabel	    *slabel = new QLabel;
@@ -155,6 +158,17 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	vbox->addWidget(dlabel);
 	vbox->addWidget(diskls);
 
+
+	//
+	// Lenovofix
+	//
+	lenovofixCb->setCheckState(Qt::Unchecked);
+	lenovofixCb->setTristate(false);
+	lenovofixCb->setText(tr("Enable lenovofix"));
+	lenovofixCb->setToolTip(tr("Setting this allows Lenovo systems with " \
+				   "a buggy BIOS to boot from GPT partitions"));
+	vbox->addWidget(lenovofixCb);
+
 	//
 	// Swap setting
 	//
@@ -193,6 +207,8 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
             SLOT(swapChanged(int)));
 	connect(usernamele, SIGNAL(textChanged(const QString &)), this,
 	    SLOT(usernameChanged(const QString &)));
+	connect(lenovofixCb, SIGNAL(stateChanged(int)), this,
+		SLOT(lenovofixChanged(int)));
 }
 
 void SettingsPage::diskSelected(int row)
@@ -212,6 +228,11 @@ bool SettingsPage::isComplete() const
 	if (!cfg_username.length())
 		return (false);
 	return (true);
+}
+
+void SettingsPage::lenovofixChanged(int state)
+{
+	cfg_lenovofix.setNum(state);
 }
 
 void SettingsPage::swapChanged(int mb)
@@ -245,13 +266,16 @@ SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 
 void SummaryPage::initializePage()
 {
+	QString lfstate = 
+		(cfg_lenovofix.toInt(0, 10) == 0 ? tr("No") : tr("Yes"));
 	struct summary_s {
 		QString key;
 		QString val;
 	} summary[] = {
 		{ tr("Target disk:"),  cfg_disk_descr },
 		{ tr("Swap (in MB):"), cfg_swap       },
-		{ tr("Username:"),     cfg_username   }
+		{ tr("Username:"),     cfg_username   },
+		{ tr("Lenovofix:"),    lfstate	      }
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -308,8 +332,9 @@ void CommitPage::initializePage()
 	if (msgBox.clickedButton() == leave) {
 		std::exit(0);
 	}
-	QString cmd = QString("%1 -u %2 -d %3 -s %4").arg(BACKEND_COMMIT)
-			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap);
+	QString cmd = QString("%1 -u %2 -d %3 -s %4 %5").arg(BACKEND_COMMIT)
+			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap)
+			.arg(cfg_lenovofix.toInt(0, 10) != 0 ? "-l" : "");
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(cmd);
 	pid = (pid_t)proc.processId();
