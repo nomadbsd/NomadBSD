@@ -4,37 +4,37 @@
 <context>
     <name>CommitPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="296"/>
+        <location filename="../src/wizard.cpp" line="323"/>
         <source>Last chance to quit installation.</source>
         <translation>Последняя возможность прервать установку.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="297"/>
+        <location filename="../src/wizard.cpp" line="324"/>
         <source>Last chance</source>
         <translation>Последняя возможность</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="300"/>
+        <location filename="../src/wizard.cpp" line="327"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="303"/>
+        <location filename="../src/wizard.cpp" line="330"/>
         <source>Install</source>
         <translation>Установка</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="320"/>
+        <location filename="../src/wizard.cpp" line="348"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Фоновый процесс не может быть запущен %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="337"/>
+        <location filename="../src/wizard.cpp" line="365"/>
         <source>An unexpected error occured while executing %1: %2</source>
         <translation>Возникла неизвестная ошибка в процессе выполнения %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="379"/>
+        <location filename="../src/wizard.cpp" line="427"/>
         <source>Press &quot;Finish&quot; to reboot</source>
         <translation>Нажмите &quot;Завершить&quot; для перезагрузки</translation>
     </message>
@@ -42,48 +42,48 @@
 <context>
     <name>InstallWizard</name>
     <message>
-        <location filename="../src/wizard.cpp" line="52"/>
+        <location filename="../src/wizard.cpp" line="54"/>
         <source>NomadBSD Installation Wizard</source>
         <translation>Мастер установки NomadBSD</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="55"/>
+        <location filename="../src/wizard.cpp" line="57"/>
         <source>Next</source>
         <translation>Далее</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="56"/>
+        <location filename="../src/wizard.cpp" line="58"/>
         <source>Back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="57"/>
+        <location filename="../src/wizard.cpp" line="59"/>
         <source>Commit</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="58"/>
+        <location filename="../src/wizard.cpp" line="60"/>
         <source>Finish</source>
         <translation>Завершить</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="59"/>
-        <location filename="../src/wizard.h" line="85"/>
+        <location filename="../src/wizard.cpp" line="61"/>
+        <location filename="../src/wizard.h" line="86"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="62"/>
+        <location filename="../src/wizard.h" line="63"/>
         <source>Fatal error</source>
         <translation>Критическая ошибка</translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="63"/>
+        <location filename="../src/wizard.h" line="64"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="66"/>
+        <location filename="../src/wizard.h" line="67"/>
         <source>
 
 Please send a bug report to the NomadBSD mailing list.
@@ -99,17 +99,17 @@ We are sorry for the inconvenience
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="78"/>
+        <location filename="../src/wizard.h" line="79"/>
         <source>Are you sure you want to quit?</source>
         <translation>Вы уверены что хотите выйти?</translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="79"/>
+        <location filename="../src/wizard.h" line="80"/>
         <source>Quit installation</source>
         <translation>Выход из мастера установки</translation>
     </message>
     <message>
-        <location filename="../src/wizard.h" line="82"/>
+        <location filename="../src/wizard.h" line="83"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
@@ -117,28 +117,38 @@ We are sorry for the inconvenience
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="129"/>
+        <location filename="../src/wizard.cpp" line="132"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Фоновый процесс не может быть запущен %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="153"/>
+        <location filename="../src/wizard.cpp" line="156"/>
         <source>&lt;b&gt;Please select the device you want to install NomadBSD on&lt;/b&gt;</source>
         <translation>&lt;b&gt;Пожалуйста, выберите устройство на которое нужно установить NomadBSD&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="161"/>
+        <location filename="../src/wizard.cpp" line="167"/>
+        <source>Enable lenovofix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="168"/>
+        <source>Setting this allows Lenovo systems with a buggy BIOS to boot from GPT partitions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="175"/>
         <source>&lt;b&gt;Desired size of the swap partition&lt;/b&gt;</source>
         <translatorcomment>Или все же использовать англицизм и раздел подкачки переименовать в swap раздел так как это слово широко известно и употребимо как технический термин в русском языке?</translatorcomment>
         <translation>&lt;b&gt;Размер раздела подкачки&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="174"/>
+        <location filename="../src/wizard.cpp" line="188"/>
         <source>&lt;b&gt;Username*&lt;/b&gt;</source>
         <translation>&lt;b&gt;Имя пользователя*&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="178"/>
+        <location filename="../src/wizard.cpp" line="192"/>
         <source>&lt;i&gt;* The installation script will adopt nomad&apos;s complete account. Only the username changes.&lt;/i&gt;</source>
         <translation>&lt;i&gt;* Мастер установки будет использовать профиль пользователя &quot;nomad&quot;. Только имя пользователя будет изменено.&lt;/i&gt;</translation>
     </message>
@@ -146,28 +156,43 @@ We are sorry for the inconvenience
 <context>
     <name>SummaryPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="239"/>
+        <location filename="../src/wizard.cpp" line="260"/>
         <source>&lt;b&gt;Summary:&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;Сводка:&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="252"/>
+        <location filename="../src/wizard.cpp" line="270"/>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="270"/>
+        <source>Yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="275"/>
         <source>Target disk:</source>
         <translation>Диск:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="253"/>
+        <location filename="../src/wizard.cpp" line="276"/>
         <source>Swap (in MB):</source>
         <translatorcomment>We could try to be precise and use MiB instead of MB here. It&apos;s important, I guess.</translatorcomment>
         <translation>Раздел подкачки (в МиБ):</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="254"/>
+        <location filename="../src/wizard.cpp" line="277"/>
         <source>Username:</source>
         <translation>Имя пользователя:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="260"/>
+        <location filename="../src/wizard.cpp" line="278"/>
+        <source>Lenovofix:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="284"/>
         <source>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Warning:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
 If you click &lt;i&gt;commit&lt;/i&gt;, the system will be written to &lt;i&gt;%1&lt;/i&gt;. All data on &lt;i&gt;%1&lt;/i&gt; will be lost!</source>
         <translation>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Внимание:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
@@ -177,12 +202,12 @@ If you click &lt;i&gt;commit&lt;/i&gt;, the system will be written to &lt;i&gt;%
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="89"/>
+        <location filename="../src/wizard.cpp" line="91"/>
         <source>&lt;b&gt;Welcome to the NomadBSD installation wizard.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;Добро пожаловать в мастер установки NomadBSD.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="91"/>
+        <location filename="../src/wizard.cpp" line="93"/>
         <source>This program will install your NomadBSD with its current configuration on a hard disk.
 
 </source>
