@@ -446,12 +446,14 @@ createimage()
 	rm -rf "${TMP_BASE_DIR}/root/.subversion"
 	if [ ! -z ${mac} ]; then
 		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
-		sed -i '' -E '/.*lenovofix.*$/d' \
-			${TMP_BASE_DIR}/usr/libexec/nomad/nomad_setup
-		sed -i '' -E '/.*lenovofix.*$/d' \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup
+		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-install.mac \
+			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
 		sed -i ''  -E "s/@ARCH@/mac/g" \
 			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
+		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup.mac \
+			${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup
+		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac \
+			${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset
 	else
 		sed -i '' -E "s/@ARCH@/${ARCH}/g" \
 			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
