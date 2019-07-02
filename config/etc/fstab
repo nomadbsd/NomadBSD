@@ -1,4 +1,4 @@
-/dev/gpt/nomadroot	/			ufs	  rw,noatime       1 1
+/dev/label/nomadroot	/			ufs	  rw,noatime       1 1
 tmpfs			/tmp			tmpfs	  rw,mode=1777     0 0	
 tmpfs			/var/log		tmpfs	  rw               0 0
 tmpfs			/var/run		tmpfs     rw		   0 0
