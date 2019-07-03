@@ -447,17 +447,13 @@ createimage()
 	rm -rf "${TMP_BASE_DIR}/root/.subversion"
 	if [ ! -z ${mac} ]; then
 		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
-		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-install.mac \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
-		sed -i ''  -E "s/@ARCH@/mac/g" \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
-		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup.mac \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-setup
-		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset
+		for i in ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac; do
+			mv $i ${i%.mac}
+		done
 	else
 		sed -i '' -E "s/@ARCH@/${ARCH}/g" \
 			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
+		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac
 	fi
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
