@@ -87,7 +87,7 @@ delhome()
 	if [ -z "${homedev}" ]; then
 		errandout "Error: Unable to find label/${homelabel} on ${rootdev}"
 	fi
-	idx=$(echo ${homedev} | sed -E "s/${rootdev}s([0-9]+)/\1/")
+	idx=$(echo ${homedev} | sed -E "s/${rootdev}s([0-9]+)[a-z]/\1/")
 	umount -f /private 2>/dev/null
 	umount -f /home 2>/dev/null
 	gpart delete -i ${idx} ${rootdev} || \
