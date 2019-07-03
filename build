@@ -461,10 +461,10 @@ createimage()
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
 	[ $? -ne 0 ] && bail
+	dd if=/dev/zero of=/dev/${mddev} bs=1M
 	[ ! -d mnt ] && mkdir mnt
 	pn=0
 	if [ -z ${mac} ]; then
-		gpart destroy -F ${mddev}
 		dd if=/dev/zero of=/dev/${mddev} bs=1M count=100
 		gpart create -s mbr ${mddev}
 		if [ "${ARCH}" != "i386" ]; then
@@ -483,7 +483,6 @@ createimage()
 			  -m ${UFS_MINFREE} /dev/${mddev}s${pn}a || bail
 		mount /dev/${mddev}s${pn}a mnt || bail
 	else
-		gpart destroy -F ${mddev}
 		gpart create -s gpt ${mddev} || bail
 		gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 		pn=$((${pn} + 1))
