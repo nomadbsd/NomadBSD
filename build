@@ -113,7 +113,7 @@ initbase()
 	umount "${SYSDIR}/dev"
 	if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
 		chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
-		    -G wheel,operator,video -s /bin/csh'
+		    -G wheel,operator,video,games -s /bin/csh'
 	fi
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
