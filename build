@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# vim: set tabstop=4:
+#
 # COMMANDS
 #
 # all		 Set up base system, build and install kernel if BUILD_KERNEL is
@@ -46,7 +48,6 @@
 #
 # drmlegacy	 Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
 #
-# vim: set tabstop=4:
 #
 . ./build.cfg
 
