@@ -207,7 +207,12 @@ commit() {
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
 	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
-
+	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
+	if [ -L /mnt/home -a -d /mnt/private/home/nomad ]; then
+		unlink /mnt/home
+		mv /mnt/private/home /mnt
+		rmdir /mnt/private
+	fi
 	status "Counting config files ..."
 	progress -1
 	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
@@ -225,11 +230,6 @@ commit() {
 	rm -f /mnt/usr/libexec/nomad*
 	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
 	mv /mnt/home/nomad /mnt/home/${username}
-	if [ -L /mnt/home -a -d /mnt/private/home/${username} ]; then
-		unlink /mnt/home
-		mv /mnt/private/home /mnt
-		rmdir /mnt/private
-	fi
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
 	status "Unmounting /mnt ..."
