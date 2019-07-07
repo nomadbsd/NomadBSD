@@ -450,10 +450,14 @@ createimage()
 		for i in ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac; do
 			mv $i ${i%.mac}
 		done
+		sed -i '' -E "s#@ROOTDEV@#/dev/gpt/${ROOTLABEL}#" \
+			${TMP_BASE_DIR}/etc/fstab
 	else
 		sed -i '' -E "s/@ARCH@/${ARCH}/g" \
 			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
 		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac
+		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
+			${TMP_BASE_DIR}/etc/fstab
 	fi
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
