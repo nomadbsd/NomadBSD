@@ -151,6 +151,7 @@ commit() {
 			 egrep -v "$re" | wc -l | tr -d ' ')
 	status "Copying files ..."
 	(cd / && tar cf -						\
+		--exclude '*/.gvfs'					\
 		--exclude '^dev*'					\
 		--exclude '^var/run*'				\
 		--exclude '^mnt*'					\
