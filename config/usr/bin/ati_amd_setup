@@ -522,20 +522,16 @@ write_xorg_cfg() {
 }
 
 unit=$(sysctl -n hw.pci.default_vgapci_unit)
-config=$(pciconf -lv | grep ^vgapci${unit} | \
+config=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
 	sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
-for i in $config; do
-	vendor=$(echo "$i" | cut -d: -f2)
-	device=$(echo "$i" | cut -d: -f1)
-	if [ "$vendor" = 1002 ]; then
-		if data_radeon | grep -iq ${device}; then
-			kldload /boot/modules/radeonkms.ko
-		else
-			kldload /boot/modules/amdgpu.ko
-			write_xorg_cfg
-		fi
-		exit 0
-	fi
-	exit 1
-done
+vendor=$(echo "$config" | cut -d: -f2)
+device=$(echo "$config" | cut -d: -f1)
+[ "$vendor" = 1002 ] || exit 1
+if data_radeon | grep -iq ${device}; then
+	kldload /boot/modules/radeonkms.ko
+else
+	kldload /boot/modules/amdgpu.ko
+	write_xorg_cfg
+fi
+exit 0
 
