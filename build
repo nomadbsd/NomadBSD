@@ -439,8 +439,6 @@ createimage()
 	mkdir ${TMP_BASE_DIR}/usr.local.etc
 	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
  	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
-	(cd ${TMP_BASE_DIR} && tar cfJ nomadbsd-backup.tar.xz \
-		etc root var usr.local.etc)
 	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
 	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
 
@@ -459,6 +457,8 @@ createimage()
 		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
 	fi
+	(cd ${TMP_BASE_DIR} && tar cfJ nomadbsd-backup.tar.xz \
+		etc root var usr.local.etc)
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
 	touch ${IMAGE_NAME}
