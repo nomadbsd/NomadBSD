@@ -186,13 +186,13 @@ commit() {
 		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
 			>> /mnt/etc/fstab
 	fi
-	sed -i .bak -E "/^local_startup/d" /mnt/etc/rc.conf
 	status "Changing username ..."
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
 	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
+	sysrc -f /mnt/etc/rc.conf -x local_startup
 
 	if [ -L /mnt/home -a -d /mnt/private/home/nomad ]; then
 		unlink /mnt/home
