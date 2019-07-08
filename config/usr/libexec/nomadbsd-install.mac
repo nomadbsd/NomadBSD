@@ -192,6 +192,8 @@ commit() {
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
 	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
+	sysrc -f /mnt/etc/rc.conf -x gsched_enable
+
 	if [ -L /mnt/home -a -d /mnt/private/home/nomad ]; then
 		unlink /mnt/home
 		mv /mnt/private/home /mnt
