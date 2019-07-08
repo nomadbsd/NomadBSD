@@ -85,8 +85,7 @@ my @gui_editor_list = (
 );
 
 my @browser_list = (
-	'firefox	Web browser based on the browser portion of Mozilla',
-	'palemoon	Open Source Goanna-based web browser'
+	'firefox	Web browser based on the browser portion of Mozilla'
 );
 
 my @email_client_list = (
