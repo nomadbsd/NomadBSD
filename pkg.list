@@ -8,6 +8,7 @@ audio/dsbmixer
 audio/musicpd
 audio/ncmpc
 benchmarks/bonnie++
+deskutils/orage
 devel/cmake
 devel/dconf
 devel/geany
