@@ -689,6 +689,30 @@ sub mkgeli {
 	close($fh);
 }
 
+sub find_desktop_file {
+	local $_;
+	my ($appsdir, $name) = @_;
+	my ($dh, $fh, $fname);
+
+	opendir($dh, $appsdir)
+		or return "";
+	while (readdir $dh) {
+		next if (! -f "$appsdir/$_");
+		$fname = $_;
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			if (/^Name=$name/im) {
+				close $fh;
+				closedir $dh;
+				return "$appsdir/$fname";
+			}
+		}
+		close $fh;
+	}
+	closedir $dh;
+	return "";
+}
+
 sub desktopsettings {
 	my $appsdir		= "/usr/local/share/applications";
 	my $usrappsdir	= "/home/nomad/.local/share/applications";
@@ -730,6 +754,9 @@ sub desktopsettings {
 	foreach (@apps) {
 		my $desktopfile = "$appsdir/$_.desktop";
 		$desktopfile = "$usrappsdir/$_.desktop" if (! -f $desktopfile);
+		if (! -f $desktopfile) {
+			$desktopfile = find_desktop_file($appsdir, $_);
+		}
 		next if (! -f $desktopfile);
 		open(my $fh, ">${plank_launcher_dir}/$_.dockitem") or next;
 		print $fh "[PlankDockItemPreferences]\n" .
