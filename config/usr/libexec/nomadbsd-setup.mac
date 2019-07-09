@@ -86,6 +86,7 @@ my @gui_editor_list = (
 
 my @browser_list = (
 	'firefox	Web browser based on the browser portion of Mozilla'
+	'midori		Lightweight web browser using WebKit browser engine',
 );
 
 my @email_client_list = (
