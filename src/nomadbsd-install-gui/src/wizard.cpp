@@ -27,6 +27,8 @@
 #include <QProcess>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGroupBox>
+#include <QRadioButton>
 #include <QCoreApplication>
 #include <QScrollArea>
 #include <QFormLayout>
@@ -42,6 +44,7 @@
 static QString cfg_swap	     = "2048";
 static QString cfg_username  = "settler";
 static QString cfg_lenovofix = "0";
+static QString cfg_fs	     = "UFS";
 static QString cfg_disk;
 static QString cfg_disk_descr;
 
@@ -158,6 +161,20 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	vbox->addWidget(dlabel);
 	vbox->addWidget(diskls);
 
+	//
+	// Filesystem selection
+	//
+	QGroupBox *groupBox = new QGroupBox(tr("Target filesystem type"));
+	QRadioButton *rbUFS = new QRadioButton(tr("&UFS"));
+	QRadioButton *rbZFS = new QRadioButton(tr("&ZFS"));
+	rbUFS->setChecked(true);
+
+	QVBoxLayout *rbVbox = new QVBoxLayout;
+	rbVbox->addWidget(rbUFS);
+	rbVbox->addWidget(rbZFS);
+	rbVbox->addStretch(1);
+	groupBox->setLayout(rbVbox);
+	vbox->addWidget(groupBox);
 
 	//
 	// Lenovofix
@@ -209,6 +226,10 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	    SLOT(usernameChanged(const QString &)));
 	connect(lenovofixCb, SIGNAL(stateChanged(int)), this,
 		SLOT(lenovofixChanged(int)));
+	connect(rbUFS, SIGNAL(clicked(bool)), this,
+		SLOT(ufsClicked(bool)));
+	connect(rbZFS, SIGNAL(clicked(bool)), this,
+		SLOT(zfsClicked(bool)));
 }
 
 void SettingsPage::diskSelected(int row)
@@ -239,6 +260,19 @@ void SettingsPage::swapChanged(int mb)
 {
 	cfg_swap.setNum(mb);
 }
+
+void SettingsPage::ufsClicked(bool active)
+{
+	if (active)
+		cfg_fs = "UFS";
+}
+
+void SettingsPage::zfsClicked(bool active)
+{
+	if (active)
+		cfg_fs = "ZFS";
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -275,6 +309,7 @@ void SummaryPage::initializePage()
 		{ tr("Target disk:"),  cfg_disk_descr },
 		{ tr("Swap (in MB):"), cfg_swap       },
 		{ tr("Username:"),     cfg_username   },
+		{ tr("Filesystem:"),   cfg_fs	      },
 		{ tr("Lenovofix:"),    lfstate	      }
 	};
 	for (int n = 0; n < nkeys; n++) {
@@ -332,8 +367,10 @@ void CommitPage::initializePage()
 	if (msgBox.clickedButton() == leave) {
 		std::exit(0);
 	}
-	QString cmd = QString("%1 -u %2 -d %3 -s %4 %5").arg(BACKEND_COMMIT)
+	QString cmd = QString("%1 -u %2 -d %3 -s %4 -f %5 %6")
+			.arg(BACKEND_COMMIT)
 			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap)
+			.arg(cfg_fs)
 			.arg(cfg_lenovofix.toInt(0, 10) != 0 ? "-l" : "");
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(cmd);

@@ -126,6 +126,8 @@ public slots:
 	void usernameChanged(const QString &username);
 	void swapChanged(int mb);
 	void lenovofixChanged(int state);
+	void ufsClicked(bool);
+	void zfsClicked(bool);
 private:
 	QSpinBox    *swapsb;
 	QLineEdit   *usernamele;
@@ -146,7 +148,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 4;
+	static const int nkeys = 5;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *text;
