@@ -37,6 +37,13 @@
 #
 #	Operating System dependent/independent variables
 #
+__tput() {
+	return
+}
+
+if [ ! -x /usr/bin/tput ]; then
+	alias tput=__tput
+fi
 
 __echo() {
 	tput -T xterm AF 2 >/dev/tty
