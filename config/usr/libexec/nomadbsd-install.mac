@@ -27,6 +27,8 @@
 idx=0
 rootfs_label="nbsdrootfs"
 swap_label="nbsdswap"
+POOL="zroot"
+ROOTSET="${POOL}/ROOT"
 
 bail() {
 	echo "nomadbsd-install: $1" >&2
@@ -43,10 +45,16 @@ progress() {
 	[ -n "${dummy}" ] && sleep 1
 }
 
-fstab() {
+fstab_ufs() {
 cat <<FSTAB_END
 /dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
 tmpfs                    /tmp tmpfs rw,mode=1777 0 0
+FSTAB_END
+}
+
+fstab_zfs() {
+cat <<FSTAB_END
+tmpfs                    /tmp tmpfs rw,mode=1777,late 0 0
 FSTAB_END
 }
 
@@ -111,37 +119,79 @@ newfswrp() {
 	[ $retval -ne 0 ] && bail "Command '$1' failed"
 }
 
+mkufs() {
+	status "Creating UFS filesystem ..."
+	newfswrp "newfs -t -U $1"
+	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	mount /dev/${disk}p${idx} /mnt || \
+		bail "Failed to mount /dev/${disk}p${idx}"
+}
+
+mkzfs() {
+	zpool create -f -o altroot=/mnt ${POOL} $1 || \
+		bail "Couldn't create zpool"
+	zfs set compress=on ${POOL}
+	zfs set atime=off ${POOL}
+	zfs create -o mountpoint=/ -o canmount=noauto ${ROOTSET}
+	status "Mounting ${ROOTSET} on /mnt ..."
+	mount -t zfs ${ROOTSET} /mnt || bail "Failed to mount pool"
+	zfs create -o mountpoint=/usr ${ROOTSET}/usr
+	zfs create -o mountpoint=/home ${ROOTSET}/home
+	zfs create -o mountpoint=/usr/ports \
+		-o exec=off -o setuid=off ${ROOTSET}/usr/ports
+	zfs create -o mountpoint=/var ${ROOTSET}/var
+	zfs create ${ROOTSET}/usr/obj
+	zfs create -o exec=off -o setuid=off ${ROOTSET}/usr/ports/distfiles
+	zfs create -o exec=off -o setuid=off ${ROOTSET}/usr/ports/packages
+	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/audit
+	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/crash
+	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/log
+	zfs create -o atime=on -o exec=off -o setuid=off ${ROOTSET}/var/mail
+	zpool set bootfs=${ROOTSET} zroot
+}
+
 commit() {
 	status "Creating GPT partition scheme ..."
 	gpart destroy -F ${disk}
 	dd if=/dev/zero of=/dev/${disk} count=100
 	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
 	status "Creating boot partition ..."
-	gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
+	gpart add -a 4k -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
 		bail "Couldn't create partition"
 	idx=$((idx + 1))
 	status "Installing boot code ..."
-	gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${idx} ${disk} || \
-		bail "Couldn't install boot code"
-	gpart add -t efi -l gpefiboot -s 200M ${disk} || \
+	if [ ${fstype} = "UFS" ]; then
+		gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${idx} ${disk} || \
+			bail "Couldn't install boot code"
+	else
+		gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot \
+			-i ${idx} ${disk} || bail "Couldn't install boot code"
+	fi
+	status "Creating EFI partition ..."
+	gpart add -a 4k -t efi -l gpefiboot -s 200M ${disk} || \
 		bail "Couldn't create EFI partition"
 	idx=$((idx + 1))
-	dd if=/boot/boot1.efifat of=/dev/${disk}p${idx}
+	gpart bootcode -p /boot/boot1.efifat -i ${idx} ${disk}
+
 	if [ ${swapsize} -gt 0 ]; then
 		status "Creating swap partition ..."
-		gpart add -t freebsd-swap -l ${swap_label} -s ${swapsize}M ${disk} || \
-			bail "Couldn't create swap partition"
+		gpart add -a 1m -t freebsd-swap -l ${swap_label} \
+			-s ${swapsize}M ${disk} || \
+				bail "Couldn't create swap partition"
 		idx=$((idx + 1))
 	fi
 	status "Creating partition for / ..."
-	gpart add -t freebsd-ufs -l ${rootfs_label} ${disk} || \
-		bail "Couldn't create partition"
-	idx=$((idx + 1))
-	status "Creating UFS filesystem ..."
-	newfswrp "newfs -t -U /dev/${disk}p${idx}"
-	status "Mounting /dev/${disk}p$idx on /mnt ..."
-	mount /dev/${disk}p${idx} /mnt || \
-		bail "Failed to mount /dev/${disk}p${idx}"
+	if [ ${fstype} = "UFS" ]; then
+		gpart add -a 1m -t freebsd-ufs -l ${rootfs_label} ${disk} || \
+			bail "Couldn't create partition"
+		idx=$((idx + 1))
+		mkufs "/dev/${disk}p${idx}"
+	else
+		gpart add -a 1m -t freebsd-zfs -l ${rootfs_label} ${disk} || \
+			bail "Couldn't create partition"
+		idx=$((idx + 1))
+		mkzfs "/dev/gpt/${rootfs_label}"
+	fi
 	status "Counting files to copy ..."
 	progress -1
 	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|home.nomad.tgz|";
@@ -180,11 +230,20 @@ commit() {
 	status "Creating /mnt/mnt ..."
 	mkdir /mnt/mnt
 	status "Writing fstab ..."
-	fstab > /mnt/etc/fstab
+	if [ ${fstype} = "UFS" ]; then
+		fstab_ufs > /mnt/etc/fstab
+	else
+		fstab_zfs > /mnt/etc/fstab
+	fi
 	if [ ${swapsize} -gt 0 ]; then
 		status "Adding swap entry to fstab ..."
 		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
 			>> /mnt/etc/fstab
+	fi
+	if [ ${fstype} = "ZFS" ]; then
+		echo zfs_load=\"YES\" >> /mnt/boot/loader.conf
+		echo vfs.root.mountfrom=\"zfs:${ROOTSET}\" \
+			>> /mnt/boot/loader.conf
 	fi
 	status "Changing username ..."
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
@@ -193,7 +252,9 @@ commit() {
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
 	sysrc -f /mnt/etc/rc.conf -x local_startup
-
+	if [ ${fstype} = "ZFS" ]; then
+		sysrc -f /mnt/etc/rc.conf zfs_enable=YES
+	fi
 	if [ -L /mnt/home -a -d /mnt/private/home/nomad ]; then
 		unlink /mnt/home
 		mv /mnt/private/home /mnt
@@ -219,6 +280,7 @@ commit() {
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
 	status "Unmounting /mnt ..."
+	[ ${fstype} = "ZFS" ] && zfs umount -af
 	umount /mnt
 	status "Done!"
 }
@@ -247,10 +309,11 @@ dummy_commit() {
 
 usage() {
 	echo "Usage: $(basename "$0") devlist"
-	echo "       $(basename "$0") commit [-n] -u user -s swap -d dev"
+	echo "       $(basename "$0") commit [-n] -u user -f fs -s swap -d dev"
 	echo "Options"
 	echo "-n     Dummy mode. Do not write anything to disk."
 	echo "-d     Define target disk."
+	echo "-f     Define filesystem type. Possible values: UFS or ZFS"
 	echo "-s     Define size of the swap partition in MB. If set to 0,"
 	echo "       no swap partition will be created."
 	echo "-u     Define the username to replace nomad."
@@ -285,6 +348,13 @@ elif [ $1 = "commit" ]; then
 			disk=$2
 			shift
 			;;
+		-f)
+			fstype=$2
+			if [ $fstype != "UFS" -a $fstype != "ZFS" ]; then
+				bail "Unknown filesystem type '$fstype'"
+			fi
+			shift
+			;;
 		-*)
 			usage
 			;;
@@ -294,6 +364,7 @@ elif [ $1 = "commit" ]; then
 	[ -z "$username" ] && bail "Username not defined"
 	[ -z "$swapsize" ] && bail "Swap size not defined"
 	[ -z "$disk"     ] && bail "Target device not defined"
+	[ -z "$fstype"   ] && bail "Filesystem type not defined"
 	if [ -n "$dummy" ]; then
 		dummy_commit
 	else
