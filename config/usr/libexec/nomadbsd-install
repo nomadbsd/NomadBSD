@@ -24,12 +24,14 @@
 #
 # vim: set tabstop=4:
 
-arch=@ARCH@
+arch=$(sysctl -n hw.machine_arch)
+version=$(cat /VERSION)
 idx=0
 rootfs_label="nbsdrootfs"
 swap_label="nbsdswap"
+[ -z "${version}" ] && bail "NomadBSD version not set. Check /VERSION"
 POOL="zroot"
-ROOTSET="${POOL}/ROOT"
+NOMADBSDROOT="${POOL}/ROOT/nomadbsd-${version}"
 
 bail() {
 	echo "nomadbsd-install: $1" >&2
@@ -128,27 +130,34 @@ mkufs() {
 		bail "Failed to mount /dev/${disk}p${idx}"
 }
 
+zfs_create() {
+	eval dataset=\${$#}
+	zfs create $* || bail "Couldn't create dataset/filesystem ${dataset}"
+}
+
 mkzfs() {
-	zpool create -f -o altroot=/mnt ${POOL} $1 || \
-		bail "Couldn't create zpool"
+	zpool create -o altroot=/mnt -m none -f ${POOL} $1 || \
+		bail "Couldn't create pool ${POOL}"
 	zfs set compress=on ${POOL}
 	zfs set atime=off ${POOL}
-	zfs create -o mountpoint=/ -o canmount=noauto ${ROOTSET}
-	status "Mounting ${ROOTSET} on /mnt ..."
-	mount -t zfs ${ROOTSET} /mnt || bail "Failed to mount pool"
-	zfs create -o mountpoint=/usr ${ROOTSET}/usr
-	zfs create -o mountpoint=/home ${ROOTSET}/home
-	zfs create -o mountpoint=/usr/ports \
-		-o exec=off -o setuid=off ${ROOTSET}/usr/ports
-	zfs create -o mountpoint=/var ${ROOTSET}/var
-	zfs create ${ROOTSET}/usr/obj
-	zfs create -o exec=off -o setuid=off ${ROOTSET}/usr/ports/distfiles
-	zfs create -o exec=off -o setuid=off ${ROOTSET}/usr/ports/packages
-	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/audit
-	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/crash
-	zfs create -o exec=off -o setuid=off ${ROOTSET}/var/log
-	zfs create -o atime=on -o exec=off -o setuid=off ${ROOTSET}/var/mail
-	zpool set bootfs=${ROOTSET} zroot
+	zfs_create -o mountpoint=none ${POOL}/ROOT
+	zfs_create -o mountpoint=/ ${NOMADBSDROOT}
+	zfs_create -o mountpoint=/usr ${NOMADBSDROOT}/usr
+	zfs_create ${NOMADBSDROOT}/home
+	zfs_create -o mountpoint=/var ${NOMADBSDROOT}/var
+	zfs_create ${NOMADBSDROOT}/usr/obj
+	zfs_create -o mountpoint=/usr/ports -o exec=off -o setuid=off \
+		${NOMADBSDROOT}/usr/ports
+	zfs_create -o exec=off -o setuid=off -o compression=off \
+		${NOMADBSDROOT}/usr/ports/distfiles
+	zfs_create -o exec=off -o setuid=off -o compression=off \
+		${NOMADBSDROOT}/usr/ports/packages
+	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/audit
+	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/crash
+	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/log
+	zfs_create -o atime=on -o exec=off -o setuid=off \
+		${NOMADBSDROOT}/var/mail
+	zpool set bootfs=${NOMADBSDROOT} zroot
 }
 
 commit() {
@@ -249,7 +258,7 @@ commit() {
 	fi
 	if [ ${fstype} = "ZFS" ]; then
 		echo zfs_load=\"YES\" >> /mnt/boot/loader.conf
-		echo vfs.root.mountfrom=\"zfs:${ROOTSET}\" \
+		echo vfs.root.mountfrom=\"zfs:${NOMADBSDROOT}\" \
 			>> /mnt/boot/loader.conf
 	fi
 	status "Changing username ..."
@@ -287,8 +296,11 @@ commit() {
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
 	status "Unmounting /mnt ..."
-	[ ${fstype} = "ZFS" ] && zfs umount -af
-	umount /mnt
+	if [ ${fstype} = "ZFS" ]; then
+		zfs umount -af
+	else
+		umount /mnt
+	fi
 	status "Done!"
 }
 
