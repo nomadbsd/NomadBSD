@@ -451,8 +451,6 @@ createimage()
 		sed -i '' -E "s#@ROOTDEV@#/dev/gpt/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
 	else
-		sed -i '' -E "s/@ARCH@/${ARCH}/g" \
-			${TMP_BASE_DIR}/usr/libexec/nomadbsd-install
 		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac
 		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
