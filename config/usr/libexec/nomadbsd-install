@@ -272,7 +272,7 @@ commit() {
 	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
 
 	status "Replacing nomad by ${username} in config files ..."
-	for i in $(find /mnt/home/nomad/ -type f); do
+	find /mnt/home/nomad/ -type f | while read i; do
 		if (file "$i" | grep -q text); then
 			n=$(($n + 1))
 			p=$(($n * 100 / $nfiles))
