@@ -32,6 +32,8 @@
 #include <QCoreApplication>
 #include <QScrollArea>
 #include <QFormLayout>
+#include <QStatusBar>
+#include <QFile>
 
 #include "wizard.h"
 #include "backend.h"
@@ -110,6 +112,7 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 //////////////////////////////////////////////////////////////////////////////
 SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 {
+	status		    = new QLabel;
 	swapsb		    = new QSpinBox;
 	diskls		    = new QListWidget(this);
 	usernamele	    = new QLineEdit;
@@ -123,6 +126,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	QProcess    proc;
         QByteArray  line;
 
+	readUsernames();
   	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(BACKEND_GET_DISKS);
 	(void)proc.waitForStarted(-1);
@@ -203,15 +207,18 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	// Username
 	//
 	ulabel->setText(tr("<b>Username*</b>"));
-        usernamele->setValidator(new QRegExpValidator(chars));
+	usernamele->setMaxLength(8);
+	usernamele->setValidator(new QRegExpValidator(chars));
 	usernamele->setPlaceholderText(cfg_username);
 
+	status->setStyleSheet("font-weight: bold; color: red");	
 	info->setText(tr("<i>* The installation script will adopt nomad's " \
 			  "complete account. Only the username changes.</i>"));
 	info->setWordWrap(true);
-	
+
 	vbox->addWidget(ulabel);
 	vbox->addWidget(usernamele);
+	vbox->addWidget(status);
 	vbox->addWidget(info);
 	setLayout(vbox);
 	if (diskls->count() > 0) {
@@ -238,6 +245,39 @@ void SettingsPage::diskSelected(int row)
 	cfg_disk_descr = diskls->item(row)->text();
 }
 
+bool SettingsPage::validateUsername(const QString &username) const
+{
+	if (cfg_username.length() < 1) {
+		status->setText(tr("Username must not be empty"));
+		return (false);
+	}
+	for (int i = 0; i < usernames.count(); i++) {
+		if (username == usernames.at(i)) {
+			status->setText(tr("Username already in use"));
+			return (false);
+		}
+	}
+	status->setText("");
+	return (true);
+}
+
+void SettingsPage::readUsernames()
+{
+	QFile file(PATH_ETC_PASSWD);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		InstallWizard::errAndOut(tr("Couldn't read '%1': %2")
+		    .arg(PATH_ETC_PASSWD).arg(file.error()));
+		return;
+	}
+	while (!file.atEnd()) {
+		QByteArray line = file.readLine();
+		QList<QByteArray>fields = line.split(':');
+		usernames.append(fields[0]);
+	}
+	file.close();
+}
+	
 void SettingsPage::usernameChanged(const QString &username)
 {
 	cfg_username = username;
@@ -246,9 +286,7 @@ void SettingsPage::usernameChanged(const QString &username)
 
 bool SettingsPage::isComplete() const
 {
-	if (!cfg_username.length())
-		return (false);
-	return (true);
+	return (validateUsername(cfg_username));
 }
 
 void SettingsPage::lenovofixChanged(int state)

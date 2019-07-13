@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <signal.h>
 
+#define PATH_ETC_PASSWD "/etc/passwd"
 #define SHUTDOWN_CMD	"shutdown -p now"
 #define REBOOT_CMD	"shutdown -r now"
 
@@ -128,11 +129,15 @@ public slots:
 	void lenovofixChanged(int state);
 	void ufsClicked(bool);
 	void zfsClicked(bool);
+	bool validateUsername(const QString &username) const;
+	void readUsernames(void);
 private:
+	QLabel	    *status;
 	QSpinBox    *swapsb;
 	QLineEdit   *usernamele;
 	QCheckBox   *lenovofixCb;
 	QListWidget *diskls;
+	QList<QString> usernames;
 };
 
 //////////////////////////////////////////////////////////////////////////////
