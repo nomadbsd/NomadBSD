@@ -66,6 +66,15 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	    SLOT(compareFields(const QString &)));
 	connect(pfield1, SIGNAL(textChanged(const QString &)), this,
 	    SLOT(compareFields(const QString &)));
+	connect(pfield1, SIGNAL(inputRejected()), this,
+	    SLOT(notifyInvalidChar()));
+	connect(pfield2, SIGNAL(inputRejected()), this,
+	    SLOT(notifyInvalidChar()));
+}
+
+void PasswordWidget::notifyInvalidChar()
+{
+	status->setText(tr("Only 7-bit ASCII characters are allowed"));
 }
 
 void PasswordWidget::setActive(const QString &input)

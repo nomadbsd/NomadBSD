@@ -44,6 +44,7 @@ signals:
 public slots:
 	void setActive(const QString &);
 	void compareFields(const QString &);
+	void notifyInvalidChar(void);
 private:
 	bool	  valid;
 	QLabel	  *status;
