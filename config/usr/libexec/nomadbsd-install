@@ -291,6 +291,7 @@ commit() {
 	done
 	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
 	rm -f /mnt/usr/libexec/nomad*
+	rm -f /mnt/usr/local/share/applications/nomadbsd-install-gui.desktop
 	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
 	mv /mnt/home/nomad /mnt/home/${username}
 	status "Running pwd_mkdb on /etc/master.passwd ..."
