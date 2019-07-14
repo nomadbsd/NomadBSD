@@ -741,7 +741,7 @@ while [ $# -gt 0 ]; do
 	git)		instgit;;
 	handbook)	insthandbook;;
 	image)		createimage;;
-	init)		init;;
+	init)		_init;;
 	initbase)	initbase;;
 	kernel)		buildkernel;;
 	patch)		createpatch;;
