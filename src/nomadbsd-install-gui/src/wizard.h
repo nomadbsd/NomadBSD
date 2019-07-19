@@ -89,7 +89,7 @@ public:
 		if (msgBox.clickedButton() == leave) {
 			if (pid > (pid_t)-1)
 				kill(0, SIGKILL);
-			QCoreApplication::exit(1);
+			QCoreApplication::exit(0);
 		}
 	}
 };
