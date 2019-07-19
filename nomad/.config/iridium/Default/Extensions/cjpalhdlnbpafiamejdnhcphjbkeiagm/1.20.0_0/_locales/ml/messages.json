@@ -1,0 +1,970 @@
+{
+   "1pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "മാറ്റങ്ങള്‍ അപ്ലേ ചെയ്യുക"
+   },
+   "1pExport": {
+      "description": "English: Export",
+      "message": "എക്സ്പോര്‍ട്ട്‌"
+   },
+   "1pExportFilename": {
+      "description": "English: my-ublock-static-filters_{{datetime}}.txt",
+      "message": "എന്‍റെ-യുബ്ലോക്ക്-സ്റ്റാറ്റിക്ക്-ഫില്‍ട്ടറുകള്‍_{{datetime}}.txt"
+   },
+   "1pFormatHint": {
+      "description": "Short information about how to create custom filters",
+      "message": "ഒരു വരിയില്‍ ഒരു ഫില്‍റ്റര്‍ എന്ന രീതിയില്‍. ഒരു ഫില്‍റ്റര്‍ എന്നത്, ഹോസ്റ്റ് നെയിം, അല്ലെങ്കില്‍ ആഡ് ബ്ലോക്ക് പ്ലസ്‌-നോട്‌ കംപാറ്റബിള്‍ ആയ ഫില്‍റ്റര്‍ എന്നിവ ആകാം. &lsquo;!&rsquo; എന്നിവയില്‍ ആരംഭിക്കുന്ന വരികള്‍ ഇഗ്നോര്‍ ചെയ്യപ്പെടും."
+   },
+   "1pImport": {
+      "description": "English: Import and append",
+      "message": "ഇമ്പോര്‍ട്ടും കൂട്ടിചേര്‍ക്കലും ചെയ്യുക"
+   },
+   "1pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "എന്‍റെ ഫില്‍ട്ടറുകള്‍"
+   },
+   "3pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "മാറ്റങ്ങള്‍ അപ്ലേ ചെയ്യുക"
+   },
+   "3pAutoUpdatePrompt1": {
+      "description": "A checkbox in the _3rd-party filters_ pane",
+      "message": "ഫില്‍ട്ടര്‍ ലിസ്റ്റുകള്‍ ഓട്ടോ-അപ്ഡേറ്റ് ചെയ്യുക."
+   },
+   "3pExternalListObsolete": {
+      "description": "used as a tooltip for the out-of-date icon beside a list",
+      "message": "കാലഹരണപ്പെട്ടത്"
+   },
+   "3pExternalListsHint": {
+      "description": "Short information about how to use the textarea to import external filter lists by URL",
+      "message": "ഒരു വരിയില്‍ ഒരു യുആര്‍എല്‍ എന്ന രീതിയില്‍. &lsquo;!&rsquo; എന്നിവയില്‍ തുടങ്ങുന്ന വരികള്‍ ഇഗ്നോര്‍ ചെയ്യപ്പെടും. ഇന്‍വാലിഡ്‌ ആയ യുആര്‍എല്ലുകള്‍ നിശബ്ദമായി ഇഗ്നോര്‍ ചെയ്യപ്പെടും."
+   },
+   "3pGroupAds": {
+      "description": "English: Ads",
+      "message": "പരസ്യങ്ങള്‍"
+   },
+   "3pGroupAnnoyances": {
+      "description": "The header identifying the filter lists in the category 'annoyances'",
+      "message": "Annoyances"
+   },
+   "3pGroupCustom": {
+      "description": "English: Custom",
+      "message": "കസ്റ്റം"
+   },
+   "3pGroupDefault": {
+      "description": "Header for the uBlock filters section in 'Filter lists pane'",
+      "message": "Built-in"
+   },
+   "3pGroupMalware": {
+      "description": "English: Malware domains",
+      "message": "മാല്‍വെയര്‍ ഡൊമൈനുകള്‍"
+   },
+   "3pGroupMultipurpose": {
+      "description": "English: Multipurpose",
+      "message": "മള്‍ട്ടിപര്‍പ്പസ്"
+   },
+   "3pGroupPrivacy": {
+      "description": "English: Privacy",
+      "message": "സ്വകാര്യത"
+   },
+   "3pGroupRegions": {
+      "description": "English: Regions, languages",
+      "message": "പ്രാദേശികം, ഭാഷകള്‍"
+   },
+   "3pIgnoreGenericCosmeticFilters": {
+      "description": "This will cause uBO to ignore all generic cosmetic filters.",
+      "message": "Ignore generic cosmetic filters"
+   },
+   "3pIgnoreGenericCosmeticFiltersInfo": {
+      "description": "Describes the purpose of the 'Ignore generic cosmetic filters' feature.",
+      "message": "\u003Cp>Generic cosmetic filters are those cosmetic filters which are meant to apply on all web sites.\u003Cp>Though handled efficiently by uBlock₀, generic cosmetic filters may still contribute measurable memory and CPU overhead on some web pages, especially for large and long-lived ones.\u003Cp>Enabling this option will eliminate the memory and CPU overhead added to web pages as a result of handling generic cosmetic filters, and also lower the memory footprint of uBlock₀ itself.\u003Cp>It is recommended to enable this option on less powerful devices."
+   },
+   "3pImport": {
+      "description": "The label for the checkbox used to import external filter lists",
+      "message": "Import..."
+   },
+   "3pLastUpdate": {
+      "description": "used as a tooltip for the clock icon beside a list",
+      "message": "അവസാന അപ്ഡേറ്റ്:{{ago}}"
+   },
+   "3pListsOfBlockedHostsHeader": {
+      "description": "English: Lists of blocked hosts",
+      "message": "Lists of blocked hosts"
+   },
+   "3pListsOfBlockedHostsPerListStats": {
+      "description": "Appears aside each filter list in the _3rd-party filters_ pane",
+      "message": "{{total}} ല്‍ നിന്നും {{used}} ഉപയോഗിക്കുന്നു"
+   },
+   "3pListsOfBlockedHostsPrompt": {
+      "description": "Appears at the top of the _3rd-party filters_ pane",
+      "message": "{{netFilterCount}} നെറ്റ്‌വര്‍ക്ക് ഫില്‍ട്ടറുകള്‍ + {{cosmeticFilterCount}} സൗന്ദര്യ ഫില്‍ട്ടറുകള്‍ ഇവിടെ നിന്നും:"
+   },
+   "3pNetworkError": {
+      "description": "used as a tooltip for error icon beside a list",
+      "message": "A network error prevented the resource from being updated."
+   },
+   "3pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "തേര്‍ഡ് പാര്‍ട്ടി ഫില്‍ട്ടറുകള്‍"
+   },
+   "3pParseAllABPHideFiltersInfo": {
+      "description": "Describes the purpose of the 'Parse and enforce cosmetic filters' feature.",
+      "message": "\u003Cp>This option enables the parsing and enforcing of \u003Ca href=\"https://adblockplus.org/en/faq_internal#elemhide\">Adblock Plus-compatible &ldquo;element hiding&rdquo; filters\u003C/a>. These filters are essentially cosmetic, they serve to hide elements in a web page which are deemed to be a visual nuisance, and which can't be blocked by the net request-based filtering engine.\u003C/p>\u003Cp>Enabling this feature increases uBlock₀'s memory footprint.\u003C/p>"
+   },
+   "3pParseAllABPHideFiltersPrompt1": {
+      "description": "English: Parse and enforce Adblock+ element hiding filters.",
+      "message": "ശുദ്ധീകരിച്ച് സൗന്ദര്യ ഫില്‍ട്ടറുകള്‍ എന്‍ഫോര്‍സ് ചെയ്യുക."
+   },
+   "3pPurgeAll": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "ക്യാഷ് ശുദ്ധീകരിക്കുക"
+   },
+   "3pUpdateNow": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "ഇപ്പോള്‍ അപ്ഡേറ്റ് ചെയ്യുക"
+   },
+   "3pUpdating": {
+      "description": "used as a tooltip for the spinner icon beside a list",
+      "message": "Updating..."
+   },
+   "aboutBackupDataButton": {
+      "description": "Text for button to create a backup of all settings",
+      "message": "ഫയലിലേക്ക് ബാക്അപ്"
+   },
+   "aboutBackupFilename": {
+      "description": "English: my-ublock-backup_{{datetime}}.txt",
+      "message": "എന്‍റെ-യുബ്ലോക്ക്-ബാക്ക്അപ്_{{datetime}}.txt"
+   },
+   "aboutChangelog": {
+      "description": "",
+      "message": "മാറ്റങ്ങളുടെ ലോഗ്"
+   },
+   "aboutCode": {
+      "description": "English: Source code (GPLv3)",
+      "message": "സോര്‍സ് കോഡ് (ജിപിഎല്‍വി3)"
+   },
+   "aboutContributors": {
+      "description": "English: Contributors",
+      "message": "കോണ്‍ട്രിബ്യൂട്ടര്‍മാര്‍"
+   },
+   "aboutDependencies": {
+      "description": "Shown in the About pane",
+      "message": "External dependencies (GPLv3-compatible):"
+   },
+   "aboutIssues": {
+      "description": "Text for a link to official issue tracker",
+      "message": "Issue tracker"
+   },
+   "aboutPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "ഇതിനെ കുറിച്ച്"
+   },
+   "aboutResetDataButton": {
+      "description": "English: Reset to default settings...",
+      "message": "ഡീഫാള്‍ട്ട് സെറ്റിംഗ്സിലേക്ക് റീസ്റ്റോര്‍ ചെയ്യുക..."
+   },
+   "aboutResetDataConfirm": {
+      "description": "Message asking user to confirm reset",
+      "message": "എല്ലാ സെറ്റിങ്ങുകളും റിമൂവ് ചെയ്യപ്പെടും. അതിനു ശേഷം യുബ്ലോക്ക്ഒ റീസ്റ്റാര്‍ട്ട്‌ ചെയ്യപ്പെടും.\n\nയുബ്ലോക്ക്ഒ-യെ ഫാക്ടറി സെറ്റിങ്ങുകളിലേക്ക് റീസെറ്റ് ചെയ്യട്ടെയോ?"
+   },
+   "aboutRestoreDataButton": {
+      "description": "English: Restore from file...",
+      "message": "ഫയലില്‍ നിന്നും റീസ്റ്റോര്‍ ചെയ്യുക..."
+   },
+   "aboutRestoreDataConfirm": {
+      "description": "Message asking user to confirm restore",
+      "message": "{{time}}ല്‍ ബാക്ക്അപ് ചെയ്യപ്പെട്ട ഡേറ്റ ഉപയോഗിച്ച് താങ്കളുടെ എല്ലാ സെറ്റിംഗ്സും ഓവര്‍ റൈറ്റ് ചെയ്യപ്പെടും. അതിനു ശേഷം യുബ്ലോക്ക്‌ഒ റീസ്റ്റാര്‍ട്ട്‌ ചെയ്യപ്പെടും.\n\nനിലവിലുള്ള എല്ലാ സെറ്റിങ്ങുകളും ഓവര്‍റൈറ്റ് ചെയ്യട്ടെയോ?"
+   },
+   "aboutRestoreDataError": {
+      "description": "Message to display when an error occurred during restore",
+      "message": "ഡേറ്റ വായിക്കാന്‍ ഒക്കുന്നില്ല അല്ലെങ്കില്‍ അത് ഇന്‍വാലിഡ്‌ ആണ്"
+   },
+   "aboutSupport": {
+      "description": "A link for where to get support",
+      "message": "Support"
+   },
+   "aboutWiki": {
+      "description": "English: project' wiki on GitHub",
+      "message": "വിക്കി"
+   },
+   "advancedSettingsPageName": {
+      "description": "Title for the advanced settings page",
+      "message": "Advanced settings"
+   },
+   "advancedSettingsWarning": {
+      "description": "A warning to users at the top of 'Advanced settings' page",
+      "message": "Warning! Change these advanced settings at your own risk."
+   },
+   "assetViewerPageName": {
+      "description": "Title for the asset viewer page",
+      "message": "uBlock₀ — Asset viewer"
+   },
+   "cloudDeviceNamePrompt": {
+      "description": "used as a prompt for the user to provide a custom device name",
+      "message": "ഈ ഉപകരണത്തിന്‍റെ പേര്:"
+   },
+   "cloudNoData": {
+      "description": "",
+      "message": "...\n..."
+   },
+   "cloudPull": {
+      "description": "tooltip",
+      "message": "ക്ലൌഡ് സ്റ്റോറേജില്‍ നിന്ന് ഇമ്പോര്‍ട്ട് ചെയ്യുക"
+   },
+   "cloudPullAndMerge": {
+      "description": "tooltip",
+      "message": "ക്ലൗഡ് സംഭരനിയില്‍ നിന്ന് ഇറക്കുമതി ചെയ്ത് നിലവിലെ ക്രമീകരണത്തില്‍ ലയിപ്പിക്കും"
+   },
+   "cloudPush": {
+      "description": "tooltip",
+      "message": "ക്ലൌഡ് സ്റ്റോറേജിലേക്ക് എക്സ്പോര്‍ട്ട്‌ ചെയ്യുക"
+   },
+   "contextMenuTemporarilyAllowLargeMediaElements": {
+      "description": "A context menu entry, present when large media elements have been blocked on the current site",
+      "message": "താൽക്കാലികമായി വലിയ മീഡിയ അനുവദിക്കുക"
+   },
+   "dashboardName": {
+      "description": "English: uBlock₀ — Dashboard",
+      "message": "യുബ്ലോക്ക്ഒ - ഡാഷ്ബോര്‍ഡ്"
+   },
+   "dashboardUnsavedWarning": {
+      "description": "A warning in the dashboard when navigating away from unsaved changes",
+      "message": "Warning! You have unsaved changes"
+   },
+   "dashboardUnsavedWarningIgnore": {
+      "description": "Label for button to ignore unsaved changes",
+      "message": "Ignore"
+   },
+   "dashboardUnsavedWarningStay": {
+      "description": "Label for button to prevent navigating away from unsaved changes",
+      "message": "Stay"
+   },
+   "docblockedBack": {
+      "description": "English: Go back",
+      "message": "പിന്നിലേക്ക്‌ പോകുക"
+   },
+   "docblockedClose": {
+      "description": "English: Close this window",
+      "message": "ഈ വിന്‍ഡോ ക്ലോസ് ചെയ്യുക"
+   },
+   "docblockedDisablePermanent": {
+      "description": "English: Permanently",
+      "message": "സ്ഥിരമായി"
+   },
+   "docblockedDisableTemporary": {
+      "description": "English: Temporarily",
+      "message": "താല്‍ക്കാലികമായി"
+   },
+   "docblockedFoundIn": {
+      "description": "English: List of filter list names follows",
+      "message": "ഇതില്‍ കണ്ടെത്തി:"
+   },
+   "docblockedNoParamsPrompt": {
+      "description": "label to be used for the parameter-less URL: https://cloud.githubusercontent.com/assets/585534/9832014/bfb1b8f0-593b-11e5-8a27-fba472a5529a.png",
+      "message": "പാരാമീറ്ററുകള്‍ ഇല്ലാതെ"
+   },
+   "docblockedProceed": {
+      "description": "English: Disable strict blocking for {{hostname}} ...",
+      "message": "{{hostname}}ലേക്ക് കര്‍ശന ബ്ലോക്കിംഗ് ഡിസേബിള്‍ ചെയ്യുക"
+   },
+   "docblockedPrompt1": {
+      "description": "English: uBlock₀ has prevented the following page from loading:",
+      "message": "താഴെ പറയുന്ന പേജ് ലോഡ് ചെയ്യുന്നത് യുബ്ലോക്ക് ഒറിജിന്‍ തടഞ്ഞിരിക്കുന്നു:"
+   },
+   "docblockedPrompt2": {
+      "description": "English: Because of the following filter",
+      "message": "ഈ ഫില്‍റ്റര്‍ കാരണം"
+   },
+   "dummy": {
+      "description": "so we dont need to deal with comma for last entry",
+      "message": "This entry must be the last one"
+   },
+   "elapsedManyDaysAgo": {
+      "description": "English: {{value}} days ago",
+      "message": "{{value}} ദിവസങ്ങള്‍ക്ക്മുന്‍പ്"
+   },
+   "elapsedManyHoursAgo": {
+      "description": "English: {{value}} hours ago",
+      "message": "{{value}} മണിക്കൂറുകള്‍ മുന്‍പ്"
+   },
+   "elapsedManyMinutesAgo": {
+      "description": "English: {{value}} minutes ago",
+      "message": "{{value}} മിനിറ്റുകള്‍ മുന്‍പ്"
+   },
+   "elapsedOneDayAgo": {
+      "description": "English: a day ago",
+      "message": "ഒരു ദിവസം മുന്‍പ്"
+   },
+   "elapsedOneHourAgo": {
+      "description": "English: an hour ago",
+      "message": "ഒരു മണിക്കൂര്‍ മുന്‍പ്"
+   },
+   "elapsedOneMinuteAgo": {
+      "description": "English: a minute ago",
+      "message": "ഒരു മിനിറ്റ് മുന്‍പ്"
+   },
+   "errorCantConnectTo": {
+      "description": "English: Network error: {{msg}}",
+      "message": "{{url}} എന്നതിലേക്ക് കണക്റ്റ് ചെയ്യാനാകുന്നില്ല"
+   },
+   "extName": {
+      "description": "extension name.",
+      "message": "uBlock Origin"
+   },
+   "extShortDesc": {
+      "description": "this will be in the Chrome web store: must be 132 characters or less",
+      "message": "അവസാനം, ഒരു കാര്യക്ഷമമായ ബ്ലോക്കര്‍. ലഘുവായ CPU, memory ഉപയോഗം."
+   },
+   "fennecMenuItemBlockingOff": {
+      "description": "Firefox-specific: appears as 'uBlock₀ (off)'",
+      "message": "ഓഫ്"
+   },
+   "genericApplyChanges": {
+      "description": "for generic 'Apply changes' buttons",
+      "message": "Apply changes"
+   },
+   "genericBytes": {
+      "description": "",
+      "message": "ബൈറ്റുകള്‍"
+   },
+   "genericCopyToClipboard": {
+      "description": "Label for buttons used to copy something to the clipboard",
+      "message": "Copy to clipboard"
+   },
+   "genericMergeViewScrollLock": {
+      "description": "Tooltip for the button used to lock scrolling between the views in the 'My rules' pane",
+      "message": "Toggle locked scrolling"
+   },
+   "genericRevert": {
+      "description": "for generic 'Revert' buttons",
+      "message": "റിവേര്‍ട്ട്"
+   },
+   "genericSubmit": {
+      "description": "for generic 'Submit' buttons",
+      "message": "സബ്മിറ്റ്"
+   },
+   "logAll": {
+      "description": "Appears in the logger's tab selector",
+      "message": "എല്ലാം"
+   },
+   "logBehindTheScene": {
+      "description": "Pretty name for behind-the-scene network requests",
+      "message": "സീനിനു പിന്നില്‍"
+   },
+   "logFilterPrompt": {
+      "description": "Placeholder string for logger output filtering input field",
+      "message": "ലോഗ് എന്‍ട്രി ഫില്‍ട്ടര്‍ ചെയ്യുക"
+   },
+   "logRequestsHeaderDomain": {
+      "description": "English: Domain",
+      "message": "ഡൊമൈന്‍"
+   },
+   "logRequestsHeaderFilter": {
+      "description": "English: Filter",
+      "message": "ഫില്‍ട്ടര്‍"
+   },
+   "logRequestsHeaderType": {
+      "description": "English: Type",
+      "message": "ടൈപ്പ്"
+   },
+   "logRequestsHeaderURL": {
+      "description": "English: URL",
+      "message": "യുആര്‍എല്‍"
+   },
+   "loggerClearTip": {
+      "description": "Tooltip for the eraser in the logger page; used to blank the content of the logger",
+      "message": "Clear logger"
+   },
+   "loggerCurrentTab": {
+      "description": "Appears in the logger's tab selector",
+      "message": "Current tab"
+   },
+   "loggerDomInspectorTip": {
+      "description": "Tooltip for the DOM inspector button in the logger page",
+      "message": "Toggle the DOM inspector"
+   },
+   "loggerEntryDetailsContext": {
+      "description": "Label to identify a context field (typically a hostname)",
+      "message": "Context"
+   },
+   "loggerEntryDetailsFilter": {
+      "description": "Label to identify a filter field",
+      "message": "Filter"
+   },
+   "loggerEntryDetailsFilterList": {
+      "description": "Label to identify a filter list field",
+      "message": "Filter list"
+   },
+   "loggerEntryDetailsHeader": {
+      "description": "Small header to identify the 'Details' pane for a specific logger entry",
+      "message": "Details"
+   },
+   "loggerEntryDetailsPartyness": {
+      "description": "Label to identify a field providing partyness information",
+      "message": "Partyness"
+   },
+   "loggerEntryDetailsRootContext": {
+      "description": "Label to identify a root context field (typically a hostname)",
+      "message": "Root context"
+   },
+   "loggerEntryDetailsRule": {
+      "description": "Label to identify a rule field",
+      "message": "Rule"
+   },
+   "loggerEntryDetailsType": {
+      "description": "Label to identify the type of an entry",
+      "message": "Type"
+   },
+   "loggerEntryDetailsURL": {
+      "description": "Label to identify the URL of an entry",
+      "message": "URL"
+   },
+   "loggerExportEncodeMarkdown": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "Markdown"
+   },
+   "loggerExportEncodePlain": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "Plain"
+   },
+   "loggerExportFormatList": {
+      "description": "Label for radio-button to pick export format",
+      "message": "List"
+   },
+   "loggerExportFormatTable": {
+      "description": "Label for radio-button to pick export format",
+      "message": "Table"
+   },
+   "loggerInfoTip": {
+      "description": "Tooltip for the top-right info label in the logger page",
+      "message": "uBlock Origin wiki: The logger"
+   },
+   "loggerPauseTip": {
+      "description": "Tooltip for the pause button in the logger page",
+      "message": "Pause logger (discard all incoming data)"
+   },
+   "loggerPopupPanelTip": {
+      "description": "Tooltip for the popup panel button in the logger page",
+      "message": "Toggle the popup panel"
+   },
+   "loggerReloadTip": {
+      "description": "Tooltip for the reload button in the logger page",
+      "message": "Reload the tab content"
+   },
+   "loggerRowFiltererBuiltin1p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "1st-party"
+   },
+   "loggerRowFiltererBuiltin3p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "3rd-party"
+   },
+   "loggerRowFiltererBuiltinAllowed": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "allowed"
+   },
+   "loggerRowFiltererBuiltinBlocked": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "blocked"
+   },
+   "loggerRowFiltererBuiltinEventful": {
+      "description": "A keyword in the built-in row filtering expression: all items corresponding to uBO doing something (blocked, allowed, redirected, etc.)",
+      "message": "eventful"
+   },
+   "loggerRowFiltererBuiltinNot": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "Not"
+   },
+   "loggerRowFiltererBuiltinTip": {
+      "description": "Tooltip for the button to bring up logger output filtering options",
+      "message": "Logger filtering options"
+   },
+   "loggerRowFiltererButtonTip": {
+      "description": "Tooltip for the row filterer button in the logger page",
+      "message": "Toggle logger filtering"
+   },
+   "loggerSettingDiscardPrompt": {
+      "description": "Logger setting: A sentence to describe the purpose of the settings below",
+      "message": "Logger entries which do not fulfill all three conditions below will be automatically discarded:"
+   },
+   "loggerSettingHideColumnContext": {
+      "description": "A label for the context column",
+      "message": "{{input}} Context"
+   },
+   "loggerSettingHideColumnFilter": {
+      "description": "A label for the filter or rule column",
+      "message": "{{input}} Filter/rule"
+   },
+   "loggerSettingHideColumnPartyness": {
+      "description": "A label for the partyness column",
+      "message": "{{input}} Partyness"
+   },
+   "loggerSettingHideColumnTime": {
+      "description": "A label for the time column",
+      "message": "{{input}} Time"
+   },
+   "loggerSettingHideColumnsPrompt": {
+      "description": "Logger settings: a sentence to describe the purpose of the checkboxes below",
+      "message": "Hide columns:"
+   },
+   "loggerSettingPerEntryLineCount": {
+      "description": "A logger setting",
+      "message": "Use {{input}} lines per entry in vertically expanded mode"
+   },
+   "loggerSettingPerEntryMaxAge": {
+      "description": "A logger setting",
+      "message": "Preserve entries from the last {{input}} minutes"
+   },
+   "loggerSettingPerTabMaxEntries": {
+      "description": "A logger setting",
+      "message": "Preserve at most {{input}} entries per tab"
+   },
+   "loggerSettingPerTabMaxLoads": {
+      "description": "A logger setting",
+      "message": "Preserve at most {{input}} page loads per tab"
+   },
+   "loggerStaticFilteringFinderSentence1": {
+      "description": "Below this sentence, the filter list(s) in which the filter was found",
+      "message": "സ്റ്റാറ്റിക് ഫില്‍ട്ടര്‍ \u003Ccode>{{filter}}\u003C/code> ഇതില്‍ കണ്ടെത്തി:"
+   },
+   "loggerStaticFilteringFinderSentence2": {
+      "description": "Message to show when a filter cannot be found in any filter lists",
+      "message": "Static filter \u003Ccode>{{filter}}\u003C/code> could not be found in any of the currently enabled filter lists"
+   },
+   "loggerStaticFilteringHeader": {
+      "description": "Small header to identify the static filtering section",
+      "message": "സ്റ്റാറ്റിക് ഫില്‍ട്ടറിങ്ങ്"
+   },
+   "loggerStaticFilteringSentence": {
+      "description": "Used in the static filtering wizard",
+      "message": "{{action}} network requests of {{type}} {{br}}which URL address matches {{url}} {{br}}and which originates {{origin}},{{br}}{{importance}} there is a matching exception filter."
+   },
+   "loggerStaticFilteringSentencePartAllow": {
+      "description": "Used in the static filtering wizard",
+      "message": "അനുവദിക്കുക"
+   },
+   "loggerStaticFilteringSentencePartAnyOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "എവിടെ നിന്നും"
+   },
+   "loggerStaticFilteringSentencePartAnyType": {
+      "description": "Used in the static filtering wizard",
+      "message": "ഏതു ടൈപ്പും"
+   },
+   "loggerStaticFilteringSentencePartBlock": {
+      "description": "Used in the static filtering wizard",
+      "message": "ബ്ലോക്ക്‌ ചെയ്യുക"
+   },
+   "loggerStaticFilteringSentencePartImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "എന്നിരുന്നാലും"
+   },
+   "loggerStaticFilteringSentencePartNotImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "അങ്ങിനെ അല്ലെങ്കില്‍"
+   },
+   "loggerStaticFilteringSentencePartOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "\"{{origin}}\"ല്‍ നിന്നും"
+   },
+   "loggerStaticFilteringSentencePartType": {
+      "description": "Used in the static filtering wizard",
+      "message": "ടൈപ്പ് \"{{type}}\""
+   },
+   "loggerURLFilteringContextLabel": {
+      "description": "Label for the context selector",
+      "message": "കോണ്‍ടെക്സ്റ്റ്:"
+   },
+   "loggerURLFilteringHeader": {
+      "description": "Small header to identify the dynamic URL filtering section",
+      "message": "ഡൈനാമിക് യുആര്‍എല്‍ ഫില്‍ട്ടറിങ്ങ്"
+   },
+   "loggerURLFilteringTypeLabel": {
+      "description": "Label for the type selector",
+      "message": "ടൈപ്പ്:"
+   },
+   "loggerUnpauseTip": {
+      "description": "Tooltip for the play button in the logger page",
+      "message": "Unpause logger"
+   },
+   "pickerContextMenuEntry": {
+      "description": "An entry in the browser's contextual menu",
+      "message": "എലമെന്‍ഡ് ബ്ലോക്ക് ചെയ്യുക"
+   },
+   "pickerCosmeticFilters": {
+      "description": "English: Cosmetic filters",
+      "message": "സൗന്ദര്യ ഫില്‍ട്ടറുകള്‍"
+   },
+   "pickerCosmeticFiltersHint": {
+      "description": "English: Click, Ctrl-click",
+      "message": "ക്ലിക്ക്, Ctrl - ക്ലിക്ക്"
+   },
+   "pickerCreate": {
+      "description": "English: Create",
+      "message": "ക്രിയേറ്റ് ചെയ്യുക"
+   },
+   "pickerNetFilters": {
+      "description": "English: header for a type of filter in the element picker dialog",
+      "message": "നെറ്റ് ഫില്‍ട്ടറുകള്‍"
+   },
+   "pickerPick": {
+      "description": "English: Pick",
+      "message": "പിക്ക് ചെയ്യുക"
+   },
+   "pickerPreview": {
+      "description": "Element picker preview mode: will cause the elements matching the current filter to be removed from the page",
+      "message": "Preview"
+   },
+   "pickerQuit": {
+      "description": "English: Quit",
+      "message": "പുറത്ത് കടക്കുക"
+   },
+   "popup1pScriptRulePrompt": {
+      "description": "",
+      "message": "ഫസ്റ്റ് പാര്‍ട്ടി സ്ക്രിപ്റ്റുകള്‍"
+   },
+   "popup3pAnyRulePrompt": {
+      "description": "",
+      "message": "തേര്‍ഡ് പാര്‍ട്ടി"
+   },
+   "popup3pFrameRulePrompt": {
+      "description": "",
+      "message": "തേര്‍ഡ് പാര്‍ട്ടി ഫ്രെയിമുകള്‍"
+   },
+   "popup3pPassiveRulePrompt": {
+      "description": "",
+      "message": "മൂന്നാം പാര്‍ട്ടി സിഎസ്എസ്/ ചിത്രങ്ങള്‍"
+   },
+   "popup3pScriptRulePrompt": {
+      "description": "",
+      "message": "തേര്‍ഡ് പാര്‍ട്ടി സ്ക്രിപ്റ്റുകള്‍"
+   },
+   "popupAnyRulePrompt": {
+      "description": "",
+      "message": "എല്ലാം"
+   },
+   "popupBlockedOnThisPagePrompt": {
+      "description": "English: on this page",
+      "message": "ഈ പേജില്‍"
+   },
+   "popupBlockedRequestPrompt": {
+      "description": "English: requests blocked",
+      "message": "അപേക്ഷകള്‍ ബ്ലോക്ക്‌ ചെയ്യപ്പെട്ടു"
+   },
+   "popupBlockedSinceInstallPrompt": {
+      "description": "English: since install",
+      "message": "ഇന്‍സ്റ്റാളിനു ശേഷം"
+   },
+   "popupBlockedStats": {
+      "description": "Example: 15 or 13%",
+      "message": "{{count}} അല്ലെങ്കില്‍ {{percent}}%"
+   },
+   "popupHitDomainCount": {
+      "description": "appears in popup",
+      "message": "{{total}} ല്‍ നിന്നും {{count}}"
+   },
+   "popupHitDomainCountPrompt": {
+      "description": "appears in popup",
+      "message": "കണക്റ്റ് ചെയ്യപ്പെട്ട ഡൊമൈനുകള്‍"
+   },
+   "popupImageRulePrompt": {
+      "description": "",
+      "message": "ചിത്രങ്ങള്‍"
+   },
+   "popupInlineScriptRulePrompt": {
+      "description": "",
+      "message": "ഇന്‍ലൈന്‍ സ്ക്രിപ്റ്റുകള്‍"
+   },
+   "popupOr": {
+      "description": "English: or",
+      "message": "അല്ലെങ്കില്‍"
+   },
+   "popupPowerSwitchInfo": {
+      "description": "English: Click: disable/enable uBlock₀ for this site.\n\nCtrl+click: disable uBlock₀ only on this page.",
+      "message": "ക്ലിക്ക്: ഈ സൈറ്റില്‍ യുബ്ലോക്ക്ഒ ഡിസേബിള്‍/എനെബിള്‍ ചെയ്യാന്‍.\nCtrl + ക്ലിക്ക്: ഈ പേജില്‍ യുബ്ലോക്ക്ഒ ഡിസേബിള്‍/എനെബിള്‍ ചെയ്യാന്‍."
+   },
+   "popupPowerSwitchInfo1": {
+      "description": "Message to be read by screen readers",
+      "message": "Click to disable uBlock₀ for this site.\n\nCtrl+click to disable uBlock₀ only on this page."
+   },
+   "popupPowerSwitchInfo2": {
+      "description": "Message to be read by screen readers",
+      "message": "Click to enable uBlock₀ for this site."
+   },
+   "popupTipDashboard": {
+      "description": "English: Click to open the dashboard",
+      "message": "ഡാഷ്ബോര്‍ഡ് തുറക്കാന്‍ ക്ലിക്ക് ചെയ്യുക"
+   },
+   "popupTipGlobalRules": {
+      "description": "Tooltip when hovering the top-most cell of the global-rules column.",
+      "message": "ആഗോള നിയമങ്ങൾ: ഈ കോളത്തിലെ നിയമങ്ങൾ എല്ലാ സൈറ്റുകളിലും പ്രയോഗിക്കുന്ന നിയമങ്ങള് ആണ്."
+   },
+   "popupTipLocalRules": {
+      "description": "Tooltip when hovering the top-most cell of the local-rules column.",
+      "message": "പ്രാദേശിക നിയമങ്ങൾ: ഈ കോളത്തിലെ നിയമങ്ങൾ നിലവിലെ സൈറ്റിലെ മാത്രം പ്രയോഗിക്കുന്ന.\nപ്രാദേശിക നിയമങ്ങൾ ആഗോള നിയമങ്ങൾ അതിലംഘിച്ച് പ്രവർത്തിക്കുന്നതായിരിക്കും."
+   },
+   "popupTipLog": {
+      "description": "Tooltip used for the logger icon in the panel",
+      "message": "അപേക്ഷാ ലോഗിലേക്ക് പോകുക"
+   },
+   "popupTipNoCosmeticFiltering": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "ഈ സൈറ്റില്‍ സൗന്ദര്യ ഫില്‍ട്ടറുകള്‍ ടോഗ്ഗിള്‍ ചെയ്യുക"
+   },
+   "popupTipNoCosmeticFiltering1": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "Click to disable cosmetic filtering on this site"
+   },
+   "popupTipNoCosmeticFiltering2": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "Click to enable cosmetic filtering on this site"
+   },
+   "popupTipNoLargeMedia": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "Toggle the blocking of large media elements for this site"
+   },
+   "popupTipNoLargeMedia1": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "Click to block large media elements on this site"
+   },
+   "popupTipNoLargeMedia2": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "Click to no longer block large media elements on this site"
+   },
+   "popupTipNoPopups": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "ഈ സൈറ്റിലെ എല്ലാ പോപ്‌അപ്പുകളും ബ്ലോക്ക്‌ ചെയ്യുന്നത് ടോഗ്ഗിള്‍ ചെയ്യുക"
+   },
+   "popupTipNoPopups1": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "Click to block all popups on this site"
+   },
+   "popupTipNoPopups2": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "Click to no longer block all popups on this site"
+   },
+   "popupTipNoRemoteFonts": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "ഈ സൈറ്റില്‍ റിമോട്ട് ഫോണ്ടുകള്‍ ബ്ലോക്ക് ചെയ്യുന്നത് ടോഗ്ഗിള്‍ ചെയ്യുക"
+   },
+   "popupTipNoRemoteFonts1": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "Click to block remote fonts on this site"
+   },
+   "popupTipNoRemoteFonts2": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "Click to no longer block remote fonts on this site"
+   },
+   "popupTipNoScripting1": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "Click to disable JavaScript on this site"
+   },
+   "popupTipNoScripting2": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "Click to no longer disable JavaScript on this site"
+   },
+   "popupTipPicker": {
+      "description": "English: Enter element picker mode",
+      "message": "എലമെന്‍ഡ് പിക്കര്‍ മോഡില്‍ കടക്കുക"
+   },
+   "popupTipRevertRules": {
+      "description": "Tooltip when hovering over the eraser in the dynamic filtering pane.",
+      "message": "നിങ്ങളുടെ മാറ്റങ്ങൾ പഴയപടി ആകാന്‍ ക്ലിക്കുചെയ്യുക."
+   },
+   "popupTipSaveRules": {
+      "description": "Tooltip when hovering over the padlock in the dynamic filtering pane.",
+      "message": "നിങ്ങളുടെ മാറ്റങ്ങൾ സ്ഥിരപെടുത്താന്‍ ക്ലിക്കുചെയ്യുക."
+   },
+   "popupTipZapper": {
+      "description": "Tooltip for the element-zapper icon in the popup panel",
+      "message": "Enter element zapper mode"
+   },
+   "rulesCommit": {
+      "description": "This will persist temporary rules",
+      "message": "കമ്മിറ്റ്"
+   },
+   "rulesDefaultFileName": {
+      "description": "default file name to use",
+      "message": "എന്‍റെ-യുബ്ലോക്ക്-ഡൈനാമിക്-നിയമങ്ങള്‍_{{datetime}}.txt"
+   },
+   "rulesEdit": {
+      "description": "Will enable manual-edit mode (textarea)",
+      "message": "എഡിറ്റ്‌"
+   },
+   "rulesEditDiscard": {
+      "description": "Will discard manually-edited content and exit manual-edit mode",
+      "message": "കളയുക"
+   },
+   "rulesEditSave": {
+      "description": "Will save manually-edited content and exit manual-edit mode",
+      "message": "സേവ്"
+   },
+   "rulesExport": {
+      "description": "",
+      "message": "ഫയലിലേക്ക് എക്സ്പോര്‍ട്ട്‌ ചെയ്യുക"
+   },
+   "rulesFormatHint": {
+      "description": "English: dynamic rule syntax and full documentation.",
+      "message": "നിയമത്തിന്‍റെ സിന്‍റ്റാക്സ്‌: \u003Ccode> സോര്‍സ് ഡെസ്റ്റിനേഷന്‍ ടൈപ്പ് ആക്ഷന്‍\u003C/code> (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Dynamic-filtering:-rule-syntax'> മുഴുനീള പ്രമാണം\u003C/a>)."
+   },
+   "rulesHint": {
+      "description": "English: List of your dynamic filtering rules.",
+      "message": "താങ്കളുടെ ഡൈനാമിക് ഫില്‍റ്റര്‍ നിയമങ്ങളുടെ ലിസ്റ്റ്."
+   },
+   "rulesImport": {
+      "description": "",
+      "message": "ഫയലില്‍ നിന്നും ഇമ്പോര്‍ട്ട് ചെയ്യുക..."
+   },
+   "rulesPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "എന്‍റെ നിയമങ്ങള്‍"
+   },
+   "rulesPermanentHeader": {
+      "description": "header",
+      "message": "സ്ഥിര നിയമങ്ങള്‍"
+   },
+   "rulesRevert": {
+      "description": "This will remove all temporary rules",
+      "message": "റിവേര്‍ട്ട്"
+   },
+   "rulesTemporaryHeader": {
+      "description": "header",
+      "message": "താല്‍ക്കാലിക നിയമങ്ങള്‍"
+   },
+   "settingPerSiteSwitchGroup": {
+      "description": "",
+      "message": "സ്ഥിര രീതി"
+   },
+   "settingPerSiteSwitchGroupSynopsis": {
+      "description": "",
+      "message": "These default behaviors can be overridden on a per-site basis"
+   },
+   "settingsAdvancedUserPrompt": {
+      "description": "",
+      "message": "ഞാന്‍ ഒരു അഡ്വാന്‍സ്ഡ് യൂസര്‍ ആണ് (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Advanced-user-features'> വായിക്കേണ്ടത്\u003C/a>)"
+   },
+   "settingsAdvancedUserSettings": {
+      "description": "For the tooltip of a link which gives access to advanced settings",
+      "message": "advanced settings"
+   },
+   "settingsCloudStorageEnabledPrompt": {
+      "description": "",
+      "message": "ക്ലൌഡ് സ്റ്റോറെജ് സപ്പോര്‍ട്ട് എനേബിള്‍ ചെയ്യുക"
+   },
+   "settingsCollapseBlockedPrompt": {
+      "description": "English: Hide placeholders of blocked elements",
+      "message": "ബ്ലോക്ക് ചെയ്യപ്പെട്ട എലമെന്‍ഡുകള്‍ക്ക് പകരമായുള്ള പ്ലയ്സ്ഹോള്‍ഡറുകള്‍ മറയ്ക്കുക"
+   },
+   "settingsColorBlindPrompt": {
+      "description": "English: Color-blind friendly",
+      "message": "വർണ്ണാന്ധതാ സൗഹാര്‍ദ്ദപരമായത്"
+   },
+   "settingsContextMenuPrompt": {
+      "description": "English: Make use of context menu where appropriate",
+      "message": "ആവശ്യമായ ഇടങ്ങളില്‍ കോണ്‍ടെക്സ്റ്റ്‌ മെനു ഉപയോഗിക്കുക"
+   },
+   "settingsHyperlinkAuditingDisabledPrompt": {
+      "description": "English: ",
+      "message": "ഹൈപര്‍ ലിങ്ക് ഓഡിറ്റിങ്ങ്/ബീക്കന്‍ ഡിസേബിള്‍ ചെയ്യുക"
+   },
+   "settingsIconBadgePrompt": {
+      "description": "English: Show the number of blocked requests on the icon",
+      "message": "ഐക്കണില്‍ ബ്ലോക്ക് ചെയ്യപ്പെട്ട അപേക്ഷകളുടെ എണ്ണം കാണിക്കുക"
+   },
+   "settingsLastBackupPrompt": {
+      "description": "English: Last backup:",
+      "message": "അവസാന ബാക്ക്അപ്:"
+   },
+   "settingsLastRestorePrompt": {
+      "description": "English: Last restore:",
+      "message": "അവസാന റീസ്റ്റോര്‍:"
+   },
+   "settingsNoCSPReportsPrompt": {
+      "description": "background information: https://github.com/gorhill/uBlock/issues/3150",
+      "message": "Block CSP reports"
+   },
+   "settingsNoCosmeticFilteringPrompt": {
+      "description": "",
+      "message": "കോസ്മെറ്റിക് ഫിൽട്ടറിംഗ് പ്രവർത്തനരഹിതമാക്കുക"
+   },
+   "settingsNoLargeMediaPrompt": {
+      "description": "",
+      "message": "Block media elements larger than {{input}} KB"
+   },
+   "settingsNoRemoteFontsPrompt": {
+      "description": "",
+      "message": "വിദൂര ഫോണ്ടുകൾ തടയുക"
+   },
+   "settingsNoScriptingPrompt": {
+      "description": "The default state for the per-site no-scripting switch",
+      "message": "Disable JavaScript"
+   },
+   "settingsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "സെറ്റിംഗ്സ്"
+   },
+   "settingsPrefetchingDisabledPrompt": {
+      "description": "English: ",
+      "message": "പ്രീ-ഫെച്ചിംഗ് ഡിസേബിള്‍ ചെയ്യുക (ബ്ലോക്ക് ചെയ്ത നെറ്റ്‌വര്‍ക്ക് അപേക്ഷകള്‍ക്ക് കണക്ഷന്‍ ലഭിക്കുന്നത് തടയുന്നതിന്)"
+   },
+   "settingsStorageUsed": {
+      "description": "English: Storage used: {{}} bytes",
+      "message": "സ്റ്റോറേജ് ഉപയോഗം: {{value}} ബൈറ്റുകള്‍"
+   },
+   "settingsTooltipsPrompt": {
+      "description": "A checkbox in the Settings pane",
+      "message": "ടൂള്ടിപ്പ് പ്രവർത്തനരഹിതമാക്കുക"
+   },
+   "settingsWebRTCIPAddressHiddenPrompt": {
+      "description": "English: ",
+      "message": "വെബ്‌ആര്‍ടിസി ലോക്കല്‍ ഐ പി അഡ്രസുകള്‍ ലീക്ക് ചെയ്യുന്നത് തടയുക"
+   },
+   "shortcutCapturePlaceholder": {
+      "description": "Placeholder string for input field used to capture a keyboard shortcut",
+      "message": "Type a shortcut"
+   },
+   "shortcutsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "Shortcuts"
+   },
+   "showDashboardButton": {
+      "description": "Firefox/Fennec-specific: Show Dashboard",
+      "message": "ഡാഷ്ബോര്‍ഡ് കാണിക്കുക"
+   },
+   "showNetworkLogButton": {
+      "description": "Firefox/Fennec-specific: Show Logger",
+      "message": "ലോഗ്ഗര്‍ കാണിക്കുക"
+   },
+   "statsPageName": {
+      "description": "Title for the logger window",
+      "message": "യുബ്ലോക്ക്ഒ - നെറ്റ്‌വര്‍ക്ക് അപേക്ഷാ ലോഗ്"
+   },
+   "subscriberConfirm": {
+      "description": "English: The message seen by the user to confirm subscription to a ABP filter list",
+      "message": "യുബ്ലോക്ക്ഒ: താഴെ പറയുന്ന യുആര്‍എല്‍ താങ്കളുടെ കസ്റ്റം ഫില്‍റ്ററില്‍ ചേര്‍ക്കട്ടേയോ?\n\nടൈറ്റില്‍: \"{{title}}\"\nയുആര്‍എല്‍: {{url}}"
+   },
+   "whitelistApply": {
+      "description": "English: Apply changes",
+      "message": "മാറ്റങ്ങള്‍ അപ്ലേ ചെയ്യുക"
+   },
+   "whitelistExport": {
+      "description": "English: Export",
+      "message": "എക്സ്പോര്‍ട്ട്‌"
+   },
+   "whitelistExportFilename": {
+      "description": "English: my-ublock-whitelist_{{datetime}}.txt",
+      "message": "എന്‍റെ-യുബ്ലോക്ക്-വൈറ്റ്ലിസ്റ്റ്_{{datetime}}.txt"
+   },
+   "whitelistImport": {
+      "description": "English: Import and append",
+      "message": "ഇമ്പോര്‍ട്ടും കൂട്ടിചേര്‍ക്കലും ചെയ്യുക"
+   },
+   "whitelistPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "വൈറ്റ് ലിസ്റ്റ്"
+   },
+   "whitelistPrompt": {
+      "description": "English: An overview of the content of the dashboard's Whitelist pane.",
+      "message": "യുബ്ലോക്ക്ഒ ഡിസേബിള്‍ ചെയ്യപ്പെടേണ്ട ഹോസ്റ്റ് നെയിമുകള്‍. ഒരു വരിയില്‍ ഒരു എന്‍ട്രി എന്ന രീതിയില്‍ ചേര്‍ക്കുക. ഇന്‍വാലിഡ്‌ ഹോസ്റ്റ് നെയിമുകള്‍ നിശബ്ദമായി ഇഗ്നോര്‍ ചെയ്യപെടും."
+   }
+}

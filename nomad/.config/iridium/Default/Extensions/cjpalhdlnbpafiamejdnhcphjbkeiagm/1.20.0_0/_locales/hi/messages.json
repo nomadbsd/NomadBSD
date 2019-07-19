@@ -1,0 +1,970 @@
+{
+   "1pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "परिवर्तन लागू करें"
+   },
+   "1pExport": {
+      "description": "English: Export",
+      "message": "निर्यात करें"
+   },
+   "1pExportFilename": {
+      "description": "English: my-ublock-static-filters_{{datetime}}.txt",
+      "message": "my-ublock-static-filters_{{datetime}}.txt"
+   },
+   "1pFormatHint": {
+      "description": "Short information about how to create custom filters",
+      "message": "One filter per line. A filter can be a plain hostname, or an Adblock Plus-compatible filter. Lines prefixed with \u003Ccode>!\u003C/code> will be ignored."
+   },
+   "1pImport": {
+      "description": "English: Import and append",
+      "message": "Import and append"
+   },
+   "1pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "मेरे फिल्टर"
+   },
+   "3pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "परिवर्तन लागू करें"
+   },
+   "3pAutoUpdatePrompt1": {
+      "description": "A checkbox in the _3rd-party filters_ pane",
+      "message": "स्व-अद्यतन फ़िल्टर सूचियां"
+   },
+   "3pExternalListObsolete": {
+      "description": "used as a tooltip for the out-of-date icon beside a list",
+      "message": "पुरानी"
+   },
+   "3pExternalListsHint": {
+      "description": "Short information about how to use the textarea to import external filter lists by URL",
+      "message": "One URL per line. Invalid URLs will be silently ignored."
+   },
+   "3pGroupAds": {
+      "description": "English: Ads",
+      "message": "विज्ञापन"
+   },
+   "3pGroupAnnoyances": {
+      "description": "The header identifying the filter lists in the category 'annoyances'",
+      "message": "सतानेवाले विज्ञापन"
+   },
+   "3pGroupCustom": {
+      "description": "English: Custom",
+      "message": "कस्टम"
+   },
+   "3pGroupDefault": {
+      "description": "Header for the uBlock filters section in 'Filter lists pane'",
+      "message": "Built-in"
+   },
+   "3pGroupMalware": {
+      "description": "English: Malware domains",
+      "message": "मैलवेयर डोमेन"
+   },
+   "3pGroupMultipurpose": {
+      "description": "English: Multipurpose",
+      "message": "बहुउद्देशीय"
+   },
+   "3pGroupPrivacy": {
+      "description": "English: Privacy",
+      "message": "गोपनीयता"
+   },
+   "3pGroupRegions": {
+      "description": "English: Regions, languages",
+      "message": "क्षेत्र, भाषा"
+   },
+   "3pIgnoreGenericCosmeticFilters": {
+      "description": "This will cause uBO to ignore all generic cosmetic filters.",
+      "message": "Ignore generic cosmetic filters"
+   },
+   "3pIgnoreGenericCosmeticFiltersInfo": {
+      "description": "Describes the purpose of the 'Ignore generic cosmetic filters' feature.",
+      "message": "\u003Cp>Generic cosmetic filters are those cosmetic filters which are meant to apply on all web sites.\u003Cp>Though handled efficiently by uBlock₀, generic cosmetic filters may still contribute measurable memory and CPU overhead on some web pages, especially for large and long-lived ones.\u003Cp>Enabling this option will eliminate the memory and CPU overhead added to web pages as a result of handling generic cosmetic filters, and also lower the memory footprint of uBlock₀ itself.\u003Cp>It is recommended to enable this option on less powerful devices."
+   },
+   "3pImport": {
+      "description": "The label for the checkbox used to import external filter lists",
+      "message": "Import..."
+   },
+   "3pLastUpdate": {
+      "description": "used as a tooltip for the clock icon beside a list",
+      "message": "अन्तिम अद्यातन: {{ago}}. कृत्रिम नवीकरण के लिए क्लिक की जिए"
+   },
+   "3pListsOfBlockedHostsHeader": {
+      "description": "English: Lists of blocked hosts",
+      "message": "Lists of blocked hosts"
+   },
+   "3pListsOfBlockedHostsPerListStats": {
+      "description": "Appears aside each filter list in the _3rd-party filters_ pane",
+      "message": "{{total}} में से {{used}} का इस्तेमाल किया"
+   },
+   "3pListsOfBlockedHostsPrompt": {
+      "description": "Appears at the top of the _3rd-party filters_ pane",
+      "message": "{{netFilterCount}} network filters ＋ {{cosmeticFilterCount}} cosmetic filters from:"
+   },
+   "3pNetworkError": {
+      "description": "used as a tooltip for error icon beside a list",
+      "message": "A network error prevented the resource from being updated."
+   },
+   "3pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "तृतीय-पक्ष फ़िल्टर"
+   },
+   "3pParseAllABPHideFiltersInfo": {
+      "description": "Describes the purpose of the 'Parse and enforce cosmetic filters' feature.",
+      "message": "\u003Cp>This option enables the parsing and enforcing of \u003Ca href=\"https://adblockplus.org/en/faq_internal#elemhide\">Adblock Plus-compatible &ldquo;element hiding&rdquo; filters\u003C/a>. These filters are essentially cosmetic, they serve to hide elements in a web page which are deemed to be a visual nuisance, and which can't be blocked by the net request-based filtering engine.\u003C/p>\u003Cp>Enabling this feature increases uBlock₀'s memory footprint.\u003C/p>"
+   },
+   "3pParseAllABPHideFiltersPrompt1": {
+      "description": "English: Parse and enforce Adblock+ element hiding filters.",
+      "message": "Parse and enforce cosmetic filters"
+   },
+   "3pPurgeAll": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "सभी अस्थायी मेमोरी को शुद्ध करे"
+   },
+   "3pUpdateNow": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "अभी नवीकृत करें"
+   },
+   "3pUpdating": {
+      "description": "used as a tooltip for the spinner icon beside a list",
+      "message": "नवीकरण प्रगति में हैं..."
+   },
+   "aboutBackupDataButton": {
+      "description": "Text for button to create a backup of all settings",
+      "message": "Back up to file"
+   },
+   "aboutBackupFilename": {
+      "description": "English: my-ublock-backup_{{datetime}}.txt",
+      "message": "my-ublock-backup_{{datetime}}.txt"
+   },
+   "aboutChangelog": {
+      "description": "",
+      "message": "परिवर्तन सूची"
+   },
+   "aboutCode": {
+      "description": "English: Source code (GPLv3)",
+      "message": "Source code (GPLv3)"
+   },
+   "aboutContributors": {
+      "description": "English: Contributors",
+      "message": "योगदानकर्ता"
+   },
+   "aboutDependencies": {
+      "description": "Shown in the About pane",
+      "message": "External dependencies (GPLv3-compatible):"
+   },
+   "aboutIssues": {
+      "description": "Text for a link to official issue tracker",
+      "message": "Issue tracker"
+   },
+   "aboutPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "जानकारी"
+   },
+   "aboutResetDataButton": {
+      "description": "English: Reset to default settings...",
+      "message": "Reset to default settings..."
+   },
+   "aboutResetDataConfirm": {
+      "description": "Message asking user to confirm reset",
+      "message": "All your settings will be removed, and uBlock₀ will restart.\n\nReset uBlock₀ to factory settings?"
+   },
+   "aboutRestoreDataButton": {
+      "description": "English: Restore from file...",
+      "message": "फाइल से वापस करो"
+   },
+   "aboutRestoreDataConfirm": {
+      "description": "Message asking user to confirm restore",
+      "message": "All your settings will be overwritten using data backed up on {{time}}, and uBlock₀ will restart.\n\nOverwrite all existing settings using backed up data?"
+   },
+   "aboutRestoreDataError": {
+      "description": "Message to display when an error occurred during restore",
+      "message": "The data could not be read or is invalid"
+   },
+   "aboutSupport": {
+      "description": "A link for where to get support",
+      "message": "मदद"
+   },
+   "aboutWiki": {
+      "description": "English: project' wiki on GitHub",
+      "message": "विकी"
+   },
+   "advancedSettingsPageName": {
+      "description": "Title for the advanced settings page",
+      "message": "उन्नत सेटिंग्स"
+   },
+   "advancedSettingsWarning": {
+      "description": "A warning to users at the top of 'Advanced settings' page",
+      "message": "Warning! Change these advanced settings at your own risk."
+   },
+   "assetViewerPageName": {
+      "description": "Title for the asset viewer page",
+      "message": "uBlock₀ — Asset viewer"
+   },
+   "cloudDeviceNamePrompt": {
+      "description": "used as a prompt for the user to provide a custom device name",
+      "message": "इस साधन का नाम:"
+   },
+   "cloudNoData": {
+      "description": "",
+      "message": "...\n..."
+   },
+   "cloudPull": {
+      "description": "tooltip",
+      "message": "क्लाउड स्टोरेज से आयात करें"
+   },
+   "cloudPullAndMerge": {
+      "description": "tooltip",
+      "message": "Import from cloud storage and merge with current settings"
+   },
+   "cloudPush": {
+      "description": "tooltip",
+      "message": "Export to cloud storage"
+   },
+   "contextMenuTemporarilyAllowLargeMediaElements": {
+      "description": "A context menu entry, present when large media elements have been blocked on the current site",
+      "message": "कुछ समय के लिए विशाल तत्वोंको चलने की अनुमति दे"
+   },
+   "dashboardName": {
+      "description": "English: uBlock₀ — Dashboard",
+      "message": "uBlock₀ — डैशबोर्ड"
+   },
+   "dashboardUnsavedWarning": {
+      "description": "A warning in the dashboard when navigating away from unsaved changes",
+      "message": "Warning! You have unsaved changes"
+   },
+   "dashboardUnsavedWarningIgnore": {
+      "description": "Label for button to ignore unsaved changes",
+      "message": "Ignore"
+   },
+   "dashboardUnsavedWarningStay": {
+      "description": "Label for button to prevent navigating away from unsaved changes",
+      "message": "Stay"
+   },
+   "docblockedBack": {
+      "description": "English: Go back",
+      "message": "वापस जाएँ"
+   },
+   "docblockedClose": {
+      "description": "English: Close this window",
+      "message": "इस विंडो को बंद करे"
+   },
+   "docblockedDisablePermanent": {
+      "description": "English: Permanently",
+      "message": "स्थायी"
+   },
+   "docblockedDisableTemporary": {
+      "description": "English: Temporarily",
+      "message": "कुछ समय के लिए"
+   },
+   "docblockedFoundIn": {
+      "description": "English: List of filter list names follows",
+      "message": "इन में पायी है:"
+   },
+   "docblockedNoParamsPrompt": {
+      "description": "label to be used for the parameter-less URL: https://cloud.githubusercontent.com/assets/585534/9832014/bfb1b8f0-593b-11e5-8a27-fba472a5529a.png",
+      "message": "without parameters"
+   },
+   "docblockedProceed": {
+      "description": "English: Disable strict blocking for {{hostname}} ...",
+      "message": "Disable strict blocking for {{hostname}}"
+   },
+   "docblockedPrompt1": {
+      "description": "English: uBlock₀ has prevented the following page from loading:",
+      "message": "uBlock Origin ने इस पेज को चालु होने से रोका हैं:"
+   },
+   "docblockedPrompt2": {
+      "description": "English: Because of the following filter",
+      "message": "Because of the following filter"
+   },
+   "dummy": {
+      "description": "so we dont need to deal with comma for last entry",
+      "message": "This entry must be the last one"
+   },
+   "elapsedManyDaysAgo": {
+      "description": "English: {{value}} days ago",
+      "message": "{{value}} दिन पहले"
+   },
+   "elapsedManyHoursAgo": {
+      "description": "English: {{value}} hours ago",
+      "message": "{{value}} घंटे पहले"
+   },
+   "elapsedManyMinutesAgo": {
+      "description": "English: {{value}} minutes ago",
+      "message": "{{value}} मिनट पहले"
+   },
+   "elapsedOneDayAgo": {
+      "description": "English: a day ago",
+      "message": "एक दिन पहले"
+   },
+   "elapsedOneHourAgo": {
+      "description": "English: an hour ago",
+      "message": "एक घंटे पहले"
+   },
+   "elapsedOneMinuteAgo": {
+      "description": "English: a minute ago",
+      "message": "एक मिनट पहले"
+   },
+   "errorCantConnectTo": {
+      "description": "English: Network error: {{msg}}",
+      "message": "Network error: {{msg}}"
+   },
+   "extName": {
+      "description": "extension name.",
+      "message": "uBlock Origin"
+   },
+   "extShortDesc": {
+      "description": "this will be in the Chrome web store: must be 132 characters or less",
+      "message": "आख़िरकार, क्रोमियम-बेस्ड ब्राउज़रों के लिए एक कुशल अवरोधक। CPU और स्मृति पर आसान।"
+   },
+   "fennecMenuItemBlockingOff": {
+      "description": "Firefox-specific: appears as 'uBlock₀ (off)'",
+      "message": "बंद"
+   },
+   "genericApplyChanges": {
+      "description": "for generic 'Apply changes' buttons",
+      "message": "परिवर्तन लागू करें"
+   },
+   "genericBytes": {
+      "description": "",
+      "message": "बाइट्स"
+   },
+   "genericCopyToClipboard": {
+      "description": "Label for buttons used to copy something to the clipboard",
+      "message": "Copy to clipboard"
+   },
+   "genericMergeViewScrollLock": {
+      "description": "Tooltip for the button used to lock scrolling between the views in the 'My rules' pane",
+      "message": "Toggle locked scrolling"
+   },
+   "genericRevert": {
+      "description": "for generic 'Revert' buttons",
+      "message": "पलटदे"
+   },
+   "genericSubmit": {
+      "description": "for generic 'Submit' buttons",
+      "message": "पक्का"
+   },
+   "logAll": {
+      "description": "Appears in the logger's tab selector",
+      "message": "सब"
+   },
+   "logBehindTheScene": {
+      "description": "Pretty name for behind-the-scene network requests",
+      "message": "पर्दे के पीछे"
+   },
+   "logFilterPrompt": {
+      "description": "Placeholder string for logger output filtering input field",
+      "message": "filter logger content"
+   },
+   "logRequestsHeaderDomain": {
+      "description": "English: Domain",
+      "message": "डोमेन"
+   },
+   "logRequestsHeaderFilter": {
+      "description": "English: Filter",
+      "message": "फिल्टर"
+   },
+   "logRequestsHeaderType": {
+      "description": "English: Type",
+      "message": "प्रकार"
+   },
+   "logRequestsHeaderURL": {
+      "description": "English: URL",
+      "message": "यू आर एल"
+   },
+   "loggerClearTip": {
+      "description": "Tooltip for the eraser in the logger page; used to blank the content of the logger",
+      "message": "Clear logger"
+   },
+   "loggerCurrentTab": {
+      "description": "Appears in the logger's tab selector",
+      "message": "वर्तमान टैब"
+   },
+   "loggerDomInspectorTip": {
+      "description": "Tooltip for the DOM inspector button in the logger page",
+      "message": "Toggle the DOM inspector"
+   },
+   "loggerEntryDetailsContext": {
+      "description": "Label to identify a context field (typically a hostname)",
+      "message": "Context"
+   },
+   "loggerEntryDetailsFilter": {
+      "description": "Label to identify a filter field",
+      "message": "Filter"
+   },
+   "loggerEntryDetailsFilterList": {
+      "description": "Label to identify a filter list field",
+      "message": "Filter list"
+   },
+   "loggerEntryDetailsHeader": {
+      "description": "Small header to identify the 'Details' pane for a specific logger entry",
+      "message": "Details"
+   },
+   "loggerEntryDetailsPartyness": {
+      "description": "Label to identify a field providing partyness information",
+      "message": "Partyness"
+   },
+   "loggerEntryDetailsRootContext": {
+      "description": "Label to identify a root context field (typically a hostname)",
+      "message": "Root context"
+   },
+   "loggerEntryDetailsRule": {
+      "description": "Label to identify a rule field",
+      "message": "Rule"
+   },
+   "loggerEntryDetailsType": {
+      "description": "Label to identify the type of an entry",
+      "message": "Type"
+   },
+   "loggerEntryDetailsURL": {
+      "description": "Label to identify the URL of an entry",
+      "message": "URL"
+   },
+   "loggerExportEncodeMarkdown": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "Markdown"
+   },
+   "loggerExportEncodePlain": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "Plain"
+   },
+   "loggerExportFormatList": {
+      "description": "Label for radio-button to pick export format",
+      "message": "List"
+   },
+   "loggerExportFormatTable": {
+      "description": "Label for radio-button to pick export format",
+      "message": "Table"
+   },
+   "loggerInfoTip": {
+      "description": "Tooltip for the top-right info label in the logger page",
+      "message": "uBlock Origin wiki: The logger"
+   },
+   "loggerPauseTip": {
+      "description": "Tooltip for the pause button in the logger page",
+      "message": "Pause logger (discard all incoming data)"
+   },
+   "loggerPopupPanelTip": {
+      "description": "Tooltip for the popup panel button in the logger page",
+      "message": "Toggle the popup panel"
+   },
+   "loggerReloadTip": {
+      "description": "Tooltip for the reload button in the logger page",
+      "message": "Reload the tab content"
+   },
+   "loggerRowFiltererBuiltin1p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "1st-party"
+   },
+   "loggerRowFiltererBuiltin3p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "3rd-party"
+   },
+   "loggerRowFiltererBuiltinAllowed": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "allowed"
+   },
+   "loggerRowFiltererBuiltinBlocked": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "blocked"
+   },
+   "loggerRowFiltererBuiltinEventful": {
+      "description": "A keyword in the built-in row filtering expression: all items corresponding to uBO doing something (blocked, allowed, redirected, etc.)",
+      "message": "eventful"
+   },
+   "loggerRowFiltererBuiltinNot": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "Not"
+   },
+   "loggerRowFiltererBuiltinTip": {
+      "description": "Tooltip for the button to bring up logger output filtering options",
+      "message": "Logger filtering options"
+   },
+   "loggerRowFiltererButtonTip": {
+      "description": "Tooltip for the row filterer button in the logger page",
+      "message": "Toggle logger filtering"
+   },
+   "loggerSettingDiscardPrompt": {
+      "description": "Logger setting: A sentence to describe the purpose of the settings below",
+      "message": "Logger entries which do not fulfill all three conditions below will be automatically discarded:"
+   },
+   "loggerSettingHideColumnContext": {
+      "description": "A label for the context column",
+      "message": "{{input}} Context"
+   },
+   "loggerSettingHideColumnFilter": {
+      "description": "A label for the filter or rule column",
+      "message": "{{input}} Filter/rule"
+   },
+   "loggerSettingHideColumnPartyness": {
+      "description": "A label for the partyness column",
+      "message": "{{input}} Partyness"
+   },
+   "loggerSettingHideColumnTime": {
+      "description": "A label for the time column",
+      "message": "{{input}} Time"
+   },
+   "loggerSettingHideColumnsPrompt": {
+      "description": "Logger settings: a sentence to describe the purpose of the checkboxes below",
+      "message": "Hide columns:"
+   },
+   "loggerSettingPerEntryLineCount": {
+      "description": "A logger setting",
+      "message": "Use {{input}} lines per entry in vertically expanded mode"
+   },
+   "loggerSettingPerEntryMaxAge": {
+      "description": "A logger setting",
+      "message": "Preserve entries from the last {{input}} minutes"
+   },
+   "loggerSettingPerTabMaxEntries": {
+      "description": "A logger setting",
+      "message": "Preserve at most {{input}} entries per tab"
+   },
+   "loggerSettingPerTabMaxLoads": {
+      "description": "A logger setting",
+      "message": "Preserve at most {{input}} page loads per tab"
+   },
+   "loggerStaticFilteringFinderSentence1": {
+      "description": "Below this sentence, the filter list(s) in which the filter was found",
+      "message": "Static filter \u003Ccode>{{filter}}\u003C/code> found in:"
+   },
+   "loggerStaticFilteringFinderSentence2": {
+      "description": "Message to show when a filter cannot be found in any filter lists",
+      "message": "Static filter \u003Ccode>{{filter}}\u003C/code> could not be found in any of the currently enabled filter lists"
+   },
+   "loggerStaticFilteringHeader": {
+      "description": "Small header to identify the static filtering section",
+      "message": "स्थायी छनाना"
+   },
+   "loggerStaticFilteringSentence": {
+      "description": "Used in the static filtering wizard",
+      "message": "{{action}} network requests of {{type}} {{br}}which URL address matches {{url}} {{br}}and which originates {{origin}},{{br}}{{importance}} there is a matching exception filter."
+   },
+   "loggerStaticFilteringSentencePartAllow": {
+      "description": "Used in the static filtering wizard",
+      "message": "छोडो"
+   },
+   "loggerStaticFilteringSentencePartAnyOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "कहि से भी"
+   },
+   "loggerStaticFilteringSentencePartAnyType": {
+      "description": "Used in the static filtering wizard",
+      "message": "हर टइप"
+   },
+   "loggerStaticFilteringSentencePartBlock": {
+      "description": "Used in the static filtering wizard",
+      "message": "रोको"
+   },
+   "loggerStaticFilteringSentencePartImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "भले ही"
+   },
+   "loggerStaticFilteringSentencePartNotImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "सिवाय"
+   },
+   "loggerStaticFilteringSentencePartOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "from “{{origin}}”"
+   },
+   "loggerStaticFilteringSentencePartType": {
+      "description": "Used in the static filtering wizard",
+      "message": "type “{{type}}”"
+   },
+   "loggerURLFilteringContextLabel": {
+      "description": "Label for the context selector",
+      "message": "सन्दर्भ:"
+   },
+   "loggerURLFilteringHeader": {
+      "description": "Small header to identify the dynamic URL filtering section",
+      "message": "URL rule"
+   },
+   "loggerURLFilteringTypeLabel": {
+      "description": "Label for the type selector",
+      "message": "प्रकार:"
+   },
+   "loggerUnpauseTip": {
+      "description": "Tooltip for the play button in the logger page",
+      "message": "Unpause logger"
+   },
+   "pickerContextMenuEntry": {
+      "description": "An entry in the browser's contextual menu",
+      "message": "इस को ब्लॉक करो"
+   },
+   "pickerCosmeticFilters": {
+      "description": "English: Cosmetic filters",
+      "message": "सुंदरता के लिए फिलटरें"
+   },
+   "pickerCosmeticFiltersHint": {
+      "description": "English: Click, Ctrl-click",
+      "message": "क्लिक, कंट्रोल - क्लिक"
+   },
+   "pickerCreate": {
+      "description": "English: Create",
+      "message": "बनाएँ"
+   },
+   "pickerNetFilters": {
+      "description": "English: header for a type of filter in the element picker dialog",
+      "message": "नेट फिलटर्स"
+   },
+   "pickerPick": {
+      "description": "English: Pick",
+      "message": "चयन"
+   },
+   "pickerPreview": {
+      "description": "Element picker preview mode: will cause the elements matching the current filter to be removed from the page",
+      "message": "पूर्वावलोकन"
+   },
+   "pickerQuit": {
+      "description": "English: Quit",
+      "message": "बंद करें"
+   },
+   "popup1pScriptRulePrompt": {
+      "description": "",
+      "message": "असली साइट के स्क्रिप्ट्स"
+   },
+   "popup3pAnyRulePrompt": {
+      "description": "",
+      "message": "तृतीय-पक्ष"
+   },
+   "popup3pFrameRulePrompt": {
+      "description": "",
+      "message": "दूसरी साइट के फ्रेम्स"
+   },
+   "popup3pPassiveRulePrompt": {
+      "description": "",
+      "message": "तृतीया पक्ष सीइसइस तस्वीरें"
+   },
+   "popup3pScriptRulePrompt": {
+      "description": "",
+      "message": "दूसरी साइट के स्क्रिप्ट्स"
+   },
+   "popupAnyRulePrompt": {
+      "description": "",
+      "message": "सभी"
+   },
+   "popupBlockedOnThisPagePrompt": {
+      "description": "English: on this page",
+      "message": "इस पृष्ठ पर"
+   },
+   "popupBlockedRequestPrompt": {
+      "description": "English: requests blocked",
+      "message": "रुके हुए अनुरोध"
+   },
+   "popupBlockedSinceInstallPrompt": {
+      "description": "English: since install",
+      "message": "स्थापना से अब तक"
+   },
+   "popupBlockedStats": {
+      "description": "Example: 15 or 13%",
+      "message": "{{count}} या {{percent}}%"
+   },
+   "popupHitDomainCount": {
+      "description": "appears in popup",
+      "message": "{{total}} मे से {{count}}"
+   },
+   "popupHitDomainCountPrompt": {
+      "description": "appears in popup",
+      "message": "योजित साइटें"
+   },
+   "popupImageRulePrompt": {
+      "description": "",
+      "message": "चित्र"
+   },
+   "popupInlineScriptRulePrompt": {
+      "description": "",
+      "message": "लाइन के बीच वाले स्क्रिप्ट्स"
+   },
+   "popupOr": {
+      "description": "English: or",
+      "message": "या"
+   },
+   "popupPowerSwitchInfo": {
+      "description": "English: Click: disable/enable uBlock₀ for this site.\n\nCtrl+click: disable uBlock₀ only on this page.",
+      "message": "दबाए : uBlock को इस साईट में बंद/चालु करने के लिए।\n\nCtrl के साथ दबाए : uBlock को सिर्फ इस पेज में बंद करने के लिए।"
+   },
+   "popupPowerSwitchInfo1": {
+      "description": "Message to be read by screen readers",
+      "message": "दबाए: uBlock को इस साईट में बंद करने के लिए।\n\nCtrl के साथ दबाए: uBlock को केवल इस पेज में बंद करने के लिए।"
+   },
+   "popupPowerSwitchInfo2": {
+      "description": "Message to be read by screen readers",
+      "message": "इस साईट में uBlock₀ को चालू करने के लिए क्लिक कीजिये।"
+   },
+   "popupTipDashboard": {
+      "description": "English: Click to open the dashboard",
+      "message": "डैशबोर्ड को खोलने के लिए क्लिक करें"
+   },
+   "popupTipGlobalRules": {
+      "description": "Tooltip when hovering the top-most cell of the global-rules column.",
+      "message": "निन्मलिखित नियमें सब वेस्बिते पर लागू है"
+   },
+   "popupTipLocalRules": {
+      "description": "Tooltip when hovering the top-most cell of the local-rules column.",
+      "message": "निन्मलिखित नियमें सिर्फ इस वेबसाइट पर लागू है"
+   },
+   "popupTipLog": {
+      "description": "Tooltip used for the logger icon in the panel",
+      "message": "अनुरोध दैनिकी में जाए"
+   },
+   "popupTipNoCosmeticFiltering": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "इस वेबसाइट की खूबसूरत फ़िल्टरिंग करें"
+   },
+   "popupTipNoCosmeticFiltering1": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "इस साइट पर कॉस्मेटिक फ़िल्टरिंग अक्षम करने के लिए क्लिक करें"
+   },
+   "popupTipNoCosmeticFiltering2": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "इस साइट पर कॉस्मेटिक फ़िल्टरिंग सक्षम करने के लिए क्लिक करें"
+   },
+   "popupTipNoLargeMedia": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "बड़े मीडिया चीजों को रोक दें"
+   },
+   "popupTipNoLargeMedia1": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "इस वेबसाइट पर बड़े मीडिया ऐलिमेंटस को ब्लाक करने के लिए क्लिक करें"
+   },
+   "popupTipNoLargeMedia2": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "इस वेबसाइट पर बड़े मीडिया ऐलिमेंटस को ब्लाक न करने के लिए क्लिक करें"
+   },
+   "popupTipNoPopups": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "इस साईट के लिए कोई पॉपअप नहीं"
+   },
+   "popupTipNoPopups1": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "इस वेबसाइट पर सभी पॉप-अप्स को ब्लाक करने के लिए क्लिक करें"
+   },
+   "popupTipNoPopups2": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "इस वेबसाइट पर सभी पॉप-अप्स को ब्लाक न करने के लिए क्लिक करें"
+   },
+   "popupTipNoRemoteFonts": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "बाहरी फ़ॉन्ट्स को ब्लॉक करें"
+   },
+   "popupTipNoRemoteFonts1": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "इस साइट पर रिमोट फोंट को अवरुद्ध करने के लिए क्लिक करें"
+   },
+   "popupTipNoRemoteFonts2": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "Click to no longer block remote fonts on this site"
+   },
+   "popupTipNoScripting1": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "Click to disable JavaScript on this site"
+   },
+   "popupTipNoScripting2": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "Click to no longer disable JavaScript on this site"
+   },
+   "popupTipPicker": {
+      "description": "English: Enter element picker mode",
+      "message": "अन्श चाटने वाले साधन में प्रवेश करे"
+   },
+   "popupTipRevertRules": {
+      "description": "Tooltip when hovering over the eraser in the dynamic filtering pane.",
+      "message": "आपके परिवर्तनों को उलटने के लिए क्लिक करें"
+   },
+   "popupTipSaveRules": {
+      "description": "Tooltip when hovering over the padlock in the dynamic filtering pane.",
+      "message": "आपके परिवर्तनों को रकने के लिए क्लिक करें"
+   },
+   "popupTipZapper": {
+      "description": "Tooltip for the element-zapper icon in the popup panel",
+      "message": "अन्श मिटाने की प्रक्रिया आरम्भ करे"
+   },
+   "rulesCommit": {
+      "description": "This will persist temporary rules",
+      "message": "पक्का करो"
+   },
+   "rulesDefaultFileName": {
+      "description": "default file name to use",
+      "message": "my-ublock-dynamic-rules_{{datetime}}.txt"
+   },
+   "rulesEdit": {
+      "description": "Will enable manual-edit mode (textarea)",
+      "message": "एडिट"
+   },
+   "rulesEditDiscard": {
+      "description": "Will discard manually-edited content and exit manual-edit mode",
+      "message": "रद्द करें"
+   },
+   "rulesEditSave": {
+      "description": "Will save manually-edited content and exit manual-edit mode",
+      "message": "सहेजें"
+   },
+   "rulesExport": {
+      "description": "",
+      "message": "Export to file"
+   },
+   "rulesFormatHint": {
+      "description": "English: dynamic rule syntax and full documentation.",
+      "message": "Rule syntax: \u003Ccode>source destination type action\u003C/code> (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Dynamic-filtering:-rule-syntax'>full documentation\u003C/a>)."
+   },
+   "rulesHint": {
+      "description": "English: List of your dynamic filtering rules.",
+      "message": "List of your dynamic filtering rules."
+   },
+   "rulesImport": {
+      "description": "",
+      "message": "फाइल से आयात करे..."
+   },
+   "rulesPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "मेरे नियम"
+   },
+   "rulesPermanentHeader": {
+      "description": "header",
+      "message": "स्थायी नियम"
+   },
+   "rulesRevert": {
+      "description": "This will remove all temporary rules",
+      "message": "पलटदे"
+   },
+   "rulesTemporaryHeader": {
+      "description": "header",
+      "message": "अस्थायी नियम"
+   },
+   "settingPerSiteSwitchGroup": {
+      "description": "",
+      "message": "सामान्य व्यवहार"
+   },
+   "settingPerSiteSwitchGroupSynopsis": {
+      "description": "",
+      "message": "ये सामान्य व्यवहारों को प्रति-पृष्ठ आधार पर बदला जा सकता है"
+   },
+   "settingsAdvancedUserPrompt": {
+      "description": "",
+      "message": "मैं एक उच्च उपयोगकर्ता हूँ (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Advanced-user-features'>आवश्यक पठन\u003C/a>)"
+   },
+   "settingsAdvancedUserSettings": {
+      "description": "For the tooltip of a link which gives access to advanced settings",
+      "message": "उन्नत सेटिंग्स"
+   },
+   "settingsCloudStorageEnabledPrompt": {
+      "description": "",
+      "message": "क्लाउड स्टोरिज समर्थन साझा करें"
+   },
+   "settingsCollapseBlockedPrompt": {
+      "description": "English: Hide placeholders of blocked elements",
+      "message": "ब्लॉक किये चीज़ो की प्लेसहोल्डर को हटाओ"
+   },
+   "settingsColorBlindPrompt": {
+      "description": "English: Color-blind friendly",
+      "message": "वरणांध अनुकूल"
+   },
+   "settingsContextMenuPrompt": {
+      "description": "English: Make use of context menu where appropriate",
+      "message": "विकल्प सूचि का प्रयोग करें"
+   },
+   "settingsHyperlinkAuditingDisabledPrompt": {
+      "description": "English: ",
+      "message": "हाइपरलिंक जाँच को अवरुध करें"
+   },
+   "settingsIconBadgePrompt": {
+      "description": "English: Show the number of blocked requests on the icon",
+      "message": "इसके आइकॉन पर ब्लॉक किये चीज़ो की गिनती दिखाओ"
+   },
+   "settingsLastBackupPrompt": {
+      "description": "English: Last backup:",
+      "message": "पिछला बेकप"
+   },
+   "settingsLastRestorePrompt": {
+      "description": "English: Last restore:",
+      "message": "अंतिम बहाल:"
+   },
+   "settingsNoCSPReportsPrompt": {
+      "description": "background information: https://github.com/gorhill/uBlock/issues/3150",
+      "message": "Block CSP reports"
+   },
+   "settingsNoCosmeticFilteringPrompt": {
+      "description": "",
+      "message": "काज़्मेटिक निस्पंदन को रोकें"
+   },
+   "settingsNoLargeMediaPrompt": {
+      "description": "",
+      "message": "{{input:number}} kB से ज़्यादा अंश को रोकें"
+   },
+   "settingsNoRemoteFontsPrompt": {
+      "description": "",
+      "message": "बाहरी अक्षराकृति को रोकें"
+   },
+   "settingsNoScriptingPrompt": {
+      "description": "The default state for the per-site no-scripting switch",
+      "message": "Disable JavaScript"
+   },
+   "settingsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "सेटिंग्स"
+   },
+   "settingsPrefetchingDisabledPrompt": {
+      "description": "English: ",
+      "message": "प्री-फ़ेचिंग अक्षम करें (अवरुद्ध नेटवर्क रिक्वेस्ट को रोकने के लिए)"
+   },
+   "settingsStorageUsed": {
+      "description": "English: Storage used: {{}} bytes",
+      "message": "प्रचलित मैमोरी: {{value}} बाइट्स"
+   },
+   "settingsTooltipsPrompt": {
+      "description": "A checkbox in the Settings pane",
+      "message": "टूलटिप्स मत दिखाओ"
+   },
+   "settingsWebRTCIPAddressHiddenPrompt": {
+      "description": "English: ",
+      "message": "WebRTC को लोकल IP ऐड्रेस प्रकट करने से रोकें"
+   },
+   "shortcutCapturePlaceholder": {
+      "description": "Placeholder string for input field used to capture a keyboard shortcut",
+      "message": "Type a shortcut"
+   },
+   "shortcutsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "शॉर्टकट"
+   },
+   "showDashboardButton": {
+      "description": "Firefox/Fennec-specific: Show Dashboard",
+      "message": "Show Dashboard"
+   },
+   "showNetworkLogButton": {
+      "description": "Firefox/Fennec-specific: Show Logger",
+      "message": "Show Logger"
+   },
+   "statsPageName": {
+      "description": "Title for the logger window",
+      "message": "यूब्लॉक  —  नेटवर्क रिक्वेस्ट लॉग"
+   },
+   "subscriberConfirm": {
+      "description": "English: The message seen by the user to confirm subscription to a ABP filter list",
+      "message": "uBlock₀: Add the following URL to your custom filter lists?\n\nTitle: \"{{title}}\"\nURL: {{url}}"
+   },
+   "whitelistApply": {
+      "description": "English: Apply changes",
+      "message": "परिवर्तन लागू करें"
+   },
+   "whitelistExport": {
+      "description": "English: Export",
+      "message": "निर्यात करें"
+   },
+   "whitelistExportFilename": {
+      "description": "English: my-ublock-whitelist_{{datetime}}.txt",
+      "message": "my-ublock-whitelist_{{datetime}}.txt"
+   },
+   "whitelistImport": {
+      "description": "English: Import and append",
+      "message": "Import and append"
+   },
+   "whitelistPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "सफेद सूची"
+   },
+   "whitelistPrompt": {
+      "description": "English: An overview of the content of the dashboard's Whitelist pane.",
+      "message": "The whitelist directives dictate on which web pages uBlock Origin should be disabled. One entry per line. Invalid directives will be silently ignored and commented out."
+   }
+}

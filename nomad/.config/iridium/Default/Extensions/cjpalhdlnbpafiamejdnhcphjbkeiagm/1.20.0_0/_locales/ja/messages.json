@@ -1,0 +1,970 @@
+{
+   "1pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "変更を適用"
+   },
+   "1pExport": {
+      "description": "English: Export",
+      "message": "エクスポート"
+   },
+   "1pExportFilename": {
+      "description": "English: my-ublock-static-filters_{{datetime}}.txt",
+      "message": "my-ublock-static-filters_{{datetime}}.txt"
+   },
+   "1pFormatHint": {
+      "description": "Short information about how to create custom filters",
+      "message": "1行につき1つのフィルターです。フィルターはただのホストネームでもAdblock Plus書式のフィルターでも構いません。\u003Ccode>!\u003C/code> が先頭にある行は無視されます。"
+   },
+   "1pImport": {
+      "description": "English: Import and append",
+      "message": "インポートと追加"
+   },
+   "1pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "Myフィルター"
+   },
+   "3pApplyChanges": {
+      "description": "English: Apply changes",
+      "message": "適用"
+   },
+   "3pAutoUpdatePrompt1": {
+      "description": "A checkbox in the _3rd-party filters_ pane",
+      "message": "フィルターリストを自動更新する"
+   },
+   "3pExternalListObsolete": {
+      "description": "used as a tooltip for the out-of-date icon beside a list",
+      "message": "古いバージョンです"
+   },
+   "3pExternalListsHint": {
+      "description": "Short information about how to use the textarea to import external filter lists by URL",
+      "message": "1行に1つのURLを記入します。無効なURLは無視されます。"
+   },
+   "3pGroupAds": {
+      "description": "English: Ads",
+      "message": "広告"
+   },
+   "3pGroupAnnoyances": {
+      "description": "The header identifying the filter lists in the category 'annoyances'",
+      "message": "迷惑系"
+   },
+   "3pGroupCustom": {
+      "description": "English: Custom",
+      "message": "カスタム"
+   },
+   "3pGroupDefault": {
+      "description": "Header for the uBlock filters section in 'Filter lists pane'",
+      "message": "内製フィルター"
+   },
+   "3pGroupMalware": {
+      "description": "English: Malware domains",
+      "message": "マルウェア ドメイン"
+   },
+   "3pGroupMultipurpose": {
+      "description": "English: Multipurpose",
+      "message": "多目的"
+   },
+   "3pGroupPrivacy": {
+      "description": "English: Privacy",
+      "message": "プライバシー"
+   },
+   "3pGroupRegions": {
+      "description": "English: Regions, languages",
+      "message": "地域、言語"
+   },
+   "3pIgnoreGenericCosmeticFilters": {
+      "description": "This will cause uBO to ignore all generic cosmetic filters.",
+      "message": "汎用的な要素隠蔽フィルターを無視する"
+   },
+   "3pIgnoreGenericCosmeticFiltersInfo": {
+      "description": "Describes the purpose of the 'Ignore generic cosmetic filters' feature.",
+      "message": "\u003Cp>汎用的な要素隠蔽フィルターとは、すべてのウェブサイトに適用される要素隠蔽フィルターのことです。\u003Cp>これはuBlock₀によって効率的に処理されますが、特に大規模で長期運営されている一部のウェブページ上では、メモリ使用量や処理時間に目に見える影響を与えることがあります。\u003Cp>このオプションを有効にすると、汎用的な要素隠蔽フィルターを処理するためにウェブページごとに追加されるメモリ使用量や処理時間を減らし、さらにuBlock₀自体のメモリ使用量を軽減できます。\u003Cp>低スペックの環境では、このオプションを有効にすることを推奨します。"
+   },
+   "3pImport": {
+      "description": "The label for the checkbox used to import external filter lists",
+      "message": "インポート..."
+   },
+   "3pLastUpdate": {
+      "description": "used as a tooltip for the clock icon beside a list",
+      "message": "最終更新: {{ago}}\nクリックすると強制的に更新します"
+   },
+   "3pListsOfBlockedHostsHeader": {
+      "description": "English: Lists of blocked hosts",
+      "message": "ブロックされたホストの一覧表示"
+   },
+   "3pListsOfBlockedHostsPerListStats": {
+      "description": "Appears aside each filter list in the _3rd-party filters_ pane",
+      "message": "{{total}}個中{{used}}使用"
+   },
+   "3pListsOfBlockedHostsPrompt": {
+      "description": "Appears at the top of the _3rd-party filters_ pane",
+      "message": "{{netFilterCount}}個のネットワークフィルター＋{{cosmeticFilterCount}}個の要素隠蔽フィルター:"
+   },
+   "3pNetworkError": {
+      "description": "used as a tooltip for error icon beside a list",
+      "message": "ネットワークエラーが発生したため、リソースを更新できませんでした。"
+   },
+   "3pPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "フィルター一覧"
+   },
+   "3pParseAllABPHideFiltersInfo": {
+      "description": "Describes the purpose of the 'Parse and enforce cosmetic filters' feature.",
+      "message": "\u003Cp>このオプションは\u003Ca href=\"https://adblockplus.org/en/faq_internal#elemhide\">Adblock Plus適合の&ldquo;要素隠蔽&rdquo;フィルター\u003C/a>の解析と施行を有効にします。これらのフィルターは表面的で、ネットリクエストベースのフィルタリングエンジンでブロックできない視覚的に迷惑な要素をウェブページ上で隠す物です。\u003C/p>\u003Cp>この機能を有効にするとuBlock₀の使用メモリーを増やします。\u003C/p>"
+   },
+   "3pParseAllABPHideFiltersPrompt1": {
+      "description": "English: Parse and enforce Adblock+ element hiding filters.",
+      "message": "要素隠蔽フィルターを解析、施行する"
+   },
+   "3pPurgeAll": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "全キャッシュを削除"
+   },
+   "3pUpdateNow": {
+      "description": "A button in the in the _3rd-party filters_ pane",
+      "message": "今すぐ更新"
+   },
+   "3pUpdating": {
+      "description": "used as a tooltip for the spinner icon beside a list",
+      "message": "更新中..."
+   },
+   "aboutBackupDataButton": {
+      "description": "Text for button to create a backup of all settings",
+      "message": "ファイルにバックアップ..."
+   },
+   "aboutBackupFilename": {
+      "description": "English: my-ublock-backup_{{datetime}}.txt",
+      "message": "my-ublock-backup_{{datetime}}.txt"
+   },
+   "aboutChangelog": {
+      "description": "",
+      "message": "更新履歴"
+   },
+   "aboutCode": {
+      "description": "English: Source code (GPLv3)",
+      "message": "ソースコード (GPLバージョン3)"
+   },
+   "aboutContributors": {
+      "description": "English: Contributors",
+      "message": "貢献者達"
+   },
+   "aboutDependencies": {
+      "description": "Shown in the About pane",
+      "message": "外部依存関係（GPLv3 互換）"
+   },
+   "aboutIssues": {
+      "description": "Text for a link to official issue tracker",
+      "message": "問題追跡システム"
+   },
+   "aboutPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "このプロジェクトについて"
+   },
+   "aboutResetDataButton": {
+      "description": "English: Reset to default settings...",
+      "message": "初期設定にリセット"
+   },
+   "aboutResetDataConfirm": {
+      "description": "Message asking user to confirm reset",
+      "message": "すべての設定が消去された後、uBlock₀が再起動します。\n\n初期設定にリセットしますか？"
+   },
+   "aboutRestoreDataButton": {
+      "description": "English: Restore from file...",
+      "message": "ファイルから復元..."
+   },
+   "aboutRestoreDataConfirm": {
+      "description": "Message asking user to confirm restore",
+      "message": "{{time}}のバックアップデータを使用してすべての設定を上書きした後、uBlock₀が再起動します。\n\nバックアップデータを使用して既存のすべての設定の上書きしますか？"
+   },
+   "aboutRestoreDataError": {
+      "description": "Message to display when an error occurred during restore",
+      "message": "データが無効、または読み込みができませんでした"
+   },
+   "aboutSupport": {
+      "description": "A link for where to get support",
+      "message": "サポート"
+   },
+   "aboutWiki": {
+      "description": "English: project' wiki on GitHub",
+      "message": "Wiki"
+   },
+   "advancedSettingsPageName": {
+      "description": "Title for the advanced settings page",
+      "message": "上級者向け設定"
+   },
+   "advancedSettingsWarning": {
+      "description": "A warning to users at the top of 'Advanced settings' page",
+      "message": "警告！　これらの上級者向け設定はご自身の責任により変更すること。"
+   },
+   "assetViewerPageName": {
+      "description": "Title for the asset viewer page",
+      "message": "uBlock₀ — アセットビューアー"
+   },
+   "cloudDeviceNamePrompt": {
+      "description": "used as a prompt for the user to provide a custom device name",
+      "message": "このデバイスの名前:"
+   },
+   "cloudNoData": {
+      "description": "",
+      "message": "...\n..."
+   },
+   "cloudPull": {
+      "description": "tooltip",
+      "message": "クラウドストレージからインポート"
+   },
+   "cloudPullAndMerge": {
+      "description": "tooltip",
+      "message": "クラウドストレージからインポートし、現在の設定と統合します"
+   },
+   "cloudPush": {
+      "description": "tooltip",
+      "message": "クラウドストレージにエクスポート"
+   },
+   "contextMenuTemporarilyAllowLargeMediaElements": {
+      "description": "A context menu entry, present when large media elements have been blocked on the current site",
+      "message": "一時的に大きなメディア要素を許可"
+   },
+   "dashboardName": {
+      "description": "English: uBlock₀ — Dashboard",
+      "message": "uBlock₀ — ダッシュボード"
+   },
+   "dashboardUnsavedWarning": {
+      "description": "A warning in the dashboard when navigating away from unsaved changes",
+      "message": "注意！　保存していない変更があります"
+   },
+   "dashboardUnsavedWarningIgnore": {
+      "description": "Label for button to ignore unsaved changes",
+      "message": "無視する"
+   },
+   "dashboardUnsavedWarningStay": {
+      "description": "Label for button to prevent navigating away from unsaved changes",
+      "message": "留まる"
+   },
+   "docblockedBack": {
+      "description": "English: Go back",
+      "message": "戻る"
+   },
+   "docblockedClose": {
+      "description": "English: Close this window",
+      "message": "このウィンドウを閉じる"
+   },
+   "docblockedDisablePermanent": {
+      "description": "English: Permanently",
+      "message": "恒久的"
+   },
+   "docblockedDisableTemporary": {
+      "description": "English: Temporarily",
+      "message": "一時的"
+   },
+   "docblockedFoundIn": {
+      "description": "English: List of filter list names follows",
+      "message": "このフィルターを含むリストの名前:"
+   },
+   "docblockedNoParamsPrompt": {
+      "description": "label to be used for the parameter-less URL: https://cloud.githubusercontent.com/assets/585534/9832014/bfb1b8f0-593b-11e5-8a27-fba472a5529a.png",
+      "message": "パラメータを除いたURL"
+   },
+   "docblockedProceed": {
+      "description": "English: Disable strict blocking for {{hostname}} ...",
+      "message": "{{hostname}}の厳格なブロックを無効にする"
+   },
+   "docblockedPrompt1": {
+      "description": "English: uBlock₀ has prevented the following page from loading:",
+      "message": "uBlock Origin は、このページの読み込みをブロックしました"
+   },
+   "docblockedPrompt2": {
+      "description": "English: Because of the following filter",
+      "message": "該当するフィルター"
+   },
+   "dummy": {
+      "description": "so we dont need to deal with comma for last entry",
+      "message": "これは最後のエントリである必要があります"
+   },
+   "elapsedManyDaysAgo": {
+      "description": "English: {{value}} days ago",
+      "message": "{{value}} 日前"
+   },
+   "elapsedManyHoursAgo": {
+      "description": "English: {{value}} hours ago",
+      "message": "{{value}} 時間前"
+   },
+   "elapsedManyMinutesAgo": {
+      "description": "English: {{value}} minutes ago",
+      "message": "{{value}} 分前"
+   },
+   "elapsedOneDayAgo": {
+      "description": "English: a day ago",
+      "message": "1日前"
+   },
+   "elapsedOneHourAgo": {
+      "description": "English: an hour ago",
+      "message": "1時間前"
+   },
+   "elapsedOneMinuteAgo": {
+      "description": "English: a minute ago",
+      "message": "1分前"
+   },
+   "errorCantConnectTo": {
+      "description": "English: Network error: {{msg}}",
+      "message": "ネットワークエラー: {{msg}}"
+   },
+   "extName": {
+      "description": "extension name.",
+      "message": "uBlock Origin"
+   },
+   "extShortDesc": {
+      "description": "this will be in the Chrome web store: must be 132 characters or less",
+      "message": "高効率ブロッカーが遂に登場。CPUとメモリーの負担を抑えます。"
+   },
+   "fennecMenuItemBlockingOff": {
+      "description": "Firefox-specific: appears as 'uBlock₀ (off)'",
+      "message": "オフ"
+   },
+   "genericApplyChanges": {
+      "description": "for generic 'Apply changes' buttons",
+      "message": "変更を適用"
+   },
+   "genericBytes": {
+      "description": "",
+      "message": "バイト"
+   },
+   "genericCopyToClipboard": {
+      "description": "Label for buttons used to copy something to the clipboard",
+      "message": "クリップボードへコピー"
+   },
+   "genericMergeViewScrollLock": {
+      "description": "Tooltip for the button used to lock scrolling between the views in the 'My rules' pane",
+      "message": "スクロールを同期する・しない"
+   },
+   "genericRevert": {
+      "description": "for generic 'Revert' buttons",
+      "message": "元に戻す"
+   },
+   "genericSubmit": {
+      "description": "for generic 'Submit' buttons",
+      "message": "適用"
+   },
+   "logAll": {
+      "description": "Appears in the logger's tab selector",
+      "message": "全て"
+   },
+   "logBehindTheScene": {
+      "description": "Pretty name for behind-the-scene network requests",
+      "message": "バックグラウンド通信"
+   },
+   "logFilterPrompt": {
+      "description": "Placeholder string for logger output filtering input field",
+      "message": "絞り込み"
+   },
+   "logRequestsHeaderDomain": {
+      "description": "English: Domain",
+      "message": "ドメイン"
+   },
+   "logRequestsHeaderFilter": {
+      "description": "English: Filter",
+      "message": "フィルター"
+   },
+   "logRequestsHeaderType": {
+      "description": "English: Type",
+      "message": "タイプ"
+   },
+   "logRequestsHeaderURL": {
+      "description": "English: URL",
+      "message": "URL"
+   },
+   "loggerClearTip": {
+      "description": "Tooltip for the eraser in the logger page; used to blank the content of the logger",
+      "message": "ログを消去する"
+   },
+   "loggerCurrentTab": {
+      "description": "Appears in the logger's tab selector",
+      "message": "現在のタブ"
+   },
+   "loggerDomInspectorTip": {
+      "description": "Tooltip for the DOM inspector button in the logger page",
+      "message": "DOMインスペクタを表示・非表示"
+   },
+   "loggerEntryDetailsContext": {
+      "description": "Label to identify a context field (typically a hostname)",
+      "message": "発信源"
+   },
+   "loggerEntryDetailsFilter": {
+      "description": "Label to identify a filter field",
+      "message": "フィルター"
+   },
+   "loggerEntryDetailsFilterList": {
+      "description": "Label to identify a filter list field",
+      "message": "フィルターリスト"
+   },
+   "loggerEntryDetailsHeader": {
+      "description": "Small header to identify the 'Details' pane for a specific logger entry",
+      "message": "詳細"
+   },
+   "loggerEntryDetailsPartyness": {
+      "description": "Label to identify a field providing partyness information",
+      "message": "パーティー種別"
+   },
+   "loggerEntryDetailsRootContext": {
+      "description": "Label to identify a root context field (typically a hostname)",
+      "message": "大本の発信源"
+   },
+   "loggerEntryDetailsRule": {
+      "description": "Label to identify a rule field",
+      "message": "ルール"
+   },
+   "loggerEntryDetailsType": {
+      "description": "Label to identify the type of an entry",
+      "message": "種類"
+   },
+   "loggerEntryDetailsURL": {
+      "description": "Label to identify the URL of an entry",
+      "message": "URL"
+   },
+   "loggerExportEncodeMarkdown": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "Markdown 形式"
+   },
+   "loggerExportEncodePlain": {
+      "description": "Label for radio-button to pick export text format",
+      "message": "通常表示"
+   },
+   "loggerExportFormatList": {
+      "description": "Label for radio-button to pick export format",
+      "message": "1列表示"
+   },
+   "loggerExportFormatTable": {
+      "description": "Label for radio-button to pick export format",
+      "message": "表形式"
+   },
+   "loggerInfoTip": {
+      "description": "Tooltip for the top-right info label in the logger page",
+      "message": "リクエストログ機能の wiki ページを開く"
+   },
+   "loggerPauseTip": {
+      "description": "Tooltip for the pause button in the logger page",
+      "message": "ログの取得を一時停止する（以後のログは破棄）"
+   },
+   "loggerPopupPanelTip": {
+      "description": "Tooltip for the popup panel button in the logger page",
+      "message": "ポップアップパネルを表示・非表示"
+   },
+   "loggerReloadTip": {
+      "description": "Tooltip for the reload button in the logger page",
+      "message": "左記のタブを再読み込み"
+   },
+   "loggerRowFiltererBuiltin1p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "ファーストパーティー"
+   },
+   "loggerRowFiltererBuiltin3p": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "サードパーティー"
+   },
+   "loggerRowFiltererBuiltinAllowed": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "許可された"
+   },
+   "loggerRowFiltererBuiltinBlocked": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "ブロックされた"
+   },
+   "loggerRowFiltererBuiltinEventful": {
+      "description": "A keyword in the built-in row filtering expression: all items corresponding to uBO doing something (blocked, allowed, redirected, etc.)",
+      "message": "フィルター処理あり"
+   },
+   "loggerRowFiltererBuiltinNot": {
+      "description": "A keyword in the built-in row filtering expression",
+      "message": "否定"
+   },
+   "loggerRowFiltererBuiltinTip": {
+      "description": "Tooltip for the button to bring up logger output filtering options",
+      "message": "絞り込みオプションを表示"
+   },
+   "loggerRowFiltererButtonTip": {
+      "description": "Tooltip for the row filterer button in the logger page",
+      "message": "絞り込みのオン・オフ"
+   },
+   "loggerSettingDiscardPrompt": {
+      "description": "Logger setting: A sentence to describe the purpose of the settings below",
+      "message": "次の3つの条件を満たすログのみが保持され、それ以外は削除されます。"
+   },
+   "loggerSettingHideColumnContext": {
+      "description": "A label for the context column",
+      "message": "{{input}} 発信源"
+   },
+   "loggerSettingHideColumnFilter": {
+      "description": "A label for the filter or rule column",
+      "message": "{{input}} フィルター／ルール"
+   },
+   "loggerSettingHideColumnPartyness": {
+      "description": "A label for the partyness column",
+      "message": "{{input}} パーティー種別"
+   },
+   "loggerSettingHideColumnTime": {
+      "description": "A label for the time column",
+      "message": "{{input}} 時刻"
+   },
+   "loggerSettingHideColumnsPrompt": {
+      "description": "Logger settings: a sentence to describe the purpose of the checkboxes below",
+      "message": "非表示にする列："
+   },
+   "loggerSettingPerEntryLineCount": {
+      "description": "A logger setting",
+      "message": "展開表示にしたとき、ログ1行を {{input}} 行で表示する"
+   },
+   "loggerSettingPerEntryMaxAge": {
+      "description": "A logger setting",
+      "message": "直近の {{input}} 分間のログを保持する"
+   },
+   "loggerSettingPerTabMaxEntries": {
+      "description": "A logger setting",
+      "message": "それぞれのタブで最大 {{input}} ログ行を保持する"
+   },
+   "loggerSettingPerTabMaxLoads": {
+      "description": "A logger setting",
+      "message": "それぞれのタブで最大 {{input}} ページ読み込み分を保持する"
+   },
+   "loggerStaticFilteringFinderSentence1": {
+      "description": "Below this sentence, the filter list(s) in which the filter was found",
+      "message": "静的フィルター \u003Ccode>{{filter}}\u003C/code> が見つかりました:"
+   },
+   "loggerStaticFilteringFinderSentence2": {
+      "description": "Message to show when a filter cannot be found in any filter lists",
+      "message": "現在 有効にしているフィルターの中には、静的フィルター \u003Ccode>{{filter}}\u003C/code> はありません"
+   },
+   "loggerStaticFilteringHeader": {
+      "description": "Small header to identify the static filtering section",
+      "message": "静的フィルター"
+   },
+   "loggerStaticFilteringSentence": {
+      "description": "Used in the static filtering wizard",
+      "message": "URLアドレスが {{url}} と一致し{{br}}発信源が {{origin}} であり{{br}}リクエストの種類が {{type}} のとき、要素を {{action}} する。{{br}}例外フィルターと一致する場合、{{importance}} を優先する。"
+   },
+   "loggerStaticFilteringSentencePartAllow": {
+      "description": "Used in the static filtering wizard",
+      "message": "許可"
+   },
+   "loggerStaticFilteringSentencePartAnyOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "任意"
+   },
+   "loggerStaticFilteringSentencePartAnyType": {
+      "description": "Used in the static filtering wizard",
+      "message": "任意"
+   },
+   "loggerStaticFilteringSentencePartBlock": {
+      "description": "Used in the static filtering wizard",
+      "message": "ブロック"
+   },
+   "loggerStaticFilteringSentencePartImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "このフィルター"
+   },
+   "loggerStaticFilteringSentencePartNotImportant": {
+      "description": "Used in the static filtering wizard",
+      "message": "例外フィルター"
+   },
+   "loggerStaticFilteringSentencePartOrigin": {
+      "description": "Used in the static filtering wizard",
+      "message": "{{origin}}"
+   },
+   "loggerStaticFilteringSentencePartType": {
+      "description": "Used in the static filtering wizard",
+      "message": "{{type}}"
+   },
+   "loggerURLFilteringContextLabel": {
+      "description": "Label for the context selector",
+      "message": "対象:"
+   },
+   "loggerURLFilteringHeader": {
+      "description": "Small header to identify the dynamic URL filtering section",
+      "message": "URL ルール"
+   },
+   "loggerURLFilteringTypeLabel": {
+      "description": "Label for the type selector",
+      "message": "タイプ:"
+   },
+   "loggerUnpauseTip": {
+      "description": "Tooltip for the play button in the logger page",
+      "message": "ログの取得を再開する"
+   },
+   "pickerContextMenuEntry": {
+      "description": "An entry in the browser's contextual menu",
+      "message": "要素をブロック"
+   },
+   "pickerCosmeticFilters": {
+      "description": "English: Cosmetic filters",
+      "message": "要素隠蔽フィルター"
+   },
+   "pickerCosmeticFiltersHint": {
+      "description": "English: Click, Ctrl-click",
+      "message": "クリック、Ctrl+クリック"
+   },
+   "pickerCreate": {
+      "description": "English: Create",
+      "message": "作成"
+   },
+   "pickerNetFilters": {
+      "description": "English: header for a type of filter in the element picker dialog",
+      "message": "ネットフィルター"
+   },
+   "pickerPick": {
+      "description": "English: Pick",
+      "message": "選択"
+   },
+   "pickerPreview": {
+      "description": "Element picker preview mode: will cause the elements matching the current filter to be removed from the page",
+      "message": "プレビュー"
+   },
+   "pickerQuit": {
+      "description": "English: Quit",
+      "message": "終了"
+   },
+   "popup1pScriptRulePrompt": {
+      "description": "",
+      "message": "ファーストパーティースクリプト"
+   },
+   "popup3pAnyRulePrompt": {
+      "description": "",
+      "message": "サードパーティー"
+   },
+   "popup3pFrameRulePrompt": {
+      "description": "",
+      "message": "サードパーティーフレーム"
+   },
+   "popup3pPassiveRulePrompt": {
+      "description": "",
+      "message": "サードパーティー CSS/画像"
+   },
+   "popup3pScriptRulePrompt": {
+      "description": "",
+      "message": "サードパーティースクリプト"
+   },
+   "popupAnyRulePrompt": {
+      "description": "",
+      "message": "すべて"
+   },
+   "popupBlockedOnThisPagePrompt": {
+      "description": "English: on this page",
+      "message": "このページ"
+   },
+   "popupBlockedRequestPrompt": {
+      "description": "English: requests blocked",
+      "message": "ブロックされたリクエスト"
+   },
+   "popupBlockedSinceInstallPrompt": {
+      "description": "English: since install",
+      "message": "インストールしてから"
+   },
+   "popupBlockedStats": {
+      "description": "Example: 15 or 13%",
+      "message": "{{count}}件 / {{percent}}%"
+   },
+   "popupHitDomainCount": {
+      "description": "appears in popup",
+      "message": "{{count}} / {{total}}"
+   },
+   "popupHitDomainCountPrompt": {
+      "description": "appears in popup",
+      "message": "接続したドメイン"
+   },
+   "popupImageRulePrompt": {
+      "description": "",
+      "message": "画像"
+   },
+   "popupInlineScriptRulePrompt": {
+      "description": "",
+      "message": "インラインスクリプト"
+   },
+   "popupOr": {
+      "description": "English: or",
+      "message": "or"
+   },
+   "popupPowerSwitchInfo": {
+      "description": "English: Click: disable/enable uBlock₀ for this site.\n\nCtrl+click: disable uBlock₀ only on this page.",
+      "message": "uBlock₀ の有効 / 無効を切り替えます。\n\nクリック: サイト全体  \nCtrl+クリック: このページのみ"
+   },
+   "popupPowerSwitchInfo1": {
+      "description": "Message to be read by screen readers",
+      "message": "クリックで、このサイト全体において uBlock₀ を無効化します。\n\nCtrl+クリックで、このページでのみ uBlock₀ を無効化します。"
+   },
+   "popupPowerSwitchInfo2": {
+      "description": "Message to be read by screen readers",
+      "message": "クリックで、このサイトにおいて uBlock₀ を有効化します。"
+   },
+   "popupTipDashboard": {
+      "description": "English: Click to open the dashboard",
+      "message": "ダッシュボードを開く"
+   },
+   "popupTipGlobalRules": {
+      "description": "Tooltip when hovering the top-most cell of the global-rules column.",
+      "message": "グローバルルール: この列にあるルールは、すべてのサイトに適用されます。"
+   },
+   "popupTipLocalRules": {
+      "description": "Tooltip when hovering the top-most cell of the local-rules column.",
+      "message": "ローカルルール: この列にあるルールは、現在のサイトにのみ適用されます。\nローカルルールはグローバルルールを上書きします。"
+   },
+   "popupTipLog": {
+      "description": "Tooltip used for the logger icon in the panel",
+      "message": "リクエストログを開く"
+   },
+   "popupTipNoCosmeticFiltering": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "このサイトの要素隠蔽フィルターを切り替えます"
+   },
+   "popupTipNoCosmeticFiltering1": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "クリックで、このサイトでの要素隠蔽フィルターを無効化します"
+   },
+   "popupTipNoCosmeticFiltering2": {
+      "description": "Tooltip for the no-cosmetic-filtering per-site switch",
+      "message": "クリックで、このサイトでの要素隠蔽フィルターを有効化します"
+   },
+   "popupTipNoLargeMedia": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "このサイトでの大きなメディア要素のブロックを切り替えます"
+   },
+   "popupTipNoLargeMedia1": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "クリックで、このサイトでの大きなメディア要素をブロックします"
+   },
+   "popupTipNoLargeMedia2": {
+      "description": "Tooltip for the no-large-media per-site switch",
+      "message": "クリックで、このサイトでの大きなメディア要素がブロックされないようにします"
+   },
+   "popupTipNoPopups": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "このサイトのすべてのポップアップのブロックを切り替えます"
+   },
+   "popupTipNoPopups1": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "クリックで、このサイトでのすべてのポップアップをブロックします"
+   },
+   "popupTipNoPopups2": {
+      "description": "Tooltip for the no-popups per-site switch",
+      "message": "クリックで、このサイトでのすべてのポップアップがブロックされないようにします"
+   },
+   "popupTipNoRemoteFonts": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "このサイトでのリモートフォントのブロックを切り替えます"
+   },
+   "popupTipNoRemoteFonts1": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "クリックで、このサイトでのリモートフォントをブロックします"
+   },
+   "popupTipNoRemoteFonts2": {
+      "description": "Tooltip for the no-remote-fonts per-site switch",
+      "message": "クリックで、このサイトでのリモートフォントがブロックされないようにします"
+   },
+   "popupTipNoScripting1": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "クリックすると、このサイトの JavaScript をブロックします"
+   },
+   "popupTipNoScripting2": {
+      "description": "Tooltip for the no-scripting per-site switch",
+      "message": "クリックすると、このサイトの JavaScript のブロックを解除します"
+   },
+   "popupTipPicker": {
+      "description": "English: Enter element picker mode",
+      "message": "要素選択モードに移行"
+   },
+   "popupTipRevertRules": {
+      "description": "Tooltip when hovering over the eraser in the dynamic filtering pane.",
+      "message": "クリックで変更を元に戻します。"
+   },
+   "popupTipSaveRules": {
+      "description": "Tooltip when hovering over the padlock in the dynamic filtering pane.",
+      "message": "クリックで変更を保存します。"
+   },
+   "popupTipZapper": {
+      "description": "Tooltip for the element-zapper icon in the popup panel",
+      "message": "要素隠蔽モードに移行"
+   },
+   "rulesCommit": {
+      "description": "This will persist temporary rules",
+      "message": "確定する"
+   },
+   "rulesDefaultFileName": {
+      "description": "default file name to use",
+      "message": "my-ublock-dynamic-rules_{{datetime}}.txt"
+   },
+   "rulesEdit": {
+      "description": "Will enable manual-edit mode (textarea)",
+      "message": "編集"
+   },
+   "rulesEditDiscard": {
+      "description": "Will discard manually-edited content and exit manual-edit mode",
+      "message": "破棄"
+   },
+   "rulesEditSave": {
+      "description": "Will save manually-edited content and exit manual-edit mode",
+      "message": "保存"
+   },
+   "rulesExport": {
+      "description": "",
+      "message": "ファイルへエクスポート"
+   },
+   "rulesFormatHint": {
+      "description": "English: dynamic rule syntax and full documentation.",
+      "message": "ルールの書き方: \u003Ccode>source destination type action\u003C/code> (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Dynamic-filtering:-rule-syntax'>詳しい説明\u003C/a>)"
+   },
+   "rulesHint": {
+      "description": "English: List of your dynamic filtering rules.",
+      "message": "ダイナミックフィルタリングルールの一覧"
+   },
+   "rulesImport": {
+      "description": "",
+      "message": "ファイルからインポート..."
+   },
+   "rulesPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "Myルール"
+   },
+   "rulesPermanentHeader": {
+      "description": "header",
+      "message": "恒久的なルール"
+   },
+   "rulesRevert": {
+      "description": "This will remove all temporary rules",
+      "message": "元に戻す"
+   },
+   "rulesTemporaryHeader": {
+      "description": "header",
+      "message": "一時的なルール"
+   },
+   "settingPerSiteSwitchGroup": {
+      "description": "",
+      "message": "デフォルトの動作"
+   },
+   "settingPerSiteSwitchGroupSynopsis": {
+      "description": "",
+      "message": "以下の設定による動作は、サイトごとに上書きできます"
+   },
+   "settingsAdvancedUserPrompt": {
+      "description": "",
+      "message": "私は上級者です (\u003Ca href='https://github.com/gorhill/uBlock/wiki/Advanced-user-features'>※必ずお読みください\u003C/a>)"
+   },
+   "settingsAdvancedUserSettings": {
+      "description": "For the tooltip of a link which gives access to advanced settings",
+      "message": "詳細設定"
+   },
+   "settingsCloudStorageEnabledPrompt": {
+      "description": "",
+      "message": "クラウドストレージのサポートを有効にする"
+   },
+   "settingsCollapseBlockedPrompt": {
+      "description": "English: Hide placeholders of blocked elements",
+      "message": "ブロックされた要素の設置場所全てを非表示にする"
+   },
+   "settingsColorBlindPrompt": {
+      "description": "English: Color-blind friendly",
+      "message": "色覚障害の人に見やすい色で表示する"
+   },
+   "settingsContextMenuPrompt": {
+      "description": "English: Make use of context menu where appropriate",
+      "message": "コンテキストメニューを適切な場合に使用する"
+   },
+   "settingsHyperlinkAuditingDisabledPrompt": {
+      "description": "English: ",
+      "message": "ハイパーリンクの監査を無効にする"
+   },
+   "settingsIconBadgePrompt": {
+      "description": "English: Show the number of blocked requests on the icon",
+      "message": "ブロックされたリクエスト数をアイコンに表示する"
+   },
+   "settingsLastBackupPrompt": {
+      "description": "English: Last backup:",
+      "message": "最後のバックアップ:"
+   },
+   "settingsLastRestorePrompt": {
+      "description": "English: Last restore:",
+      "message": "最後の復元:"
+   },
+   "settingsNoCSPReportsPrompt": {
+      "description": "background information: https://github.com/gorhill/uBlock/issues/3150",
+      "message": "CSPレポートをブロックする"
+   },
+   "settingsNoCosmeticFilteringPrompt": {
+      "description": "",
+      "message": "要素隠蔽フィルターを無効にする"
+   },
+   "settingsNoLargeMediaPrompt": {
+      "description": "",
+      "message": "{{input}} KB より大きいメディア要素をブロックする"
+   },
+   "settingsNoRemoteFontsPrompt": {
+      "description": "",
+      "message": "リモートフォントをブロックする"
+   },
+   "settingsNoScriptingPrompt": {
+      "description": "The default state for the per-site no-scripting switch",
+      "message": "JavaScript をブロックする"
+   },
+   "settingsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": " 設定"
+   },
+   "settingsPrefetchingDisabledPrompt": {
+      "description": "English: ",
+      "message": "先読みを無効にする (ブロックされたネットワークへの接続を防止するため)"
+   },
+   "settingsStorageUsed": {
+      "description": "English: Storage used: {{}} bytes",
+      "message": "使用中のストレージ: {{value}} バイト"
+   },
+   "settingsTooltipsPrompt": {
+      "description": "A checkbox in the Settings pane",
+      "message": "ツールチップを無効にする"
+   },
+   "settingsWebRTCIPAddressHiddenPrompt": {
+      "description": "English: ",
+      "message": "ローカルIPアドレスの漏洩をもたらすWebRTCを防止する"
+   },
+   "shortcutCapturePlaceholder": {
+      "description": "Placeholder string for input field used to capture a keyboard shortcut",
+      "message": "ショートカットを入力"
+   },
+   "shortcutsPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "ショートカットキー"
+   },
+   "showDashboardButton": {
+      "description": "Firefox/Fennec-specific: Show Dashboard",
+      "message": "ダッシュボードを表示"
+   },
+   "showNetworkLogButton": {
+      "description": "Firefox/Fennec-specific: Show Logger",
+      "message": "ネットワークリクエストログを表示"
+   },
+   "statsPageName": {
+      "description": "Title for the logger window",
+      "message": "uBlock₀ — ネットワークリクエストログ"
+   },
+   "subscriberConfirm": {
+      "description": "English: The message seen by the user to confirm subscription to a ABP filter list",
+      "message": "uBlock₀: 以下のURLをカスタムフィルターに追加しますか？\n\nタイトル: \"{{title}}\"\nURL: {{url}}"
+   },
+   "whitelistApply": {
+      "description": "English: Apply changes",
+      "message": "変更を適用"
+   },
+   "whitelistExport": {
+      "description": "English: Export",
+      "message": "エクスポート"
+   },
+   "whitelistExportFilename": {
+      "description": "English: my-ublock-whitelist_{{datetime}}.txt",
+      "message": "my-ublock-whitelist_{{datetime}}.txt"
+   },
+   "whitelistImport": {
+      "description": "English: Import and append",
+      "message": "インポートと追加"
+   },
+   "whitelistPageName": {
+      "description": "appears as tab name in dashboard",
+      "message": "ホワイトリスト"
+   },
+   "whitelistPrompt": {
+      "description": "English: An overview of the content of the dashboard's Whitelist pane.",
+      "message": "uBlock₀が無効になるホスト名の一覧です。1行につき1つのエントリで、無効なホスト名は無視されます。"
+   }
+}
