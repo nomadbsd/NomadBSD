@@ -468,8 +468,8 @@ Das Setup beschreibt nur das Speichermedium, von dem NomadBSD gestartet worden i
         <source>Before you can use NomadBSD, there are some things that need to be set up.
 
 The setup will only write to the USB flash drive it is currently running from. It will not change your system.</source>
-        <translation>Willkommen zum NomadBSD Setup Wizard
-Bevor Sie NomadBSD benutzen können, müssen noch einige Dinge konfiguriert werden.
+        <translation>Bevor Sie NomadBSD benutzen können, müssen noch einige Dinge konfiguriert werden.
+
 Das Setup beschreibt nur das Speichermedium, von dem NomadBSD gestartet worden ist. Ihr System wird nicht verändert.</translation>
     </message>
     <message>
