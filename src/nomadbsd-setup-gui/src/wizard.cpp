@@ -25,6 +25,8 @@
 #include <QVariant>
 #include <QStyle>
 #include <QProcess>
+#include <QFormLayout>
+#include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTranslator>
@@ -42,10 +44,11 @@
 static bool    cfg_use_geli = false;
 static QString cfg_geli;
 static QString cfg_locale;
+static QString cfg_localedescr;
 static QString cfg_region;
 static QString cfg_kbdlayout;
 static QString cfg_kbdvariant;
-static QString cfg_kbdmodel;
+static QString cfg_kbdconfigdescr;
 static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
@@ -55,6 +58,9 @@ static QString cfg_editor;
 static QString cfg_gui_editor;
 static QString cfg_email_client;
 static QString cfg_file_manager;
+static QStringList cfg_xkbdlayouts;
+static QStringList cfg_xkbdvariants;
+static QStringList cfg_xkbdconfigdescr;
 //////////////////////////////////////////////////////////////////////////////
 
 static QTranslator translator;
@@ -67,6 +73,7 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	addPage(new LocalePage);
 	addPage(new WelcomePage);
 	addPage(new KbdLayoutPage);
+	addPage(new ExtraKbdLayoutPage);
 	addPage(new TimezonePage);
 	addPage(new PasswordPage);
 	addPage(new GeliPage);
@@ -175,9 +182,9 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
 
 void LocalePage::localeSelected(int row)
 {
-	cfg_locale = localels->item(row)->data(Qt::UserRole).toString();
-	cfg_region = cfg_locale.split('_').at(1);
-
+	cfg_locale	= localels->item(row)->data(Qt::UserRole).toString();
+	cfg_region	= cfg_locale.split('_').at(1);
+	cfg_localedescr	= localels->item(row)->text();
 	qApp->removeTranslator(&translator);
 	if (translator.load(QLocale(cfg_locale), QLatin1String(PROGRAM),
 	    QLatin1String("_"), QLatin1String(":/locale")))
@@ -196,6 +203,7 @@ void LocalePage::localeSelected(int row)
 //////////////////////////////////////////////////////////////////////////////
 KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 {
+	info		    = new QLabel;
 	llabel		    = new QLabel;
 	vlabel		    = new QLabel;
 	tlabel		    = new QLabel;
@@ -203,6 +211,192 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	variantls	    = new QListWidget(this);
 	QLineEdit   *test   = new QLineEdit;
 	QVBoxLayout *lvbox  = new QVBoxLayout;
+	QVBoxLayout *vvbox  = new QVBoxLayout;
+	QVBoxLayout *layout = new QVBoxLayout;
+	QHBoxLayout *hbox   = new QHBoxLayout;
+	QProcess    proc;
+        QByteArray  line;
+
+	proc.setReadChannel(QProcess::StandardOutput);
+	proc.start(BACKEND_GET_KBDLAYOUTS_LATIN);
+	(void)proc.waitForStarted(-1);
+
+	//
+	// According to the Qt docs, we can not rely on the return value.
+	// We have to check state().
+	//
+	if (proc.state() == QProcess::NotRunning) {
+		SetupWizard::errAndOut(tr("Couldn't start backend '%1': %2")
+		    .arg(BACKEND_GET_KBDLAYOUTS).arg(proc.errorString()));
+	}
+	while (proc.waitForReadyRead(-1)) {
+		while (!(line = proc.readLine()).isEmpty()) {
+			// Remove trailing newline
+			line.truncate(line.size() - 1);
+			QList<QByteArray>fields = line.split('|');
+			if (fields.count() < 2)
+				continue;
+			QString label = fields.at(1);
+			QString code  = fields.at(0);
+			QListWidgetItem *item = new QListWidgetItem(label);
+			item->setData(Qt::UserRole, QVariant(code));
+			layoutls->addItem(item);
+		}
+        }
+	proc.waitForFinished(-1);
+	if (proc.exitCode() != 0) {
+		SetupWizard::errAndOut(
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_KBDLAYOUTS));
+	}
+	//
+	// Read keyboard variants.
+	//
+	proc.start(BACKEND_GET_KBDVARIANTS);
+
+	(void)proc.waitForStarted(-1);
+
+	if (proc.state() == QProcess::NotRunning) {
+		SetupWizard::errAndOut(tr("Couldn't start backend '%1': %2")
+		    .arg(BACKEND_GET_KBDVARIANTS).arg(proc.errorString()));
+	}
+	while (proc.waitForReadyRead(-1)) {
+		while (!(line = proc.readLine()).isEmpty()) {
+			// Remove trailing newline
+			line.truncate(line.size() - 1);
+			QList<QByteArray>fields = line.split('|');
+			if (fields.count() < 3)
+				continue;
+			kbdvariant_s kv;
+			kv.descr   = fields.at(1);
+			kv.layout  = fields.at(2);
+			kv.variant = fields.at(0);
+			kbdvariant.append(kv);
+		}
+        }
+	proc.waitForFinished(-1);
+	if (proc.exitCode() != 0) {
+		SetupWizard::errAndOut(
+		    tr("Command '%1' returned with an error.")
+		    .arg(BACKEND_GET_KBDVARIANTS));
+	}
+	info->setWordWrap(true);
+	info->setAlignment(Qt::AlignHCenter);
+	llabel->setStyleSheet("font-weight: bold;");
+	vlabel->setStyleSheet("font-weight: bold;");
+	tlabel->setStyleSheet("font-weight: bold;");
+
+	layout->addWidget(info);
+	lvbox->addWidget(llabel);
+	lvbox->addWidget(layoutls);
+	vvbox->addWidget(vlabel);
+	vvbox->addWidget(variantls);
+	hbox->addLayout(lvbox);
+	hbox->addLayout(vvbox);
+
+	layout->setSpacing(15);
+	layout->addLayout(hbox);
+	layout->addWidget(tlabel);
+	layout->addWidget(test);
+	setLayout(layout);
+
+	if (layoutls->count() > 0)
+		layoutls->setCurrentRow(0);
+	connect(layoutls, SIGNAL(currentRowChanged(int)), this,
+	    SLOT(kbdLayoutSelected(int)));
+}
+
+//
+// Show keyboard variants matching the keyboard layout code.
+//
+void KbdLayoutPage::kbdLayoutSelected(int row)
+{
+	cfg_kbdlayout = layoutls->item(row)->data(Qt::UserRole).toString();
+
+	// Unset a previously set keyboard variant.
+	cfg_kbdvariant = "";
+	cfg_kbdconfigdescr = layoutls->item(row)->text();
+
+	//
+	// Disconnect the slot to prevent it from being called when
+	// removing items.
+	//
+	variantls->disconnect();
+
+	for (int i = variantls->count(); i > 0; i--) {
+		QListWidgetItem *item = variantls->takeItem(0);
+		delete(item);
+	}
+	for (int i = 0; i < kbdvariant.count(); i++) {
+		if (kbdvariant.at(i).layout != cfg_kbdlayout)
+			continue;
+		QListWidgetItem *item =
+		    new QListWidgetItem(kbdvariant.at(i).descr);
+		item->setData(Qt::UserRole,
+		    QVariant(kbdvariant.at(i).variant));
+		variantls->addItem(item);
+	}
+	if (variantls->count() > 0) {
+		variantls->setCurrentRow(0);
+		variantls->item(0)->setSelected(false);
+	}
+	connect(variantls, SIGNAL(currentRowChanged(int)), this,
+	    SLOT(kbdVariantSelected(int)));
+	system(QString("setxkbmap -layout %1")
+	    .arg(cfg_kbdlayout).toStdString().c_str());
+}
+
+void KbdLayoutPage::kbdVariantSelected(int row)
+{
+	cfg_kbdvariant = variantls->item(row)->data(Qt::UserRole).toString();
+	system(QString("setxkbmap -layout %1 -variant %2")
+	    .arg(cfg_kbdlayout).arg(cfg_kbdvariant).toStdString().c_str());
+	cfg_kbdconfigdescr = QString("%1 [%2]")
+				.arg(layoutls->currentItem()->text())
+				.arg(variantls->item(row)->text());
+}
+
+void KbdLayoutPage::initializePage()
+{
+	//
+	// Select the first layout matching the region code.
+	//
+	QString reg = cfg_region.toLower();
+	for (int n = 0; n < layoutls->count(); n++) {
+		QString l = layoutls->item(n)->data(Qt::UserRole).toString();
+		if (reg == l) {
+			layoutls->setCurrentRow(n);
+			break;
+		}
+	}
+	info->setText(tr("Please choose a latin layout as system default " \
+			 "here. The next screens allows you to add "	   \
+			 "additional keyboard layouts."));
+	llabel->setText(tr("Keyboard layout"));
+	vlabel->setText(tr("Keyboard variant"));
+	tlabel->setText(tr("Test your keyboard settings"));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Additional keyboard layouts page
+//
+//////////////////////////////////////////////////////////////////////////////
+ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
+{
+	info		    = new QLabel;
+	llabel		    = new QLabel;
+	xllabel		    = new QLabel;
+	vlabel		    = new QLabel;
+	//tlabel		    = new QLabel;
+	addBt		    = new QPushButton;
+	removeBt	    = new QPushButton;
+	layoutls	    = new QListWidget(this);
+	variantls	    = new QListWidget(this);
+	xlayoutls	    = new QListWidget(this);
+	//QLineEdit   *test   = new QLineEdit;
+	QVBoxLayout *lvbox  = new QVBoxLayout;
+	QVBoxLayout *xlvbox = new QVBoxLayout;
 	QVBoxLayout *vvbox  = new QVBoxLayout;
 	QVBoxLayout *layout = new QVBoxLayout;
 	QHBoxLayout *hbox   = new QHBoxLayout;
@@ -272,9 +466,13 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+	info->setWordWrap(true);
+	info->setAlignment(Qt::AlignHCenter);
 	llabel->setStyleSheet("font-weight: bold;");
+	xllabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
-	tlabel->setStyleSheet("font-weight: bold;");
+	//tlabel->setStyleSheet("font-weight: bold;");
+	layout->addWidget(info);
 
 	lvbox->addWidget(llabel);
 	lvbox->addWidget(layoutls);
@@ -285,38 +483,42 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 
 	layout->setSpacing(15);
 	layout->addLayout(hbox);
-	layout->addWidget(tlabel);
-	layout->addWidget(test);
+	//layout->addWidget(tlabel);
+	//layout->addWidget(test);
+	layout->addWidget(addBt, 1, Qt::AlignRight);
+	
+	xlvbox->addWidget(xllabel);
+	xlvbox->addWidget(xlayoutls);
+	xlvbox->addWidget(removeBt, 1, Qt::AlignLeft);
+	layout->addLayout(xlvbox);
 	setLayout(layout);
 
-	if (layoutls->count() > 0)
-		layoutls->setCurrentRow(0);
 	connect(layoutls, SIGNAL(currentRowChanged(int)), this,
 	    SLOT(kbdLayoutSelected(int)));
+	connect(addBt, SIGNAL(clicked()), this, SLOT(addLayout()));
+	connect(removeBt, SIGNAL(clicked()), this, SLOT(removeLayout()));
 }
 
 //
 // Show keyboard variants matching the keyboard layout code.
 //
-void KbdLayoutPage::kbdLayoutSelected(int row)
+void ExtraKbdLayoutPage::kbdLayoutSelected(int row)
 {
-	cfg_kbdlayout = layoutls->item(row)->data(Qt::UserRole).toString();
-
-	// Unset a previously set keyboard variant.
-	cfg_kbdvariant = "";
-
+	QString kbdlayout = layoutls->item(row)->data(Qt::UserRole).toString();
 	//
 	// Disconnect the slot to prevent it from being called when
 	// removing items.
 	//
 	variantls->disconnect();
 
+	lrow = row; vrow = -1;
+
 	for (int i = variantls->count(); i > 0; i--) {
 		QListWidgetItem *item = variantls->takeItem(0);
 		delete(item);
 	}
 	for (int i = 0; i < kbdvariant.count(); i++) {
-		if (kbdvariant.at(i).layout != cfg_kbdlayout)
+		if (kbdvariant.at(i).layout != kbdlayout)
 			continue;
 		QListWidgetItem *item =
 		    new QListWidgetItem(kbdvariant.at(i).descr);
@@ -324,24 +526,53 @@ void KbdLayoutPage::kbdLayoutSelected(int row)
 		    QVariant(kbdvariant.at(i).variant));
 		variantls->addItem(item);
 	}
-	if (variantls->count() > 0) {
-		variantls->setCurrentRow(0);
-		variantls->item(0)->setSelected(false);
-	}
 	connect(variantls, SIGNAL(currentRowChanged(int)), this,
 	    SLOT(kbdVariantSelected(int)));
-	system(QString("setxkbmap -layout %1")
-	    .arg(cfg_kbdlayout).toStdString().c_str());
 }
 
-void KbdLayoutPage::kbdVariantSelected(int row)
+void ExtraKbdLayoutPage::kbdVariantSelected(int row)
 {
-	cfg_kbdvariant = variantls->item(row)->data(Qt::UserRole).toString();
-	system(QString("setxkbmap -layout %1 -variant %2")
-	    .arg(cfg_kbdlayout).arg(cfg_kbdvariant).toStdString().c_str());
+	vrow = row;
 }
 
-void KbdLayoutPage::initializePage()
+void ExtraKbdLayoutPage::addLayout()
+{
+	QString		 data, descr, ldescr, vdescr, layout, variant;
+	QListWidgetItem *item;
+
+	if (lrow == -1)
+		return;
+	ldescr = layoutls->item(lrow)->text();
+	layout = layoutls->item(lrow)->data(Qt::UserRole).toString();
+	if (vrow != -1) {
+		vdescr  = variantls->item(vrow)->text();
+		variant = variantls->item(vrow)->data(Qt::UserRole).toString();
+		descr = QString("%1 [%2]").arg(ldescr).arg(vdescr);
+		data  = QString("%1\t%2").arg(layout).arg(variant);
+	} else {
+		descr = ldescr;
+		data  = layout;
+		variant = "";
+	}
+	item = new QListWidgetItem(descr);
+	item->setData(Qt::UserRole, QVariant(data));
+	xlayoutls->addItem(item);
+	cfg_xkbdlayouts.append(data);
+	cfg_xkbdconfigdescr.append(descr);
+}
+
+void ExtraKbdLayoutPage::removeLayout()
+{
+	int row = xlayoutls->currentRow();
+	if (row < 0)
+		return;
+	QListWidgetItem *item = xlayoutls->takeItem(row);
+	delete item;
+	cfg_xkbdlayouts.removeAt(row);
+	cfg_xkbdconfigdescr.removeAt(row);
+}
+
+void ExtraKbdLayoutPage::initializePage()
 {
 	//
 	// Select the first layout matching the region code.
@@ -354,9 +585,15 @@ void KbdLayoutPage::initializePage()
 			break;
 		}
 	}
+	addBt->setText(tr("Add layout"));
+	removeBt->setText(tr("Remove layout"));
+	info->setText(tr("Here you can add additional keyboard layouts. " \
+			 "You can switch between them from the NomadBSD " \
+			 "desktop."));
 	llabel->setText(tr("Keyboard layout"));
 	vlabel->setText(tr("Keyboard variant"));
-	tlabel->setText(tr("Test your keyboard settings"));
+	//tlabel->setText(tr("Test your keyboard settings"));
+	xllabel->setText(tr("Additional layouts"));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -676,17 +913,16 @@ void ProgramsPage::selectionChanged(int /* unused */)
 //////////////////////////////////////////////////////////////////////////////
 SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 {
+	QFormLayout *form = new QFormLayout;
 	QVBoxLayout *vbox = new QVBoxLayout;
 	text = new QLabel;
 	for (int n = 0; n < nkeys; n++) {
 		key[n]		  = new QLabel;
 		val[n]		  = new QLabel;
-		QHBoxLayout *hbox = new QHBoxLayout;
 		key[n]->setStyleSheet("font-weight: bold;");
-		hbox->addWidget(key[n]);
-		hbox->addWidget(val[n]);
-		vbox->addLayout(hbox);
+		form->addRow(key[n], val[n]);
 	}
+	vbox->addLayout(form);
 	vbox->addWidget(text);
 	setLayout(vbox);
 	setCommitPage(true);
@@ -694,22 +930,22 @@ SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 
 void SummaryPage::initializePage()
 {
+	QString xkbdlayouts = cfg_xkbdconfigdescr.join(",\n");
 	struct summary_s {
 		QString key;
 		QString val;
 	} summary[] = {
-		{ tr("Locale:"),	   cfg_locale	    },
-		{ tr("Keyboard layout:"),  cfg_kbdlayout    },
-		{ tr("Keyboard variant:"), cfg_kbdvariant   },
-		{ tr("Timezone:"),	   cfg_timezone     },
-		{ tr("Encrypt /home:"),	   cfg_geli	    },
-		{ tr("Shell:"),		   cfg_shell	    },
-		{ tr("Editor:"),	   cfg_editor	    },
-		{ tr("GUI editor:"),	   cfg_gui_editor   },
-		{ tr("Email client:"),	   cfg_email_client },
-		{ tr("Web browser:"),	   cfg_browser	    },
-		{ tr("File manager:"),	   cfg_file_manager }
-
+		{ tr("Locale:"),			cfg_localedescr	   },
+		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
+		{ tr("Add. keyboard layouts:"),		xkbdlayouts	   },
+		{ tr("Timezone:"),			cfg_timezone       },
+		{ tr("Encrypt /home:"),			cfg_geli	   },
+		{ tr("Shell:"),				cfg_shell	   },
+		{ tr("Editor:"),			cfg_editor	   },
+		{ tr("GUI editor:"),			cfg_gui_editor     },
+		{ tr("Email client:"),			cfg_email_client   },
+		{ tr("Web browser:"),			cfg_browser	   },
+		{ tr("File manager:"),			cfg_file_manager   },
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -749,6 +985,8 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 
 void CommitPage::initializePage()
 {
+	QString xkbdlayouts = cfg_xkbdlayouts.join(",");
+
 	struct config_s {
 		QString var;
 		QString val;
@@ -764,7 +1002,8 @@ void CommitPage::initializePage()
 		{ "cfg_gui_editor",	cfg_gui_editor	  },
 		{ "cfg_browser",	cfg_browser	  },
 		{ "cfg_email_client",	cfg_email_client  },
-		{ "cfg_file_manager",	cfg_file_manager  }
+		{ "cfg_file_manager",	cfg_file_manager  },
+		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(BACKEND_COMMIT);

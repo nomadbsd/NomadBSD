@@ -157,6 +157,7 @@ public slots:
 protected:
 	void initializePage();
 private:
+	QLabel	    *info;
 	QLabel	    *llabel;
 	QLabel	    *vlabel;
 	QLabel	    *tlabel;
@@ -172,6 +173,49 @@ private:
 	};
 	QList<kbdvariant_s> kbdvariant;	// List of all keyboard variants.
 };
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Additional keyboard layouts page
+//
+//////////////////////////////////////////////////////////////////////////////
+class ExtraKbdLayoutPage : public QWizardPage
+{
+	Q_OBJECT
+
+public:
+	ExtraKbdLayoutPage(QWidget *parent = 0);
+public slots:
+	void kbdLayoutSelected(int row);
+	void kbdVariantSelected(int row);
+	void addLayout(void);
+	void removeLayout(void);
+protected:
+	void initializePage();
+private:
+	int	    lrow = -1;
+	int	    vrow = -1;
+	QLabel	    *info;
+	QLabel	    *llabel;
+	QLabel	    *xllabel;
+	QLabel	    *vlabel;
+	QLabel	    *tlabel;
+	QPushButton *addBt;
+	QPushButton *removeBt;
+	QListWidget *layoutls;
+	QListWidget *xlayoutls;
+	QListWidget *variantls;
+	//
+	// Struct to hold a keyboard variant record.
+	//
+	struct kbdvariant_s {
+		QString layout;		// Layout code (e.g, ru, de, etc.)
+		QString variant;	// Variant (e.g, nodeadkeys)
+		QString descr;		// Description (e.g, "Swedish (Dvorak)")
+	};
+	QList<kbdvariant_s> kbdvariant;	// List of all keyboard variants.
+};
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
