@@ -41,6 +41,7 @@ my $blksize			= $fragsize * 8;
 my $path_templates	= "/usr/share/nomadbsd-setup";
 my $path_xkbd_conf	= "/usr/local/etc/X11/xorg.conf.d/10-input-keyboard.conf";
 my $path_xinitrc	= "$path_templates/xinitrc";
+my ($xlayoutstr, $xvariantstr);
 
 my $cfg_fm;
 my $cfg_locale;
@@ -54,7 +55,7 @@ my $cfg_editor;
 my $cfg_browser;
 my $cfg_gui_editor;
 my $cfg_email_client;
-
+my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
 #
@@ -816,7 +817,15 @@ sub desktopsettings {
 	# Create dconf file from plank.ini
 	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-
+	# Autostart gxkb and setxkbmap if multiple keyboard layouts were set.
+	if (@cfg_xkbdlayouts > 0) {
+		open(my $fh, ">>", "$autostart")
+			or bail("Failed to open $autostart");
+		print $fh "setxkbmap -layout \"$xlayoutstr\" " .
+				  "-variant \"$xvariantstr\"\n";
+		print $fh "gxkb&\n";
+		close($fh);
+	}
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
 }
@@ -827,9 +836,18 @@ sub set_kbdmap {
 		bail("Couldn't open $path_templates/input-keyboard.conf");
 	open(my $out, ">$path_xkbd_conf")
 		or bail("Couldn't open $path_xkbd_conf");
+	$xlayoutstr  .= $cfg_kbdlayout;
+	$xvariantstr .= $cfg_kbdvariant;
+	for (my $l = 0; $l < @cfg_xkbdlayouts; $l++) {
+		my @lv = split(/\t/, $cfg_xkbdlayouts[$l]);
+		$xlayoutstr  .= ',';
+		$xvariantstr .= ',';
+		$xlayoutstr  .= $lv[0];
+		$xvariantstr .= $lv[1];
+	}
 	foreach (<$in>) {
-		$_ =~ s/\@XKBDLAYOUT\@/$cfg_kbdlayout/;
-		$_ =~ s/\@XKBDVARIANT\@/$cfg_kbdvariant/;
+		$_ =~ s/\@XKBDLAYOUT\@/$xlayoutstr/;
+		$_ =~ s/\@XKBDVARIANT\@/$xvariantstr/;
 		print $out $_;
 	}
 	close($in); close($out);
@@ -860,11 +878,14 @@ sub commit {
 		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
 		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
 		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
+		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
+			@cfg_xkbdlayouts = split(/,/, $1);
+		}
 	}
 	STDOUT->autoflush(1);
 	if ($dummy) {
-			dummy_commit();
-			exit 0;
+		dummy_commit();
+		exit 0;
 	}
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
@@ -906,10 +927,10 @@ sub commit {
 	status("Setting locale for user nomad");
 	system("pw usermod nomad -L ${cfg_locale}") == 0
 			or bail("Failed to set locale $cfg_locale");
-	status("Configuring desktop");
-	desktopsettings();
 	status("Setting keyboard map for X and vt");
 	set_kbdmap();
+	status("Configuring desktop");
+	desktopsettings();
 	status("Disabling auto-login on ttyv0");
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
