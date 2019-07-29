@@ -937,7 +937,7 @@ void SummaryPage::initializePage()
 	} summary[] = {
 		{ tr("Locale:"),			cfg_localedescr	   },
 		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
-		{ tr("Add. keyboard layouts:"),		xkbdlayouts	   },
+		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
 		{ tr("Encrypt /home:"),			cfg_geli	   },
 		{ tr("Shell:"),				cfg_shell	   },
