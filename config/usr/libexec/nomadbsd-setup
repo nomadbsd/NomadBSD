@@ -418,6 +418,20 @@ sub print_timezones {
 }
 
 #
+# Check whether the given layout code matches a non-latin layout.
+#
+sub is_nonlatin {
+	my @non_latin = qw(am ara ben bd bg bt by cs deva ge gh gr guj guru \
+			   il in ir iku jp kan kh kr la lao lk mk mm mn mv \
+			   mal olck ori pk ru scc sy syr tel th tj tam ua uz \
+			   af et ma brai id iq kz kg my np rs tz);
+	foreach (@non_latin) {
+		return 1 if ($_[0] eq $_);
+	}
+	return 0;
+}
+
+#
 # Print a list of records of the form:
 #
 #	lang code|lang name
@@ -427,6 +441,7 @@ sub print_timezones {
 #	us|English (US)
 #
 sub print_kbdlayout_list {
+	my ($latin) = @_;
 	my ($in_layout, @layout_descs, @layouts, @tmplist);
 	
 	open(my $fh, '<', $xkbdlist) or die "$!";
@@ -438,6 +453,7 @@ sub print_kbdlayout_list {
 			last;
 		} elsif ($in_layout) {
 			if (/\s+(\S+)\s+(.*)$/) {
+				next if ($latin && is_nonlatin($1));
 				push @layout_descs, $2;
 				push @layouts, $1;
 			}
@@ -1007,7 +1023,13 @@ while (@ARGV) {
 		print_locales();
 		exit 0;
 	} elsif ($ARGV[0] eq "kbdlayouts") {
-		print_kbdlayout_list();
+		shift @ARGV;
+		my $f = check_args('l', 0);
+		if ($f eq 'l') {
+			print_kbdlayout_list(1);
+		} else {
+			print_kbdlayout_list(0);
+		}
 		exit 0;
 	} elsif ($ARGV[0] eq "kbdmodels") {
 		print_xkbdmodels();
