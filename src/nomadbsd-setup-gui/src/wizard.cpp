@@ -373,7 +373,9 @@ void KbdLayoutPage::initializePage()
 		if (reg == l) {
 			layoutls->setCurrentRow(n);
 			break;
-		}
+		} else if (l == "us")
+			// Select the "us" layout if there is no match.
+			layoutls->setCurrentRow(n);
 	}
 	title->setText(tr("Default keyboard layout"));
 	info->setText(tr("Please choose a latin layout as system default " \
