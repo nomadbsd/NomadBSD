@@ -32,6 +32,7 @@
 #include <QTranslator>
 #include <QCoreApplication>
 #include <QScrollArea>
+#include <QShortcut>
 #include <QFontMetricsF>
 #include "wizard.h"
 #include "backend.h"
@@ -506,6 +507,7 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	layout->addLayout(xlvbox);
 	setLayout(layout);
 
+	new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(removeLayout()));
 	connect(layoutls, SIGNAL(currentRowChanged(int)), this,
 	    SLOT(kbdLayoutSelected(int)));
 	connect(addBt, SIGNAL(clicked()), this, SLOT(addLayout()));
