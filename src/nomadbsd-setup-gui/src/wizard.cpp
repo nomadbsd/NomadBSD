@@ -106,6 +106,7 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo.png"));
 	setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 	layout->addWidget(title);
@@ -170,6 +171,7 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
 	}
 	label->setStyleSheet("font-weight: bold;");
 	label->setText(tr("Please select your language/locale"));
+	label->setAlignment(Qt::AlignHCenter);
 
 	vbox->addWidget(label);
 	vbox->addWidget(localels);
@@ -203,6 +205,7 @@ void LocalePage::localeSelected(int row)
 //////////////////////////////////////////////////////////////////////////////
 KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 {
+	title		    = new QLabel;
 	info		    = new QLabel;
 	llabel		    = new QLabel;
 	vlabel		    = new QLabel;
@@ -280,12 +283,15 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	info->setWordWrap(true);
 	info->setAlignment(Qt::AlignHCenter);
 	llabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
 	tlabel->setStyleSheet("font-weight: bold;");
 
+	layout->addWidget(title);
 	layout->addWidget(info);
 	lvbox->addWidget(llabel);
 	lvbox->addWidget(layoutls);
@@ -369,6 +375,7 @@ void KbdLayoutPage::initializePage()
 			break;
 		}
 	}
+	title->setText(tr("Default keyboard layout"));
 	info->setText(tr("Please choose a latin layout as system default " \
 			 "here. The next screens allows you to add "	   \
 			 "additional keyboard layouts."));
@@ -384,6 +391,7 @@ void KbdLayoutPage::initializePage()
 //////////////////////////////////////////////////////////////////////////////
 ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 {
+	title		    = new QLabel;
 	info		    = new QLabel;
 	llabel		    = new QLabel;
 	xllabel		    = new QLabel;
@@ -466,12 +474,15 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	info->setWordWrap(true);
 	info->setAlignment(Qt::AlignHCenter);
 	llabel->setStyleSheet("font-weight: bold;");
 	xllabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
 	//tlabel->setStyleSheet("font-weight: bold;");
+	layout->addWidget(title);
 	layout->addWidget(info);
 
 	lvbox->addWidget(llabel);
@@ -587,6 +598,7 @@ void ExtraKbdLayoutPage::initializePage()
 	}
 	addBt->setText(tr("Add layout"));
 	removeBt->setText(tr("Remove layout"));
+	title->setText(tr("Additional keyboard layouts"));
 	info->setText(tr("Here you can add additional keyboard layouts. " \
 			 "You can switch between them from the NomadBSD " \
 			 "desktop."));
@@ -643,6 +655,7 @@ TimezonePage::TimezonePage(QWidget *parent) : QWizardPage(parent)
 		    .arg(BACKEND_GET_TIMEZONES));
 	}
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	vbox->addWidget(title);
 	vbox->addWidget(timezonels);
 	setLayout(vbox);
@@ -686,6 +699,7 @@ PasswordPage::PasswordPage(QWidget *parent) : QWizardPage(parent)
 	QVBoxLayout *layout = new QVBoxLayout;
 
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	intro->setWordWrap(true);
 	layout->addWidget(title);
 	layout->addWidget(intro);
@@ -737,6 +751,8 @@ GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
 	QVBoxLayout *containerBox = new QVBoxLayout(passContainer);
 
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
+
 	intro->setWordWrap(true);
 	containerBox->addWidget(pwdLabel);
 	containerBox->addWidget(pass);
@@ -823,6 +839,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 
 	for (int n = 0; n < ncats; n++) {
 		QProcess   proc;
@@ -913,15 +930,21 @@ void ProgramsPage::selectionChanged(int /* unused */)
 //////////////////////////////////////////////////////////////////////////////
 SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 {
+	text		  = new QLabel;
+	title		  = new QLabel;
 	QFormLayout *form = new QFormLayout;
 	QVBoxLayout *vbox = new QVBoxLayout;
-	text = new QLabel;
+
+	title->setAlignment(Qt::AlignHCenter);
+	title->setStyleSheet("font-weight: bold;");
+
 	for (int n = 0; n < nkeys; n++) {
 		key[n]		  = new QLabel;
 		val[n]		  = new QLabel;
 		key[n]->setStyleSheet("font-weight: bold;");
 		form->addRow(key[n], val[n]);
 	}
+	vbox->addWidget(title);
 	vbox->addLayout(form);
 	vbox->addWidget(text);
 	setLayout(vbox);
@@ -951,6 +974,7 @@ void SummaryPage::initializePage()
 		key[n]->setText(summary[n].key);
 		val[n]->setText(summary[n].val);
 	}
+	title->setText(tr("Summary\n"));
 	text->setText(tr("\n\nIf you click \"commit\", the changes " \
 			 "will be written to your USB flash drive"));
 	text->setWordWrap(true);
