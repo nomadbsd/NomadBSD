@@ -586,14 +586,18 @@ void ExtraKbdLayoutPage::removeLayout()
 void ExtraKbdLayoutPage::initializePage()
 {
 	//
-	// Select the first layout matching the region code.
+	// Select the first layout matching the region code unless it
+	// matches the default keyboard layout.
 	//
 	QString reg = cfg_region.toLower();
-	for (int n = 0; n < layoutls->count(); n++) {
-		QString l = layoutls->item(n)->data(Qt::UserRole).toString();
-		if (reg == l) {
-			layoutls->setCurrentRow(n);
-			break;
+	if (cfg_kbdlayout != reg) {
+		for (int n = 0; n < layoutls->count(); n++) {
+			QString l;
+			l = layoutls->item(n)->data(Qt::UserRole).toString();
+			if (reg == l) {
+				layoutls->setCurrentRow(n);
+				break;
+			}
 		}
 	}
 	addBt->setText(tr("Add layout"));
