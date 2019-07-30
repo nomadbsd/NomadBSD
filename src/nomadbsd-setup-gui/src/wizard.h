@@ -157,6 +157,7 @@ public slots:
 protected:
 	void initializePage();
 private:
+	QLabel	    *title;
 	QLabel	    *info;
 	QLabel	    *llabel;
 	QLabel	    *vlabel;
@@ -195,6 +196,7 @@ protected:
 private:
 	int	    lrow = -1;
 	int	    vrow = -1;
+	QLabel	    *title;
 	QLabel	    *info;
 	QLabel	    *llabel;
 	QLabel	    *xllabel;
@@ -330,6 +332,7 @@ private:
 	static const int nkeys = 11;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
+	QLabel *title;
 	QLabel *text;
 };
 
