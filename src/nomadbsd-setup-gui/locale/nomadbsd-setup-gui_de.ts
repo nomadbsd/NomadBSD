@@ -4,17 +4,17 @@
 <context>
     <name>CommitPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="778"/>
+        <location filename="../src/wizard.cpp" line="1047"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="802"/>
+        <location filename="../src/wizard.cpp" line="1071"/>
         <source>An unexpected error occured while executing %1: %2</source>
         <translation>Ein unerwarteter Fehler trat während der Ausführung von %1 auf: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="860"/>
+        <location filename="../src/wizard.cpp" line="1129"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
         <translation>%1 mit Fehlercode %2 beendet:
@@ -25,27 +25,77 @@
         <translation type="vanished">%1 wurde mit Fehlercode %2 beendet</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="863"/>
+        <location filename="../src/wizard.cpp" line="1132"/>
         <source>Press &quot;Finish&quot; to reboot</source>
         <translation>Drücken Sie auf &quot;Abschließen&quot;, um den Computer neu zu starten</translation>
     </message>
 </context>
 <context>
+    <name>ExtraKbdLayoutPage</name>
+    <message>
+        <location filename="../src/wizard.cpp" line="425"/>
+        <location filename="../src/wizard.cpp" line="456"/>
+        <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
+        <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="445"/>
+        <location filename="../src/wizard.cpp" line="476"/>
+        <source>Command &apos;%1&apos; returned with an error.</source>
+        <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="605"/>
+        <source>Add layout</source>
+        <translation>Layout hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="606"/>
+        <source>Remove layout</source>
+        <translation>Layout entfernen</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="607"/>
+        <source>Additional keyboard layouts</source>
+        <translation>Zusätzliche Tastaturbelegungen</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="608"/>
+        <source>Here you can add additional keyboard layouts. You can switch between them from the NomadBSD desktop.</source>
+        <translation>Hier können Sie zusätzliche Tastaturbelegungen hinzufügen. Sie können vom NomadBSD-Desktop aus zwischen diesen wechseln.</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="611"/>
+        <source>Keyboard layout</source>
+        <translation>Tastaturbelegung</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="612"/>
+        <source>Keyboard variant</source>
+        <translation>Tastaturvariante</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="614"/>
+        <source>Additional layouts</source>
+        <translation>Zusätzliche Tastaturbelegungen</translation>
+    </message>
+</context>
+<context>
     <name>GeliPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="525"/>
+        <location filename="../src/wizard.cpp" line="784"/>
         <source>Encrypt /home using Geli</source>
         <translation>Verschlüssele /home mit Geli</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="526"/>
+        <location filename="../src/wizard.cpp" line="785"/>
         <source>Geli encrypted /home
 </source>
         <translation>Geli verschlüsseltes /home
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="527"/>
+        <location filename="../src/wizard.cpp" line="786"/>
         <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
@@ -54,34 +104,34 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="531"/>
+        <location filename="../src/wizard.cpp" line="790"/>
         <source>Define a password required to decrypt /home</source>
         <translation>Vergeben Sie ein Passwort um /home entschüsseln zu können</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="532"/>
+        <location filename="../src/wizard.cpp" line="791"/>
         <source>Password:</source>
         <translation>Passwort:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="533"/>
+        <location filename="../src/wizard.cpp" line="792"/>
         <source>Repeat password:</source>
         <translation>Passwort wiederholen:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="534"/>
+        <location filename="../src/wizard.cpp" line="793"/>
         <source>Passwords do not match</source>
         <translation>Passwörter stimmen nicht überein</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="524"/>
-        <location filename="../src/wizard.cpp" line="547"/>
+        <location filename="../src/wizard.cpp" line="783"/>
+        <location filename="../src/wizard.cpp" line="806"/>
         <source>Yes</source>
         <translation>Ja</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="524"/>
-        <location filename="../src/wizard.cpp" line="547"/>
+        <location filename="../src/wizard.cpp" line="783"/>
+        <location filename="../src/wizard.cpp" line="806"/>
         <source>No</source>
         <translation>Nein</translation>
     </message>
@@ -89,29 +139,39 @@
 <context>
     <name>KbdLayoutPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="221"/>
-        <location filename="../src/wizard.cpp" line="252"/>
+        <location filename="../src/wizard.cpp" line="232"/>
+        <location filename="../src/wizard.cpp" line="263"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="241"/>
-        <location filename="../src/wizard.cpp" line="272"/>
+        <location filename="../src/wizard.cpp" line="252"/>
+        <location filename="../src/wizard.cpp" line="283"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="357"/>
+        <location filename="../src/wizard.cpp" line="380"/>
+        <source>Default keyboard layout</source>
+        <translation>Standard-Tastaturbelegung</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="381"/>
+        <source>Please choose a latin layout as system default here. The next screens allows you to add additional keyboard layouts.</source>
+        <translation>Bitte wählen Sie hier eine Tastaturbelegung mit lateinischen Zeichen als Systemstandard. Auf der nächsten Seite können Sie weitere Tastaturbelegungen hinzufügen.</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="384"/>
         <source>Keyboard layout</source>
         <translation>Tastaturbelegung</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="358"/>
+        <location filename="../src/wizard.cpp" line="385"/>
         <source>Keyboard variant</source>
         <translation>Tastaturvariante</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="359"/>
+        <location filename="../src/wizard.cpp" line="386"/>
         <source>Test your keyboard settings</source>
         <translation>Testen Sie Ihre Tastatureinstellung</translation>
     </message>
@@ -119,42 +179,42 @@
 <context>
     <name>LocalePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="141"/>
+        <location filename="../src/wizard.cpp" line="149"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="161"/>
+        <location filename="../src/wizard.cpp" line="169"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="165"/>
+        <location filename="../src/wizard.cpp" line="173"/>
         <source>Please select your language/locale</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="185"/>
+        <location filename="../src/wizard.cpp" line="194"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="186"/>
+        <location filename="../src/wizard.cpp" line="195"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="187"/>
+        <location filename="../src/wizard.cpp" line="196"/>
         <source>Commit</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="188"/>
+        <location filename="../src/wizard.cpp" line="197"/>
         <source>Finish</source>
         <translation>Abschließen</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="189"/>
+        <location filename="../src/wizard.cpp" line="198"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
@@ -162,14 +222,14 @@
 <context>
     <name>PasswordPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="463"/>
+        <location filename="../src/wizard.cpp" line="720"/>
         <source>Set password for user and root
 </source>
         <translation>Setzen Sie das Passwort für Ihren Benutzer und root
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="464"/>
+        <location filename="../src/wizard.cpp" line="721"/>
         <source>The password you choose here will be used for your user account (nomad), and for the administration account (root)
 
 </source>
@@ -178,17 +238,17 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="467"/>
+        <location filename="../src/wizard.cpp" line="724"/>
         <source>Password:</source>
         <translation>Passwort:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="468"/>
+        <location filename="../src/wizard.cpp" line="725"/>
         <source>Repeat password:</source>
         <translation>Passwort wiederholen:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="469"/>
+        <location filename="../src/wizard.cpp" line="726"/>
         <source>Passwords do not match</source>
         <translation>Passwörter stimmen nicht überein</translation>
     </message>
@@ -225,54 +285,54 @@
 <context>
     <name>ProgramsPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="605"/>
+        <location filename="../src/wizard.cpp" line="865"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="627"/>
+        <location filename="../src/wizard.cpp" line="887"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="647"/>
+        <location filename="../src/wizard.cpp" line="907"/>
         <source>Shell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="647"/>
+        <location filename="../src/wizard.cpp" line="907"/>
         <source>Editor</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="647"/>
+        <location filename="../src/wizard.cpp" line="907"/>
         <source>GUI Editor</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="648"/>
+        <location filename="../src/wizard.cpp" line="908"/>
         <source>Email client</source>
         <translation>E-Mail-Client</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="648"/>
+        <location filename="../src/wizard.cpp" line="908"/>
         <source>Web browser</source>
         <translation>Webbrowser</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="648"/>
+        <location filename="../src/wizard.cpp" line="908"/>
         <source>File manager</source>
         <translation>Dateimanager</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="652"/>
+        <location filename="../src/wizard.cpp" line="912"/>
         <source>Choose your default applications
 </source>
         <translation>Wählen SIe Ihre Standardanwendungen
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="653"/>
+        <location filename="../src/wizard.cpp" line="913"/>
         <source>Please choose your preferred shell, editors, browser, and email client
 </source>
         <translation>Bitte wählen Sie Ihre bevorzugte Shell, Ihren Editor, Webbrowser und E-Mail-Client
@@ -282,7 +342,7 @@
 <context>
     <name>SetupWizard</name>
     <message>
-        <location filename="../src/wizard.cpp" line="65"/>
+        <location filename="../src/wizard.cpp" line="71"/>
         <source>NomadBSD Setup</source>
         <translation></translation>
     </message>
@@ -348,7 +408,7 @@ Wir entschuldigen uns für die Unannehmlichkeiten
 <context>
     <name>SummaryPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="718"/>
+        <location filename="../src/wizard.cpp" line="984"/>
         <source>
 
 If you click &quot;commit&quot;, the changes will be written to your USB flash drive</source>
@@ -357,61 +417,72 @@ If you click &quot;commit&quot;, the changes will be written to your USB flash d
 Wenn Sie auf &quot;Anwenden&quot; klicken, werden die Änderungen auf den USB-Stick geschrieben</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="701"/>
+        <location filename="../src/wizard.cpp" line="967"/>
         <source>Locale:</source>
         <translation>Lokalisation:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="702"/>
+        <location filename="../src/wizard.cpp" line="968"/>
         <source>Keyboard layout:</source>
         <translation>Tastaturbelegung:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="703"/>
         <source>Keyboard variant:</source>
-        <translation>Tastaturvariante:</translation>
+        <translation type="vanished">Tastaturvariante:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="704"/>
+        <location filename="../src/wizard.cpp" line="969"/>
+        <source>Additional keyboard layouts:</source>
+        <translation>Zusätzliche Tastaturbelegungen:</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="970"/>
         <source>Timezone:</source>
         <translation>Zeitzone:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="705"/>
+        <location filename="../src/wizard.cpp" line="971"/>
         <source>Encrypt /home:</source>
         <translation>Verschlüssele /home:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="706"/>
+        <location filename="../src/wizard.cpp" line="972"/>
         <source>Shell:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="707"/>
+        <location filename="../src/wizard.cpp" line="973"/>
         <source>Editor:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="708"/>
+        <location filename="../src/wizard.cpp" line="974"/>
         <source>GUI editor:</source>
         <translation>GUI-Editor:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="711"/>
+        <location filename="../src/wizard.cpp" line="977"/>
         <source>File manager:</source>
         <translation>Dateimanager:</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="983"/>
+        <source>Summary
+</source>
+        <translation>Zusammenfassung
+</translation>
     </message>
     <message>
         <source>GUI editor</source>
         <translation type="vanished">GUI-Editor:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="709"/>
+        <location filename="../src/wizard.cpp" line="975"/>
         <source>Email client:</source>
         <translation>E-Mail-Client:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="710"/>
+        <location filename="../src/wizard.cpp" line="976"/>
         <source>Web browser:</source>
         <translation>Webbrowser:</translation>
     </message>
@@ -427,17 +498,17 @@ Wenn Sie next klicken, werden die Änderungen auf Ihren USB-Stick geschrieben</t
 <context>
     <name>TimezonePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="385"/>
+        <location filename="../src/wizard.cpp" line="640"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="405"/>
+        <location filename="../src/wizard.cpp" line="660"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="431"/>
+        <location filename="../src/wizard.cpp" line="687"/>
         <source>Please select your timezone</source>
         <translation>Bitte wählen Sie Ihre Zeitzone</translation>
     </message>
@@ -455,7 +526,7 @@ Bevor Sie NomadBSD benutzen können, müssen noch einige Dinge konfiguriert werd
 Das Setup beschreibt nur das Speichermedium, von dem NomadBSD gestartet worden ist. Ihr System wird nicht verändert.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="111"/>
+        <location filename="../src/wizard.cpp" line="119"/>
         <source>Welcome to the NomadBSD setup wizard.
 
 </source>
@@ -464,7 +535,7 @@ Das Setup beschreibt nur das Speichermedium, von dem NomadBSD gestartet worden i
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="112"/>
+        <location filename="../src/wizard.cpp" line="120"/>
         <source>Before you can use NomadBSD, there are some things that need to be set up.
 
 The setup will only write to the USB flash drive it is currently running from. It will not change your system.</source>
