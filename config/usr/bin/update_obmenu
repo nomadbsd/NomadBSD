@@ -34,7 +34,7 @@ use IO::KQueue;
 
 my %category_icons = (
 	AudioVideo  => "applications-multimedia",
-	udio	    => "applications-multimedia",
+	Audio	    => "applications-multimedia",
 	Video	    => "applications-multimedia",
 	Development => "applications-development",
 	Education   => "applications-science",
@@ -432,7 +432,6 @@ sub add_submenu {
 	splice @ob_menu, $idx + 1, 0,
 		   "<menu id=\"$id\" label=\"$label\" comment=\"--- auto ---\">";
 	splice @ob_menu, $idx + 2, 0, "</menu>";
-
 	if (($idx = find_menu("root-menu")) == -1)
 		{ Xerr(1, "Fatal: Couldn't find the root menu") }
 	splice @ob_menu, $idx + 1, 0, "\t<menu id=\"$id\" icon=\"$icon\" " .
@@ -543,17 +542,19 @@ sub read_obmenu {
 		$buf .= $_;
 	}
 	@lines = split(/\n/, $buf);
+
+	$skip_item = $skip_menu = 0;
 	foreach (@lines) {
 		chomp;
 		next if (!$_ || /^\s*$/);
 		if (/\s*<menu\s*.*\s*comment=\"--- auto ---\">/) {
-			$skip_menu++;
+			$skip_menu = 1;
 		} elsif (/\s*<item\s*.*\s*comment=\"--- auto ---\">/) {
-			$skip_item++;
+			$skip_item = 1;
 		} elsif ($skip_menu && /\s*<\/menu>/) {
-			$skip_menu--;
+			$skip_menu = 0;
 		} elsif ($skip_item && /\s*<\/item>/) {
-			$skip_item--;
+			$skip_item = 0;
 		} else {
 			next if ($skip_item || $skip_menu);
 			next if (/\s*<menu\s*.*\s*comment=\"--- auto ---\".*\/>/);
