@@ -15,6 +15,7 @@ devel/dconf
 devel/geany
 devel/git
 devel/gmake
+devel/p5-IO-KQueue
 devel/pkgconf
 devel/qt5-buildtools
 devel/qt5-linguisttools
