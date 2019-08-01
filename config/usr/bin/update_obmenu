@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# vim: set tabstop=4:
 #
 # Copyright (c) 2012 Marcel Kaiser. All rights reserved.
 #
@@ -27,15 +28,17 @@
 # FILENAME:	update_obmenu
 # AUTHOR:	Marcel Kaiser <mk@nic-nac-project.org>
 # PURPOSE:	Creates and updates the Openbox menu.
-# REQUIRES:     Optional: gmessage or xmessage for error messages.
+# REQUIRES:	Optional: gmessage or xmessage for error messages.
 #
 ##############################################################################
 use utf8;
 use strict;
+use Fcntl qw(:flock);
+use IO::KQueue;
 
 my %category_icons = (
 	AudioVideo  => "applications-multimedia",
-	Audio	    => "applications-multimedia",
+	udio	    => "applications-multimedia",
 	Video	    => "applications-multimedia",
 	Development => "applications-development",
 	Education   => "applications-science",
@@ -52,14 +55,14 @@ my %category_icons = (
 my @categories = (
 	"AudioVideo",	"Audio",	"Video",	"Development",
 	"Education",	"Game",		"Graphics",	"Network",
-	"Office",	"Settings",	"System",	"Utility"
+	"Office",		"Settings",	"System",	"Utility"
 );
 
 # Add your language here.
 my %ctgrs_de = (
-	AudioVideo => "Audio/Video", Audio	 => "Audio",
+	AudioVideo => "Audio/Video", Audio		 => "Audio",
 	Video	   => "Video",	     Development => "Entwicklung",
-	Education  => "Bildung",     Game	 => "Spiele",
+	Education  => "Bildung",     Game		 => "Spiele",
 	Graphics   => "Grafik",	     Network	 => "Netzwerk/Internet",
 	Office	   => "Büro",	     Settings	 => "Einstellungen",
 	System	   => "System",	     Utility	 => "Zubehör",
@@ -68,12 +71,15 @@ my %ctgrs_de = (
 my %ctgrs = (de => \%ctgrs_de);
 
 my @xterms= ("sakura", "urxvt", "rxvt", "mrxvt", "xterm", "Terminal",
-	     "gnome-terminal");
+			 "gnome-terminal");
 
 # Where to look for desktop files.
 my @apps_paths = (
 	"/usr/local/share/applications", "/usr/share/applications",
-	$ENV{'XDG_DATA_HOME'} ? $ENV{'XDG_DATA_HOME'} : "$ENV{'HOME'}/.local"
+	$ENV{'XDG_DATA_HOME'} ? $ENV{'XDG_DATA_HOME'} :
+		"$ENV{'HOME'}/.local/share/applications",
+	$ENV{'XDG_DATA_HOME'} ? $ENV{'XDG_DATA_HOME'} :
+		"$ENV{'HOME'}/.local/applications"
 );
 
 # Paths to look for icon dirs.
@@ -95,6 +101,7 @@ my @pixmap_search_paths = (
 );
 
 my $lang        = "en";
+my $lockfile	= "$ENV{'HOME'}/.update_obmenu.lock";
 my $menu_path   = "$ENV{'HOME'}/.config/openbox/menu.xml";
 my @menu_prefix = ("/etc", "/usr/etc", "/usr/local/etc");
 my $dflt_menu   = "xdg/openbox/menu.xml";
@@ -118,7 +125,7 @@ sub Xerr {
 sub translate {
 	my ($str) = @_;
 	my ($l, $p, $tstr);
-	
+
 	return ($str) if (!$lang || $lang eq 'en');
 	($l) = split(/_/, $lang, 2);
 	return ($str) if (!($p = $ctgrs{$l}));
@@ -140,23 +147,26 @@ sub find_xterm {
 }
 
 sub lookup_icon_theme {
-	open(FH, '<', "$ENV{'HOME'}/.gtkrc.mine") or return (-1);
-	foreach (<FH>) {
+	my $fh;
+	local $_;
+
+	open($fh, '<', "$ENV{'HOME'}/.gtkrc.mine") or return (-1);
+	foreach (<$fh>) {
 		if (/^gtk-icon-theme-name\s*=\s*\"(.+)\"/) {
 			$icon_theme = $1;
 		} elsif (/^gtk-fallback-icon-theme\s*=\s*\"(.+)\"/) {
 			$fallback_icon_theme = $1;
 		}
 	}
-	close(FH);
+	close($fh);
 	return (0);
 }
 
-sub get_inherits
-{
+sub get_inherits {
 	my ($fh);
 	my ($index) = "$_[0]/index.theme";
-		
+	local $_;
+
 	return if (! -f $index);
 	open($fh, '<', $index) || return;
 	foreach (<$fh>) {
@@ -168,9 +178,9 @@ sub get_inherits
 	close($fh);
 }
 
-sub find_icon_theme_dir
-{
+sub find_icon_theme_dir {
 	my ($theme) = @_;
+	local $_;
 
 	foreach (@icon_prefix) {
 		my $dir = "$_/$theme";
@@ -182,6 +192,7 @@ sub find_icon_theme_dir
 sub get_icon_search_paths {
 	my ($dir, $idir, $fh);
 	my (@list, @icon_paths);
+	local $_;
 
 	if (!$icon_theme) {
 		lookup_icon_theme();
@@ -223,6 +234,7 @@ sub find_icon {
 	my ($i, $ih, $p, $path, $dir, @inherit, @tmp);
 	my ($icon) = @_;
 	my @exts = ('.svg', '.png', '.xpm');
+	local $_;
 
 	if ($icon !~ /.*\.[a-zA-Z]+$/) {
 		for ($i = 0; $i < @exts; $i++) {
@@ -246,6 +258,7 @@ sub find_icon {
 sub find_menu {
 	my ($id) = @_;
 	my $idx  = 0;
+	local $_;
 
 	foreach (@ob_menu) {
 		return ($idx) if (/^\s*\<menu id=\"$id\"/);
@@ -256,6 +269,7 @@ sub find_menu {
 
 sub find_application {
 	my ($app) = @_;
+	local $_;
 
 	foreach (@ob_menu) {
 		return (1) if (/^\s*\<item label=\"$app\"/);
@@ -266,31 +280,32 @@ sub find_application {
 sub parse_desktop_file {
 	my ($fname) = @_;
 	my %info;
-	my ($type, $default_comment, $default_name, $terminal, $command);
+	my ($fh, $type, $default_comment, $default_name, $terminal, $command);
 	my ($lang1, $lang2, $name, $comment, $category, $path, $icon, $x);
 	my ($no_display, $dt_entry_section);
+	local $_;
 
 	$lang1 = $lang;
 	$lang2 = ($lang =~ /(.*)_/) ? $1 : $lang;
 
 	$info{'Filename'} = $fname;
 
-	open(FH, '<', $fname) or return (0);
+	open($fh, '<', $fname) or return (0);
 
 	$name = $comment = $category = "";
-	foreach (<FH>) {
+	foreach (<$fh>) {
 		if (!$dt_entry_section) {
 			$dt_entry_section = 1 if ($_ =~ /^\[Desktop Entry\]/);
 			next;
 		}
 		last if ($_ =~ /^\[/); 
 
-		$default_name	 = $1 if (/^_?Name\s*=\s*(.*)/);
+		$default_name= $1 if (/^_?Name\s*=\s*(.*)/);
 		$name		 = $1 if (/^_?Name\[$lang1\]\s*=\s*(.*)$/ ||
-					 /^_?Name\[$lang2\]\s*=\s*(.*)$/);
+							/^_?Name\[$lang2\]\s*=\s*(.*)$/);
 		$default_comment = $1 if (/^_?Comment\s*=\s*(.*)/);
 		$comment	 = $1 if (/^_?Comment\[$lang1\]\s*=\s*(.*)/ ||
-					 /^_?Comment\[$lang2\]\s*=\s*(.*)/);
+							/^_?Comment\[$lang2\]\s*=\s*(.*)/);
 		$command	 = $1 if (/^Exec\s*=\s*(.*)$/);
 		$type		 = $1 if (/^Type\s*=\s*(.*)/);
 		$terminal	 = $1 if (/^Terminal\s*=\s*(.*)/);
@@ -307,7 +322,7 @@ sub parse_desktop_file {
 	}
 	chomp($category);
 
-	close(FH);
+	close($fh);
 	return (0) if ($type ne "Application");
 
 	$command =~ s/\%[a-z,A-Z]//;
@@ -328,6 +343,8 @@ sub add_submenu {
 	my $idx   = 0;
 	my $label = translate($id);
 	my $icon = find_icon($category_icons{$id});
+	local $_;
+
 	foreach (@ob_menu) {
 		last if (/^\<openbox_menu/);
 		$idx++;
@@ -352,6 +369,7 @@ sub add_application {
 	my $i     = 0;
 	my $xterm;
 	my $icon;
+	local $_;
 
 	return (-1) if (($i = find_menu($app{'Category'})) == -1);
 	
@@ -392,6 +410,7 @@ sub add_application {
 sub add_me {
 	my $idx = 0;
 	my $found_root_menu = 0;
+	local $_;
 
 	foreach (@ob_menu) {
 		if (/^\<menu id=\"root-menu\"/) {
@@ -411,11 +430,166 @@ sub add_me {
 	splice @ob_menu, $idx + 4, 0, "\t<\/item>\n";
 }
 
+sub read_blacklist {
+	my $path_blacklist = "$ENV{HOME}/.config/update_obmenu.ignore";
+
+	return if (! -f $path_blacklist);
+
+	open(my $fh, '<', $path_blacklist)
+		or die "Failed to open $path_blacklist";
+	@blacklist = <$fh>;
+
+	close($fh);
+}
+
+sub is_blacklisted {
+	my ($f) = @_;
+	local $_;
+
+	foreach (@blacklist) {
+		chomp;
+		return 1 if ($f eq $_);
+	}
+	return 0;
+}
+
+sub read_obmenu {
+	my ($fh, $skip_item, $skip_menu, $buf, @lines);
+	local $_;
+
+	@ob_menu = ();
+	# Read the obenbox menu and skip previously added menus and
+	# application entries.
+	if (!open($fh, '<', $menu_path) and !open($fh, '<', $dflt_menu))
+		{ Xerr(1, "Could not find menu.xml") }
+	flock($fh, LOCK_EX)
+		or Xerr(1, "Could not lock $menu_path");
+	foreach (<$fh>) {
+		$_ =~ s/>\s*</>\n</g;
+		$buf .= $_;
+	}
+	@lines = split(/\n/, $buf);
+	foreach (@lines) {
+		if (/\s*<menu\s*.*\s*comment=\"--- auto ---\">/) {
+			$skip_menu++;
+		} elsif (/\s*<item\s*.*\s*comment=\"--- auto ---\">/) {
+			$skip_item++;
+		} elsif ($skip_menu && /\s*<\/menu>/) {
+			$skip_menu--;
+		} elsif ($skip_item && /\s*<\/item>/) {
+			$skip_item--;
+		} else {
+			next if ($skip_item || $skip_menu);
+			next if (/\s*<menu\s*.*\s*comment=\"--- auto ---\".*\/>/);
+			push @ob_menu, $_;
+		}
+	}
+	flock($fh, LOCK_UN);
+	close($fh);
+}
+
+sub write_obmenu {
+	my $fh;
+	local $_;
+
+	chmod(0644, $menu_path);
+	open($fh, '>', $menu_path)
+		or Xerr(1, "Could not open \'$menu_path\'");
+	flock($fh, LOCK_EX)
+		or Xerr(1, "Could not lock $menu_path");
+	foreach(@ob_menu)
+		{ print $fh "$_\n" }
+	flock($fh, LOCK_UN);
+	close($fh);
+	system("openbox --reconfigure");
+}
+
+#
+# Take an array of flag character and the expected number of arguments.
+# If $ARGV[0] containes a flag not in the given array, or @ARGV doesn't
+# have the required number of arguments, exit with an error.
+# If $ARGV[0] contains a valid flag and @ARGV has the expected number of
+# arguments, return the flag character. If $ARGV[0] doesn't start with
+# a '-', return an empty string.
+#
+sub getargs {
+	my ($nargs, $i);
+	local $_;
+
+	if ($ARGV[0] =~ /^-([A-Za-z0-9])([A-Za-z0-9]+)/) {
+		# -Xarg or -XYZ == -X -Y -Z
+		$nargs = @ARGV;
+		for ($i = 0; $i < @_ - 1; $i++) {
+			next if ($_[$i] ne $1);
+			if ($_[$i + 1] == 0) {
+				my $opt = $1;
+				$ARGV[0] =~ s/^-$opt(.*)/-$1/;
+				return (($opt));
+			}
+			last;
+		}
+		if ($i == @_ - 1) {
+			print STDERR "Invalid option '-$1'\n";
+			exit 1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+				exit 1
+			}
+		}
+		my @args = ($2);
+		push @args, splice(@ARGV, 1, $_[$i + 1] - 1);
+		if (@args < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+			exit 1
+		}
+		shift @ARGV;
+		return (($1, @args));
+	} elsif ($ARGV[0] =~ /^-([A-Za-z0-9]{1})/) {
+		# -X
+		$nargs = @ARGV - 1;
+	} else {
+		return ();
+	}
+	for ($i = 0; $i < @_ - 1; $i++) {
+		next if ($_[$i] ne $1);
+		if ($nargs < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+			exit 1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+				exit 1
+			}
+		}
+		my @args = splice(@ARGV, 1, $_[$i + 1]);
+		shift @ARGV;
+		return (($1, @args));
+	}
+	print STDERR "Invalid option '$ARGV[0]'\n";
+	exit 1;
+}
+
+sub usage {
+	my $progname = $0;
+
+	$progname = $1 if ($0 =~ /\.{0,2}.*\/([a-zA-Z0-9.,-_]+$)/);
+	print STDERR "Usage: $progname -u|-n|-a [-p delay]\n" .
+			 "-a   : Monitor application directories and autoupdate menu.\n" .
+			 "-p   : Instead of kqueue use stat to poll for changes every " .
+			 "'delay' seconds.\n" .
+			 "-u   : Update your Openbox menu.\n" .
+		     "-n   : Create a new Openbox menu. Your old menu.xml " .
+	    "will be overwritten!\n";
+	exit(1);
+}
+
 ##############################################################################
-my $nflag = 0;
-my $uflag = 0;
-my ($skip_item, $skip_menu);
-my $path;
+my ($aflag, $nflag, $uflag, $pflag, $delay, $update);
+my ($path, $kq, $lock);
+my (@fhs, @mtimes);
 
 ($lang) = split(/\./, $ENV{'LANG'});
 
@@ -429,23 +603,24 @@ foreach (@menu_prefix) {
 	}
 }
 
-while ($ARGV[0] =~ m/^-/) {
-	if ($ARGV[0] eq "-u") {
-		$uflag = 1;
-	} elsif ($ARGV[0] eq "-n") {
-		$nflag = 1;
+while ((my ($flag, @args) = getargs('h', 0, 'u', 0, 'a', 0, 'p', 1))) {
+	usage()	   if ($flag eq 'h');
+	$aflag = 1 if ($flag eq 'a');
+	$uflag = 1 if ($flag eq 'u');
+	if ($flag eq 'p') {
+		$pflag = 1;
+		$delay = $args[0];
 	}
-	shift;
 }
-if (($uflag == 1 && $nflag == 1) || ($uflag == 0 && $nflag == 0)) {
-	my $progname = $0;
 
-	$progname = $1 if ($0 =~ /\.{0,2}.*\/([a-zA-Z0-9.,-_]+$)/);
-	print STDERR "Usage: $progname -u|-n\n" .
-		     "-u   : Update your Openbox menu.\n" .
-		     "-n   : Create a new Openbox menu. Your old menu.xml " .
-	    "will be overwritten!\n";
-	exit(1);
+if ($aflag == 0) {
+	if (($uflag == 1 && $nflag == 1) || ($uflag == 0 && $nflag == 0)) {
+		usage();
+	}
+} elsif ($aflag + $nflag + $uflag > 1) {
+		usage();
+} elsif ($pflag && !$aflag) {
+	usage();
 }
 
 if ($nflag == 1) {
@@ -466,112 +641,132 @@ if ($nflag == 1) {
 	push @ob_menu, '</item>' . "\n";
 	push @ob_menu, '</menu>' . "\n";
 	push @ob_menu, '</openbox_menu>' . "\n";
-} else {
-	# Read the obenbox menu and skip previously added menus and
-	# application entries.
-	if (!open(FH, '<', $menu_path) and !open(FH, '<', $dflt_menu))
-		{ Xerr(1, "Could not find menu.xml") }
-	foreach (<FH>) {
-		if (/\s*<menu\s*.*\s*comment=\"--- auto ---\">/) {
-			$skip_menu++;
-		} elsif (/\s*<item\s*.*\s*comment=\"--- auto ---\">/) {
-			$skip_item++;
-		} elsif ($skip_menu && /\s*<\/menu>/) {
-			$skip_menu--;
-		} elsif ($skip_item && /\s*<\/item>/) {
-			$skip_item--;
-		} else {
-			next if ($skip_item || $skip_menu);
-			next if (/\s*<menu\s*.*\s*comment=\"--- auto ---\".*\/>/);
-			push @ob_menu, $_;
+} elsif (!$aflag) {
+	read_obmenu();
+}
+
+for (my $i = 0; $i < @apps_paths;) {
+	if (! -d $apps_paths[$i]) {
+		splice @apps_paths, $i, 1;
+	} else {
+		$i++;
+	}
+}
+
+if ($aflag) {
+	open($lock, '>>', $lockfile)
+		or Xerr(1, "Failed to open lockfile");
+	unless (flock($lock, LOCK_EX|LOCK_NB)) {
+		print STDERR "Another instance of '$0 -a' is already running\n";
+		exit(1);
+	}
+	seek $lock, 0, 0;
+	print $lock "$$\n";
+	$lock->flush();
+	truncate $lock, tell($lock);
+
+	if ($pflag) {
+		for (my $i = 0; $i < @apps_paths; $i++) {
+			my @r = stat($apps_paths[$i]);
+			$mtimes[$i] = $r[9];
+		}
+	} else {
+		$kq = IO::KQueue->new();
+		foreach (@apps_paths) {
+			if (open(my $fh, $_)) {
+				push @fhs, $fh;
+				my $fd = fileno($fh);
+				$kq->EV_SET($fd, EVFILT_VNODE, EV_ADD|EV_ONESHOT,
+					NOTE_WRITE, 0, 0);
+			}
 		}
 	}
-	close(FH);
-}
-
-sub read_blacklist {
-	my $path_blacklist = "$ENV{HOME}/.config/update_obmenu.ignore";
-
-	return if (! -f $path_blacklist);
-
-	open(my $fh, '<', $path_blacklist)
-		or die "Failed to open $path_blacklist";
-	@blacklist = <$fh>;
-
-	close($fh);
-}
-
-sub is_blacklisted {
-	my ($f) = @_;
-
-	foreach (@blacklist) {
-		chomp;
-		return 1 if ($f eq $_);
-	}
-	return 0;
 }
 
 read_blacklist();
 get_icon_search_paths();
 
-foreach $path (@apps_paths) {
-	foreach (`find $path -name "*.desktop" 2>/dev/null`) {
-		chomp;
-		next if (/userapp-/);
-		next if (is_blacklisted($_));
-		my %i;
-		if ((%i = parse_desktop_file($_))) {
-			next if (find_application($i{'Name'}));
-			next if ($i{'NoDisplay'} eq 'true');
-			if ($i{'Category'} && find_menu($i{'Category'}) == -1) {
-				my $key = translate($i{'Category'});
-				$cats_hash{$key} = $i{'Category'};
-				push @apps, { %i };
+while (1) {
+	if ($aflag) {
+		if ($pflag) {
+			sleep($delay);
+			for (my $i = 0; $i < @apps_paths; $i++) {
+				my @r = stat($apps_paths[$i]);
+				if ($mtimes[$i] != $r[9]) {
+						print STDERR "UPDATE\n"; STDERR->flush();
+						$mtimes[$i] = $r[9];
+						$update = 1;
+				}
+				sleep(1);
+			}
+			next if (!$update);
+		} else {
+			my @events = $kq->kevent();
+			next if (!@events);
+			foreach my $kevent (@events) {
+				my $fd = $kevent->[KQ_IDENT];
+				sleep(1);
+				$kq->EV_SET($fd, EVFILT_VNODE, EV_ADD|EV_ONESHOT,
+								 NOTE_WRITE, 0, 0);
+			}
+		}
+		read_obmenu();
+	}
+	@apps = ();
+	%cats_hash = ();
+	foreach $path (@apps_paths) {
+		foreach (`find $path -name "*.desktop" 2>/dev/null`) {
+			chomp;
+			next if (/userapp-/);
+			next if (is_blacklisted($_));
+			my %i;
+			if ((%i = parse_desktop_file($_))) {
+				next if (find_application($i{'Name'}));
+				next if ($i{'NoDisplay'} eq 'true');
+				if ($i{'Category'} && find_menu($i{'Category'}) == -1) {
+					my $key = translate($i{'Category'});
+					$cats_hash{$key} = $i{'Category'};
+					push @apps, { %i };
+				}
 			}
 		}
 	}
-}
+	foreach (sort {$b cmp $a} keys %cats_hash) {
+		next if (find_menu($cats_hash{$_}) != -1);
+		add_submenu($cats_hash{$_});
+	}
+	foreach my $c (values %cats_hash) {
+		my @capps;
 
-foreach (sort {$b cmp $a} keys %cats_hash) {
-	next if (find_menu($cats_hash{$_}) != -1);
-	add_submenu($cats_hash{$_});
-}
-
-foreach my $c (values %cats_hash) {
-	my @capps;
-
-	for (my $i = 0; $i < @apps; $i++) {
-		next if ($c ne $apps[$i]{'Category'});
-		my $j;
-		for ($j = 0; $j < @capps; $j++) {
-			if (lc($apps[$i]{'Name'}) le lc($capps[$j]{'Name'})) {
-				splice @capps, $j, 0, $apps[$i];
-				last;
+		for (my $i = 0; $i < @apps; $i++) {
+			next if ($c ne $apps[$i]{'Category'});
+			my $j;
+			for ($j = 0; $j < @capps; $j++) {
+				if (lc($apps[$i]{'Name'}) le lc($capps[$j]{'Name'})) {
+					splice @capps, $j, 0, $apps[$i];
+					last;
+				}
+			}
+			if ($j == @capps) {
+				push @capps, $apps[$i];
 			}
 		}
-		if ($j == @capps) {
-			push @capps, $apps[$i];
+		for (my $i = @capps - 1; $i >= 0; $i--) {
+			next if (find_application($capps[$i]{'Name'}));
+			my $hp = $capps[$i];
+			my %h = %$hp;
+			add_application(%h);
 		}
+		@capps = ();
 	}
-	for (my $i = @capps - 1; $i >= 0; $i--) {
-		next if (find_application($capps[$i]{'Name'}));
-		my $hp = $capps[$i];
-		my %h = %$hp;
-		add_application(%h);
-	}
-	@capps = ();
+	last if (!$aflag);
+	add_me();
+	write_obmenu();
+	$update = 0;
 }
 
 # Add an entry for this script to the Openbox root menu.
 add_me();
-
-# Write the menu to menu.xml
-chmod(0644, $menu_path);
-open(FH, '>', $menu_path)
-	or Xerr(1, "Could not open \'$menu_path\'");
-foreach(@ob_menu)
-	{ print FH }
-close(FH);
-system("openbox --reconfigure");
+write_obmenu();
 exit(0);
 
