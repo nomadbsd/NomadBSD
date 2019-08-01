@@ -12,3 +12,4 @@ dsbmixer -i&
 redshift -l$(getlalo)&
 dunst&
 xbindkeys&
+daemon -f update_obmenu -a -p 5&
