@@ -24,12 +24,8 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##############################################################################
-#
-# FILENAME:	update_obmenu
-# AUTHOR:	Marcel Kaiser <mk@nic-nac-project.org>
 # PURPOSE:	Creates and updates the Openbox menu.
-# REQUIRES:	Optional: gmessage or xmessage for error messages.
-#
+# REQUIRES:	Optional: notify-send, gmessage or xmessage for error messages.
 ##############################################################################
 use utf8;
 use strict;
@@ -53,25 +49,107 @@ my %category_icons = (
 );
 
 my @categories = (
-	"AudioVideo",	"Audio",	"Video",	"Development",
-	"Education",	"Game",		"Graphics",	"Network",
-	"Office",		"Settings",	"System",	"Utility"
+	"AudioVideo", "Audio",    "Video",    "Development",
+	"Education",  "Game",     "Graphics", "Network",
+	"Office",     "Settings", "System",   "Utility"
 );
 
 # Add your language here.
 my %ctgrs_de = (
-	AudioVideo => "Audio/Video", Audio		 => "Audio",
-	Video	   => "Video",	     Development => "Entwicklung",
-	Education  => "Bildung",     Game		 => "Spiele",
-	Graphics   => "Grafik",	     Network	 => "Netzwerk/Internet",
-	Office	   => "Büro",	     Settings	 => "Einstellungen",
-	System	   => "System",	     Utility	 => "Zubehör",
+	AudioVideo => "Audio/Video", Audio       => "Audio",
+	Video	   => "Video",       Development => "Entwicklung",
+	Education  => "Bildung",     Game        => "Spiele",
+	Graphics   => "Grafik",      Network     => "Netzwerk/Internet",
+	Office	   => "Büro",        Settings    => "Einstellungen",
+	System	   => "System",      Utility     => "Zubehör",
 	Application=> "Anwendungen"
 );
-my %ctgrs = (de => \%ctgrs_de);
 
-my @xterms= ("sakura", "urxvt", "rxvt", "mrxvt", "xterm", "Terminal",
-			 "gnome-terminal");
+my %ctgrs_fr = (
+	AudioVideo => "Audio/Video", Audio       => "Audio",
+	Video      => "Video",       Development => "Développement",
+	Education  => "Éducation",   Game        => "Jeu",
+	Graphics   => "Graphique",   Network     => "Réseau",
+	Office     => "Bureau",      Settings    => "Réglages",
+	System     => "Système",     Utility     => "Utilitaire",
+	Application=> "Application"
+);
+
+my %ctgrs_es = (
+	AudioVideo => "Audio/Video", Audio       => "Audio",
+	Video      => "Video",       Development => "Desarrollo",
+	Education  => "Educación",   Game        => "Juego",
+	Graphics   => "Gráficos",    Network     => "Red",
+	Office     => "Oficina",     Settings    => "Ajustes",
+	System     => "Sistemas",    Utility     => "Utilidad",
+	Application=> "Solicitud"
+);
+
+my %ctgrs_gr = (
+	AudioVideo => "Ήχος/βίντεο", Audio       => "Ήχος",
+	Video      => "βίντεο",      Development => "Ανάπτυξη",
+	Education  => "Εκπαίδευση",  Game        => "Παιχνίδι",
+	Graphics   => "Γραφικά",     Network     => "Δίκτυο",
+	Office     => "Γραφείο",     Settings    => "Ρυθμίσεις",
+	System     => "Σύστημα",     Utility     => "Χρησιμότητα",
+	Application=> "Εφαρμογή"
+);
+
+my %ctgrs_pt = (
+	AudioVideo => "Áudio/Vídeo", Audio       => "Áudio",
+	Video      => "Vídeo",       Development => "Desenvolvimento",
+	Education  => "Educação",    Game        => "Jogos",
+	Graphics   => "Gráficos",    Network     => "Rede",
+	Office     => "Escritório",  Settings    => "Definições",
+	System     => "Sistema",     Utility     => "Utility",
+	Application=> "Aplicação"
+);
+
+my %ctgrs_ru = (
+	AudioVideo => "Аудио/видео", Audio       => "аудио",
+	Video      => "видео",       Development => "развитие",
+	Education  => "образование", Game        => "Игра",
+	Graphics   => "Графика",     Network     => "сеть",
+	Office     => "офис",        Settings    => "настройки",
+	System     => "система",     Utility     => "Полезность",
+	Application=> "заявка"
+);
+
+my %ctgrs_zh = (
+	AudioVideo => "音頻視頻",      Audio       => "音頻",
+	Video      => "視頻",         Development => "發展",
+	Education  => "教育",         Game        => "遊戲",
+	Graphics   => "圖像",         Network     => "網絡",
+	Office     => "辦公室",       Settings    => "設置",
+	System     => "系統",         Utility     => "效用",
+	Application=> "應用"
+);
+
+my %ctgrs_jp = (
+	AudioVideo => "オーディオ/ビデオ", Audio       => "オーディオ",
+	Video      => "ビデオ",          Development => "開発",
+	Education  => "教育",            Game        => "ゲーム",
+	Graphics   => "グラフィックス",    Network     => "ネットワーク",
+	Office     => "事務所",          Settings    => "設定",
+	System     => "システム",        Utility      => "効用",
+	Application=> "応用"
+);
+
+my %ctgrs = (
+	de => \%ctgrs_de,
+	es => \%ctgrs_es,
+	fr => \%ctgrs_fr,
+	gr => \%ctgrs_gr,
+	jp => \%ctgrs_jp,
+	pt => \%ctgrs_pt,
+	ru => \%ctgrs_ru,
+	zh => \%ctgrs_zh
+);
+
+my @xterms= (
+	"sakura", "urxvt", "rxvt", "mrxvt", "xterm", "Terminal",
+	"gnome-terminal"
+);
 
 # Where to look for desktop files.
 my @apps_paths = (
@@ -105,20 +183,18 @@ my $lockfile	= "$ENV{'HOME'}/.update_obmenu.lock";
 my $menu_path   = "$ENV{'HOME'}/.config/openbox/menu.xml";
 my @menu_prefix = ("/etc", "/usr/etc", "/usr/local/etc");
 my $dflt_menu   = "xdg/openbox/menu.xml";
-my $icon_theme;
-my $fallback_icon_theme;
-my $xterm;
-my @ob_menu;
-my @blacklist;
-my @apps;
-my @icon_search_paths;
+my ($progname, $icon_theme, $fallback_icon_theme, $xterm);
+my (@ob_menu, @blacklist, @apps, @icon_search_paths);
 my %cats_hash;
+
 ##############################################################################
 sub Xerr {
 	my ($ret, $msg) = @_;
-
+	$msg = "$progname: $msg";
 	print STDERR "$msg\n";
-	system("xmessage \"$msg\"") if (system("gmessage \"$msg\"") == -1);
+	unless (system("notify-send -u critical \"$msg\"") == 0) {
+		system("xmessage \"$msg\"") if (system("gmessage \"$msg\"") == -1);
+	}
 	exit($ret);
 }
 
@@ -342,7 +418,7 @@ sub add_submenu {
 	my ($id, $label)  = @_;
 	my $idx   = 0;
 	my $label = translate($id);
-	my $icon = find_icon($category_icons{$id});
+	my $icon  = find_icon($category_icons{$id});
 	local $_;
 
 	foreach (@ob_menu) {
@@ -350,25 +426,23 @@ sub add_submenu {
 		$idx++;
 	}
 	if ($idx == @ob_menu) {
-		Xerr(1, "Fatal: Coudn't find 'openbox_menu'\n".
+		Xerr(1, "Fatal: Coudn't find 'openbox_menu'\n" .
 			"Your menu.xml seems to be corrupted.");
 	}
 	splice @ob_menu, $idx + 1, 0,
-	    "<menu id=\"$id\" label=\"$label\" comment=\"--- auto ---\">\n";
-	splice @ob_menu, $idx + 2, 0, "</menu>\n";
+		   "<menu id=\"$id\" label=\"$label\" comment=\"--- auto ---\">";
+	splice @ob_menu, $idx + 2, 0, "</menu>";
 
 	if (($idx = find_menu("root-menu")) == -1)
 		{ Xerr(1, "Fatal: Couldn't find the root menu") }
 	splice @ob_menu, $idx + 1, 0, "\t<menu id=\"$id\" icon=\"$icon\" " .
-	    "comment=\"--- auto ---\"/>\n";
+		   "comment=\"--- auto ---\"/>";
 	return (0);
 }
 
 sub add_application {
 	my (%app) = @_;
-	my $i     = 0;
-	my $xterm;
-	my $icon;
+	my ($i, $xterm, $icon);
 	local $_;
 
 	return (-1) if (($i = find_menu($app{'Category'})) == -1);
@@ -387,22 +461,22 @@ sub add_application {
 			$icon = "$icon".".png"
 				if ($icon !~ /.*\.[a-zA-Z]+$/);
 			splice @ob_menu, $i + 1, 0,
-			    "\t<item icon=\"$icon\"" .
-			    " label=\"$app{'Name'}\" ".
-			     "comment=\"--- auto ---\">\n";
+				   "\t<item icon=\"$icon\"" .
+				   " label=\"$app{'Name'}\" " .
+				   "comment=\"--- auto ---\">";
 		} else {
 			splice @ob_menu, $i + 1, 0,
-			    "\t<item label=\"$app{'Name'}\" ".
-			    "comment=\"--- auto ---\">\n";
+				   "\t<item label=\"$app{'Name'}\" " .
+				   "comment=\"--- auto ---\">";
 		}
 	} else {
-		splice @ob_menu, $i + 1, 0, "\t<item label=\"$app{'Name'}\" ".
-					    "comment=\"--- auto ---\">\n";
+		splice @ob_menu, $i + 1, 0, "\t<item label=\"$app{'Name'}\" " .
+			   "comment=\"--- auto ---\">";
 	}
-	splice @ob_menu, $i + 2, 0, "\t\t<action name=\"Execute\">\n";
-	splice @ob_menu, $i + 3, 0, "\t\t\t<command>$app{'Exec'}</command>\n";
-	splice @ob_menu, $i + 4, 0, "\t\t</action>\n";
-	splice @ob_menu, $i + 5, 0, "\t</item>\n";
+	splice @ob_menu, $i + 2, 0, "\t\t<action name=\"Execute\">";
+	splice @ob_menu, $i + 3, 0, "\t\t\t<command>$app{'Exec'}</command>";
+	splice @ob_menu, $i + 4, 0, "\t\t</action>";
+	splice @ob_menu, $i + 5, 0, "\t</item>";
 
 	return (0);
 }
@@ -422,12 +496,12 @@ sub add_me {
 	}
 	return if ($idx == @ob_menu);
 	splice @ob_menu, $idx + 0, 0,
-	    "\t<item label=\"Update Menu\" comment=\"--- auto ---\">\n";
-	splice @ob_menu, $idx + 1, 0, "\t\t<action name=\"Execute\">\n";
+	    "\t<item label=\"Update Menu\" comment=\"--- auto ---\">";
+	splice @ob_menu, $idx + 1, 0, "\t\t<action name=\"Execute\">";
 	splice @ob_menu, $idx + 2, 0,
-	    "\t\t\t<command>$0 -u<\/command>\n";
-	splice @ob_menu, $idx + 3, 0, "\t\t<\/action>\n";
-	splice @ob_menu, $idx + 4, 0, "\t<\/item>\n";
+	    "\t\t\t<command>$0 -u<\/command>";
+	splice @ob_menu, $idx + 3, 0, "\t\t<\/action>";
+	splice @ob_menu, $idx + 4, 0, "\t<\/item>";
 }
 
 sub read_blacklist {
@@ -470,6 +544,8 @@ sub read_obmenu {
 	}
 	@lines = split(/\n/, $buf);
 	foreach (@lines) {
+		chomp;
+		next if (!$_ || /^\s*$/);
 		if (/\s*<menu\s*.*\s*comment=\"--- auto ---\">/) {
 			$skip_menu++;
 		} elsif (/\s*<item\s*.*\s*comment=\"--- auto ---\">/) {
@@ -497,8 +573,10 @@ sub write_obmenu {
 		or Xerr(1, "Could not open \'$menu_path\'");
 	flock($fh, LOCK_EX)
 		or Xerr(1, "Could not lock $menu_path");
-	foreach(@ob_menu)
-		{ print $fh "$_\n" }
+	foreach(@ob_menu) {
+		chomp;
+		print $fh "$_\n"
+	}
 	flock($fh, LOCK_UN);
 	close($fh);
 	system("openbox --reconfigure");
@@ -509,8 +587,8 @@ sub write_obmenu {
 # If $ARGV[0] containes a flag not in the given array, or @ARGV doesn't
 # have the required number of arguments, exit with an error.
 # If $ARGV[0] contains a valid flag and @ARGV has the expected number of
-# arguments, return the flag character. If $ARGV[0] doesn't start with
-# a '-', return an empty string.
+# arguments, return the flag character and an array with its arguments.
+# If $ARGV[0] doesn't start with a '-', return an empty string.
 #
 sub getargs {
 	my ($nargs, $i);
@@ -573,16 +651,13 @@ sub getargs {
 }
 
 sub usage {
-	my $progname = $0;
-
-	$progname = $1 if ($0 =~ /\.{0,2}.*\/([a-zA-Z0-9.,-_]+$)/);
 	print STDERR "Usage: $progname -u|-n|-a [-p delay]\n" .
 			 "-a   : Monitor application directories and autoupdate menu.\n" .
 			 "-p   : Instead of kqueue use stat to poll for changes every " .
 			 "'delay' seconds.\n" .
 			 "-u   : Update your Openbox menu.\n" .
 		     "-n   : Create a new Openbox menu. Your old menu.xml " .
-	    "will be overwritten!\n";
+			 "will be overwritten!\n";
 	exit(1);
 }
 
@@ -592,6 +667,12 @@ my ($path, $kq, $lock);
 my (@fhs, @mtimes);
 
 ($lang) = split(/\./, $ENV{'LANG'});
+
+if ($0 =~ /\.{0,2}.*\/([a-zA-Z0-9.,-_]+$)/) {
+	$progname = $1;
+} else {
+	$progname = $0;
+}
 
 # Look for the default openbox menu
 foreach (@menu_prefix) {
@@ -603,10 +684,11 @@ foreach (@menu_prefix) {
 	}
 }
 
-while ((my ($flag, @args) = getargs('h', 0, 'u', 0, 'a', 0, 'p', 1))) {
+while ((my ($flag, @args) = getargs('n', 0, 'h', 0, 'u', 0, 'a', 0, 'p', 1))) {
 	usage()	   if ($flag eq 'h');
 	$aflag = 1 if ($flag eq 'a');
 	$uflag = 1 if ($flag eq 'u');
+	$nflag = 1 if ($flag eq 'n');
 	if ($flag eq 'p') {
 		$pflag = 1;
 		$delay = $args[0];
@@ -618,7 +700,7 @@ if ($aflag == 0) {
 		usage();
 	}
 } elsif ($aflag + $nflag + $uflag > 1) {
-		usage();
+	usage();
 } elsif ($pflag && !$aflag) {
 	usage();
 }
@@ -626,25 +708,26 @@ if ($aflag == 0) {
 if ($nflag == 1) {
 	# Create a new menu.
 	@ob_menu = ();
-	push @ob_menu, '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-	push @ob_menu, '<openbox_menu xmlns="http://openbox.org/3.4/menu">' . "\n";
-	push @ob_menu, '<menu id="root-menu" label="Openbox 3">' . "\n";
+	push @ob_menu, '<?xml version="1.0" encoding="UTF-8"?>';
+	push @ob_menu, '<openbox_menu xmlns="http://openbox.org/3.4/menu">';
+	push @ob_menu, '<menu id="root-menu" label="Openbox 3">';
 	push @ob_menu, '<separator />' . "\n";
-	push @ob_menu, '<menu id="client-list-menu" />' . "\n";
-	push @ob_menu, '<separator />' . "\n";
-	push @ob_menu, '<item label="Reconfigure">' . "\n";
-	push @ob_menu, '<action name="Reconfigure" />' . "\n";
-	push @ob_menu, '</item>' . "\n";
-	push @ob_menu, '<separator />' . "\n";
-	push @ob_menu, '<item label="Exit">' . "\n";
-	push @ob_menu, '<action name="Exit" />' . "\n";
-	push @ob_menu, '</item>' . "\n";
-	push @ob_menu, '</menu>' . "\n";
-	push @ob_menu, '</openbox_menu>' . "\n";
+	push @ob_menu, '<menu id="client-list-menu" />';
+	push @ob_menu, '<separator />';
+	push @ob_menu, '<item label="Reconfigure">';
+	push @ob_menu, '<action name="Reconfigure" />';
+	push @ob_menu, '</item>';
+	push @ob_menu, '<separator />';
+	push @ob_menu, '<item label="Exit">';
+	push @ob_menu, '<action name="Exit" />';
+	push @ob_menu, '</item>';
+	push @ob_menu, '</menu>';
+	push @ob_menu, '</openbox_menu>';
 } elsif (!$aflag) {
 	read_obmenu();
 }
 
+# Remove non-existing paths
 for (my $i = 0; $i < @apps_paths;) {
 	if (! -d $apps_paths[$i]) {
 		splice @apps_paths, $i, 1;
@@ -657,7 +740,7 @@ if ($aflag) {
 	open($lock, '>>', $lockfile)
 		or Xerr(1, "Failed to open lockfile");
 	unless (flock($lock, LOCK_EX|LOCK_NB)) {
-		print STDERR "Another instance of '$0 -a' is already running\n";
+		print STDERR "Another instance of '$progname -a' is already running\n";
 		exit(1);
 	}
 	seek $lock, 0, 0;
@@ -677,7 +760,7 @@ if ($aflag) {
 				push @fhs, $fh;
 				my $fd = fileno($fh);
 				$kq->EV_SET($fd, EVFILT_VNODE, EV_ADD|EV_ONESHOT,
-					NOTE_WRITE, 0, 0);
+							NOTE_WRITE, 0, 0);
 			}
 		}
 	}
@@ -693,9 +776,8 @@ while (1) {
 			for (my $i = 0; $i < @apps_paths; $i++) {
 				my @r = stat($apps_paths[$i]);
 				if ($mtimes[$i] != $r[9]) {
-						print STDERR "UPDATE\n"; STDERR->flush();
-						$mtimes[$i] = $r[9];
-						$update = 1;
+					$mtimes[$i] = $r[9];
+					$update = 1;
 				}
 				sleep(1);
 			}
@@ -769,4 +851,3 @@ while (1) {
 add_me();
 write_obmenu();
 exit(0);
-
