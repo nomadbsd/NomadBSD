@@ -54,7 +54,6 @@ my @categories = (
 	"Office",     "Settings", "System",   "Utility"
 );
 
-# Add your language here.
 my %ctgrs_de = (
 	AudioVideo => "Audio/Video", Audio       => "Audio",
 	Video	   => "Video",       Development => "Entwicklung",
@@ -146,10 +145,7 @@ my %ctgrs = (
 	zh => \%ctgrs_zh
 );
 
-my @xterms= (
-	"sakura", "urxvt", "rxvt", "mrxvt", "xterm", "Terminal",
-	"gnome-terminal"
-);
+my @xterms= qw(sakura urxvt rxvt mrxvt xterm Terminal gnome-terminal);
 
 # Where to look for desktop files.
 my @apps_paths = (
@@ -170,12 +166,12 @@ my @icon_prefix = (
 
 # Pixmaps paths
 my @pixmap_search_paths = (
-	"/usr/local/share/icons",
 	"/usr/local/share/pixmaps",
 	"/usr/share/pixmaps",
-	"/usr/share/icons",
-	"$ENV{'HOME'}/.fluxbox/icons",
 	"$ENV{'HOME'}/.local/share/pixmaps",
+	"/usr/local/share/icons",
+	"/usr/share/icons",
+	"$ENV{'HOME'}/.fluxbox/icons"
 );
 
 my @toolkit_config_paths = (
@@ -191,18 +187,18 @@ my $lockfile            = "$ENV{'HOME'}/.update_obmenu.lock";
 my $menu_path           = "$ENV{'HOME'}/.config/openbox/menu.xml";
 my @menu_prefix         = ("/etc", "/usr/etc", "/usr/local/etc");
 my $dflt_menu           = "xdg/openbox/menu.xml";
-my $fallback_icon_theme = "hicolor";
-my ($progname, $icon_theme, $xterm);
+my $default_theme       = "hicolor";
+my ($progname, $icon_theme, $fallback_icon_theme, $xterm);
 my (@ob_menu, @blacklist, @apps, @icon_search_paths);
 my %cats_hash;
-
 ##############################################################################
+
 sub Xerr {
 	my ($ret, $msg) = @_;
 	$msg = "$progname: $msg";
 	print STDERR "$msg\n";
-	unless (system("notify-send -u critical \"$msg\"") == 0) {
-		system("xmessage \"$msg\"") if (system("gmessage \"$msg\"") == -1);
+	unless (system(qq(notify-send -u critical "$msg")) == 0) {
+		system(qq(xmessage "$msg")) if (system(qq(gmessage "$msg")) == -1);
 	}
 	exit($ret);
 }
@@ -235,16 +231,15 @@ sub lookup_icon_theme {
 	my $fh;
 	local $_;
 
-	$icon_theme = "";
 	foreach my $path (@toolkit_config_paths) {
 		open($fh, '<', $path) or next;
 		foreach (<$fh>) {
 			if (/^gtk-icon-theme-name\s*=\s*\"(.+)\"/) {
-				$icon_theme = $1;
+				$icon_theme = $1 if (!$icon_theme);
 			} elsif (/^gtk-fallback-icon-theme\s*=\s*\"(.+)\"/) {
-				$fallback_icon_theme = $1;
+				$fallback_icon_theme = $1 if (!$fallback_icon_theme);
 			} elsif (/^icon_theme\s*=\s*(.+)/) {
-				$icon_theme = $1;
+				$icon_theme = $1 if (!$icon_theme);
 			}
 		}
 		close($fh);
@@ -285,9 +280,6 @@ sub get_icon_search_paths {
 	my (@list, @icon_paths);
 	local $_;
 
-	if (!$icon_theme) {
-		lookup_icon_theme();
-	}
 	if (($dir = find_icon_theme_dir($icon_theme))) {
 		push @icon_paths, $dir;
 		my @inherits = get_inherits($dir);
@@ -324,19 +316,12 @@ sub get_icon_search_paths {
 sub find_icon {
 	my ($i, $ih, $p, $path, $dir, @inherit, @tmp);
 	my ($icon) = @_;
-	my @exts = ('.svg', '.png', '.xpm');
 	local $_;
 
 	if ($icon !~ /.*\.(svg|png|xpm)$/) {
-		for ($i = 0; $i < @exts; $i++) {
-			$p = $icon . $exts[$i];
-			foreach $dir (@icon_search_paths) {
-				return "$dir/$p" if (-f "$dir/$p");
-			}
-			foreach $dir (@icon_search_paths) {
-				foreach (glob(qq(${dir}/${icon}*))) {
-					return "$_" if (-f "$_");
-				}
+		foreach $dir (@icon_search_paths) {
+			foreach (glob(qq(${dir}/${icon}*))) {
+				return "$_" if (-f "$_");
 			}
 		}
 	} else {
@@ -667,17 +652,20 @@ sub getargs {
 }
 
 sub usage {
-	print STDERR "Usage: $progname [-i theme] -u|-n|-a [-p delay]\n" .
-			 "-a   : Monitor application directories and autoupdate menu.\n" .
-			 "-p   : Instead of kqueue use stat to poll for changes every " .
-			 "'delay' seconds.\n" .
-			 "-u   : Update your Openbox menu.\n" .
-		     "-n   : Create a new Openbox menu. Your old menu.xml " .
-			 "will be overwritten!\n" .
-			 "-i   : Use the given icon theme.\n";
+	my @utext = (<<"UTEXT_END" =~ m/^\t*(.+)/gm);
+	Usage: $progname [-i theme] [-I <fallback theme>] -u|-n|-a [-p delay]
+	-a   : Monitor application directories and autoupdate menu.
+	-p   : Instead of kqueue use stat to poll for changes every 'delay' seconds.
+	-u   : Update your Openbox menu.
+	-n   : Create a new Openbox menu. Your old menu.xml
+	       will be overwritten!
+	-i   : Use the given icon theme.
+	-I   : Use the given fallback icon theme.
+UTEXT_END
+	foreach (@utext)
+		{ print "$_\n" }
 	exit(1);
 }
-
 ##############################################################################
 my ($aflag, $nflag, $uflag, $pflag, $delay, $update);
 my ($path, $kq, $lock);
@@ -701,7 +689,7 @@ foreach (@menu_prefix) {
 	}
 }
 
-while ((my ($flag, @args) = getargs(qw(n 0 h 0 u 0 a 0 p 1 i 1)))) {
+while ((my ($flag, @args) = getargs(qw(n 0 h 0 u 0 a 0 p 1 i 1 I 1)))) {
 	usage()	   if ($flag eq 'h');
 	$aflag = 1 if ($flag eq 'a');
 	$uflag = 1 if ($flag eq 'u');
@@ -711,6 +699,8 @@ while ((my ($flag, @args) = getargs(qw(n 0 h 0 u 0 a 0 p 1 i 1)))) {
 		$delay = $args[0];
 	} elsif ($flag eq 'i') {
 		$icon_theme = $args[0];
+	} elsif ($flag eq 'I') {
+		$fallback_icon_theme = $args[0];
 	}
 }
 
@@ -722,28 +712,6 @@ if ($aflag == 0) {
 	usage();
 } elsif ($pflag && !$aflag) {
 	usage();
-}
-
-if ($nflag == 1) {
-	# Create a new menu.
-	@ob_menu = ();
-	push @ob_menu, '<?xml version="1.0" encoding="UTF-8"?>';
-	push @ob_menu, '<openbox_menu xmlns="http://openbox.org/3.4/menu">';
-	push @ob_menu, '<menu id="root-menu" label="Openbox 3">';
-	push @ob_menu, '<separator />' . "\n";
-	push @ob_menu, '<menu id="client-list-menu" />';
-	push @ob_menu, '<separator />';
-	push @ob_menu, '<item label="Reconfigure">';
-	push @ob_menu, '<action name="Reconfigure" />';
-	push @ob_menu, '</item>';
-	push @ob_menu, '<separator />';
-	push @ob_menu, '<item label="Exit">';
-	push @ob_menu, '<action name="Exit" />';
-	push @ob_menu, '</item>';
-	push @ob_menu, '</menu>';
-	push @ob_menu, '</openbox_menu>';
-} elsif (!$aflag) {
-	read_obmenu();
 }
 
 # Remove non-existing paths
@@ -785,8 +753,33 @@ if ($aflag) {
 	}
 }
 
-read_blacklist();
+if ($nflag == 1) {
+	@ob_menu = (<<"OBMENU_END" =~ m/^\s*(.+)/gm);
+	<?xml version="1.0" encoding="UTF-8"?>
+	<openbox_menu xmlns="http://openbox.org/3.4/menu">
+	<menu id="root-menu" label="Openbox 3">
+	<separator />
+	<menu id="client-list-menu" />
+	<separator />
+	<item label="Reconfigure">
+	<action name="Reconfigure" />
+	</item>
+	<separator />
+	<item label="Exit">
+	<action name="Exit" />
+	</item>
+	</menu>
+	</openbox_menu>
+OBMENU_END
+} elsif (!$aflag) {
+	read_obmenu();
+}
+
+lookup_icon_theme();
+$icon_theme          = $default_theme if (!$icon_theme);
+$fallback_icon_theme = $default_theme if (!$fallback_icon_theme);
 get_icon_search_paths();
+read_blacklist();
 
 while (1) {
 	if ($aflag) {
