@@ -46,6 +46,7 @@
 static QString cfg_swap	     = "2048";
 static QString cfg_username  = "settler";
 static QString cfg_lenovofix = "0";
+static QString cfg_autologin = "0";
 static QString cfg_fs	     = "UFS";
 static QString cfg_disk;
 static QString cfg_disk_descr;
@@ -117,6 +118,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	diskls		    = new QListWidget(this);
 	usernamele	    = new QLineEdit;
 	lenovofixCb	    = new QCheckBox;
+	autologinCb	    = new QCheckBox;
 	QVBoxLayout *vbox   = new QVBoxLayout;
 	QLabel	    *dlabel = new QLabel;
 	QLabel	    *slabel = new QLabel;
@@ -210,7 +212,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	usernamele->setMaxLength(8);
 	usernamele->setValidator(new QRegExpValidator(chars));
 	usernamele->setPlaceholderText(cfg_username);
-
+	autologinCb->setText(tr("Auto-login user"));
 	status->setStyleSheet("font-weight: bold; color: red");	
 	info->setText(tr("<i>* The installation script will adopt nomad's " \
 			  "complete account. Only the username changes.</i>"));
@@ -218,6 +220,7 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 
 	vbox->addWidget(ulabel);
 	vbox->addWidget(usernamele);
+	vbox->addWidget(autologinCb);
 	vbox->addWidget(status);
 	vbox->addWidget(info);
 	setLayout(vbox);
@@ -233,6 +236,8 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	    SLOT(usernameChanged(const QString &)));
 	connect(lenovofixCb, SIGNAL(stateChanged(int)), this,
 		SLOT(lenovofixChanged(int)));
+	connect(autologinCb, SIGNAL(stateChanged(int)), this,
+		SLOT(autologinChanged(int)));
 	connect(rbUFS, SIGNAL(clicked(bool)), this,
 		SLOT(ufsClicked(bool)));
 	connect(rbZFS, SIGNAL(clicked(bool)), this,
@@ -277,7 +282,12 @@ void SettingsPage::readUsernames()
 	}
 	file.close();
 }
-	
+
+void SettingsPage::autologinChanged(int state)
+{
+	cfg_autologin.setNum(state);
+}
+
 void SettingsPage::usernameChanged(const QString &username)
 {
 	cfg_username = username;
@@ -338,8 +348,10 @@ SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 
 void SummaryPage::initializePage()
 {
-	QString lfstate = 
+	QString lfstate =
 		(cfg_lenovofix.toInt(0, 10) == 0 ? tr("No") : tr("Yes"));
+	QString alstate =
+		(cfg_autologin.toInt(0, 10) == 0 ? tr("No") : tr("Yes"));
 	struct summary_s {
 		QString key;
 		QString val;
@@ -347,6 +359,7 @@ void SummaryPage::initializePage()
 		{ tr("Target disk:"),  cfg_disk_descr },
 		{ tr("Swap (in MB):"), cfg_swap       },
 		{ tr("Username:"),     cfg_username   },
+		{ tr("Auto-login:"),   alstate	      },
 		{ tr("Filesystem:"),   cfg_fs	      },
 		{ tr("Lenovofix:"),    lfstate	      }
 	};
@@ -405,11 +418,12 @@ void CommitPage::initializePage()
 	if (msgBox.clickedButton() == leave) {
 		std::exit(0);
 	}
-	QString cmd = QString("%1 -u %2 -d %3 -s %4 -f %5 %6")
+	QString cmd = QString("%1 -u %2 -d %3 -s %4 -f %5 %6 %7")
 			.arg(BACKEND_COMMIT)
 			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap)
 			.arg(cfg_fs)
-			.arg(cfg_lenovofix.toInt(0, 10) != 0 ? "-l" : "");
+			.arg(cfg_lenovofix.toInt(0, 10) != 0 ? "-l" : "")
+			.arg(cfg_autologin.toInt(0, 10) != 0 ? "-a" : "");
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(cmd);
 	pid = (pid_t)proc.processId();

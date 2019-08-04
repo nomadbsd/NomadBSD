@@ -160,6 +160,21 @@ mkzfs() {
 	zpool set bootfs=${NOMADBSDROOT} zroot
 }
 
+set_autologin() {
+	path_slim="/mnt/usr/local/etc/slim.conf"
+	awk -v user=$username -v autologin=${autologin:=0} '
+		! /^default_user/ && ! /^auto_login/ {
+			print $0;
+		}
+	END {
+		if (autologin) {
+			printf("default_user%+11s\n", user);
+			printf("auto_login%+13s\n", "yes");
+		}
+	}' < $path_slim > $path_slim.tmp
+	mv $path_slim.tmp $path_slim
+}
+
 commit() {
 	status "Creating GPT partition scheme ..."
 	gpart destroy -F ${disk}
@@ -264,7 +279,6 @@ commit() {
 	status "Changing username ..."
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
-	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
 	sysrc -f /mnt/etc/rc.conf -x local_startup
@@ -296,6 +310,7 @@ commit() {
 	mv /mnt/home/nomad /mnt/home/${username}
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+	set_autologin
 	status "Unmounting /mnt ..."
 	if [ ${fstype} = "ZFS" ]; then
 		zfs umount -af
@@ -339,6 +354,7 @@ usage() {
 	echo "       no swap partition will be created."
 	echo "-u     Define the username to replace nomad."
 	echo "-l     Set lenovofix."
+	echo "-a     Auto-login user (Slim)."
 	exit 1
 }
 
@@ -379,6 +395,9 @@ elif [ $1 = "commit" ]; then
 				bail "Unknown filesystem type '$fstype'"
 			fi
 			shift
+			;;
+		-a)
+			autologin=1
 			;;
 		-*)
 			usage
