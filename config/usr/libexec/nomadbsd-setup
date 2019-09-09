@@ -266,7 +266,7 @@ sub bootstrap_gui {
 	my $path_scfb_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
 	my $path_vesa_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms);
-	my @spinner = ('   ', '.  ', '.. ', '...');
+	my @spinner = qw(| / - \\);
 
 	STDOUT->autoflush(1);
 	print "Creating font cache. This might take a moment. " .
@@ -276,8 +276,8 @@ sub bootstrap_gui {
 	} else {
 		my $n = 0;
 		while (waitpid(-1, WNOHANG) >= 0) {
-			print "\rPlease wait$spinner[$n++]";
-			usleep(500000);
+			print "\rPlease wait [$spinner[$n++]]";
+			usleep(200000);
 			$n = $n % @spinner;
 		}
 	}
