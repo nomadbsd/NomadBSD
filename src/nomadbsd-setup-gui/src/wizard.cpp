@@ -85,7 +85,15 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 
 void SetupWizard::accept()
 {
+	QMessageBox msgBox;
+	msgBox.setWindowModality(Qt::WindowModal);
+	msgBox.setText(tr("Rebooting. Please wait ..."));
+	msgBox.setWindowTitle(tr("Rebooting"));
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowIcon(msgBox.iconPixmap());
+	msgBox.setStandardButtons(0);
 	system(REBOOT_CMD);
+	msgBox.exec();
 	QDialog::accept();
 }
 
