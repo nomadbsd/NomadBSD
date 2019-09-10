@@ -20,6 +20,7 @@ video/x-matroska=mpv.desktop
 video/mpeg=mpv.desktop
 video/x-msvideo=mpv.desktop
 video/mp4=mpv.desktop
+video/webm=mpv.desktop
 x-scheme-handler/http=BROWSER
 x-scheme-handler/https=BROWSER
 x-scheme-handler/ftp=BROWSER
