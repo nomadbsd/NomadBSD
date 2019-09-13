@@ -349,8 +349,6 @@ buildkernel()
 	local makeopts="KERNCONF=NOMADBSD ${BUILDKERNEL_OPTS}"
 	      makeopts="${makeopts} WITHOUT_MODULES=\"${WITHOUT_KMODS}\""
 	local regx="/DEBUG=-g/d; /WITH_CTF=1/d; /^ident.*GENERIC/d;"
-	      regx="${regx}/^options.*DDB/d; /^options.*KDB/d;"
-	      regx="${regx}/^options.*GDB/d; ${regex}/^options.*WITNESS.*/d;"
 	sed -e "${regx}" < ${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
 	KERNELOPTS >> ${KERNCONF_NOMADBSD}
 	if [ "${ARCH}" = "i386" ]; then
