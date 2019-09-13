@@ -121,6 +121,9 @@ initbase()
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
 	insthandbook
 	instusrcfg
+	if (echo ${RELEASE} | grep -q 'CURRENT'); then
+		sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
+	fi
 }
 
 mkfontpaths()
