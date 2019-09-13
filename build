@@ -532,8 +532,8 @@ createuzip()
 		bail
 	fi
 	blksize=$((${FRAGSIZE} * 8))
-	uzipsz=$(estimgsize "${SYSDIR}/usr/local")
-
+	uzipsz=$(du -mc -B ${FRAGSIZE} "${SYSDIR}/usr/local" | tail -1 | cut -f 1)
+	uzipsz=$((${uzipsz} + ${uzipsz} * 2 / 100))
 	touch ${UZIP_IMAGE}.img
 	mddev=$(mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s ${uzipsz}m) || bail
 	newfs -O 1 -o space -m 0 -b ${blksize} -f ${FRAGSIZE} \
