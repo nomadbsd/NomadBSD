@@ -747,6 +747,23 @@ help()
 
 [ $# -lt 1 ] && usage
 
+if ! which mkfontscale >/dev/null;  then
+	echo "Please install x11-fonts/mkfontscale"
+	exit 1
+fi
+if ! which markdown >/dev/null; then
+	echo "Please install textproc/markdown"
+	exit 1
+fi
+if ! which git >/dev/null; then
+	echo "Please install devel/git"
+	exit 1
+fi
+if [ ! -f /usr/ports/Makefile ]; then
+	echo "Please install the FreeBSD ports tree under /usr/ports"
+	exit 1
+fi
+
 trap bail SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
