@@ -547,7 +547,14 @@ createuzip()
 	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
-	mkuzip -Z -j 2 -d -s 19456 -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
+	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
+	if [ "${mversion}" = "13" ]; then
+		mkuzip -Z -j $(sysctl -n hw.ncpu) -d -s 19456 -A zstd -C 19 \
+				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
+	else
+		mkuzip -Z -j $(sysctl -n hw.ncpu) -d -s 19456 \
+				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
+	fi
 }
 
 createpatch()
