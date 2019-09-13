@@ -709,7 +709,8 @@ all()
 resumebuild()
 {
 	local i stages stage_found failed_stage
-	stages="updatebase buildkernel instpkgs instgit build_setupgui instports"
+	stages="updatebase buildkernel instpkgs instgit build_setupgui"
+	stages="${stages} build_installgui instports"
 	stages="${stages} builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
