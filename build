@@ -123,6 +123,7 @@ initbase()
 	instusrcfg
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
+		rm -f "${SYSDIR}/usr/local/etc/X11/xorg.conf.d/wacom.conf"
 	fi
 }
 
