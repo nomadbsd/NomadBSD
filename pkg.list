@@ -64,8 +64,8 @@ print/hplip
 print/qpdfview
 russian/aspell
 russian/hunspell
-security/fpm2
 security/gnupg
+security/keepassxc
 security/nmap
 security/pidgin-otr
 security/sudo
