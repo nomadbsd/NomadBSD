@@ -480,7 +480,11 @@ createimage()
 			newfs_msdos -F 32 -c 1 /dev/${mddev}s${pn} || bail
 			mount -t msdosfs /dev/${mddev}s${pn} mnt || bail
 			mkdir -p mnt/EFI/BOOT || bail
-			cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+			if (echo ${RELEASE} | grep -q 'CURRENT'); then
+				cp ${SYSDIR}/boot/loader.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+			else
+				cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+			fi
 			umount mnt
 		fi
 		gpart add -t freebsd -s ${basesz}M ${mddev}
@@ -503,7 +507,11 @@ createimage()
 		newfs_msdos -F 32 -c 1 /dev/${mddev}p${pn} || bail
 		mount -t msdosfs /dev/${mddev}p${pn} mnt || bail
 		mkdir -p mnt/EFI/BOOT || bail
-		cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+		if (echo ${RELEASE} | grep -q 'CURRENT'); then
+			cp ${SYSDIR}/boot/loader.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+		else
+			cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
+		fi
 		umount mnt
 		gpart add -t freebsd-ufs -l ${ROOTLABEL} -s ${basesz}M ${mddev} || bail
 		pn=$((${pn} + 1))
