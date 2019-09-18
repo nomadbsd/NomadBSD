@@ -54,7 +54,6 @@ static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
 static QString cfg_geli_password;
-static QString cfg_browser;
 static QString cfg_editor;
 static QString cfg_gui_editor;
 static QString cfg_email_client;
@@ -845,7 +844,6 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
 		{ BACKEND_GET_GUIEDITORS,   &cfg_gui_editor,   &guiEditors   },
 		{ BACKEND_GET_EMAILCLIENTS, &cfg_email_client, &emailClients },
-		{ BACKEND_GET_BROWSERS,     &cfg_browser,      &browsers     },
 		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
 
 	};
@@ -915,13 +913,13 @@ void ProgramsPage::initializePage()
 {
 	QString label[ncats] = {
 		tr("Shell"),	    tr("Editor"), tr("GUI Editor"),
-		tr("Email client"), tr("Web browser"), tr("File manager")
+		tr("Email client"), tr("File manager")
 	};
 	for (int n = 0; n < ncats; n++)
 		catLabel[n]->setText(label[n]);
 	title->setText(tr("Choose your default applications\n"));
 	intro->setText(tr("Please choose your preferred shell, editors, " \
-			  "browser, and email client\n"));
+			  "and email client\n"));
 }
 
 QString ProgramsPage::getBoxVal(QComboBox *box)
@@ -933,7 +931,6 @@ void ProgramsPage::selectionChanged(int /* unused */)
 {
 	cfg_shell	 = getBoxVal(shells);
 	cfg_editor	 = getBoxVal(editors);
-	cfg_browser	 = getBoxVal(browsers);
 	cfg_gui_editor	 = getBoxVal(guiEditors);
 	cfg_email_client = getBoxVal(emailClients);
 	cfg_file_manager = getBoxVal(fileManagers);
@@ -983,7 +980,6 @@ void SummaryPage::initializePage()
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
 		{ tr("Email client:"),			cfg_email_client   },
-		{ tr("Web browser:"),			cfg_browser	   },
 		{ tr("File manager:"),			cfg_file_manager   },
 	};
 	for (int n = 0; n < nkeys; n++) {
@@ -1040,7 +1036,6 @@ void CommitPage::initializePage()
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
 		{ "cfg_gui_editor",	cfg_gui_editor	  },
-		{ "cfg_browser",	cfg_browser	  },
 		{ "cfg_email_client",	cfg_email_client  },
 		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }

@@ -304,14 +304,13 @@ private:
 protected:
 	void initializePage(void);
 private:
-	static const int ncats = 6;
+	static const int ncats = 5;
 	QLabel	  *catLabel[ncats];
 	QLabel	  *intro;
 	QLabel	  *title;
 	QComboBox *shells;
 	QComboBox *editors;
 	QComboBox *guiEditors;
-	QComboBox *browsers;
 	QComboBox *emailClients;
 	QComboBox *fileManagers;
 };
@@ -329,7 +328,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 11;
+	static const int nkeys = 10;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *title;
