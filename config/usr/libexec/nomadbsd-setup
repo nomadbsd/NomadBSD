@@ -53,7 +53,6 @@ my $cfg_kbdlayout;
 my $cfg_kbdvariant;
 my $cfg_editor;
 my $cfg_gui_editor;
-my $cfg_email_client;
 my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
@@ -82,11 +81,6 @@ my @gui_editor_list = (
 	'leafpad	GTK+ based simple text editor',
 	'gvim		Vim with a GTK+ frontend',
 	'vim		Vim running in a X terminal'
-);
-
-my @email_client_list = (
-	'sylpheed	Lightweight, featureful, and fast GTK+ based e-mail client',
-	'thunderbird	Mozilla Thunderbird is standalone mail and news'
 );
 
 my %locales = (
@@ -747,7 +741,7 @@ sub desktopsettings {
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
 	
 	my @apps = (
-		'home', 'sakura', 'firefox', $cfg_email_client,
+		'home', 'sakura', 'firefox', 'sylpheed',
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
 		'mpv', 'gimp', 'octopkg', 'leave'
 	);
@@ -770,8 +764,7 @@ sub desktopsettings {
 	}
 	close($fh);
 
-	# Create "plank" dock items for e-mail client, filemanager,
-	# gimp, vlc, terminal, etc.
+	# Create "plank" dock items for filemanager, gimp, vlc, terminal, etc.
 	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
 	foreach (@apps) {
 		my $desktopfile = "$appsdir/$_.desktop";
@@ -796,7 +789,7 @@ sub desktopsettings {
 	close($fh);
 	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/EMAILCLIENT/${cfg_email_client}.desktop/g' " .
+	system("sed -i .bak -E 's/EMAILCLIENT/sylpheed.desktop/g' " .
 		   "${mimelist}");
 	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
 		   "${mimelist}");
@@ -870,7 +863,6 @@ sub commit {
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
 		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
-		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
 		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
 			@cfg_xkbdlayouts = split(/,/, $1);
 		}
@@ -966,7 +958,6 @@ sub usage {
 		  "COMMANDS\n" .
 		  "locales        Print list of locales\n" .
 		  "filemanagers   Print a list of file managers\n" .
-		  "emailclients   Print a list of email client\n" .
 		  "editors        Print a list of editors\n" .
 		  "guieditors     Print a list of GUI editors\n" .
 		  "kbdmodels      Print a list of X keyboard models\n" .
@@ -1066,9 +1057,6 @@ while (@ARGV) {
 		exit 0;
 	} elsif ($ARGV[0] eq "editors") {
 		print_array_data(\@editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "emailclients") {
-		print_array_data(\@email_client_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "guieditors") {
 		print_array_data(\@gui_editor_list);
