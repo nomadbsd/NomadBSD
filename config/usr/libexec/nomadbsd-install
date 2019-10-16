@@ -76,11 +76,18 @@ devlist() {
 		split($0, a, "[<>]"); descr = a[2];
 		n = split($NF, a, "[,()]");
 		for (i = 2; i <= n; i++) {
-			if (a[i] ~ /(ada|da|nvd)[0-9]/) {
+			if (a[i] ~ /(ada|da)[0-9]/) {
 				printf("%s|%s\n", a[i], descr);
 			}
 		}
-	}')
+	}';
+		nvmecontrol devlist | awk '/^nvme[0-9]:/ {
+			n = split($0, a, ":");
+			sub(/^nvme/, "nvd", a[1]);
+			sub(/^[ \t]*/, "", a[2]);
+			printf("%s|%s\n", a[1], a[2]);
+		}'
+	)
 	if [ -n "${rootdev}" ]; then
 		echo "$list" | grep -v "^${rootdev}"
 	else
