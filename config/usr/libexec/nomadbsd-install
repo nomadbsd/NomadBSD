@@ -81,9 +81,9 @@ devlist() {
 			}
 		}
 	}';
-		nvmecontrol devlist | awk '/^nvme[0-9]:/ {
+		nvmecontrol devlist | awk '/^[ \t]*nvme[0-9]:/ {
 			n = split($0, a, ":");
-			sub(/^nvme/, "nvd", a[1]);
+			sub(/^[ \t]*nvme/, "nvd", a[1]);
 			sub(/^[ \t]*/, "", a[2]);
 			printf("%s|%s\n", a[1], a[2]);
 		}'
