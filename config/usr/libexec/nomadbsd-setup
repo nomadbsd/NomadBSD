@@ -640,6 +640,8 @@ sub mkhome {
 	system("mkdir /home/nomad") == 0
 		or bail("Couldn't create /home/nomad");
 	system("chown nomad:nomad /home/nomad");
+	status("Creating /home/freebsd-update");
+	system("mkdir /home/freebsd-update");
 	status("Adding fstab entry for /home");
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "$dev\t/home\t\t\tufs\trw,noatime\t1 1\n";

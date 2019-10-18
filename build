@@ -186,6 +186,9 @@ createbase()
 
 updatebase()
 {
+	if [ ! -d "${SYSDIR}"/home/freebsd-update ]; then
+		mkdir "${SYSDIR}"/home/freebsd-update
+	fi
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f config/etc/freebsd-update.conf -b "${SYSDIR}" fetch && \
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
