@@ -252,6 +252,12 @@ instpkgs()
 	fi
 	export ASSUME_ALWAYS_YES=yes
 	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
+
+	# Lock all kernel module packages to prevent kernel version mismatch
+	# problems when updating packages on CURRENT.
+	if (echo ${RELEASE} | grep -q 'CURRENT'); then
+		pkg -c "${SYSDIR}" lock -y '*-kmod-*'
+	fi
 	umount "${SYSDIR}/dev"
 	buildnvidia
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
