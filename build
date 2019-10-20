@@ -353,6 +353,11 @@ instports()
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
 			OPTIONS_UNSET=DOCS clean deinstall install" || bail
 	done
+	# Lock all kernel module packages to prevent kernel version mismatch
+	# problems when updating packages on CURRENT.
+	if (echo ${RELEASE} | grep -q 'CURRENT'); then
+		pkg -c "${SYSDIR}" lock -y '*-kmod-*'
+	fi
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
 }
