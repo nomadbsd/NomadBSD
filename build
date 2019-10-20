@@ -256,7 +256,7 @@ instpkgs()
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
-		pkg -c "${SYSDIR}" lock -y '*-kmod-*'
+		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
 	umount "${SYSDIR}/dev"
 	buildnvidia
@@ -356,7 +356,7 @@ instports()
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
-		pkg -c "${SYSDIR}" lock -y '*-kmod-*'
+		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
