@@ -32,6 +32,7 @@
 #include <QTranslator>
 #include <QCoreApplication>
 #include <QScrollArea>
+#include <QShortcut>
 #include <QFontMetricsF>
 #include "wizard.h"
 #include "backend.h"
@@ -53,10 +54,8 @@ static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
 static QString cfg_geli_password;
-static QString cfg_browser;
 static QString cfg_editor;
 static QString cfg_gui_editor;
-static QString cfg_email_client;
 static QString cfg_file_manager;
 static QStringList cfg_xkbdlayouts;
 static QStringList cfg_xkbdvariants;
@@ -84,7 +83,15 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 
 void SetupWizard::accept()
 {
+	QMessageBox msgBox;
+	msgBox.setWindowModality(Qt::WindowModal);
+	msgBox.setText(tr("Rebooting. Please wait ..."));
+	msgBox.setWindowTitle(tr("Rebooting"));
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowIcon(msgBox.iconPixmap());
+	msgBox.setStandardButtons(0);
 	system(REBOOT_CMD);
+	msgBox.exec();
 	QDialog::accept();
 }
 
@@ -106,6 +113,7 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo.png"));
 	setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 	layout->addWidget(title);
@@ -170,6 +178,7 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
 	}
 	label->setStyleSheet("font-weight: bold;");
 	label->setText(tr("Please select your language/locale"));
+	label->setAlignment(Qt::AlignHCenter);
 
 	vbox->addWidget(label);
 	vbox->addWidget(localels);
@@ -203,6 +212,7 @@ void LocalePage::localeSelected(int row)
 //////////////////////////////////////////////////////////////////////////////
 KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 {
+	title		    = new QLabel;
 	info		    = new QLabel;
 	llabel		    = new QLabel;
 	vlabel		    = new QLabel;
@@ -280,12 +290,15 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	info->setWordWrap(true);
 	info->setAlignment(Qt::AlignHCenter);
 	llabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
 	tlabel->setStyleSheet("font-weight: bold;");
 
+	layout->addWidget(title);
 	layout->addWidget(info);
 	lvbox->addWidget(llabel);
 	lvbox->addWidget(layoutls);
@@ -367,8 +380,11 @@ void KbdLayoutPage::initializePage()
 		if (reg == l) {
 			layoutls->setCurrentRow(n);
 			break;
-		}
+		} else if (l == "us")
+			// Select the "us" layout if there is no match.
+			layoutls->setCurrentRow(n);
 	}
+	title->setText(tr("Default keyboard layout"));
 	info->setText(tr("Please choose a latin layout as system default " \
 			 "here. The next screens allows you to add "	   \
 			 "additional keyboard layouts."));
@@ -384,6 +400,7 @@ void KbdLayoutPage::initializePage()
 //////////////////////////////////////////////////////////////////////////////
 ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 {
+	title		    = new QLabel;
 	info		    = new QLabel;
 	llabel		    = new QLabel;
 	xllabel		    = new QLabel;
@@ -466,12 +483,15 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	info->setWordWrap(true);
 	info->setAlignment(Qt::AlignHCenter);
 	llabel->setStyleSheet("font-weight: bold;");
 	xllabel->setStyleSheet("font-weight: bold;");
 	vlabel->setStyleSheet("font-weight: bold;");
 	//tlabel->setStyleSheet("font-weight: bold;");
+	layout->addWidget(title);
 	layout->addWidget(info);
 
 	lvbox->addWidget(llabel);
@@ -493,6 +513,7 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	layout->addLayout(xlvbox);
 	setLayout(layout);
 
+	new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(removeLayout()));
 	connect(layoutls, SIGNAL(currentRowChanged(int)), this,
 	    SLOT(kbdLayoutSelected(int)));
 	connect(addBt, SIGNAL(clicked()), this, SLOT(addLayout()));
@@ -575,18 +596,23 @@ void ExtraKbdLayoutPage::removeLayout()
 void ExtraKbdLayoutPage::initializePage()
 {
 	//
-	// Select the first layout matching the region code.
+	// Select the first layout matching the region code unless it
+	// matches the default keyboard layout.
 	//
 	QString reg = cfg_region.toLower();
-	for (int n = 0; n < layoutls->count(); n++) {
-		QString l = layoutls->item(n)->data(Qt::UserRole).toString();
-		if (reg == l) {
-			layoutls->setCurrentRow(n);
-			break;
+	if (cfg_kbdlayout != reg) {
+		for (int n = 0; n < layoutls->count(); n++) {
+			QString l;
+			l = layoutls->item(n)->data(Qt::UserRole).toString();
+			if (reg == l) {
+				layoutls->setCurrentRow(n);
+				break;
+			}
 		}
 	}
 	addBt->setText(tr("Add layout"));
 	removeBt->setText(tr("Remove layout"));
+	title->setText(tr("Additional keyboard layouts"));
 	info->setText(tr("Here you can add additional keyboard layouts. " \
 			 "You can switch between them from the NomadBSD " \
 			 "desktop."));
@@ -643,6 +669,7 @@ TimezonePage::TimezonePage(QWidget *parent) : QWizardPage(parent)
 		    .arg(BACKEND_GET_TIMEZONES));
 	}
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	vbox->addWidget(title);
 	vbox->addWidget(timezonels);
 	setLayout(vbox);
@@ -686,6 +713,7 @@ PasswordPage::PasswordPage(QWidget *parent) : QWizardPage(parent)
 	QVBoxLayout *layout = new QVBoxLayout;
 
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 	intro->setWordWrap(true);
 	layout->addWidget(title);
 	layout->addWidget(intro);
@@ -737,6 +765,8 @@ GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
 	QVBoxLayout *containerBox = new QVBoxLayout(passContainer);
 
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
+
 	intro->setWordWrap(true);
 	containerBox->addWidget(pwdLabel);
 	containerBox->addWidget(pass);
@@ -812,8 +842,6 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		{ BACKEND_GET_SHELLS,	    &cfg_shell,        &shells       },
 		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
 		{ BACKEND_GET_GUIEDITORS,   &cfg_gui_editor,   &guiEditors   },
-		{ BACKEND_GET_EMAILCLIENTS, &cfg_email_client, &emailClients },
-		{ BACKEND_GET_BROWSERS,     &cfg_browser,      &browsers     },
 		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
 
 	};
@@ -823,6 +851,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
 
 	for (int n = 0; n < ncats; n++) {
 		QProcess   proc;
@@ -881,14 +910,13 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 void ProgramsPage::initializePage()
 {
 	QString label[ncats] = {
-		tr("Shell"),	    tr("Editor"), tr("GUI Editor"),
-		tr("Email client"), tr("Web browser"), tr("File manager")
+		tr("Shell"), tr("Editor"), tr("GUI Editor"), tr("File manager")
 	};
 	for (int n = 0; n < ncats; n++)
 		catLabel[n]->setText(label[n]);
 	title->setText(tr("Choose your default applications\n"));
 	intro->setText(tr("Please choose your preferred shell, editors, " \
-			  "browser, and email client\n"));
+			  "and filemanager\n"));
 }
 
 QString ProgramsPage::getBoxVal(QComboBox *box)
@@ -900,9 +928,7 @@ void ProgramsPage::selectionChanged(int /* unused */)
 {
 	cfg_shell	 = getBoxVal(shells);
 	cfg_editor	 = getBoxVal(editors);
-	cfg_browser	 = getBoxVal(browsers);
 	cfg_gui_editor	 = getBoxVal(guiEditors);
-	cfg_email_client = getBoxVal(emailClients);
 	cfg_file_manager = getBoxVal(fileManagers);
 }
 
@@ -913,15 +939,21 @@ void ProgramsPage::selectionChanged(int /* unused */)
 //////////////////////////////////////////////////////////////////////////////
 SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 {
+	text		  = new QLabel;
+	title		  = new QLabel;
 	QFormLayout *form = new QFormLayout;
 	QVBoxLayout *vbox = new QVBoxLayout;
-	text = new QLabel;
+
+	title->setAlignment(Qt::AlignHCenter);
+	title->setStyleSheet("font-weight: bold;");
+
 	for (int n = 0; n < nkeys; n++) {
 		key[n]		  = new QLabel;
 		val[n]		  = new QLabel;
 		key[n]->setStyleSheet("font-weight: bold;");
 		form->addRow(key[n], val[n]);
 	}
+	vbox->addWidget(title);
 	vbox->addLayout(form);
 	vbox->addWidget(text);
 	setLayout(vbox);
@@ -937,20 +969,19 @@ void SummaryPage::initializePage()
 	} summary[] = {
 		{ tr("Locale:"),			cfg_localedescr	   },
 		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
-		{ tr("Add. keyboard layouts:"),		xkbdlayouts	   },
+		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
 		{ tr("Encrypt /home:"),			cfg_geli	   },
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
-		{ tr("Email client:"),			cfg_email_client   },
-		{ tr("Web browser:"),			cfg_browser	   },
 		{ tr("File manager:"),			cfg_file_manager   },
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
 		val[n]->setText(summary[n].val);
 	}
+	title->setText(tr("Summary\n"));
 	text->setText(tr("\n\nIf you click \"commit\", the changes " \
 			 "will be written to your USB flash drive"));
 	text->setWordWrap(true);
@@ -1000,8 +1031,6 @@ void CommitPage::initializePage()
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
 		{ "cfg_gui_editor",	cfg_gui_editor	  },
-		{ "cfg_browser",	cfg_browser	  },
-		{ "cfg_email_client",	cfg_email_client  },
 		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};

@@ -157,6 +157,7 @@ public slots:
 protected:
 	void initializePage();
 private:
+	QLabel	    *title;
 	QLabel	    *info;
 	QLabel	    *llabel;
 	QLabel	    *vlabel;
@@ -195,6 +196,7 @@ protected:
 private:
 	int	    lrow = -1;
 	int	    vrow = -1;
+	QLabel	    *title;
 	QLabel	    *info;
 	QLabel	    *llabel;
 	QLabel	    *xllabel;
@@ -302,15 +304,13 @@ private:
 protected:
 	void initializePage(void);
 private:
-	static const int ncats = 6;
+	static const int ncats = 4;
 	QLabel	  *catLabel[ncats];
 	QLabel	  *intro;
 	QLabel	  *title;
 	QComboBox *shells;
 	QComboBox *editors;
 	QComboBox *guiEditors;
-	QComboBox *browsers;
-	QComboBox *emailClients;
 	QComboBox *fileManagers;
 };
 
@@ -327,9 +327,10 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 11;
+	static const int nkeys = 9;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
+	QLabel *title;
 	QLabel *text;
 };
 

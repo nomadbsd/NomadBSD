@@ -76,11 +76,18 @@ devlist() {
 		split($0, a, "[<>]"); descr = a[2];
 		n = split($NF, a, "[,()]");
 		for (i = 2; i <= n; i++) {
-			if (a[i] ~ /(ada|da|nvd)[0-9]/) {
+			if (a[i] ~ /(ada|da)[0-9]/) {
 				printf("%s|%s\n", a[i], descr);
 			}
 		}
-	}')
+	}';
+		nvmecontrol devlist | awk '/^[ \t]*nvme[0-9]:/ {
+			n = split($0, a, ":");
+			sub(/^[ \t]*nvme/, "nvd", a[1]);
+			sub(/^[ \t]*/, "", a[2]);
+			printf("%s|%s\n", a[1], a[2]);
+		}'
+	)
 	if [ -n "${rootdev}" ]; then
 		echo "$list" | grep -v "^${rootdev}"
 	else
@@ -158,6 +165,21 @@ mkzfs() {
 	zfs_create -o atime=on -o exec=off -o setuid=off \
 		${NOMADBSDROOT}/var/mail
 	zpool set bootfs=${NOMADBSDROOT} zroot
+}
+
+set_autologin() {
+	path_slim="/mnt/usr/local/etc/slim.conf"
+	awk -v user=$username -v autologin=${autologin:=0} '
+		! /^default_user/ && ! /^auto_login/ {
+			print $0;
+		}
+	END {
+		if (autologin) {
+			printf("default_user%+11s\n", user);
+			printf("auto_login%+13s\n", "yes");
+		}
+	}' < $path_slim > $path_slim.tmp
+	mv $path_slim.tmp $path_slim
 }
 
 commit() {
@@ -264,7 +286,6 @@ commit() {
 	status "Changing username ..."
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
-	sed -i .bak -E "/^default_user/d" /mnt/usr/local/etc/slim.conf
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
 	sysrc -f /mnt/etc/rc.conf -x local_startup
@@ -296,6 +317,7 @@ commit() {
 	mv /mnt/home/nomad /mnt/home/${username}
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+	set_autologin
 	status "Unmounting /mnt ..."
 	if [ ${fstype} = "ZFS" ]; then
 		zfs umount -af
@@ -339,6 +361,7 @@ usage() {
 	echo "       no swap partition will be created."
 	echo "-u     Define the username to replace nomad."
 	echo "-l     Set lenovofix."
+	echo "-a     Auto-login user (Slim)."
 	exit 1
 }
 
@@ -379,6 +402,9 @@ elif [ $1 = "commit" ]; then
 				bail "Unknown filesystem type '$fstype'"
 			fi
 			shift
+			;;
+		-a)
+			autologin=1
 			;;
 		-*)
 			usage
