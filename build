@@ -125,6 +125,10 @@ initbase()
 		sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
 		rm -f "${SYSDIR}/usr/local/etc/X11/xorg.conf.d/wacom.conf"
 	fi
+	# Set boot menu position in ${SYSDIR}/boot/lua/drawer.lua
+	re="s/^menu_position =.*$/menu_position"
+	re="${re} = {x = ${MENU_POSITION_X}, y = ${MENU_POSITION_Y}}/"
+	sed -E -i '' "${re}" "${SYSDIR}"/boot/lua/drawer.lua
 }
 
 mkfontpaths()
