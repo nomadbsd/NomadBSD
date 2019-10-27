@@ -132,7 +132,7 @@ x11/dmenu
 x11/dsbautostart
 x11/gxkb
 x11/metalock
-x11/plank
+x11-wm/plank
 x11/sakura
 x11/setxkbmap
 x11/slim
