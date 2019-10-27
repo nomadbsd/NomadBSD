@@ -2,6 +2,11 @@
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/bin:/home/nomad/bin
 
 export QT_QPA_PLATFORMTHEME=gtk2
+#FIRSTRUN_START
+# Put everything to be run only on the first login here
+cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
+sed -i '' '/^#FIRSTRUN_START/,/^#FIRSTRUN_END/d' $0
+#FIRSTRUN_END
 
 #
 # Kill dbus services from a previous session in order to prevent hangs.
@@ -13,7 +18,6 @@ for s in 15 9; do
 	done
 done
 
-cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
 sh ~/.config/DSB/autostart.sh
 ############################################################################
 # Uncomment one of the following lines depending on the DE/WM you intend to
