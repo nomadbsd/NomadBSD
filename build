@@ -464,7 +464,24 @@ createimage()
  	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
 	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
 	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
-
+	if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
+		mkdir -p ${TMP_BASE_DIR}/unionfs/usr/local || bail
+		mv ${TMP_BASE_DIR}/etc/rc.d/mount_uzip.fuse \
+				${TMP_BASE_DIR}/etc/rc.d/mount_uzip || bail
+		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.fuse \
+				${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset || bail
+		rmdir ${TMP_BASE_DIR}/usr/local || bail
+		ln -s /unionfs/usr/local ${TMP_BASE_DIR}/usr/local || bail
+		awk '{
+			if (/^# Insert other /) {
+				print $0;
+				print "/etc/rc.d/mount_uzip stop"
+			} else
+				print $0
+		}' "${SYSDIR}/etc/rc.shutdown" > ${TMP_BASE_DIR}/etc/rc.shutdown
+	else
+		rm -f ${TMP_BASE_DIR}/etc/rc.d/mount_uzip.fuse || bail
+	fi
 	rm -rf "${TMP_BASE_DIR}/root/.subversion"
 	if [ ! -z ${mac} ]; then
 		echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
@@ -611,6 +628,25 @@ createpatch()
 	echo ${r} >> nomadbsd-patch.index
 }
 
+build_unionfs()
+{
+	[ "${USE_UNIONFS_FUSE}" != "YES" ] && return
+
+	if [ ! -d "${SYSDIR}/tmp/unionfs-fuse" ]; then
+		(cd "${SYSDIR}/tmp" && \
+			git clone https://github.com/nomadbsd/unionfs-fuse) || bail
+	else
+		(cd "${SYSDIR}/tmp/unionfs-fuse" && git pull) || bail
+	fi
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+		cd /tmp/unionfs-fuse && cmake . && make" || bail
+	umount "${SYSDIR}/dev"
+	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfs" "${SYSDIR}/usr/bin" || bail
+	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfsctl" "${SYSDIR}/usr/bin" || bail
+	cp "${SYSDIR}/tmp/unionfs-fuse/LICENSE" \
+		"${SYSDIR}/usr/local/share/licenses/unionfs-fuse" || bail
+}
+
 build_setupgui()
 {
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
@@ -708,9 +744,9 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit build_setupgui build_installgui instports "
-	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage "
-	stages="${stages} cleanup"
+	stages="instpkgs instgit build_setupgui build_installgui build_unionfs "
+	stages="${stages} instports builddrmlegacy postpkgcfg createuzip "
+	stages="${stages} createimage cleanup"
 
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -737,7 +773,7 @@ resumebuild()
 {
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
-	stages="${stages} build_installgui instports"
+	stages="${stages} build_installgui build_unionfs instports"
 	stages="${stages} builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
@@ -815,6 +851,7 @@ while [ $# -gt 0 ]; do
 	setupgui)	build_setupgui;;
 	installgui) build_installgui;;
 	src)		instsrcdist;;
+	unionfs)	build_unionfs;;
 	uzip)		createuzip;;
 	usrcfg)		instusrcfg;;
 	usrclean)	usrclean;;
