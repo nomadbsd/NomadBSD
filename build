@@ -491,6 +491,12 @@ createimage()
 		for i in ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac; do
 			mv $i ${i%.mac}
 		done
+		if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
+			mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac.fuse \
+				${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset || bail
+		else
+			rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac.fuse
+		fi
 		sed -i '' -E "s#@ROOTDEV@#/dev/gpt/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
 	else
