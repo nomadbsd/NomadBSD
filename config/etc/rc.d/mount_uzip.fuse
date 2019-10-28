@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# PROVIDE: mount_uzip
+# BEFORE: ldconfig NETWORKING
+# REQUIRE: FILESYSTEMS
+
+. /etc/rc.subr 
+name=mount_uzip
+start_cmd=do_mount_uzip
+stop_cmd=do_unmount
+
+required_modules="geom_uzip fusefs"
+spinner_pid=-1
+
+#
+# Make sure to kill the spinner if the script receives a signal
+#
+kill_spinner() {
+	[ ${spinner_pid} -gt -1 ] && kill -KILL ${spinner_pid}
+	exit 1
+}
+
+do_mount_uzip()
+{
+	if (mount | grep -q '/unionfs/usr/local'); then
+		# The uzip image is already mounted. Try to mount
+		# the unionfs.
+		do_mount_unionfs
+		return
+	fi
+	#
+	# Create a spinner to indicate progress
+	#
+	{
+		spinner="| / - \\ | / - \\"
+		while [ true ]; do
+			for i in ${spinner}; do
+				printf "\r"
+				# Use the alias'd echo from rc.subr
+				echo -n "Mounting uzip image [$i]"
+				sleep 0.2
+			done
+		done
+	}&
+	spinner_pid=$!
+	trap kill_spinner SIGINT SIGTERM SIGHUP
+	mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /unionfs/usr/local
+	kill ${spinner_pid}
+	echo
+	do_mount_unionfs
+}
+
+do_mount_unionfs()
+{
+	if (mount | grep -q ' /usr/local '); then
+		return
+	fi
+	# Create and mount a writeable directory to /usr/local using
+	# unionfs, so users can install packages.
+	if (mount | grep -qE '(/home |/private )'); then
+		if [ ! -d /home/pkgs ]; then
+			mkdir /home/pkgs
+		fi
+		unionfs -o cow,max_files=32768 \
+		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
+		        /unionfs/usr/local=RO:/home/pkgs=RW /usr/local
+		service ldconfig start
+	fi
+}
+
+do_unmount()
+{
+	if (mount | grep -q ' /usr/local '); then
+		echo "Unmounting /usr/local ..."
+		umount -f /usr/local
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"
+
