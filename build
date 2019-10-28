@@ -40,6 +40,8 @@
 #
 # installgui (Re)build and (re)install nomadbsd-install-gui
 #
+# unionfs	 (Re)build and (re)install unionfs-fuse
+#
 # usrcfg	 Install all files from nomad/ in ${SYSDIR]/home/nomad
 #
 # usrclean	 Remove all files from ${SYSDIR}/home/nomad
@@ -510,7 +512,7 @@ createimage()
 		dd if=/dev/zero of=/dev/${mddev} bs=1M count=100
 		gpart create -s mbr ${mddev}
 		if [ "${ARCH}" != "i386" ]; then
-			gpart add -t efi -s 40M ${mddev}
+			gpart add -a 4k -t efi -s 40M ${mddev}
 			pn=$(($pn + 1))
 			newfs_msdos -F 32 -c 1 /dev/${mddev}s${pn} || bail
 			mount -t msdosfs /dev/${mddev}s${pn} mnt || bail
@@ -522,7 +524,7 @@ createimage()
 			fi
 			umount mnt
 		fi
-		gpart add -t freebsd -s ${basesz}M ${mddev}
+		gpart add -t freebsd -a 4k -s ${basesz}M ${mddev}
 		pn=$(($pn + 1))
 		gpart create -s bsd ${mddev}s${pn}
 		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev}
@@ -537,7 +539,7 @@ createimage()
 		gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 		pn=$((${pn} + 1))
 		gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${pn} ${mddev} || bail
-		gpart add -t efi -l gpefiboot -s 200M ${mddev} || bail
+		gpart add -t efi -a 4k -l gpefiboot -s 200M ${mddev} || bail
 		pn=$((${pn} + 1))
 		newfs_msdos -F 32 -c 1 /dev/${mddev}p${pn} || bail
 		mount -t msdosfs /dev/${mddev}p${pn} mnt || bail
