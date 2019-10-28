@@ -40,6 +40,8 @@ resume      Continue where the build failed. Use this to resume from a failed
 
 setupgui    (Re)build and (re)install nomadbsd-setup-gui
 
+unionfs     (Re)build and (re)install unionfs-fuse
+
 uzip        Create uzip image.
 
 update      Update base system
