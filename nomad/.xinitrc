@@ -2,6 +2,32 @@
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/bin:/home/nomad/bin
 
 export QT_QPA_PLATFORMTHEME=gtk2
+
+uid=$(id -u)
+
+#
+# Check if ~/.cache is a symbolic link to a directory owned by the user.
+# If the link's target is not a directory or does not exist, create a
+# directory owned by the user under /tmp, and make ~/.cache a symbolic
+# link to it.
+#
+if [ -L ~/.cache ]; then
+	if [ -d ~/.cache ]; then
+		ownerid=$(stat -f %u ~/.cache)
+		if [ "${ownerid}" != "${uid}" ]; then
+			recreate_cache=1
+		fi
+	else
+		recreate_cache=1
+	fi
+	if [ "${recreate_cache}" = "1" ]; then
+		user=$(whoami)
+		unlink -f ~/.cache
+		cachedir=$(mktemp -d /tmp/${user}.XXXXXX)
+		ln -s ${cachedir} ~/.cache
+	fi
+fi
+
 #FIRSTRUN_START
 # Put everything to be run only on the first login here
 cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
@@ -11,7 +37,6 @@ sed -i '' '/^#FIRSTRUN_START/,/^#FIRSTRUN_END/d' $0
 #
 # Kill dbus services from a previous session in order to prevent hangs.
 #
-uid=$(id| sed -E 's/.*uid=([0-9]+).*/\1/')
 for s in 15 9; do
 	for p in dbus-launch gvfsd-fuse; do
 		pgrep -U ${uid} -q $p && pkill -$s $p
