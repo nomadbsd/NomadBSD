@@ -9,7 +9,6 @@ name=mount_uzip
 start_cmd=do_mount_uzip
 stop_cmd=do_unmount
 
-required_modules="geom_uzip fusefs"
 spinner_pid=-1
 
 #
@@ -27,6 +26,9 @@ do_mount_uzip()
 		# the unionfs.
 		do_mount_unionfs
 		return
+	fi
+	if (! kldstat -q -m geom_uzip); then
+		kldload geom_uzip 2>/dev/null
 	fi
 	#
 	# Create a spinner to indicate progress
@@ -60,6 +62,9 @@ do_mount_unionfs()
 	if (mount | grep -qE '(/home |/private )'); then
 		if [ ! -d /home/pkgs ]; then
 			mkdir /home/pkgs
+		fi
+		if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
+			kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
 		fi
 		unionfs -o cow,max_files=32768 \
 		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
