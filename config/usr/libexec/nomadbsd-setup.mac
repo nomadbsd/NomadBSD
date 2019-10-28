@@ -887,6 +887,11 @@ sub commit {
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
+	if (-l "/usr/local") {
+		status("Replacing symlink to /unionfs/usr/local by /usr/local");
+		system("unlink /usr/local && mkdir /usr/local") == 0
+			or bail("Couldn't create directory '/usr/local'");
+	}
 	exit 0;
 }
 
