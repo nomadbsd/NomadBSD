@@ -483,6 +483,7 @@ createimage()
 		}' "${SYSDIR}/etc/rc.shutdown" > ${TMP_BASE_DIR}/etc/rc.shutdown
 	else
 		rm -f ${TMP_BASE_DIR}/etc/rc.d/mount_uzip.fuse || bail
+		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.fuse || bail
 	fi
 	rm -rf "${TMP_BASE_DIR}/root/.subversion"
 	if [ ! -z ${mac} ]; then
