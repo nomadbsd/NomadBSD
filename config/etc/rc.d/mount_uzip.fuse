@@ -66,7 +66,7 @@ do_mount_unionfs()
 		if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
 			kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
 		fi
-		unionfs -o cow,max_files=32768 \
+		unionfs -o cow,max_files=32768,direct_io \
 		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
 		        /home/pkgs=RW:/unionfs/usr/local=RO /usr/local
 		service ldconfig start
