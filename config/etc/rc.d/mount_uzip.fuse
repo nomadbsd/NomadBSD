@@ -68,7 +68,7 @@ do_mount_unionfs()
 		fi
 		unionfs -o cow,max_files=32768 \
 		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
-		        /unionfs/usr/local=RO:/home/pkgs=RW /usr/local
+		        /home/pkgs=RW:/unionfs/usr/local=RO /usr/local
 		service ldconfig start
 	fi
 }
