@@ -261,6 +261,8 @@ commit() {
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
 	sysrc -f /mnt/etc/rc.conf -x local_startup
+	sed -i '' 's,^WorkDir.*,WorkDir /var/db/freebsd-update,' \
+		/mnt/etc/freebsd-update.conf
 	if [ ${fstype} = "ZFS" ]; then
 		sysrc -f /mnt/etc/rc.conf zfs_enable=YES
 	fi
