@@ -35,6 +35,7 @@ my $gptroot			= "nomadroot";
 my $gpthome			= "nomadhome";
 my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
+my $path_dotfiles	= "/usr/share/nomadbsd/home.nomad.tgz";
 my $path_zoneinfo	= "/usr/share/zoneinfo/zone.tab";
 my $fragsize		= 4096;
 my $blksize			= $fragsize * 8;
@@ -854,13 +855,13 @@ sub commit {
 	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
 	status("Counting files to copy");
 	progress(-1);
-	foreach (`tar tf /home.nomad.tgz`) {
+	foreach (`tar tf ${path_dotfiles}`) {
 		$nfiles++;
 	}
 	$nfiles = 1 if (!$nfiles);
 	status("Extracting dot files and directories for user nomad");
-	open(my $fh, "-|", "cd /home/nomad && tar xvf /home.nomad.tgz 2>&1")
-		or bail("Failed to open pipe to 'tar xvf /home.nomad.tgz'");
+	open(my $fh, "-|", "cd /home/nomad && tar xvf ${path_dotfiles} 2>&1")
+		or bail("Failed to open pipe to 'tar xvf ${path_dotfiles}'");
 	while (defined($_ = <$fh>)) {
 		next if (! /^x/);
 		chomp;

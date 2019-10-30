@@ -26,7 +26,7 @@
 
 rootlabel="nomadroot"
 homelabel="nomadhome"
-backupfile="/nomadbsd-backup.tar.xz"
+backupfile="/usr/share/nomadbsd/nomadbsd-backup.tar.xz"
 
 exitmenu() {
 	local ret opt

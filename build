@@ -454,7 +454,7 @@ createimage()
 	    --exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
 	mkdir ${TMP_BASE_DIR}/var/log
 	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
-		${TMP_BASE_DIR}/home.nomad.tgz
+		${TMP_BASE_DIR}/usr/share/nomadbsd/home.nomad.tgz
 	mkdir ${TMP_BASE_DIR}/usr.local.etc
 	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
  	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
@@ -498,7 +498,7 @@ createimage()
 		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
 	fi
-	(cd ${TMP_BASE_DIR} && tar cfJ nomadbsd-backup.tar.xz \
+	(cd ${TMP_BASE_DIR} && tar cfJ /usr/share/nomadbsd/nomadbsd-backup.tar.xz \
 		etc root var usr.local.etc)
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))

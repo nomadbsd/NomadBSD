@@ -231,7 +231,7 @@ commit() {
 	fi
 	status "Counting files to copy ..."
 	progress -1
-	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|home.nomad.tgz|";
+	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|usr/share/nomadbsd/home.nomad.tgz|";
 	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip|home/pkgs.*)"
 	nfiles=$(find / \( -type f -or -type d -or 	 \
 			 -type l -or -type p \) 2>/dev/null | \
@@ -243,7 +243,7 @@ commit() {
 		--exclude '^var/run*'				\
 		--exclude '^mnt*'					\
 		--exclude '^uzip*'					\
-		--exclude '^home.nomad.tgz'			\
+		--exclude '^usr/share/nomadbsd/home.nomad.tgz'			\
 		--exclude '^nomadbsd-backup.tar.xz'	\
 		--exclude '^etc/rc.d/mount_uzip'	\
 		--exclude '^home/pkgs*' .) | \
