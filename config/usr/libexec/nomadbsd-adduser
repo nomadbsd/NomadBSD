@@ -46,6 +46,8 @@ my $cfg_groups = "wheel,operator,video,games,cups,webcamd";
 my $cfg_password;
 my $cfg_editor;
 my $cfg_gui_editor;
+my $cfg_email_client;
+my $cfg_browser;
 my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
@@ -53,7 +55,17 @@ my @cfg_xkbdlayouts;
 # 
 my @file_manager_list = (
 	'Thunar		Xfce file manager',
-	'pcmanfm	PCMan file manager'
+	'pcmanfm	PCMan file manager',
+	'dolphin	KDE filemanager dolphin',
+	'nautilus	File manager for the GNOME desktop',
+	'konqueror	KDE system log application',
+	'krusader	Twin panel file manager for KDE, like midnight or norton commander',
+	'nemo		Twin panel file manager for KDE, like midnight or norton commander',
+	'xfe		Fast MS-Explorer like file manager for X',
+	'emelfm2	Gtk2+ port of emelfm, a fast graphical filemanager',
+	'gentoo		Gtk+ based, file manager inspired by DirectoryOpus',
+	'caja		File manager for the MATE desktop',
+	'doublecmd	Total Commander like file manager for the X Window System'
 );
 
 my @shell_list = (
@@ -65,9 +77,6 @@ my @shell_list = (
 	'sh			Bourne shell'
 );
 
-#
-#	Name	prog	descr
-#
 my @editor_list = (
 	'ee			Easy editor',
 	'vim		Vi IMproved, a programmer\'s text editor',
@@ -83,6 +92,27 @@ my @gui_editor_list = (
 	'leafpad	GTK+ based simple text editor',
 	'gvim		Vim with a GTK+ frontend',
 	'vim		Vim running in a X terminal'
+);
+
+my @browser_list = (
+	'firefox	Web browser based on the browser portion of Mozilla',
+	'iridium	Iridium browser',
+	'chrome		Google web browser based on WebKit',
+	'otter-browser	Browser based on Qt 5',
+	'luakit		Fast, small, webkit2 based browser framework extensible with Lua',
+	'falkon		Web browser based on Webengine and Qt Framework',
+	'epiphany	Extremely lightweight and simple web browser for GNOME 3',
+	'midori		Lightweight web browser using WebKit browser engine',
+	'surf		Simple Web browser based on WebKit2/GTK+',
+	'opera		Blazingly fast, full-featured, standards-compliant browser'
+);
+
+my @mailclient_list = (
+	'thunderbird	Mozilla Thunderbird is standalone mail and news that stands above',
+	'sylpheed	Lightweight, featureful, and fast GTK+ based e-mail client',
+	'evolution	Integrated mail, calendar and address book distributed suite',
+	'claws-mail	Lightweight and featureful GTK+ based e-mail and news client',
+	'geary		Mail client for GNOME 3',
 );
 
 my %locales = (
@@ -353,20 +383,44 @@ sub find_desktop_file {
 
 	opendir($dh, $appsdir)
 		or return "";
-	while (readdir $dh) {
-		next if (! -f "$appsdir/$_");
-		$fname = $_;
+	my @files = sort {lc($b) cmp lc($a)} readdir $dh;
+	closedir $dh;
+
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
 		open($fh, "<$appsdir/$fname") or die "$!";
 		while (<$fh>) {
-			if (/^Name=$name/im) {
+			if (/^Name=${name}$/im) {
 				close $fh;
-				closedir $dh;
-				return "$appsdir/$fname";
+				return $fname;
 			}
 		}
 		close $fh;
 	}
-	closedir $dh;
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			chomp;
+			if (/^Exec=${name}$/im) {
+				close $fh;
+				return $fname;
+			}
+		}
+		close $fh;
+	}
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			chomp;
+			if ($_ =~ /^Exec=${name}\s*/im) {
+				close $fh;
+				return $fname;
+			}
+		}
+		close $fh;
+	}
 	return "";
 }
 
@@ -382,9 +436,15 @@ sub desktopsettings {
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
 	
 	my @apps = (
-		'home', 'sakura', 'firefox', 'sylpheed',
+		'home', 'sakura', $cfg_browser, $cfg_email_client,
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
 		'mpv', 'gimp', 'octopkg', 'leave'
+	);
+	my %default_apps = (
+		BROWSER		=> $cfg_browser,
+		FILEMANAGER	=> $cfg_fm,
+		EMAILCLIENT	=> $cfg_email_client,
+		GUIEDITOR	=> $cfg_gui_editor
 	);
 	open(my $fh, ">>/home/$cfg_username/.login_conf")
 		or bail("Couldn't open $_");
@@ -411,7 +471,7 @@ sub desktopsettings {
 		my $desktopfile = "$appsdir/$_.desktop";
 		$desktopfile = "$usrappsdir/$_.desktop" if (! -f $desktopfile);
 		if (! -f $desktopfile) {
-			$desktopfile = find_desktop_file($appsdir, $_);
+			$desktopfile = "$appsdir/" . find_desktop_file($appsdir, $_);
 		}
 		next if (! -f $desktopfile);
 		open(my $fh, ">${plank_launcher_dir}/$_.dockitem") or next;
@@ -428,12 +488,16 @@ sub desktopsettings {
 	open(my $fh, ">>$plank_ini") or bail("Couldn't open $plank_ini");
 	print $fh "dock-items=[$items]\n";
 	close($fh);
-	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/EMAILCLIENT/sylpheed.desktop/g' " .
-		   "${mimelist}");
-	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
-		   "${mimelist}");
+
+	foreach (keys %default_apps) {
+		my $desktopfile = "$default_apps{$_}.desktop";
+		if (! -f "$appsdir/$default_apps{$_}.desktop" &&
+		    ! -f "$usrappsdir/$default_apps{$_}.desktop") {
+			$desktopfile = find_desktop_file($appsdir, $default_apps{$_});
+			next if (!$desktopfile);
+		}
+		system("sed -i .bak -E 's/$_/${desktopfile}/g' ${mimelist}");
+	}
 	system("rm -f ${mimelist}.bak 2>/dev/null");
 
 	# Update Openbox menu
@@ -480,11 +544,14 @@ sub commit {
 		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
 		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
+		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
+		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
 		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
 			@cfg_xkbdlayouts = split(/,/, $1);
 		}
 	}
 	STDOUT->autoflush(1);
+
 	if ($dummy) {
 		dummy_commit();
 		exit 0;
@@ -655,6 +722,18 @@ while (@ARGV) {
 			$variant = pop @args;
 		}
 		print_kbdvariant_list($variant);
+		exit 0;
+	} elsif ($ARGV[0] eq "browsers") {
+		remove_not_installed(\@browser_list);
+		print_array_data(\@browser_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "emailclients") {
+		remove_not_installed(\@mailclient_list);
+		print_array_data(\@mailclient_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "filemanagers") {
+		remove_not_installed(\@file_manager_list);
+		print_array_data(\@file_manager_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "shells") {
 		remove_not_installed(\@shell_list);

@@ -51,6 +51,8 @@ static QString cfg_region = "US";
 static QString cfg_shell;
 static QString cfg_password;
 static QString cfg_editor;
+static QString cfg_email_client;
+static QString cfg_browser;
 static QString cfg_gui_editor;
 static QString cfg_file_manager;
 static QStringList cfg_xkbdlayouts;
@@ -531,8 +533,9 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		{ BACKEND_GET_SHELLS,	    &cfg_shell,        &shells       },
 		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
 		{ BACKEND_GET_GUIEDITORS,   &cfg_gui_editor,   &guiEditors   },
-		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
-
+		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers },
+		{ BACKEND_GET_EMAILCLIENTS, &cfg_email_client, &emailClients },
+		{ BACKEND_GET_BROWSERS,	    &cfg_browser,      &browsers     }
 	};
 	layout->setSpacing(10);
 	layout->addWidget(title);
@@ -597,7 +600,8 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 void ProgramsPage::initializePage()
 {
 	QString label[ncats] = {
-		tr("Shell"), tr("Editor"), tr("GUI Editor"), tr("File manager")
+		tr("Shell"), tr("Editor"), tr("GUI Editor"),
+		tr("File manager"), tr("Mail client"), tr("Web browser")
 	};
 	for (int n = 0; n < ncats; n++)
 		catLabel[n]->setText(label[n]);
@@ -615,6 +619,8 @@ void ProgramsPage::selectionChanged(int /* unused */)
 	cfg_editor	 = getBoxVal(editors);
 	cfg_gui_editor	 = getBoxVal(guiEditors);
 	cfg_file_manager = getBoxVal(fileManagers);
+	cfg_browser	 = getBoxVal(browsers);
+	cfg_email_client = getBoxVal(emailClients);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -657,6 +663,8 @@ void SummaryPage::initializePage()
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
 		{ tr("File manager:"),			cfg_file_manager   },
+		{ tr("Mail client:"),			cfg_email_client   },
+		{ tr("Web browser:"),			cfg_browser	   }
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -707,6 +715,8 @@ void CommitPage::initializePage()
 		{ "cfg_editor",		cfg_editor	  },
 		{ "cfg_gui_editor",	cfg_gui_editor	  },
 		{ "cfg_file_manager",	cfg_file_manager  },
+		{ "cfg_email_client",	cfg_email_client  },
+		{ "cfg_browser",	cfg_browser	  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);
