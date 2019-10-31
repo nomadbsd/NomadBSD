@@ -54,6 +54,23 @@ my @categories = qw(
 	Office        Settings System    Utility
 );
 
+my %trtbl_cs = (
+	'AudioVideo'  => 'Audio/Video',
+	'Audio'       => 'Zvuk',
+	'Video'	      => 'Video',
+	'Development' => 'Rozvoj',
+	'Education'   => 'Vzdělání',
+	'Game'        => 'Hra',
+	'Graphics'    => 'Grafika',
+	'Network'     => 'Síť',
+	'Office'      => 'Kancelář',
+	'Settings'    => 'Nastavení',
+	'System'      => 'Systém',
+	'Utility'     => 'Nástroj',
+	'Application' => 'aplikace',
+	'Update menu' => 'Aktualizujte nabídku'
+);
+
 my %trtbl_de = (
 	'AudioVideo'  => 'Audio/Video',
 	'Audio'       => 'Audio',
@@ -191,6 +208,7 @@ my %trtbl_jp = (
 );
 
 my %trtbl = (
+	cs => \%trtbl_cs,
 	de => \%trtbl_de,
 	es => \%trtbl_es,
 	fr => \%trtbl_fr,
