@@ -803,6 +803,7 @@ void CommitPage::cleanup(int exitCode, QProcess::ExitStatus /* exitStatus */)
 		    tr("%1 returned with error code %2:\n\"%3\"")
 		    .arg(BACKEND_COMMIT).arg(exitCode).arg(errorMsgBuf));
 	}
+	statusMsg->setText(tr("User %1 successfully added").arg(cfg_username));
 	emit completeChanged();
 }
 
