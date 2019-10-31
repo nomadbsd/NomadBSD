@@ -47,8 +47,6 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	pfield1->setValidator(new QRegExpValidator(chars));
 	pfield2->setValidator(new QRegExpValidator(chars));
 
-	pl1->setStyleSheet("font-weight: bold;");
-	pl2->setStyleSheet("font-weight: bold;");
 	status->setStyleSheet("font-style: italic;");
 
 	form->addRow(pl1, pfield1);
