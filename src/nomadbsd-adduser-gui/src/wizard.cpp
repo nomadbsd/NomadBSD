@@ -34,6 +34,7 @@
 #include <QScrollArea>
 #include <QShortcut>
 #include <QFontMetricsF>
+#include <QFormLayout>
 #include <QFile>
 #include "wizard.h"
 #include "backend.h"
@@ -117,22 +118,24 @@ UsernamePage::UsernamePage(QWidget *parent) : QWizardPage(parent)
 	QLabel	    *text   = new QLabel;
 	QLabel	    *ulabel = new QLabel;
 	QVBoxLayout *layout = new QVBoxLayout;
+	QFormLayout *form   = new QFormLayout;
 	QRegExp	    chars   = QRegExp("[a-z]+");
 	usernamele	    = new QLineEdit;
 	status		    = new QLabel;
 
 	readUsernames();
-	ulabel->setText(tr("<b>Username:</b>"));
+	ulabel->setText(tr("Username:"));
 	usernamele->setMaxLength(8);
 	usernamele->setValidator(new QRegExpValidator(chars));
+	form->addRow(ulabel, usernamele);
+
 	status->setStyleSheet("color: red;");	
 	text->setText(tr("Add a new user to the system\n\n"));
 	text->setWordWrap(true);
 	text->setStyleSheet("font-weight: bold;");
 	text->setAlignment(Qt::AlignHCenter);
 	layout->addWidget(text);
-	layout->addWidget(ulabel);
-	layout->addWidget(usernamele);
+	layout->addLayout(form);
 	layout->addWidget(status);
 	setLayout(layout);
 
