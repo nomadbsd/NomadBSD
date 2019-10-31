@@ -499,8 +499,9 @@ createimage()
 		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
 			${TMP_BASE_DIR}/etc/fstab
 	fi
-	(cd ${TMP_BASE_DIR} && tar cfJ /usr/share/nomadbsd/nomadbsd-backup.tar.xz \
-		etc root var usr.local.etc)
+	(cd ${TMP_BASE_DIR} && \
+		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
+		etc root var usr.local.etc) || bail
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
 	touch ${IMAGE_NAME}
