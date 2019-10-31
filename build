@@ -668,6 +668,14 @@ build_installgui()
 	umount "${SYSDIR}/dev"
 }
 
+build_addusergui()
+{
+	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+		cd /tmp/nomadbsd-adduser-gui && qmake && make && make install" || bail
+	umount "${SYSDIR}/dev"
+}
+
 insthandbook()
 {
 	local i
@@ -749,9 +757,9 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit build_setupgui build_installgui build_unionfs "
-	stages="${stages} instports builddrmlegacy postpkgcfg createuzip "
-	stages="${stages} createimage cleanup"
+	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
+	stages="${stages} build_unionfs instports builddrmlegacy postpkgcfg"
+	stages="${stages} createuzip createimage cleanup"
 
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -778,7 +786,7 @@ resumebuild()
 {
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
-	stages="${stages} build_installgui build_unionfs instports"
+	stages="${stages} build_installgui build_addusergui build_unionfs instports"
 	stages="${stages} builddrmlegacy postpkgcfg"
 	stages="${stages} createuzip createimage cleanup"
 
@@ -855,6 +863,7 @@ while [ $# -gt 0 ]; do
 	resume)		resumebuild;;
 	setupgui)	build_setupgui;;
 	installgui) build_installgui;;
+	addusergui)	build_addusergui;;
 	src)		instsrcdist;;
 	unionfs)	build_unionfs;;
 	uzip)		createuzip;;

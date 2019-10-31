@@ -3,6 +3,8 @@ all         Set up base system, build and install kernel if BUILD_KERNEL is
             set to YES, intall packages, ports, software from Git repos,
             create uzip image, and finally build the NomadBSD image.
 
+addusergui  (Re)build and (re)install nomadbsd-adduser-gui
+
 clean       Remove base system dir, distfiles, patch dir, and uzip images.
 
 cleanup     Unmount filesystems, remove mount points, and detach md devices.
