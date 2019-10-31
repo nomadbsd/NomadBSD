@@ -1,13 +1,13 @@
-PREFIX	     = /usr/libexec
+PREFIX	     = /usr
 PROGRAM	     = nomadbsd-setup-gui
-PATH_BACKEND = $${PREFIX}/nomadbsd-setup
+PATH_BACKEND = $${PREFIX}/libexec/nomadbsd-setup
 TARGET	     = $${PROGRAM}
 TEMPLATE     = app
 INSTALLS     = target
 RESOURCES    = resources.qrc
 TRANSLATIONS = locale/$${PROGRAM}_de.ts \
                locale/$${PROGRAM}_ru.ts \
-							 locale/$${PROGRAM}_cs.ts
+               locale/$${PROGRAM}_cs.ts
 QT	    += widgets
 INCLUDEPATH += .
 DEFINES	    += PROGRAM=\\\"$${PROGRAM}\\\"
@@ -27,5 +27,5 @@ cleanqm.commands  = rm -f locale/*.qm
 distclean.depends = cleanqm
 
 target.files      = $${PROGRAM}
-target.path       = $${PREFIX}
+target.path       = $${PREFIX}/bin
 

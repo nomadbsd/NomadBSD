@@ -5,6 +5,6 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 export QT_QPA_PLATFORMTHEME=gtk2
 export GTK2_RC_FILES="/usr/share/nomadbsd-setup/gtkrc-2.0"
 feh --no-fehbg --bg-fill /usr/share/nomadbsd-setup/background.png
-/usr/libexec/nomadbsd-setup-gui&
+/usr/bin/nomadbsd-setup-gui&
 exec openbox-session
 

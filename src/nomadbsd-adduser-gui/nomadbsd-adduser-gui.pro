@@ -1,7 +1,6 @@
-#PREFIX	     = .
-PREFIX	     = /usr/libexec
+PREFIX	     = /usr
 PROGRAM	     = nomadbsd-adduser-gui
-PATH_BACKEND = $${PREFIX}/nomadbsd-adduser
+PATH_BACKEND = $${PREFIX}/libexec/nomadbsd-adduser
 APPSDIR      = /usr/local/share/applications
 TARGET	     = $${PROGRAM}
 TEMPLATE     = app
@@ -27,7 +26,7 @@ cleanqm.commands  = rm -f locale/*.qm
 distclean.depends = cleanqm
 
 target.files      = $${PROGRAM}
-target.path       = $${PREFIX}
+target.path       = $${PREFIX}/bin
 
 desktopfile.path  = $${APPSDIR}
 desktopfile.files = $${PROGRAM}.desktop

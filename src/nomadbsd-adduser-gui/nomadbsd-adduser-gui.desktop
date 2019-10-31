@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Add user
-Exec=dsbsu /usr/libexec/nomadbsd-adduser-gui
+Exec=dsbsu /usr/bin/nomadbsd-adduser-gui
 Icon=system-users
 Terminal=false
 StartupNotify=false
