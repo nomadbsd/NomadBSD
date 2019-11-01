@@ -498,7 +498,6 @@ void PasswordPage::initializePage()
 	title->setText(tr("Set password for new user\n"));
 	pass->setPl1Text(tr("Password:"));
 	pass->setPl2Text(tr("Repeat password:"));
-	pass->setStatusText(tr("Passwords do not match"));
 }
 
 void PasswordPage::passwordChanged()
