@@ -48,6 +48,7 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	pfield2->setValidator(new QRegExpValidator(chars));
 
 	status->setStyleSheet("font-style: italic;");
+	status->setStyleSheet("color: red;");
 
 	form->addRow(pl1, pfield1);
 	form->addRow(pl2, pfield2);
@@ -90,9 +91,11 @@ void PasswordWidget::compareFields(const QString &input)
 	if (input != "" && pfield2->text() == pfield1->text()) {
 		valid = true;
 		status->setText(tr("OK"));
+		status->setStyleSheet("color: normal;");
 	} else {
 		valid = false;
 		status->setText(tr("Passwords do not match"));
+		status->setStyleSheet("color: red;");
 	}
 	emit passwordChanged();
 }
