@@ -216,7 +216,7 @@ buildnvidia()
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	[ ! -d "nvidia" ] && mkdir "nvidia" 
-	for d in nvidia-driver-304 nvidia-driver-340 nvidia-driver; do
+	for d in nvidia-driver-304 nvidia-driver-340 nvidia-driver-390; do
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		[ -f nvidia/${pkgname}.txz ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
