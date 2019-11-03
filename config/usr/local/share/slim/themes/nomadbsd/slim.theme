@@ -12,7 +12,7 @@ msg_shadow_xoffset 1
 msg_shadow_yoffset 1
 
 # valid values: center, stretch, tile
-background_style        center
+background_style        stretch
 background_color        #2473bd
 
 # Input controls
