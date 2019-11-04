@@ -695,11 +695,11 @@ insthandbook()
 		(cd handbook && git pull)
 	fi
 	(cd handbook && make)
-	if [ ! -d "${SYSDIR}/home/nomad/handbook" ]; then
-		mkdir "${SYSDIR}/home/nomad/handbook"
+	if [ ! -d "${SYSDIR}/usr/share/nomadbsd-handbook" ]; then
+		mkdir "${SYSDIR}/usr/share/nomadbsd-handbook"
 	fi
 	for i in style.css handbook.html images; do
-		cp -r handbook/$i "${SYSDIR}/home/nomad/handbook/"
+		cp -r handbook/$i "${SYSDIR}/usr/share/nomadbsd-handbook/"
 	done
 }
 
