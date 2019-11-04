@@ -573,7 +573,7 @@ sub set_timezone {
 	# This needs fixing
 	system("echo $tz > /var/db/zoneinfo");
 	system("cp /usr/share/zoneinfo/$tz /etc/localtime");
-	system("adjkerntz -a");
+	system("adjkerntz -i");
 }
 
 sub set_shell {
@@ -923,6 +923,8 @@ sub commit {
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
+	status("Regenerating font cache");
+	system("/usr/local/bin/fc-cache -sfr");
 	if (-l "/usr/local") {
 		status("Replacing symlink to /unionfs/usr/local by /usr/local");
 		system("unlink /usr/local && mkdir /usr/local") == 0
