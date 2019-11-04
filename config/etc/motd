@@ -1,14 +1,11 @@
-                                                        [34m_____ 
-                                                       ( ___ )
-                                         .-.    _______||___||_______    .-.
-                                         '  `.-´  | |           | |  `-.´  '
-                                         '        | |           | |        '
-                                          '       | |           | |       '
-                                           `.     | |           | |     .´
-                 [37m _   _                      [34m|    [37m_ ____ ____  ____    [34m|
-                 [37m| \ | | ___  _ __ ___   __ _  __| | __ ) ___||  _ \   [34m|
-                 [37m|  \| |/ _ \| '_ ` _ \ / _` |/ _` |  _ \___ \| | | |  [34m|
-                 [37m| |\  | (_) | | | | | | (_| | (_| | |_) |__) | |_| |  [34m|
-                 [37m|_| \_|\___/|_| |_| |_|\__,_|\__,_|____/____/|____/   [34m.
-                                              `.__| |___________| |__ .´[m
+Welcome to NomadBSD!
+
+Read the NomadBSD handbook[1][2] for an introduction. For questions, feature
+requests, and problem reports visit [3].
+
+
+---
+1. /usr/share/nomadbsd-handbook/handbook.html
+2. http://nomadbsd.org/handbook/handbook.html
+3. http://nomadbsd.org/contact.html
 
