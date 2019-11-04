@@ -35,7 +35,4 @@ if ($?prompt) then
 	endif
 endif
 
-if ($TERM == "xterm") then
-	bindkey ^[[3~ delete-char
-endif
-
+bindkey ^[[3~ delete-char
