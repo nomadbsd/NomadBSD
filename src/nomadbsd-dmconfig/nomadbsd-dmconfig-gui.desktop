@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Display manager settings
+Name[de]=Displaymanager-Einstellungen
+Exec=dsbsu /usr/bin/nomadbsd-dmconfig-gui
+Icon=preferences-desktop-personal
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=Settings;

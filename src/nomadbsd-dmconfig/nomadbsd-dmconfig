@@ -1,0 +1,255 @@
+#!/usr/local/bin/perl
+#
+# Copyright (c) 2019 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+use utf8;
+use strict;
+use POSIX ":sys_wait_h";
+use Time::HiRes "usleep";
+use File::Temp qw(tempfile);
+
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
+my ($aflag, $dflag, $tflag, $user, $theme, $autologin);
+my $path_themedir	 = "/usr/local/share/slim/themes";
+my $path_slimcfg	 = "/usr/local/etc/slim.conf";
+my $cfg_autologin	 = "no";
+my $cfg_default_user;
+my $cfg_theme;
+##############################################################################
+#
+# Write the given message to stderr and the log file, and terminate
+# the script with exit 1.
+#
+sub bail {
+	my ($msg) = @_;
+	my $fh;
+
+	$msg .= "\n";
+	print STDERR $msg;
+	exit 1
+}
+
+sub print_usernames {
+	my ($fh, @users);
+
+	open($fh, '/etc/passwd')
+		or bail("Couldn't open '/etc/passwd'");
+	while (<$fh>) {
+		my @fields = split(/:/);
+		# Skip UIDs < 1001
+		next if ($fields[3] < 1001);
+		next if ($fields[6] =~ /nologin/);
+		next if ($fields[5] =~ /nonexistent/);
+		push @users, $fields[0];
+	}
+	close($fh);
+	print "usernames=" . join(' ', @users) . "\n";
+}
+
+sub print_settings {
+	my ($fh, $dh, @themes);
+
+	open($fh, $path_slimcfg) or bail("Couldn't open $path_slimcfg");
+	while (<$fh>) {
+		if (/^\s*default_user\s+(.*)$/) {
+			$cfg_default_user = $1;
+		} elsif (/^\s*auto_login\s+(.*)/) {
+			$cfg_autologin = $1;
+		} elsif (/^\s*current_theme\s+(.*)/) {
+			$cfg_theme = $1;
+		}
+	}
+	close($fh);
+	opendir($dh, $path_themedir)
+		or bail("Couldn't open theme dir '$path_themedir'");
+	while (readdir $dh) {
+		next if (/^\.{1,2}$/);
+		push @themes, $_;
+	}
+	closedir($dh);
+
+	my $found_theme;
+	foreach (@themes) {
+		if ($cfg_theme eq $_) {
+			$found_theme = 1;
+			last;
+		}
+	}
+	$cfg_theme = "default" if (!$found_theme);
+
+	print "themes=" . join(' ', @themes) . "\n";
+	print "default_user=$cfg_default_user\n";
+	print "autologin=$cfg_autologin\n";
+	print "theme=$cfg_theme\n";
+	print_usernames();
+	exit(0);
+}
+
+sub set_var {
+	my ($var, $val) = @_;
+	my ($fh, $fname, $var_set, $mode, @in);
+
+	$mode = (stat($path_slimcfg))[2];
+	open($fh, $path_slimcfg)
+		or bail("Couldn't open $path_slimcfg");
+	@in = <$fh>;
+	close($fh);
+	($fh, $fname) = tempfile($path_slimcfg . ".XXXXX", UNLINK => 0)
+		or bail("Failed to create temporary file '$fname'");
+	foreach (@in) {
+		if (/^\s*$var\s+/) {
+			# If $val is empty, remove var from file.
+			print $fh "$var\t\t$val\n" if ($val);
+			$var_set = 1;
+		} else {
+			print $fh $_;
+		}
+	}
+	print $fh "$var\t\t$val\n" if (!$var_set && $val);
+	close($fh);
+	if (!rename($fname, $path_slimcfg)) {
+		unlink($fname);
+		bail("Failed to rename $fname -> $path_slimcfg");
+	}
+	chmod($mode & 07777, $path_slimcfg);
+}
+
+sub usage {
+	STDOUT->autoflush(1);
+	print "Usage: nomadbsd-dmconfig [-q] [-t theme] [-d user -a yes|no]\n" .
+		  "OPTIONS\n" .
+		  "-h             Print this\n" .
+		  "-q             Query settings\n" .
+		  "-d user        Set default user. Unset if user is empty\n" .
+		  "-a yes|no      Enable/Disable auto login\n" .
+		  "-t theme       Set the given theme\n";
+	exit 0;
+}
+
+#
+# Take an array of flag character and the expected number of arguments.
+# If $ARGV[0] containes a flag not in the given array, or @ARGV doesn't
+# have the required number of arguments, exit with an error.
+# If $ARGV[0] contains a valid flag and @ARGV has the expected number of
+# arguments, return the flag character and an array with its arguments.
+# If $ARGV[0] doesn't start with a '-', return an empty string.
+#
+sub getargs {
+	my ($nargs, $i);
+	local $_;
+
+	if ($ARGV[0] =~ /^-([A-Za-z0-9])([A-Za-z0-9]+)/) {
+		# -Xarg or -XYZ == -X -Y -Z
+		$nargs = @ARGV;
+		for ($i = 0; $i < @_ - 1; $i++) {
+			next if ($_[$i] ne $1);
+			if ($_[$i + 1] == 0) {
+				my $opt = $1;
+				$ARGV[0] =~ s/^-$opt(.*)/-$1/;
+				return (($opt));
+			}
+			last;
+		}
+		if ($i == @_ - 1) {
+			print STDERR "Invalid option '-$1'\n";
+			return -1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+				return -1;
+			}
+		}
+		my @args = ($2);
+		push @args, splice(@ARGV, 1, $_[$i + 1] - 1);
+		if (@args < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+			return -1;
+		}
+		shift @ARGV;
+		return (($1, @args));
+	} elsif ($ARGV[0] =~ /^-([A-Za-z0-9]{1})/) {
+		# -X
+		$nargs = @ARGV - 1;
+	} else {
+		return ();
+	}
+	for ($i = 0; $i < @_ - 1; $i++) {
+		next if ($_[$i] ne $1);
+		if ($nargs < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+			return -1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+				return -1;
+			}
+		}
+		my @args = splice(@ARGV, 1, $_[$i + 1]);
+		shift @ARGV;
+		return (($1, @args));
+	}
+	print STDERR "Invalid option '$ARGV[0]'\n";
+	return -1;
+}
+
+while ((my ($flag, @args) = getargs('a', 1, 'h', 0, 't', 1, 'q', 0, 'd', 1))) {
+	if ($flag eq 'h') {
+		usage();
+	} elsif ($flag eq 'd') {
+		$dflag = 1;
+		$user = $args[0];
+	} elsif ($flag eq 'a') {
+		$aflag = 1;
+		$autologin = $args[0];
+	} elsif ($flag eq 't') {
+		$tflag = 1;
+		$theme = $args[0];
+	} elsif ($flag eq 'q') {
+		print_settings();
+	}
+}
+
+if ($aflag) {
+	STDOUT->autoflush(1);
+	usage() if (!$dflag);
+	usage() if ($autologin !~ /(yes|no)/);
+	usage() if ($autologin eq 'yes' && !$user);
+	set_var("default_user", $user);
+	set_var("auto_login", $autologin);
+}
+
+if ($dflag) {
+	usage() if (!$aflag);
+}
+
+if ($tflag) {
+	usage() if (!$theme);
+	set_var("current_theme", $theme);
+}
+
+usage() if (!$tflag && !$dflag && !$aflag);
+
