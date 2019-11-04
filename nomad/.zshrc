@@ -17,6 +17,7 @@ compinit
 bindkey "\e[A" history-beginning-search-backward-end
 bindkey "\e[B" history-beginning-search-forward-end
 bindkey "\e[F" end-of-line
+bindkey "\e[3~" delete-char
 
 alias rm="rm -i"
 alias ls="ls -G"
