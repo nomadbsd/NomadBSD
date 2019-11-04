@@ -318,9 +318,9 @@ postpkgcfg()
 	# Remove useless Xfce desktop file
 	rm -f "${SYSDIR}"/usr/local/share/applications/xfce4-about.desktop
 
-	# Change default icon of Sakura
+	# Use the Papirus terminal icon as default icon for Sakura
 	cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
-	"${SYSDIR}"/usr/local/share/pixmaps/terminal-tango.svg
+	"${SYSDIR}"/usr/local/share/pixmaps/terminal.svg
 	(cd config/usr/local/share/slim && tar cf - .) | \
 	    (cd "${SYSDIR}"/usr/local/share/slim && tar xf -)
 	mkfontpaths
