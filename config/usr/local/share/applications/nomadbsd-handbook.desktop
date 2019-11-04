@@ -3,6 +3,6 @@ Name=NomadBSD handbook
 Exec=xdg-open /usr/share/nomadbsd-handbook/handbook.html
 Icon=help-browser
 Terminal=false
-StartupNotify=false
+StartupNotify=true
 Type=Application
 Categories=System;Documentation;
