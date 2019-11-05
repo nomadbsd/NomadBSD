@@ -1,10 +1,11 @@
-PREFIX		= /usr
+PREFIX		= /tmp
 PROGRAM		= nomadbsd-dmconfig-gui
+BACKEND         = nomadbsd-dmconfig
+BACKEND_DIR     = $${PREFIX}/libexec
 PATH_THEME_DIR	= /usr/local/share/slim/themes
-PATH_BACKEND	= $${PREFIX}/libexec/nomadbsd-dmconfig
-APPSDIR		= /usr/local/share/applications
+PATH_BACKEND	= $${BACKEND_DIR}/$${BACKEND}
+APPSDIR		= $${PREFIX}/share/applications
 TARGET		= $${PROGRAM}
-QMAKE_STRIP	= echo
 TEMPLATE	= app
 INSTALLS	= target desktopfile backend
 RESOURCES	= resources.qrc
@@ -30,10 +31,10 @@ distclean.depends = cleanqm
 
 target.files      = $${PROGRAM}
 target.path       = $${PREFIX}/bin
-target.extra	  = strip $${PROGRAM}
 
-backend.files	  = nomadbsd-dmconfig
-backend.path	  = $${PREFIX}/libexec
+backend.files	  = $${BACKEND}
+backend.path	  = $${BACKEND_DIR}
+backend.CONFIG    = nostrip
 
 desktopfile.path  = $${APPSDIR}
 desktopfile.files = $${PROGRAM}.desktop

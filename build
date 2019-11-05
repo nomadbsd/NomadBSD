@@ -654,17 +654,30 @@ build_unionfs()
 
 build_setupgui()
 {
+	set -x
+	if [ -n "${mac}" ]; then
+		QMAKE_VARS="MAC=1"
+	else
+		QMAKE_VARS=""
+	fi
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-setup-gui && qmake && make && make install" || bail
+		cd /tmp/nomadbsd-setup-gui && make distclean; \
+		qmake ${QMAKE_VARS} && make && make install" || bail
 	umount "${SYSDIR}/dev"
 }
 
 build_installgui()
 {
+	if [ -n "${mac}" ]; then
+		QMAKE_VARS="MAC=1"
+	else
+		QMAKE_VARS=""
+	fi
 	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-install-gui && qmake && make && make install" || bail
+		cd /tmp/nomadbsd-install-gui && make distclean; \
+		qmake ${QMAKE_VARS} && make && make install" || bail
 	umount "${SYSDIR}/dev"
 }
 
@@ -672,7 +685,8 @@ build_addusergui()
 {
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-adduser-gui && qmake && make && make install" || bail
+		cd /tmp/nomadbsd-adduser-gui && make distclean; \
+		qmake && make && make install" || bail
 	umount "${SYSDIR}/dev"
 }
 
@@ -680,7 +694,8 @@ build_dmconfig()
 {
 	cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-dmconfig && qmake && make && make install" || bail
+		cd /tmp/nomadbsd-dmconfig && make distclean; \
+		qmake && make && make install" || bail
 	umount "${SYSDIR}/dev"
 }
 
