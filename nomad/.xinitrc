@@ -13,7 +13,7 @@ uid=$(id -u)
 #
 if [ -L ~/.cache ]; then
 	if [ -d ~/.cache ]; then
-		ownerid=$(stat -f %u ~/.cache)
+		ownerid=$(stat -L -f %u ~/.cache)
 		if [ "${ownerid}" != "${uid}" ]; then
 			recreate_cache=1
 		fi
@@ -22,7 +22,7 @@ if [ -L ~/.cache ]; then
 	fi
 	if [ "${recreate_cache}" = "1" ]; then
 		user=$(whoami)
-		unlink -f ~/.cache
+		unlink ~/.cache
 		cachedir=$(mktemp -d /tmp/${user}.XXXXXX)
 		ln -s ${cachedir} ~/.cache
 	fi
