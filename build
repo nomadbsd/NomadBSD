@@ -654,7 +654,6 @@ build_unionfs()
 
 build_setupgui()
 {
-	set -x
 	if [ -n "${mac}" ]; then
 		QMAKE_VARS="MAC=1"
 	else
