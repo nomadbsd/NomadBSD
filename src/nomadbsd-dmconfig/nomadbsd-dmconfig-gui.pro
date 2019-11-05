@@ -1,4 +1,4 @@
-PREFIX		= /tmp
+PREFIX		= /usr
 PROGRAM		= nomadbsd-dmconfig-gui
 BACKEND         = nomadbsd-dmconfig
 BACKEND_DIR     = $${PREFIX}/libexec
