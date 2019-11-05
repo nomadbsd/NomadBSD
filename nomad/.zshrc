@@ -16,8 +16,12 @@ compinit
 
 bindkey "\e[A" history-beginning-search-backward-end
 bindkey "\e[B" history-beginning-search-forward-end
-bindkey "\e[F" end-of-line
 bindkey "\e[3~" delete-char
+
+case $TERM in
+screen*|tmux*)  bindkey "\e[4~" end-of-line ;;
+*)		bindkey "\e[F" end-of-line ;;
+esac
 
 alias rm="rm -i"
 alias ls="ls -G"
