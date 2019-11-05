@@ -99,11 +99,13 @@ public:
 	UsernamePage(QWidget *parent = 0);
 	bool isComplete() const;
 public slots:
+	void nameChanged(const QString &name);
 	void usernameChanged(const QString &username);
 	bool validateUsername(const QString &username) const;
 	void readUsernames(void);
 private:
 	QLabel	    *status;
+	QLineEdit   *namele;
 	QLineEdit   *usernamele;
 	QList<QString> usernames;
 };
@@ -232,7 +234,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 9;
+	static const int nkeys = 10;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *title;

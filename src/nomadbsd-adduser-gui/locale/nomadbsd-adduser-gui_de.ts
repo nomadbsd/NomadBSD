@@ -4,24 +4,24 @@
 <context>
     <name>CommitPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="730"/>
+        <location filename="../src/wizard.cpp" line="748"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="754"/>
+        <location filename="../src/wizard.cpp" line="772"/>
         <source>An unexpected error occured while executing %1: %2</source>
         <translation>Ein unerwarteter Fehler trat während der Ausführung von %1 auf: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="812"/>
+        <location filename="../src/wizard.cpp" line="830"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
         <translation>%1 mit Fehlercode %2 beendet:
 &quot;%3&quot;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="815"/>
+        <location filename="../src/wizard.cpp" line="833"/>
         <source>User %1 successfully added</source>
         <translation>Benutzer %1 erfolgreich angelegt</translation>
     </message>
@@ -29,49 +29,49 @@
 <context>
     <name>ExtraKbdLayoutPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="290"/>
-        <location filename="../src/wizard.cpp" line="321"/>
+        <location filename="../src/wizard.cpp" line="306"/>
+        <location filename="../src/wizard.cpp" line="337"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="310"/>
-        <location filename="../src/wizard.cpp" line="341"/>
+        <location filename="../src/wizard.cpp" line="326"/>
+        <location filename="../src/wizard.cpp" line="357"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="465"/>
+        <location filename="../src/wizard.cpp" line="481"/>
         <source>Add layout</source>
         <translation>Layout hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="466"/>
+        <location filename="../src/wizard.cpp" line="482"/>
         <source>Remove layout</source>
         <translation>Layout entfernen</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="467"/>
+        <location filename="../src/wizard.cpp" line="483"/>
         <source>Additional keyboard layouts</source>
         <translation>Zusätzliche Tastaturbelegungen</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="468"/>
+        <location filename="../src/wizard.cpp" line="484"/>
         <source>Here you can add additional keyboard layouts. The user can switch between them from the NomadBSD desktop.</source>
         <translation>Hier können Sie zusätzliche Keyboard-Layouts hinzufügen. Der Benutzer kann zwischen diesen vom NomadBSD-Desktop aus wechseln.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="471"/>
+        <location filename="../src/wizard.cpp" line="487"/>
         <source>Keyboard layout</source>
         <translation>Tastaturbelegung</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="472"/>
+        <location filename="../src/wizard.cpp" line="488"/>
         <source>Keyboard variant</source>
         <translation>Tastaturvariante</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="473"/>
+        <location filename="../src/wizard.cpp" line="489"/>
         <source>Additional layouts</source>
         <translation>Zusätzliche Tastaturbelegungen</translation>
     </message>
@@ -79,17 +79,17 @@
 <context>
     <name>LocalePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="213"/>
+        <location filename="../src/wizard.cpp" line="229"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="233"/>
+        <location filename="../src/wizard.cpp" line="249"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="237"/>
+        <location filename="../src/wizard.cpp" line="253"/>
         <source>Please select language/locale for the new user</source>
         <translation>Bitte wählen Sie die Sprache/Lokalisation für den neuen Benutzer</translation>
     </message>
@@ -97,19 +97,19 @@
 <context>
     <name>PasswordPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="498"/>
+        <location filename="../src/wizard.cpp" line="514"/>
         <source>Set password for new user
 </source>
         <translation>Setzen Sie das Passwort für den neuen Benutzer
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="499"/>
+        <location filename="../src/wizard.cpp" line="515"/>
         <source>Password:</source>
         <translation>Passwort:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="500"/>
+        <location filename="../src/wizard.cpp" line="516"/>
         <source>Repeat password:</source>
         <translation>Passwort wiederholen:</translation>
     </message>
@@ -146,49 +146,49 @@
 <context>
     <name>ProgramsPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="560"/>
+        <location filename="../src/wizard.cpp" line="576"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="582"/>
+        <location filename="../src/wizard.cpp" line="598"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="602"/>
+        <location filename="../src/wizard.cpp" line="618"/>
         <source>Shell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="602"/>
+        <location filename="../src/wizard.cpp" line="618"/>
         <source>Editor</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="602"/>
+        <location filename="../src/wizard.cpp" line="618"/>
         <source>GUI Editor</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="603"/>
+        <location filename="../src/wizard.cpp" line="619"/>
         <source>Mail client</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="603"/>
+        <location filename="../src/wizard.cpp" line="619"/>
         <source>Web browser</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="607"/>
+        <location filename="../src/wizard.cpp" line="623"/>
         <source>Default applications
 </source>
         <translation>Standard-Anwendungen
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="603"/>
+        <location filename="../src/wizard.cpp" line="619"/>
         <source>File manager</source>
         <translation>Dateimanager</translation>
     </message>
@@ -196,52 +196,57 @@
 <context>
     <name>SummaryPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="659"/>
+        <location filename="../src/wizard.cpp" line="676"/>
         <source>Locale:</source>
         <translation>Lokalisation:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="660"/>
+        <location filename="../src/wizard.cpp" line="677"/>
         <source>Additional keyboard layouts:</source>
         <translation>Zusätzliche Tastaturbelegungen:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="658"/>
+        <location filename="../src/wizard.cpp" line="675"/>
         <source>Username:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="661"/>
+        <location filename="../src/wizard.cpp" line="674"/>
+        <source>Full name:</source>
+        <translation>Vollständiger Name:</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="678"/>
         <source>Shell:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="662"/>
+        <location filename="../src/wizard.cpp" line="679"/>
         <source>Editor:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="663"/>
+        <location filename="../src/wizard.cpp" line="680"/>
         <source>GUI editor:</source>
         <translation>GUI-Editor:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="664"/>
+        <location filename="../src/wizard.cpp" line="681"/>
         <source>File manager:</source>
         <translation>Dateimanager:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="665"/>
+        <location filename="../src/wizard.cpp" line="682"/>
         <source>Mail client:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="666"/>
+        <location filename="../src/wizard.cpp" line="683"/>
         <source>Web browser:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="672"/>
+        <location filename="../src/wizard.cpp" line="689"/>
         <source>Summary
 </source>
         <translation>Zusammenfassung
@@ -251,12 +256,17 @@
 <context>
     <name>UsernamePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="129"/>
+        <location filename="../src/wizard.cpp" line="132"/>
+        <source>Full name:</source>
+        <translation>Vollständiger Name:</translation>
+    </message>
+    <message>
+        <location filename="../src/wizard.cpp" line="138"/>
         <source>Username:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="135"/>
+        <location filename="../src/wizard.cpp" line="144"/>
         <source>Add a new user to the system
 
 </source>
@@ -265,17 +275,17 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="151"/>
+        <location filename="../src/wizard.cpp" line="162"/>
         <source>Username must not be empty</source>
         <translation>Benutzername darf nicht leer sein</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="156"/>
+        <location filename="../src/wizard.cpp" line="167"/>
         <source>Username already in use</source>
         <translation>Benutzername bereits vergeben</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="169"/>
+        <location filename="../src/wizard.cpp" line="180"/>
         <source>Couldn&apos;t read &apos;%1&apos;: %2</source>
         <translation>Konnte &apos;%1&apos; nicht lesen: %2</translation>
     </message>
@@ -283,27 +293,27 @@
 <context>
     <name>Wizard</name>
     <message>
-        <location filename="../src/wizard.cpp" line="67"/>
+        <location filename="../src/wizard.cpp" line="68"/>
         <source>Add user</source>
         <translation>Benutzer anlegen</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="69"/>
+        <location filename="../src/wizard.cpp" line="70"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="70"/>
+        <location filename="../src/wizard.cpp" line="71"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="71"/>
+        <location filename="../src/wizard.cpp" line="72"/>
         <source>Commit</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="72"/>
+        <location filename="../src/wizard.cpp" line="73"/>
         <source>Finish</source>
         <translation>Abschließen</translation>
     </message>
@@ -343,7 +353,7 @@ Wir entschuldigen uns für die Unannehmlichkeiten
         <translation>Sicher, dass Sie das Programm beenden wollen?</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="73"/>
+        <location filename="../src/wizard.cpp" line="74"/>
         <location filename="../src/wizard.h" line="76"/>
         <location filename="../src/wizard.h" line="82"/>
         <source>Cancel</source>

@@ -45,6 +45,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 static QString cfg_username;
+static QString cfg_name;
 static QString cfg_locale = "en";
 static QString cfg_localedescr = "English (US)";
 static QString cfg_region = "US";
@@ -119,16 +120,24 @@ UsernamePage::UsernamePage(QWidget *parent) : QWizardPage(parent)
 {
 	QLabel	    *text   = new QLabel;
 	QLabel	    *ulabel = new QLabel;
+	QLabel	    *nlabel = new QLabel;
 	QVBoxLayout *layout = new QVBoxLayout;
-	QFormLayout *form   = new QFormLayout;
-	QRegExp	    chars   = QRegExp("[a-z]+");
+	QFormLayout *form  = new QFormLayout;
+	QRegExp	    uchars  = QRegExp("[a-z]+");
+	QRegExp	    nchars  = QRegExp("[^:,]+");
+	namele		    = new QLineEdit;
 	usernamele	    = new QLineEdit;
 	status		    = new QLabel;
+
+	nlabel->setText(tr("Full name:"));
+	namele->setMaxLength(32);
+	namele->setValidator(new QRegExpValidator(nchars));
+	form->addRow(nlabel, namele);
 
 	readUsernames();
 	ulabel->setText(tr("Username:"));
 	usernamele->setMaxLength(8);
-	usernamele->setValidator(new QRegExpValidator(chars));
+	usernamele->setValidator(new QRegExpValidator(uchars));
 	form->addRow(ulabel, usernamele);
 
 	status->setStyleSheet("color: red;");	
@@ -141,6 +150,8 @@ UsernamePage::UsernamePage(QWidget *parent) : QWizardPage(parent)
 	layout->addWidget(status);
 	setLayout(layout);
 
+	connect(namele, SIGNAL(textChanged(const QString &)), this,
+	    SLOT(nameChanged(const QString &)));
 	connect(usernamele, SIGNAL(textChanged(const QString &)), this,
 	    SLOT(usernameChanged(const QString &)));
 }
@@ -182,6 +193,11 @@ void UsernamePage::usernameChanged(const QString &username)
 {
 	cfg_username = username;
 	emit completeChanged();
+}
+
+void UsernamePage::nameChanged(const QString &name)
+{
+	cfg_name = name;
 }
 
 bool UsernamePage::isComplete() const
@@ -655,6 +671,7 @@ void SummaryPage::initializePage()
 		QString key;
 		QString val;
 	} summary[] = {
+		{ tr("Full name:"),			cfg_name	   },
 		{ tr("Username:"),			cfg_username	   },
 		{ tr("Locale:"),			cfg_localedescr	   },
 		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
@@ -707,6 +724,7 @@ void CommitPage::initializePage()
 		QString var;
 		QString val;
 	} config[] = {
+		{ "cfg_name",		cfg_name	  },
 		{ "cfg_username",	cfg_username	  },
 		{ "cfg_locale",		cfg_locale	  },
 		{ "cfg_password",	cfg_password	  },

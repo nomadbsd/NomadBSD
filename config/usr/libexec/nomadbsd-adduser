@@ -37,6 +37,7 @@ my $path_datadir	= "/usr/share/nomadbsd";
 my $path_dotfiles	= "$path_datadir/home.nomad.tgz";
 my ($xlayoutstr, $xvariantstr);
 
+my $cfg_name;
 my $cfg_username;
 my $cfg_class;
 my $cfg_fm;
@@ -352,7 +353,7 @@ sub set_password {
 
 sub add_user {
 	open(my $fh, "| pw useradd -n $cfg_username " .
-				 "-G $cfg_groups -L $cfg_locale -m -h 0")
+				 "-G $cfg_groups -L $cfg_locale -c \"$cfg_name\" -m -h 0")
 		or bail("Failed to execute 'pw'");
 	print $fh $cfg_password;
 	if (!close($fh)) {
@@ -537,6 +538,7 @@ sub commit {
 		$| = 1;
 		select $ofh;
 		chomp;
+		$cfg_name		   = $1 if (/^cfg_name\s*=\s*(.*)/);
 		$cfg_username	   = $1 if (/^cfg_username\s*=\s*(.*)/);
 		$cfg_locale		   = $1 if (/^cfg_locale\s*=\s*(.*)/);
 		$cfg_fm		   	   = $1 if (/^cfg_file_manager\s*=\s*(.*)/);
