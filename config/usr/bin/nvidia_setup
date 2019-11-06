@@ -1077,6 +1077,17 @@ ldconfig_paths="\${ldconfig_paths} $1"
 rc_conf_d_END
 }
 
+condcp() {
+	local src=$1
+	local dst=$2
+
+	csum=$(md5 -q "${src}")
+	if (! md5 -c "${csum}" "${dst}" >/dev/null 2>&1); then
+		echo "Copying $src to $dst"
+		cp -a "${src}" "${dst}"
+	fi
+}
+
 find_driver() {
 	unit=$(sysctl -n hw.pci.default_vgapci_unit)
 	config=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | \
@@ -1104,18 +1115,24 @@ fi
 cp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
 	/usr/local/etc/libmap.d
 
-rc_conf_d_ldconfig /usr/local/nvidia/${driver}/usr/local/lib > \
-	/etc/rc.conf.d/ldconfig
-
 ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
-mount_unionfs -o noatime \
-    /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/drivers \
-    /usr/local/lib/xorg/modules/drivers
-mount_unionfs -o noatime \
-    /usr/local/nvidia/${driver}/usr/local/lib/xorg/modules/extensions/.nvidia \
-    /usr/local/lib/xorg/modules/extensions
-mount_unionfs -o noatime /usr/local/nvidia/${driver}/boot /boot
-mount_unionfs -o noatime /usr/local/nvidia/${driver}/compat /compat
+
+srcdir="/usr/local/nvidia/${driver}"
+condcp "${srcdir}/usr/local/lib/xorg/modules/drivers/nvidia_drv.so" \
+	"/usr/local/lib/xorg/modules/drivers/nvidia_drv.so"
+for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/*; do
+	l=$(basename "$l")
+	condcp "${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/$l" \
+		"/usr/local/lib/xorg/modules/extensions/$l"
+done
+for m in ${srcdir}/boot/modules/*.ko; do
+	m=$(basename "$m")
+	condcp "${srcdir}/boot/modules/$m" "/boot/modules/$m"
+done
+for l in ${srcdir}/usr/local/lib/vdpau/*; do
+	l=$(basename "$l")
+	condcp "${srcdir}/usr/local/lib/vdpau/$l" "/usr/local/lib/vdpau/$l"
+done
 
 if [ ${driver} -ge 390 ]; then
 	kldload nvidia
