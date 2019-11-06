@@ -1112,12 +1112,16 @@ fi
 
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
 
-cp /usr/local/nvidia/${driver}/usr/local/etc/libmap.d/nvidia.conf \
+srcdir="/usr/local/nvidia/${driver}"
+
+cp ${srcdir}/usr/local/etc/libmap.d/nvidia.conf \
 	/usr/local/etc/libmap.d
+
+rc_conf_d_ldconfig ${srcdir}/usr/local/lib > \
+	/etc/rc.conf.d/ldconfig
 
 ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
 
-srcdir="/usr/local/nvidia/${driver}"
 condcp "${srcdir}/usr/local/lib/xorg/modules/drivers/nvidia_drv.so" \
 	"/usr/local/lib/xorg/modules/drivers/nvidia_drv.so"
 for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/*; do
