@@ -17,7 +17,7 @@ load_rc_config $name
 : ${initgfx_menu:="YES"}
 
 path_intel_cfg="/usr/local/etc/X11/xorg.conf.d/10-intel.conf"
-path_nvdia_cfg="/usr/local/etc/X11/xorg.conf.d/10-nvidia.conf"
+path_nvidia_cfg="/usr/local/etc/X11/xorg.conf.d/10-nvidia.conf"
 path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
 path_vesa_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf"
 path_libmap_cfg="/usr/local/etc/libmap.d/nvidia.conf"
