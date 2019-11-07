@@ -1,0 +1,765 @@
+#!/usr/local/bin/perl
+#
+# Copyright (c) 2019 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+use utf8;
+use strict;
+use POSIX ":sys_wait_h";
+use Time::HiRes "usleep";
+
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
+my $dummy;
+my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
+my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
+my $path_datadir	= "/usr/share/nomadbsd";
+my $path_dotfiles	= "$path_datadir/home.nomad.tgz";
+my ($xlayoutstr, $xvariantstr);
+
+my $cfg_name;
+my $cfg_username;
+my $cfg_class;
+my $cfg_fm;
+my $cfg_locale;
+my $cfg_shell;
+my $cfg_groups = "wheel,operator,video,games,cups,webcamd";
+my $cfg_password;
+my $cfg_editor;
+my $cfg_gui_editor;
+my $cfg_email_client;
+my $cfg_browser;
+my @cfg_xkbdlayouts;
+##############################################################################
+# This section is for defining data.
+#
+# 
+my @file_manager_list = (
+	'Thunar		Xfce file manager',
+	'pcmanfm	PCMan file manager',
+	'dolphin	KDE filemanager dolphin',
+	'nautilus	File manager for the GNOME desktop',
+	'konqueror	KDE system log application',
+	'krusader	Twin panel file manager for KDE, like midnight or norton commander',
+	'nemo		Twin panel file manager for KDE, like midnight or norton commander',
+	'xfe		Fast MS-Explorer like file manager for X',
+	'emelfm2	Gtk2+ port of emelfm, a fast graphical filemanager',
+	'gentoo		Gtk+ based, file manager inspired by DirectoryOpus',
+	'caja		File manager for the MATE desktop',
+	'doublecmd	Total Commander like file manager for the X Window System'
+);
+
+my @shell_list = (
+	'fish		The friendly interactive shell',
+	'zsh		The Z shell',
+	'bash		GNU Bourne-Again SHell',
+	'csh		Shell with file name completion and command line editing',
+	'ksh		AT&T KornShell',
+	'sh			Bourne shell'
+);
+
+my @editor_list = (
+	'ee			Easy editor',
+	'vim		Vi IMproved, a programmer\'s text editor',
+	'vi			Bug-for-bug compatible replacement for 4BSD\'s vi',
+	'nano		Nano\'s ANOther editor, an enhanced free Pico clone',
+	'ne			Nice and powerful editor',
+	'micro		Modern and intuitive terminal-based text editor',
+	'nvim		Next-generation Vim (Neovim)',
+	'emacs		GNU editing macros'
+);
+
+my @gui_editor_list = (
+	'leafpad	GTK+ based simple text editor',
+	'gvim		Vim with a GTK+ frontend',
+	'vim		Vim running in a X terminal'
+);
+
+my @browser_list = (
+	'firefox	Web browser based on the browser portion of Mozilla',
+	'iridium	Iridium browser',
+	'chrome		Google web browser based on WebKit',
+	'otter-browser	Browser based on Qt 5',
+	'luakit		Fast, small, webkit2 based browser framework extensible with Lua',
+	'falkon		Web browser based on Webengine and Qt Framework',
+	'epiphany	Extremely lightweight and simple web browser for GNOME 3',
+	'midori		Lightweight web browser using WebKit browser engine',
+	'surf		Simple Web browser based on WebKit2/GTK+',
+	'opera		Blazingly fast, full-featured, standards-compliant browser'
+);
+
+my @mailclient_list = (
+	'thunderbird	Mozilla Thunderbird is standalone mail and news that stands above',
+	'sylpheed	Lightweight, featureful, and fast GTK+ based e-mail client',
+	'evolution	Integrated mail, calendar and address book distributed suite',
+	'claws-mail	Lightweight and featureful GTK+ based e-mail and news client',
+	'geary		Mail client for GNOME 3',
+);
+
+my %locales = (
+	af_ZA	=>	'Afrikaans - South Africa',
+	ar_AE	=>	'Arabic - United Arab Emirates',
+	ar_EG	=>	'Arabic - Egypt',
+	ar_JO	=>	'Arabic - Jordan',
+	ar_MA	=>	'Arabic - Morocco',
+	ar_QA	=>	'Arabic - Qatar',
+	ar_SA	=>	'Arabic - Saudi Arabia',
+	be_BY	=>	'Belarusian - Belarus',
+	bg_BG	=>	'Bulgarian - Bulgaria',
+	ca_ES	=>	'Catalan - Catalan',
+	cs_CZ	=>	'Czech - Czech Republic',
+	da_DK	=>	'Danish - Denmark',
+	de_AT	=>	'German - Austria',
+	de_CH	=>	'German - Switzerland',
+	de_DE	=>	'German - Germany',
+	el_GR	=>	'Greek - Greece',
+	en_AU	=>	'English - Australia',
+	en_CA	=>	'English - Canada',
+	en_GB	=>	'English - United Kingdom',
+	en_IE	=>	'English - Ireland',
+	en_NZ	=>	'English - New Zealand',
+	en_PH	=>	'English - Philippines',
+	en_US	=>	'English - United States',
+	en_ZA	=>	'English - South Africa',
+	es_AR	=>	'Spanish - Argentina',
+	es_CR	=>	'Spanish - Costa Rica',
+	es_ES	=>	'Spanish - Spain',
+	es_MX	=>	'Spanish - Mexico',
+	et_EE	=>	'Estonian - Estonia',
+	eu_ES	=>	'Basque - Basque',
+	fi_FI	=>	'Finnish - Finland',
+	fr_BE	=>	'French - Belgium',
+	fr_CA	=>	'French - Canada',
+	fr_CH	=>	'French - Switzerland',
+	fr_FR	=>	'French - France',
+	he_IL	=>	'Hebrew - Israel',
+	hi_IN	=>	'Hindi - India',
+	hr_HR	=>	'Croatian - Croatia',
+	hu_HU	=>	'Hungarian - Hungary',
+	hy_AM	=>	'Armenian - Armenia',
+	is_IS	=>	'Icelandic - Iceland',
+	it_CH	=>	'Italian - Switzerland',
+	it_IT	=>	'Italian - Italy',
+	ja_JP	=>	'Japanese - Japan',
+	kk_KZ	=>	'Kazakh - Kazakhstan',
+	ko_KR	=>	'Korean - Korea',
+	lt_LT	=>	'Lithuanian - Lithuania',
+	lv_LV	=>	'Latvian - Latvia',
+	mn_MN	=>	'Mongolian - Mongolia',
+	nb_NO	=>	'Norwegian (Bokmål) - Norway',
+	nl_BE	=>	'Dutch - Belgium',
+	nl_NL	=>	'Dutch - The Netherlands',
+	nn_NO	=>	'Norwegian (Nynorsk) - Norway',
+	pl_PL	=>	'Polish - Poland',
+	pt_BR	=>	'Portuguese - Brazil',
+	pt_PT	=>	'Portuguese - Portugal',
+	ro_RO	=>	'Romanian - Romania',
+	ru_RU	=>	'Russian - Russia',
+	sk_SK	=>	'Slovak - Slovakia',
+	sl_SI	=>	'Slovenian - Slovenia',
+	sv_FI	=>	'Swedish - Finland',
+	sv_SE	=>	'Swedish - Sweden',
+	tr_TR	=>	'Turkish - Turkey',
+	uk_UA	=>	'Ukrainian - Ukraine',
+	zh_CN	=>	'Chinese - China',
+	zh_HK	=>	'Chinese - Hong Kong SAR',
+	zh_TW	=>	'Chinese - Taiwan'
+);
+##############################################################################
+#
+# Write the given message to stderr and the log file, and terminate
+# the script with exit 1.
+#
+sub bail {
+	my ($msg) = @_;
+	my $fh;
+
+	$msg .= "\n";
+	print STDERR $msg;
+	exit 1
+}
+
+#
+# Write a status message to stdout (the frontend). The frontend treats
+# lines starting with a '!' as status messsage that tells the user what
+# is happening.
+#
+sub status {
+	my $ofh = select STDOUT;
+	$| = 1;
+	print "!$_[0] ...\n";
+	select $ofh;
+}
+
+sub progress {
+	my $ofh = select STDOUT;
+	$| = 1;
+	print "%$_[0]\n";
+	select $ofh;
+}
+
+#
+# Remove all apps from the list which are not installed
+#
+sub remove_not_installed {
+	my ($ref) = @_;
+	my @list;
+	foreach (@$ref) {
+		if (/(\S+)\t+(.+)/) {
+				my $prog = $1;
+				my $prog_lc = lc($prog);
+			if (system("which $prog >/dev/null 2>&1") == 0 ||
+			    system("which $prog_lc >/dev/null 2>&1") == 0) {
+				push @list, "$1\t$2";
+			}
+		}
+	}
+	@$ref = @list;
+}
+
+#
+# Takes a reference to an array, and prints its content to stdout, while
+# replacing the field delimiter tabs by a |.
+#
+sub print_array_data {
+	my ($ref) = @_;
+	foreach (@$ref) {
+		$_ =~ s/\t+/|/;
+		print "$_\n";
+	}
+}
+
+#
+# Print the list of locales sorted by name, not by locale code.
+#
+sub print_locales {
+	foreach my $name (sort { $locales{$a} cmp $locales{$b} } keys %locales) {
+		print "$name|$locales{$name}\n";
+    }
+}
+
+#
+# Print a list of records of the form:
+#
+#	lang code|lang name
+#
+# Example:
+#
+#	us|English (US)
+#
+sub print_kbdlayout_list {
+	my ($latin) = @_;
+	my ($in_layout, @layout_descs, @layouts, @tmplist);
+	
+	open(my $fh, '<', $xkbdlist) or die "$!";
+	foreach (<$fh>) {
+		chomp;
+		if (/^\!\s+layout$/) {
+			$in_layout  = 1;
+		} elsif (/^\!/ && $in_layout) {
+			last;
+		} elsif ($in_layout) {
+			if (/\s+(\S+)\s+(.*)$/) {
+				next if ($latin && is_nonlatin($1));
+				push @layout_descs, $2;
+				push @layouts, $1;
+			}
+		}
+	}
+	close $fh;
+	for (my $l; $l < @layouts; $l++) {
+		push @tmplist, "$layout_descs[$l]|$layouts[$l]";
+	}
+	foreach (sort @tmplist) {
+		my ($ld, $l) = split(/\|/, $_);
+		# Layout code|Layout descr.
+		print "$l|$ld\n";
+	}
+}
+
+#
+# Print a list of records of the form:
+#
+#	Variant code|variant descr.|layout code
+#
+# Example:
+#
+#	us|English (US)
+#
+sub print_kbdvariant_list {
+	my ($layout) = @_;
+	my ($in_variant, @variant_descs, @variant_layout);
+	my (@variant_names, @tmplist);
+	
+	open(my $fh, '<', $xkbdlist) or die "$!";
+	foreach (<$fh>) {
+		chomp;
+		if (/^\!\s+variant$/) {
+			$in_variant = 1;
+		} elsif (/^\!/ && $in_variant) {
+			last;
+		} elsif ($in_variant) {
+			if (/\s+(\S+)\s+(\S+):\s+(.*)/) {
+				next if ($layout && $layout ne $2);
+				push @variant_descs, $3;
+				push @variant_layout, $2;
+				push @variant_names, $1;
+			}
+		}
+	}
+	close $fh;
+	for (my $i = 0; $i < @variant_layout; $i++) {
+		# Change order of fields, so that we can sort after layout
+		# and variant description.
+		my $rec = "$variant_descs[$i]|$variant_names[$i]|" .
+				  "$variant_layout[$i]";
+		push @tmplist, $rec;
+	}
+	foreach (sort @tmplist) {
+		my ($vd, $vn, $l) = split(/\|/, $_);
+		# Variant code|variant descr.|layout code
+		print "$vn|$vd|$l\n";
+	}
+}
+
+sub set_password {
+	my ($user, $pass) = @_;
+	open(my $fh, "| pw usermod $user -h 0") or bail("Failed to execute 'pw'");
+	print $fh $pass;
+	if (!close($fh)) {
+		bail("Failed to set password for user $user");
+	}
+}
+
+sub add_user {
+	open(my $fh, "| pw useradd -n $cfg_username " .
+				 "-G $cfg_groups -L $cfg_locale -c \"$cfg_name\" -m -h 0")
+		or bail("Failed to execute 'pw'");
+	print $fh $cfg_password;
+	if (!close($fh)) {
+		bail("Failed to set password for user $cfg_username");
+	}
+	set_shell();
+}
+
+sub set_shell {
+	my $shpath = $cfg_shell;
+	
+	if ($cfg_shell !~ /^\//) {
+		open(my $fh, "</etc/shells") or bail("Couldn't open /etc/shells");
+		foreach (<$fh>) {
+			if (/\/$cfg_shell$/) {
+				$shpath = $_; last
+			}
+		}
+		close($fh);
+	}
+	system("pw usermod $cfg_username -s $shpath");
+}
+
+sub find_desktop_file {
+	local $_;
+	my ($appsdir, $name) = @_;
+	my ($dh, $fh, $fname);
+
+	opendir($dh, $appsdir)
+		or return "";
+	my @files = sort {lc($b) cmp lc($a)} readdir $dh;
+	closedir $dh;
+
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			if (/^Name=${name}$/im) {
+				close $fh;
+				return $fname;
+			}
+		}
+		close $fh;
+	}
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			chomp;
+			if (/^Exec=${name}$/im) {
+				close $fh;
+				return $fname;
+			}
+		}
+		close $fh;
+	}
+	foreach $fname (@files) {
+		next if (! -f "$appsdir/$fname");
+		open($fh, "<$appsdir/$fname") or die "$!";
+		while (<$fh>) {
+			chomp;
+			if ($_ =~ /^Exec=${name}\s*/im) {
+				close $fh;
+				return $fname;
+			}
+		}
+		close $fh;
+	}
+	return "";
+}
+
+sub desktopsettings {
+	my $appsdir		= "/usr/local/share/applications";
+	my $usrappsdir	= "/home/$cfg_username/.local/share/applications";
+	my $mimelist	= "/home/$cfg_username/.config/mimeapps.list";
+	my $dsbmc_cfg	= "/home/$cfg_username/.config/DSB/dsbmc/config";
+	my $autostart	= "/home/$cfg_username/.config/DSB/autostart.sh";
+	my $xinitrc		= "/home/$cfg_username/.xinitrc";
+	my $plank_ini	= "/home/$cfg_username/.config/plank.ini";
+	my $plank_launcher_dir	= "/home/$cfg_username/.config/plank/dock1/launchers";
+	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
+	
+	my @apps = (
+		'home', 'sakura', $cfg_browser, $cfg_email_client,
+		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
+		'mpv', 'gimp', 'octopkg', 'leave'
+	);
+	my %default_apps = (
+		BROWSER		=> $cfg_browser,
+		FILEMANAGER	=> $cfg_fm,
+		EMAILCLIENT	=> $cfg_email_client,
+		GUIEDITOR	=> $cfg_gui_editor
+	);
+	open(my $fh, ">>/home/$cfg_username/.login_conf")
+		or bail("Couldn't open $_");
+	print $fh $logincfg_rec;
+	close($fh);
+
+	open(my $fh, $xinitrc) or bail("Couldn't open $xinitrc");
+	my @xinit = <$fh>;
+	close($fh);
+	open(my $fh, ">$xinitrc") or bail("Couldn't open $xinitrc");
+	foreach (@xinit) {
+		if (/#!/) {
+			print $fh "$_";
+			print $fh "export EDITOR=$cfg_editor\n";
+		} else {
+			print $fh "$_";
+		}
+	}
+	close($fh);
+
+	# Create "plank" dock items for filemanager, gimp, vlc, terminal, etc.
+	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
+	foreach (@apps) {
+		my $desktopfile = "$appsdir/$_.desktop";
+		$desktopfile = "$usrappsdir/$_.desktop" if (! -f $desktopfile);
+		if (! -f $desktopfile) {
+			$desktopfile = "$appsdir/" . find_desktop_file($appsdir, $_);
+		}
+		next if (! -f $desktopfile);
+		open(my $fh, ">${plank_launcher_dir}/$_.dockitem") or next;
+		print $fh "[PlankDockItemPreferences]\n" .
+				  "Launcher=file://$desktopfile\n";
+		close($fh);
+	}
+	# Define order of plank's dock items
+	my $items;
+	foreach (@apps) {
+		$items .= ", " if ($items);
+		$items .= "'$_.dockitem'";
+	}
+	open(my $fh, ">>$plank_ini") or bail("Couldn't open $plank_ini");
+	print $fh "dock-items=[$items]\n";
+	close($fh);
+
+	foreach (keys %default_apps) {
+		my $desktopfile = "$default_apps{$_}.desktop";
+		if (! -f "$appsdir/$default_apps{$_}.desktop" &&
+		    ! -f "$usrappsdir/$default_apps{$_}.desktop") {
+			$desktopfile = find_desktop_file($appsdir, $default_apps{$_});
+			next if (!$desktopfile);
+		}
+		system("sed -i .bak -E 's/$_/${desktopfile}/g' ${mimelist}");
+	}
+	system("rm -f ${mimelist}.bak 2>/dev/null");
+
+	# Update Openbox menu
+	system("su -l $cfg_username -c '/usr/bin/update_obmenu -u'");
+	
+	# Create localized XDG standard dirs.
+	system("su -l $cfg_username -c '/usr/local/bin/xdg-user-dirs-update'");
+	
+	# Autostart gxkb and setxkbmap if multiple keyboard layouts were set.
+	if (@cfg_xkbdlayouts > 0) {
+		for (my $l = 0; $l < @cfg_xkbdlayouts; $l++) {
+			my @lv = split(/\t/, $cfg_xkbdlayouts[$l]);
+			$xlayoutstr  .= ',';
+			$xvariantstr .= ',';
+			$xlayoutstr  .= $lv[0];
+			$xvariantstr .= $lv[1];
+		}
+		open(my $fh, ">>", "$autostart")
+			or bail("Failed to open $autostart");
+		print $fh "setxkbmap -layout \"$xlayoutstr\" " .
+				  "-variant \"$xvariantstr\"\n";
+		print $fh "gxkb&\n";
+		close($fh);
+	}
+	# Make user the owner of all the files under /home/username
+	system("chown -R $cfg_username /home/$cfg_username");
+}
+
+#
+# Read the configuration from stdin, and do the installation
+#
+sub commit {
+	my ($nfiles, $n);
+
+	while ($_ = <STDIN>) {
+		my $ofh = select STDIN;
+		$| = 1;
+		select $ofh;
+		chomp;
+		$cfg_name		   = $1 if (/^cfg_name\s*=\s*(.*)/);
+		$cfg_username	   = $1 if (/^cfg_username\s*=\s*(.*)/);
+		$cfg_locale		   = $1 if (/^cfg_locale\s*=\s*(.*)/);
+		$cfg_fm		   	   = $1 if (/^cfg_file_manager\s*=\s*(.*)/);
+		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
+		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
+		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
+		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
+		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
+		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
+		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
+			@cfg_xkbdlayouts = split(/,/, $1);
+		}
+	}
+	STDOUT->autoflush(1);
+
+	if ($dummy) {
+		dummy_commit();
+		exit 0;
+	}
+	bail("Username not defined") if (!$cfg_username);
+	bail("Password not defined") if (!$cfg_password);
+	bail("Shell not defined")	 if (!$cfg_shell);
+	bail("Locale not defined")	 if (!$cfg_locale);
+
+	status("Adding user $cfg_username");
+	add_user();
+	foreach (`tar tf $path_dotfiles`) {
+		$nfiles++;
+	}
+	$nfiles = 1 if (!$nfiles);
+	status("Extracting dot files and directories for user $cfg_username");
+	open(my $fh, "-|", "cd /home/$cfg_username && tar xvf $path_dotfiles 2>&1")
+		or bail("Failed to open pipe to 'tar xvf $path_dotfiles'");
+	while (defined($_ = <$fh>)) {
+		next if (! /^x/);
+		chomp;
+		my $p = int(++$n * 100 / $nfiles);
+		print ">$_\n";
+		progress($p);
+	}
+	close($fh);
+
+	# Replace "nomad" by username
+	foreach (`find /home/$cfg_username/ -type f`) {
+		chomp;
+		if (-T $_) {
+			system(qq(sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${cfg_username}/g" "$_"));
+		}
+	}
+	system("cd /home/$cfg_username && chown -R $cfg_username .");
+	status("Configuring desktop");
+	desktopsettings();
+	status("User $cfg_username successfully added");
+	exit 0;
+}
+
+sub dummy_commit {
+	status("Adding user $cfg_username");
+	status("Extracting dot files and directories for user $cfg_username");
+	for (my $p = 0; $p < 100; $p++) {
+		print "%$p\n"; usleep(50000);
+	}
+	status("Configuring desktop");
+	exit 0;
+}
+
+sub usage {
+	STDOUT->autoflush(1);
+	print "Usage: nomadbsd-adduser [options] command [args ...]\n" .
+		  "OPTIONS\n" .
+		  "-h             Print this\n" .
+		  "-n             Dummy mode. Only writes messages to stdout\n" .
+		  "               without doing anything\n" .
+		  "COMMANDS\n" .
+		  "locales        Print list of locales\n" .
+		  "filemanagers   Print a list of file managers\n" .
+		  "editors        Print a list of editors\n" .
+		  "guieditors     Print a list of GUI editors\n" .
+		  "kbdmodels      Print a list of X keyboard models\n" .
+		  "kbdlayouts     Print a list of keyboard layouts\n" .
+		  "kbdvariants    Print a list of keyboard varinats\n" .
+		  "commit         Read configuration from stdin, and apply it\n";
+	exit 0;
+}
+
+#
+# Take an array of flag character and the expected number of arguments.
+# If $ARGV[0] containes a flag not in the given array, or @ARGV doesn't
+# have the required number of arguments, exit with an error.
+# If $ARGV[0] contains a valid flag and @ARGV has the expected number of
+# arguments, return the flag character and an array with its arguments.
+# If $ARGV[0] doesn't start with a '-', return an empty string.
+#
+sub getargs {
+	my ($nargs, $i);
+	local $_;
+
+	if ($ARGV[0] =~ /^-([A-Za-z0-9])([A-Za-z0-9]+)/) {
+		# -Xarg or -XYZ == -X -Y -Z
+		$nargs = @ARGV;
+		for ($i = 0; $i < @_ - 1; $i++) {
+			next if ($_[$i] ne $1);
+			if ($_[$i + 1] == 0) {
+				my $opt = $1;
+				$ARGV[0] =~ s/^-$opt(.*)/-$1/;
+				return (($opt));
+			}
+			last;
+		}
+		if ($i == @_ - 1) {
+			print STDERR "Invalid option '-$1'\n";
+			return -1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+				return -1;
+			}
+		}
+		my @args = ($2);
+		push @args, splice(@ARGV, 1, $_[$i + 1] - 1);
+		if (@args < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] argument(s)\n";
+			return -1;
+		}
+		shift @ARGV;
+		return (($1, @args));
+	} elsif ($ARGV[0] =~ /^-([A-Za-z0-9]{1})/) {
+		# -X
+		$nargs = @ARGV - 1;
+	} else {
+		return ();
+	}
+	for ($i = 0; $i < @_ - 1; $i++) {
+		next if ($_[$i] ne $1);
+		if ($nargs < $_[$i + 1]) {
+			print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+			return -1;
+		}
+		for (my $j = 0; $j + 1 < $nargs && $j < $_[$i + 1]; $j++) {
+			if ($ARGV[$j + 1] =~ /^-/) {
+				print STDERR "Option -$_[$i] requires $_[$i + 1] arguments\n";
+				return -1;
+			}
+		}
+		my @args = splice(@ARGV, 1, $_[$i + 1]);
+		shift @ARGV;
+		return (($1, @args));
+	}
+	print STDERR "Invalid option '$ARGV[0]'\n";
+	return -1;
+}
+
+while ((my ($flag, @args) = getargs('h', 0, 'n', 0))) {
+	usage()	   if ($flag eq 'h');
+	$dummy = 1 if ($flag eq 'n');
+	shift;
+}
+
+while (@ARGV) {
+	if ($ARGV[0] eq "locales") {
+		print_locales();
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdlayouts") {
+		shift @ARGV;
+		my ($f, @args) = getargs('l', 0);
+		if ($f eq 'l') {
+			print_kbdlayout_list(1);
+		} else {
+			print_kbdlayout_list(0);
+		}
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdmodels") {
+		print_xkbdmodels();
+		exit 0;
+	} elsif ($ARGV[0] eq "kbdvariants") {
+		my $variant;
+		
+		shift @ARGV;
+		my ($f, @args) = getargs('l', 1);
+		if ($f eq 'l') {
+			shift;
+			$variant = pop @args;
+		}
+		print_kbdvariant_list($variant);
+		exit 0;
+	} elsif ($ARGV[0] eq "browsers") {
+		remove_not_installed(\@browser_list);
+		print_array_data(\@browser_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "emailclients") {
+		remove_not_installed(\@mailclient_list);
+		print_array_data(\@mailclient_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "filemanagers") {
+		remove_not_installed(\@file_manager_list);
+		print_array_data(\@file_manager_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "shells") {
+		remove_not_installed(\@shell_list);
+		print_array_data(\@shell_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "editors") {
+		remove_not_installed(\@editor_list);
+		print_array_data(\@editor_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "guieditors") {
+		remove_not_installed(\@gui_editor_list);
+		print_array_data(\@gui_editor_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "filemanagers") {
+		remove_not_installed(\@file_manager_list);
+		print_array_data(\@file_manager_list);
+		exit 0;
+	} elsif ($ARGV[0] eq "commit") {
+		commit();
+		exit 0;
+	} else {
+		print STDERR "Unknown command: $ARGV[0]\n";
+		usage();
+	}
+	shift;
+}
+usage();
