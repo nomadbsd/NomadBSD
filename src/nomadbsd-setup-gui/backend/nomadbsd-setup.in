@@ -26,36 +26,36 @@ use utf8;
 use strict;
 use POSIX ":sys_wait_h";
 use Time::HiRes "usleep";
+use lib('@MODULE_PATH@');
+use nomadbsd_setup_@MODULE_ARCH@;
 
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
+our $fragsize		= 4096;
+our $blksize		= $fragsize * 8;
+our $cfg_geli_password;
+
 my $dummy;
-my $gptroot			= "nomadroot";
-my $gpthome			= "nomadhome";
 my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
-my $path_dotfiles	= "/usr/share/nomadbsd/home.nomad.tgz";
 my $path_zoneinfo	= "/usr/share/zoneinfo/zone.tab";
-my $fragsize		= 4096;
-my $blksize			= $fragsize * 8;
+my $path_dotfiles	= "/usr/share/nomadbsd/home.nomad.tgz";
 my $path_templates	= "/usr/share/nomadbsd-setup";
 my $path_xkbd_conf	= "/usr/local/etc/X11/xorg.conf.d/10-input-keyboard.conf";
 my $path_xinitrc	= "$path_templates/xinitrc";
+my ($xlayoutstr, $xvariantstr);
 
 my $cfg_fm;
 my $cfg_locale;
 my $cfg_timezone;
 my $cfg_shell;
 my $cfg_password;
-my $cfg_geli_password;
 my $cfg_kbdlayout;
 my $cfg_kbdvariant;
 my $cfg_editor;
-my $cfg_browser;
 my $cfg_gui_editor;
-my $cfg_email_client;
-
+my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
 #
@@ -83,16 +83,6 @@ my @gui_editor_list = (
 	'leafpad	GTK+ based simple text editor',
 	'gvim		Vim with a GTK+ frontend',
 	'vim		Vim running in a X terminal'
-);
-
-my @browser_list = (
-	'firefox	Web browser based on the browser portion of Mozilla'
-	'midori		Lightweight web browser using WebKit browser engine',
-);
-
-my @email_client_list = (
-	'sylpheed	Lightweight, featureful, and fast GTK+ based e-mail client',
-	'thunderbird	Mozilla Thunderbird is standalone mail and news'
 );
 
 my %locales = (
@@ -266,7 +256,7 @@ sub bootstrap_gui {
 	my $path_scfb_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
 	my $path_vesa_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms);
-	my @spinner = ('   ', '.  ', '.. ', '...');
+	my @spinner = qw(| / - \\);
 
 	STDOUT->autoflush(1);
 	print "Creating font cache. This might take a moment. " .
@@ -276,8 +266,8 @@ sub bootstrap_gui {
 	} else {
 		my $n = 0;
 		while (waitpid(-1, WNOHANG) >= 0) {
-			print "\rPlease wait$spinner[$n++]";
-			usleep(500000);
+			print "\rPlease wait [$spinner[$n++]]";
+			usleep(200000);
 			$n = $n % @spinner;
 		}
 	}
@@ -325,59 +315,6 @@ sub bootstrap_gui {
 }
 
 #
-# 1. Get the device mounted on /, which must be gpt/$gptroot
-# 2. Get the device name from glabel
-# 3. Return the device name without the '/dev' prefix and slice.
-#
-sub get_rootdev {
-	my ($rootdev, @output);
-	
-	@output = `df /`;
-	# Skip header
-	$rootdev = (split(/\s+/, $output[1]))[0];
-	$rootdev =~ s#/dev/##;
-	return if ($rootdev ne "gpt/$gptroot");
-	foreach (`glabel status`) {
-		$_ =~ s/\s+//;
-		my ($l, $s, $d) = split(/\s+/, $_);
-		next if ($l ne "gpt/$gptroot");
-		return $1 if (/([a-zA-Z0-9]+)[sp][0-9]{1,}[a-f]?$/);
-	}
-}
-
-#
-# Return the device and slice the /home partition is stored on.
-# It must match the label gpt/$gpthome, and must be on the
-# root device.
-#
-sub get_homedev {
-	my ($rootdev, $homedev, @output);
-	
-	$rootdev = get_rootdev();
-	bail("Couldn't find root device") if (!$rootdev);
-	@output = `df /`;
-	# Skip header
-	$homedev = (split(/\s+/, $output[1]))[0];
-	$homedev =~ s#/dev/##;
-	bail("gpt/$gpthome not mounted on /home")
-		if ($output[1] ne "gpt/$gpthome");
-	@output = `glabel status`;
-	# Skip header
-	shift @output;
-	foreach (@output) {
-		chomp;
-		# Remove leading spaces
-		$_ =~ s/^\s+//;
-		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "gpt/$gpthome") {
-			return $d if ($d =~ /$rootdev[ps]{1}[0-9]{1,}[a-f]?$/);
-			bail("gpt/$gpthome not on $rootdev");
-		}
-	}
-	bail("Couldn't find gpt/$gpthome");
-}
-
-#
 # Takes a reference to an array, and prints its content to stdout, while
 # replacing the field delimiter tabs by a |.
 #
@@ -419,6 +356,20 @@ sub print_timezones {
 }
 
 #
+# Check whether the given layout code matches a non-latin layout.
+#
+sub is_nonlatin {
+	my @non_latin = qw(am ara ben bd bg bt by cs deva ge gh gr guj guru \
+			   il in ir iku jp kan kh kr la lao lk mk mm mn mv \
+			   mal olck ori pk ru scc sy syr tel th tj tam ua uz \
+			   af et ma brai id iq kz kg my np rs tz);
+	foreach (@non_latin) {
+		return 1 if ($_[0] eq $_);
+	}
+	return 0;
+}
+
+#
 # Print a list of records of the form:
 #
 #	lang code|lang name
@@ -428,6 +379,7 @@ sub print_timezones {
 #	us|English (US)
 #
 sub print_kbdlayout_list {
+	my ($latin) = @_;
 	my ($in_layout, @layout_descs, @layouts, @tmplist);
 	
 	open(my $fh, '<', $xkbdlist) or die "$!";
@@ -439,6 +391,7 @@ sub print_kbdlayout_list {
 			last;
 		} elsif ($in_layout) {
 			if (/\s+(\S+)\s+(.*)$/) {
+				next if ($latin && is_nonlatin($1));
 				push @layout_descs, $2;
 				push @layouts, $1;
 			}
@@ -587,109 +540,6 @@ sub set_shell {
 	system("pw usermod $user -s $shpath");
 }
 	
-sub mkhomepart {
-	my $dev = get_rootdev();
-
-	bail("Failed to find root device.") if (!$dev);
-	#
-	# Check if gpt/${gpthome} already exists.
-	#
-	foreach (`glabel status`) {
-		$_ =~ s/\s+//;
-		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "gpt/$gpthome") {
-			bail("Error: gpt/$gpthome already exists");
-		}
-	}
-	system("gpart recover $dev");
-	system("gpart add -t freebsd-ufs -l $gpthome $dev") == 0
-		or bail("Couldn't create home partition: gpart failed.");
-}
-
-sub mkhome {
-	my $cmd = "newfs -t -E -U -O 1 -o time -b $blksize -f $fragsize " .
-			  "-m 8 /dev/gpt/$gpthome";
-	mkhomepart();
-	status("Creating filesystem on /dev/gpt/$gpthome");
-	newfswrp($cmd);
-	if (! -d "/home") {
-		status("Creating /home");
-		system("mkdir /home") == 0
-			or bail("Failed to create directory /home");
-	}
-	status("Mounting /dev/gpt/${gpthome} on /home");
-	system("mount /dev/gpt/${gpthome} /home") == 0
-		or bail("Couldn't mount /dev/gpt/${gpthome} on /home");
-	status("Creating /home/nomad");
-	system("mkdir /home/nomad") == 0
-		or bail("Couldn't create /home/nomad");
-	system("chown nomad:nomad /home/nomad");
-	status("Adding fstab entry for /home");
-	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n";
-	close($fh);
-}
-
-sub mkgeli {
-	my $geli_init	= "geli init -s 4096 -K /root/$gpthome.key -J - " .
-					  "/dev/gpt/$gpthome";
-	my $geli_attach	= "geli attach -k /root/${gpthome}.key -j - " .
-					  "/dev/gpt/$gpthome";
-	my $newfscmd	= "newfs -t -E -U -O 1 -o time -b $blksize -f " .
-					  "$fragsize -m 8 /dev/gpt/$gpthome.eli";
-	status("Creating partition for /private/home");
-	mkhomepart();
-	system("dd if=/dev/random of=/root/$gpthome.key bs=64 count=1");
-	status("Initializing geli volume");
-	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
-	print $fh "${cfg_geli_password}\n";
-	bail("Failed to init geli volume.")	if (!close($fh));
-	status("Attaching geli volume");
-	open(my $fh, "|$geli_attach") or bail("Couldn't attach geli volume");
-	print $fh "$cfg_geli_password\n";
-	bail("Failed to attach geli volume.") if (!close($fh));
-	status("Creating filesystem on /dev/gpt/${gpthome}.eli");
-	newfswrp($newfscmd);
-	if (! -d "/private") {
-		system("unlink /private >/dev/null 2>&1");
-		status("Creating /private");
-		system("mkdir /private") == 0 or bail("Failed to create /private");
-	}
-	status("Mounting /dev/gpt/${gpthome}.eli on /private");
-	system("mount /dev/gpt/$gpthome.eli /private") == 0
-		or bail("Failed to mount filesystem.");
-	status("Creating /private/home");
-	system("mkdir /private/home") == 0
-		or bail("Failed to create /private/home");
-	status("Creating /private/etc");
-	system("mkdir /private/etc") == 0
-		or bail("Failed to create /private/etc");
-	status("Creating /private/home/nomad");
-	system("mkdir /private/home/nomad") == 0
-		or bail("Failed to create /private/home/nomad");
-	system("unlink /home >/dev/null 2>&1");
-	system("rmdir -rf /home 2>&1");
-	status("Symlinking /home to /private/home");
-	
-	system("ln -s /private/home /home") == 0
-		or bail("Failed to create symlink /home -> /private/home");
-	system("chown nomad:nomad /home/nomad");
-	
-	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
-	system("mv /etc/ppp /private/etc/");
-	system("mv /etc/wpa_supplicant.conf /private/etc");
-	system("touch /private/etc/wpa_supplicant.conf");
-	system("cd /etc && ln -sf /private/etc/ppp; " .
-		   "ln -sf /private/etc/wpa_supplicant.conf");
-	system("sysrc -f /etc/rc.conf.in in geli_devices=\"gpt/${gpthome}\"");
-	system("sysrc -f /etc/rc.conf.in " .
-		   "geli_gpt_${gpthome}_flags=\"-k /root/${gpthome}.key\"");
-	status("Adding fstab entry for /dev/gpt/${gpthome}.eli");
-	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
-	close($fh);
-}
-
 sub find_desktop_file {
 	local $_;
 	my ($appsdir, $name) = @_;
@@ -726,9 +576,9 @@ sub desktopsettings {
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
 	
 	my @apps = (
-		'home', 'sakura', $cfg_browser, $cfg_email_client,
+		'home', 'sakura', 'firefox', 'sylpheed',
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
-		'vlc', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
+		'mpv', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
 	);
 	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
 		open(my $fh, ">>$_") or bail("Couldn't open $_");
@@ -749,8 +599,7 @@ sub desktopsettings {
 	}
 	close($fh);
 
-	# Create "plank" dock items for browser, e-mail client, filemanager,
-	# gimp, vlc, terminal, etc.
+	# Create "plank" dock items for filemanager, gimp, vlc, terminal, etc.
 	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
 	foreach (@apps) {
 		my $desktopfile = "$appsdir/$_.desktop";
@@ -773,9 +622,9 @@ sub desktopsettings {
 	open(my $fh, ">>$plank_ini") or bail("Couldn't open $plank_ini");
 	print $fh "dock-items=[$items]\n";
 	close($fh);
-	system("sed -i .bak -E 's/BROWSER/${cfg_browser}.desktop/g' ${mimelist}");
+	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/EMAILCLIENT/${cfg_email_client}.desktop/g' " .
+	system("sed -i .bak -E 's/EMAILCLIENT/sylpheed.desktop/g' " .
 		   "${mimelist}");
 	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
 		   "${mimelist}");
@@ -790,7 +639,15 @@ sub desktopsettings {
 	# Create dconf file from plank.ini
 	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-
+	# Autostart gxkb and setxkbmap if multiple keyboard layouts were set.
+	if (@cfg_xkbdlayouts > 0) {
+		open(my $fh, ">>", "$autostart")
+			or bail("Failed to open $autostart");
+		print $fh "setxkbmap -layout \"$xlayoutstr\" " .
+				  "-variant \"$xvariantstr\"\n";
+		print $fh "gxkb&\n";
+		close($fh);
+	}
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
 }
@@ -801,9 +658,18 @@ sub set_kbdmap {
 		bail("Couldn't open $path_templates/input-keyboard.conf");
 	open(my $out, ">$path_xkbd_conf")
 		or bail("Couldn't open $path_xkbd_conf");
+	$xlayoutstr  .= $cfg_kbdlayout;
+	$xvariantstr .= $cfg_kbdvariant;
+	for (my $l = 0; $l < @cfg_xkbdlayouts; $l++) {
+		my @lv = split(/\t/, $cfg_xkbdlayouts[$l]);
+		$xlayoutstr  .= ',';
+		$xvariantstr .= ',';
+		$xlayoutstr  .= $lv[0];
+		$xvariantstr .= $lv[1];
+	}
 	foreach (<$in>) {
-		$_ =~ s/\@XKBDLAYOUT\@/$cfg_kbdlayout/;
-		$_ =~ s/\@XKBDVARIANT\@/$cfg_kbdvariant/;
+		$_ =~ s/\@XKBDLAYOUT\@/$xlayoutstr/;
+		$_ =~ s/\@XKBDVARIANT\@/$xvariantstr/;
 		print $out $_;
 	}
 	close($in); close($out);
@@ -831,14 +697,15 @@ sub commit {
 		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
-		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
 		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
-		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
+		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
+			@cfg_xkbdlayouts = split(/,/, $1);
+		}
 	}
 	STDOUT->autoflush(1);
 	if ($dummy) {
-			dummy_commit();
-			exit 0;
+		dummy_commit();
+		exit 0;
 	}
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
@@ -880,10 +747,10 @@ sub commit {
 	status("Setting locale for user nomad");
 	system("pw usermod nomad -L ${cfg_locale}") == 0
 			or bail("Failed to set locale $cfg_locale");
-	status("Configuring desktop");
-	desktopsettings();
 	status("Setting keyboard map for X and vt");
 	set_kbdmap();
+	status("Configuring desktop");
+	desktopsettings();
 	status("Disabling auto-login on ttyv0");
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
@@ -933,8 +800,6 @@ sub usage {
 		  "COMMANDS\n" .
 		  "locales        Print list of locales\n" .
 		  "filemanagers   Print a list of file managers\n" .
-		  "emailclients   Print a list of email client\n" .
-		  "browsers       Print a list of browsers\n" .
 		  "editors        Print a list of editors\n" .
 		  "guieditors     Print a list of GUI editors\n" .
 		  "kbdmodels      Print a list of X keyboard models\n" .
@@ -1004,7 +869,13 @@ while (@ARGV) {
 		print_locales();
 		exit 0;
 	} elsif ($ARGV[0] eq "kbdlayouts") {
-		print_kbdlayout_list();
+		shift @ARGV;
+		my $f = check_args('l', 0);
+		if ($f eq 'l') {
+			print_kbdlayout_list(1);
+		} else {
+			print_kbdlayout_list(0);
+		}
 		exit 0;
 	} elsif ($ARGV[0] eq "kbdmodels") {
 		print_xkbdmodels();
@@ -1028,12 +899,6 @@ while (@ARGV) {
 		exit 0;
 	} elsif ($ARGV[0] eq "editors") {
 		print_array_data(\@editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "emailclients") {
-		print_array_data(\@email_client_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "browsers") {
-		print_array_data(\@browser_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "guieditors") {
 		print_array_data(\@gui_editor_list);
