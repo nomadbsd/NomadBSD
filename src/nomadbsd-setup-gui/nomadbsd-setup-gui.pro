@@ -1,4 +1,4 @@
-PREFIX       = /tmp
+PREFIX       = /usr
 PROGRAM	     = nomadbsd-setup-gui
 BACKEND      = nomadbsd-setup
 DATA_DIR     = $${PREFIX}/share/nomadbsd-setup
