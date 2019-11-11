@@ -26,6 +26,8 @@
 
 arch=$(sysctl -n hw.machine_arch)
 version=$(cat /VERSION)
+efipartsz=@EFI_PART_SIZE@
+
 idx=0
 rootfs_label="nbsdrootfs"
 swap_label="nbsdswap"
@@ -48,6 +50,19 @@ progress() {
 	[ -n "${dummy}" ] && sleep 1
 }
 
+show_extract() {
+	awk -v nfiles=$1 '{
+		while (getline > 0) {
+			if ($0 !~ /^x/)
+				continue;
+			p = int(++n * 100 / nfiles);
+			print ">" $0;
+			print "%" p;
+			fflush();
+		}
+	}'
+}
+
 fstab_ufs() {
 cat <<FSTAB_END
 /dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
@@ -64,10 +79,9 @@ FSTAB_END
 getrootdev()
 {
 	local rootdev
-	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
-	[ "${rootdev}" != "label/nomadroot" ] && return
-	rootdev=$(glabel status | grep nomadroot | awk -F" " '{ print $3 }')
-	echo "${rootdev}" | sed -E 's/(.*)s[0-9][a-z]/\1/'
+	rootdev=$(df / | tail -n 1 | awk '{ sub("/dev/", "", $1); print $1 }')
+	glabel status | grep $rootdev | awk -F" " '{ print $3 }' | \
+		sed -E 's/(.*)[sp][0-9][a-z]*/\1/'
 }
 
 devlist() {
@@ -201,7 +215,7 @@ commit() {
 	fi
 	if [ "${arch}" = "amd64" ]; then
 		status "Creating EFI partition ..."
-		gpart add -a 4k -t efi -l gpefiboot -s 800K ${disk} || \
+		gpart add -a 4k -t efi -l gpefiboot -s ${efipartsz} ${disk} || \
 			bail "Couldn't create EFI partition"
 		idx=$((idx + 1))
 		gpart bootcode -p /boot/boot1.efifat -i ${idx} ${disk}
@@ -231,8 +245,8 @@ commit() {
 	fi
 	status "Counting files to copy ..."
 	progress -1
-	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|usr/share/nomadbsd/home.nomad.tgz|";
-	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip|home/pkgs.*)"
+	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|private.*|unionfs.*|home.*|";
+	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip)"
 	nfiles=$(find / \( -type f -or -type d -or 	 \
 			 -type l -or -type p \) 2>/dev/null | \
 			 egrep -v "$re" | wc -l | tr -d ' ')
@@ -243,20 +257,12 @@ commit() {
 		--exclude '^var/run*'				\
 		--exclude '^mnt*'					\
 		--exclude '^uzip*'					\
-		--exclude '^usr/share/nomadbsd/home.nomad.tgz'			\
 		--exclude '^nomadbsd-backup.tar.xz'	\
 		--exclude '^etc/rc.d/mount_uzip'	\
-		--exclude '^home/pkgs*' .) | \
-		(cd /mnt && tar xmvf - 2>&1) | awk -v nfiles=$nfiles '{
-			while (getline > 0) {
-				if ($0 !~ /^x/)
-					continue;
-				p = int(++n * 100 / nfiles);
-				print ">" $0;
-				print "%" p;
-				fflush();
-			}
-		}'
+		--exclude '^unionfs*'				\
+		--exclude '^private*'				\
+		--exclude '^home*'  .) |			\
+		(cd /mnt && tar xmvf - 2>&1) | show_extract $nfiles
 	status "Creating /mnt/dev ..."
 	mkdir /mnt/dev
 	status "Creating /mnt/var/run ..."
@@ -287,17 +293,49 @@ commit() {
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
 	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
 	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
+
 	sysrc -f /mnt/etc/rc.conf -x gsched_enable
 	sysrc -f /mnt/etc/rc.conf -x local_startup
 	sed -i '' 's,^WorkDir.*,WorkDir /var/db/freebsd-update,' \
 		/mnt/etc/freebsd-update.conf
+	sed -E -i '' '/^\/etc\/rc.d\/mount_uzip.*$/d' /mnt/etc/rc.shutdown
+
 	if [ ${fstype} = "ZFS" ]; then
 		sysrc -f /mnt/etc/rc.conf zfs_enable=YES
 	fi
-	if [ -L /mnt/home -a -d /mnt/private/home/nomad ]; then
-		unlink /mnt/home
-		mv /mnt/private/home /mnt
-		rmdir /mnt/private
+
+	if [ ! -d /mnt/home ]; then
+			mkdir /mnt/home || bail "Couldn't create /mnt/home"
+	fi
+	if [ -L /home -a -d /private/home/nomad ]; then
+		status "Counting files to copy from /private/home ..."
+		progress -1
+		nfiles=$(cd /private/home && find . \( -type f -or -type d -or	\
+			-type l -or -type p \) 2>/dev/null | \
+			egrep -v '^\./(pkgs/|compat/)' | wc -l | tr -d ' ')
+
+		status "Copying files from /private/home ..."
+		(cd /private/home && tar cf -	\
+			--exclude '*/.gvfs'			\
+			--exclude '^pkgs*'			\
+			--exclude '^compat*' .) | (cd /mnt/home && tar xmvf - 2>&1) | \
+			show_extract $nfiles
+		unlink /mnt/etc/wpa_supplicant.conf
+		unlink /mnt/etc/ppp
+		(cd /private/etc && tar cf - .) | (cd /mnt/etc && tar xmf -)
+	else
+		status "Counting files to copy from /home ..."
+		progress -1
+		nfiles=$(cd /home && find . \( -type f -or -type d -or	\
+			-type l -or -type p \) 2>/dev/null | \
+			egrep -v '^\./(pkgs/|compat/)' | wc -l | tr -d ' ')
+
+		status "Copying files from /home ..."
+		(cd /home && tar cf -			\
+			--exclude '*/.gvfs'			\
+			--exclude '^pkgs*'			\
+			--exclude '^compat*' .) | (cd /mnt/home && tar xmvf - 2>&1) | \
+			show_extract $nfiles
 	fi
 	status "Counting config files ..."
 	progress -1
@@ -313,7 +351,10 @@ commit() {
 		fi
 	done
 	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
-	rm -f /mnt/usr/libexec/nomad*
+	for i in setup install; do
+		rm -f "/mnt/usr/libexec/nomadbsd-$i"
+		rm -f "/mnt/usr/bin/nomadbsd-$i-gui"
+	done
 	rm -f /mnt/usr/local/share/applications/nomadbsd-install-gui.desktop
 	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
 	mv /mnt/home/nomad /mnt/home/${username}
