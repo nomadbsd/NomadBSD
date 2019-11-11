@@ -23,24 +23,28 @@ for(a, TRANSLATIONS) {
 	system($$cmd)
 }
 
-cleanqm.commands     = rm -f locale/*.qm
+clean_backend.commands = rm -f $${BACKEND}
+cleanqm.commands       = rm -f locale/*.qm
 
-distclean.depends    = cleanqm
+distclean.depends      = cleanqm clean_backend
 
-target.files         = $${PROGRAM}
-target.path          = $${PREFIX}/bin
+target.files           = $${PROGRAM}
+target.path            = $${PREFIX}/bin
 
 isEmpty(MAC) {
-backend.files        = backend/pc/$${BACKEND}
+	cmd = sed -E \"s/@EFI_PART_SIZE@/40M/\" $${BACKEND}.in
 } else {
-backend.files        = backend/mac/$${BACKEND}
+	cmd = sed -E \"s/@EFI_PART_SIZE@/200M/\" $${BACKEND}.in
 }
-backend.path         = $${BACKEND_DIR}
-backend.CONFIG       = nostrip
+system($$cmd > $${BACKEND})
+system(chmod a+x $${BACKEND})
+backend.files          = $${BACKEND}
+backend.path           = $${BACKEND_DIR}
+backend.CONFIG         = nostrip
 
-desktopfile.path     = $${APPSDIR}
-desktopfile.files    = $${PROGRAM}.desktop
+desktopfile.path       = $${APPSDIR}
+desktopfile.files      = $${PROGRAM}.desktop
 
-QMAKE_EXTRA_TARGETS += cleanqm distclean desktopfile backend
-INSTALLS            += target backend desktopfile
+QMAKE_EXTRA_TARGETS   += cleanqm distclean desktopfile backend clean_backend
+INSTALLS              += target backend desktopfile
 
