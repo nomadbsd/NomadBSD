@@ -439,8 +439,9 @@ createimage()
 	mount /dev/${tmpimgdev}p1 ${TMP_BASE_DIR} || bail
 
 	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
-	(cd "${SYSDIR}" && tar -cf -         \
-	    --exclude '^boot/kernel.old'   \
+	(cd "${SYSDIR}" && tar -cf -       \
+		--exclude '^compat'			   \
+		--exclude '^boot/kernel.old'   \
 	    --exclude '^git*'              \
 	    --exclude '^pkgs/*'            \
 	    --exclude '^usr/obj*'          \
@@ -454,6 +455,7 @@ createimage()
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'    \
 	    --exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
+	ln -s /home/compat ${TMP_BASE_DIR}/compat
 	mkdir ${TMP_BASE_DIR}/var/log
 	mkdir ${TMP_BASE_DIR}/usr/share/nomadbsd
 	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
