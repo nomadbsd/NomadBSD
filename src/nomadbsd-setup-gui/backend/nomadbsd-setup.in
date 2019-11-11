@@ -720,6 +720,8 @@ sub commit {
 	}
 	status("Creating /home/pkgs");
 	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
+	status("Creating /home/compat");
+	system("mkdir /home/compat") == 0 or bail("Couldn't create /home/compat");
 	status("Counting files to copy");
 	progress(-1);
 	foreach (`tar tf ${path_dotfiles}`) {
