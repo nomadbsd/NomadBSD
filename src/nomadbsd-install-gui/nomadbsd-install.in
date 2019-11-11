@@ -52,6 +52,8 @@ progress() {
 
 show_extract() {
 	awk -v nfiles=$1 '{
+		if (nfiles <= 0)
+			exit;
 		while (getline > 0) {
 			if ($0 !~ /^x/)
 				continue;
@@ -303,7 +305,19 @@ commit() {
 	if [ ${fstype} = "ZFS" ]; then
 		sysrc -f /mnt/etc/rc.conf zfs_enable=YES
 	fi
-
+	if [ -L /compat -a -d /home/compat ]; then
+		unlink /mnt/compat
+		if [ ! -d /mnt/compat ]; then
+			mkdir /mnt/compat || bail "Couldn't create /mnt/compat"
+		fi
+		status "Counting files to copy from /home/compat ..."
+		progress -1
+		nfiles=$(cd /home/compat && find . \( -type f -or -type d -or	\
+			-type l -or -type p \) 2>/dev/null | wc -l | tr -d ' ')
+		status "Copying files from /home/compat to /mnt/compat ..."
+		(cd /home/compat && tar cf - .) | \
+			(cd /mnt/compat && tar xmvf - 2>&1) | show_extract $nfiles
+	fi
 	if [ ! -d /mnt/home ]; then
 			mkdir /mnt/home || bail "Couldn't create /mnt/home"
 	fi
