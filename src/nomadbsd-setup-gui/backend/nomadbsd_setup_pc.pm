@@ -143,13 +143,12 @@ sub mkhome {
 
 sub mkgeli {
 	my $dev			= "/dev/label/$homelabel";
-	my $geli_init	= "geli init -s 4096 -K /root/$homelabel.key -J - $dev";
-	my $geli_attach	= "geli attach -k /root/${homelabel}.key -j - $dev";
+	my $geli_init	= "geli init -s 4096 -e AES-XTS -l 256 -J - $dev";
+	my $geli_attach	= "geli attach -j - $dev";
 	my $newfscmd	= "newfs -t -E -U -O 1 -o time -b ${main::blksize} -f " .
 					  "${main::fragsize} -m 8 ${dev}.eli";
 	status("Creating partition for /private/home");
 	mkhomepart();
-	system("dd if=/dev/random of=/root/$homelabel.key bs=64 count=1");
 	status("Initializing geli volume");
 	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
 	print $fh "${main::cfg_geli_password}\n";
@@ -192,8 +191,6 @@ sub mkgeli {
 	system("cd /etc && ln -sf /private/etc/ppp; " .
 		   "ln -sf /private/etc/wpa_supplicant.conf");
 	system("sysrc -f /etc/rc.conf.in in geli_devices=\"label/${homelabel}\"");
-	system("sysrc -f /etc/rc.conf.in " .
-		   "geli_label_${homelabel}_flags=\"-k /root/${homelabel}.key\"");
 	status("Adding fstab entry for ${dev}.eli");
 	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "${dev}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";

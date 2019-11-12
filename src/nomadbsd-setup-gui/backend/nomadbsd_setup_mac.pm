@@ -127,15 +127,13 @@ sub mkhome {
 }
 
 sub mkgeli {
-	my $geli_init	= "geli init -s 4096 -K /root/$gpthome.key -J - " .
-					  "/dev/gpt/$gpthome";
-	my $geli_attach	= "geli attach -k /root/${gpthome}.key -j - " .
-					  "/dev/gpt/$gpthome";
+	my $dev			= "/dev/gpt/$gpthome";
+	my $geli_init	= "geli init -s 4096 -e AES-XTS -l 256 -J - $dev";
+	my $geli_attach	= "geli attach -j - $dev";
 	my $newfscmd	= "newfs -t -E -U -O 1 -o time -b ${main::blksize} -f " .
-					  "${main::fragsize} -m 8 /dev/gpt/$gpthome.eli";
+					  "${main::fragsize} -m 8 ${dev}.eli";
 	status("Creating partition for /private/home");
 	mkhomepart();
-	system("dd if=/dev/random of=/root/$gpthome.key bs=64 count=1");
 	status("Initializing geli volume");
 	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
 	print $fh "${main::cfg_geli_password}\n";
@@ -178,8 +176,6 @@ sub mkgeli {
 	system("cd /etc && ln -sf /private/etc/ppp; " .
 		   "ln -sf /private/etc/wpa_supplicant.conf");
 	system("sysrc -f /etc/rc.conf.in in geli_devices=\"gpt/${gpthome}\"");
-	system("sysrc -f /etc/rc.conf.in " .
-		   "geli_gpt_${gpthome}_flags=\"-k /root/${gpthome}.key\"");
 	status("Adding fstab entry for /dev/gpt/${gpthome}.eli");
 	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
