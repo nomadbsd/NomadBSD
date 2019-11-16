@@ -213,6 +213,14 @@ buildnvidia()
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
+	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
+	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
+	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
+	mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
+	for v in 304 340 390 440; do
+		cat nvidia/nvidia-driver-${v}*.txz | \
+		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+	done
 }
 
 builddrmlegacy()
@@ -252,15 +260,6 @@ instpkgs()
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
 	umount "${SYSDIR}/dev"
-	buildnvidia
-	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
-	for v in 304 340 390 440; do
-		cat nvidia/nvidia-driver-${v}*.txz | \
-		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
-	done
 }
 
 instgit()
@@ -770,8 +769,8 @@ all()
 	local i stages
 
 	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
-	stages="${stages} build_dmconfig build_unionfs instports builddrmlegacy"
-	stages="${stages} postpkgcfg createuzip createimage cleanup"
+	stages="${stages} build_dmconfig build_unionfs instports buildnvidia"
+	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage cleanup"
 
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -799,9 +798,8 @@ resumebuild()
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui build_dmconfig"
-	stages="${stages} build_unionfs instports builddrmlegacy postpkgcfg"
-	stages="${stages} createuzip createimage cleanup"
-
+	stages="${stages} build_unionfs instports buildnvidia builddrmlegacy"
+	stages="${stages} postpkgcfg createuzip createimage cleanup"
 	stage_found=0
 	failed_stage=$(cat .failed-stage)
 	if [ -z "${failed_stage}" ]; then
