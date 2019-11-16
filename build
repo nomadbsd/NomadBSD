@@ -321,7 +321,9 @@ instports()
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
-	for p in ${PORTSLIST}; do
+	perlvers=$(make -V PERL5_DEFAULT -f "${PORTSTREE}/Mk/bsd.port.mk")
+
+	for p in lang/perl${perlvers} ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
 		if pkg --chroot "${SYSDIR}" info --exists $p; then
 			# Check whether the ports version is newer than the
