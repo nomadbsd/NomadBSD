@@ -17,7 +17,8 @@
         <location filename="../src/wizard.cpp" line="1139"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 завершилась с кодом ошибки %2:
+&quot;%3&quot;</translation>
     </message>
     <message>
         <source>%1 returned with error code %2</source>
@@ -35,48 +36,48 @@
         <location filename="../src/wizard.cpp" line="434"/>
         <location filename="../src/wizard.cpp" line="465"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">Фоновый процесс не может быть запущен %1: %2</translation>
+        <translation>Фоновый процесс не может быть запущен &apos;%1&apos;: %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="454"/>
         <location filename="../src/wizard.cpp" line="485"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Команда &apos;%1&apos; завершилась с ошибкой.</translation>
+        <translation>Команда &apos;%1&apos; завершилась с ошибкой.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="615"/>
         <source>Add layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавить раскладку</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="616"/>
         <source>Remove layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить раскладку</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="617"/>
         <source>Additional keyboard layouts</source>
-        <translation type="unfinished"></translation>
+        <translation>Дополнительные раскладки клавиатуры</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="618"/>
         <source>Here you can add additional keyboard layouts. You can switch between them from the NomadBSD desktop.</source>
-        <translation type="unfinished"></translation>
+        <translation>Здесь Вы можете добавить дополнительные раскладки клавиатуры. Вы сможете переключаться между ними с рабочего стола NomadBSD.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="621"/>
         <source>Keyboard layout</source>
-        <translation type="unfinished">Раскладка клавиатуры</translation>
+        <translation>Раскладка клавиатуры</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="622"/>
         <source>Keyboard variant</source>
-        <translation type="unfinished">Тип клавиатуры</translation>
+        <translation>Тип клавиатуры</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="624"/>
         <source>Additional layouts</source>
-        <translation type="unfinished"></translation>
+        <translation>Дополнительные раскладки</translation>
     </message>
 </context>
 <context>
@@ -152,12 +153,12 @@
     <message>
         <location filename="../src/wizard.cpp" line="389"/>
         <source>Default keyboard layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Раскладка клавиатуры по-умолчанию</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="390"/>
         <source>Please choose a latin layout as system default here. The next screens allows you to add additional keyboard layouts.</source>
-        <translation type="unfinished"></translation>
+        <translation>Пожалуйста, выберите латинскую раскладку по-умолчанию тут. Вы сможете добавить дополнительные раскладки далее.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="393"/>
@@ -273,7 +274,7 @@
     <message>
         <location filename="../src/password.cpp" line="77"/>
         <source>Only 7-bit ASCII characters are allowed</source>
-        <translation type="unfinished"></translation>
+        <translation>Допустимы только 7-разрядные ASCII символы</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="94"/>
@@ -348,12 +349,12 @@
     <message>
         <location filename="../src/wizard.cpp" line="90"/>
         <source>Rebooting. Please wait ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Перезагрузка. Пожалуйста подождите ...</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="91"/>
         <source>Rebooting</source>
-        <translation type="unfinished"></translation>
+        <translation>Перезагрузка</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="58"/>
@@ -433,7 +434,7 @@ We are sorry for the inconvenience
     <message>
         <location filename="../src/wizard.cpp" line="979"/>
         <source>Additional keyboard layouts:</source>
-        <translation type="unfinished"></translation>
+        <translation>Дополнительные раскладки клавиатуры:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="980"/>
@@ -479,7 +480,8 @@ We are sorry for the inconvenience
         <location filename="../src/wizard.cpp" line="993"/>
         <source>Summary
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурация
+</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="994"/>

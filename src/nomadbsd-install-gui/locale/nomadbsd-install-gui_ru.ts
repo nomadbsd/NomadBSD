@@ -129,27 +129,27 @@ We are sorry for the inconvenience
     <message>
         <location filename="../src/wizard.cpp" line="173"/>
         <source>Target filesystem type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип файловой системы</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="174"/>
         <source>&amp;UFS</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;UFS</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="175"/>
         <source>&amp;ZFS</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;ZFS</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="190"/>
         <source>Enable lenovofix</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать lenovofix</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="191"/>
         <source>Setting this allows Lenovo systems with a buggy BIOS to boot from GPT partitions</source>
-        <translation type="unfinished"></translation>
+        <translation>Включение данного параметра позволит компьютерам Lenovo с ошибками в BIOS загружаться с GPT разделов</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="198"/>
@@ -165,7 +165,7 @@ We are sorry for the inconvenience
     <message>
         <location filename="../src/wizard.cpp" line="215"/>
         <source>Auto-login user</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматический вход в систему</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="217"/>
@@ -175,17 +175,17 @@ We are sorry for the inconvenience
     <message>
         <location filename="../src/wizard.cpp" line="256"/>
         <source>Username must not be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя пользователя не должно быть пустым</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="261"/>
         <source>Username already in use</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя пользователя уже используется</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="274"/>
         <source>Couldn&apos;t read &apos;%1&apos;: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно прочитать &apos;%1&apos;: %2</translation>
     </message>
 </context>
 <context>
@@ -199,13 +199,13 @@ We are sorry for the inconvenience
         <location filename="../src/wizard.cpp" line="352"/>
         <location filename="../src/wizard.cpp" line="354"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Нет</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="352"/>
         <location filename="../src/wizard.cpp" line="354"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="359"/>
@@ -226,17 +226,17 @@ We are sorry for the inconvenience
     <message>
         <location filename="../src/wizard.cpp" line="362"/>
         <source>Auto-login:</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматический вход:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="363"/>
         <source>Filesystem:</source>
-        <translation type="unfinished"></translation>
+        <translation>Файловая система:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="364"/>
         <source>Lenovofix:</source>
-        <translation type="unfinished"></translation>
+        <translation>Lenovofix:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="370"/>

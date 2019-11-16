@@ -1,6 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
 	<file>locale/nomadbsd-adduser-gui_de.qm</file>
+	<file>locale/nomadbsd-adduser-gui_ru.qm</file>
 </qresource>
 </RCC>
 

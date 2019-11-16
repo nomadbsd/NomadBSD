@@ -7,7 +7,8 @@ APPSDIR      = $${PREFIX}/share/applications
 TARGET	     = $${PROGRAM}
 TEMPLATE     = app
 RESOURCES    = resources.qrc
-TRANSLATIONS = locale/$${PROGRAM}_de.ts
+TRANSLATIONS = locale/$${PROGRAM}_de.ts \
+               locale/$${PROGRAM}_ru.ts
 QT	    += widgets
 INCLUDEPATH += .
 DEFINES	    += PROGRAM=\\\"$${PROGRAM}\\\"
