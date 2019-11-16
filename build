@@ -336,7 +336,7 @@ instports()
 			echo "Building newer version from ports ..."
 		fi
 		echo "Building $p ..." >&2
-		pname=$(echo $p | cut -d/ -f2 | tr '-' '_')
+		pname=$(echo $p | cut -d/ -f2 | tr '.-' '__')
 		eval popts=\${${pname}_OPTS}
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
 			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
