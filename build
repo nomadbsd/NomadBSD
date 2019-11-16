@@ -54,35 +54,21 @@
 #
 . ./build.cfg
 
-if [ -z "${RELEASE}" ]; then
-	echo "RELEASE must not be empty" >&2
-	exit 1
-fi
-if [ -z "${SYSDIR}" ]; then
-	echo "SYSDIR must not be empty" >&2
-	exit 1
-fi
-if [ -z "${DISTDIR}" ]; then
-	echo "DISTDIR must not be empty" >&2
-	exit 1
-fi
-if [ -z "${PATCHDIR}" ]; then
-	echo "PATCHDIR must not be empty" >&2
-	exit 1
-fi
+for i in RELEASE SYSDIR DISTDIR PATCHDIR; do
+	eval var=\${$i}
+	if [ -z "${var}" ]; then
+		echo "$i must not be empty" >&2
+		exit 1
+	fi
+done
 
-if [ "$(realpath -q ${SYSDIR})" = "/" ]; then
-	echo "Refusing to use '/' as SYSDIR"
-	exit 1
-fi
-if [ "$(realpath -q ${DISTDIR})" = "/" ]; then
-	echo "Refusing to use '/' as DISTDIR"
-	exit 1
-fi
-if [ "$(realpath -q ${PATCHDIR})" = "/" ]; then
-	echo "Refusing to use '/' as PATCHDIR"
-	exit 1
-fi
+for i in SYSDIR DISTDIR PATCHDIR; do
+	eval var=\${$i}
+	if [ "$(realpath -q ${var})" = "/" ]; then
+		echo "Refusing to use '/' as $i"
+		exit 1
+	fi
+done
 
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
