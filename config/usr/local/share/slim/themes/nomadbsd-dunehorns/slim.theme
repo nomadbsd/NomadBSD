@@ -1,0 +1,48 @@
+# text04 theme for SLiM
+# by Johannes Winkelmann
+# ... with improvements by Doug Barton, dougb@FreeBSD.org
+# ... with modifications for NomadBSD by Marcel Kaiser
+# Messages (ie: shutdown)
+msg_color               #FFFFFF
+msg_font                Droid Sans:size=20:bold:dpi=75
+msg_x                   50%
+msg_y                   40%
+msg_shadow_color #702342
+msg_shadow_xoffset 1
+msg_shadow_yoffset 1
+
+# valid values: center, stretch, tile
+background_style        stretch
+background_color        #2473bd
+
+# Input controls
+input_panel_x           25%
+input_panel_y           65%
+input_name_x            394
+input_name_y            181
+input_font          	Droid Sans:size=12:dpi=75
+input_color             #000000
+
+# Username / password request
+username_font          	Droid Sans:size=14:bold:dpi=75
+username_color        	#f9f9f9
+username_x              280
+username_y              183
+password_x              280
+password_y              183
+username_shadow_xoffset 1
+username_shadow_yoffset 1
+username_shadow_color   #702342
+
+# Welcome message
+welcome_font            Droid Sans:size=12:dpi=75
+welcome_color           #f9f9f9
+welcome_x               280
+welcome_y               210
+welcome_shadow_xoffset 1
+welcome_shadow_yoffset 1
+welcome_shadow_color   #702342
+
+username_msg            Username:
+password_msg            Password:
+welcome_msg             %host
