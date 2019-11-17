@@ -210,6 +210,9 @@ buildnvidia()
 	fi
 	for d in nvidia-driver-304 nvidia-driver-340 \
 			 nvidia-driver-390 nvidia-driver; do
+		# Skip nvidia-driver-440 on i386
+		[ ${ARCH} = "i386" -a $d = "nvidia-driver" ] && continue
+
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		[ -f nvidia/${pkgname}.txz ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
@@ -225,8 +228,12 @@ buildnvidia()
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
+	if [ ${ARCH} = "amd64" ]; then
+		mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
+	fi
 	for v in 304 340 390 440; do
+		# Skip nvidia-driver-440 on i386
+		[ ${ARCH} = "i386" -a $v = "440" ] && continue
 		cat nvidia/nvidia-driver-${v}*.txz | \
 		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
 	done
