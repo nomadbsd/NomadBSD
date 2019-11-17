@@ -202,6 +202,12 @@ buildnvidia()
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	[ ! -d "nvidia" ] && mkdir "nvidia" 
+	# Building nvidia-driver>=410 requires textproc/gsed
+	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
+		have_gsed=1
+	else
+		pkg --chroot "${SYSDIR}" install -y textproc/gsed
+	fi
 	for d in nvidia-driver-304 nvidia-driver-340 \
 			 nvidia-driver-390 nvidia-driver; do
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
@@ -213,6 +219,9 @@ buildnvidia()
 	done
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
+	# Remove textproc/gsed if we just installed it for building nvidia-driver
+	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
+
 	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
 	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
@@ -321,9 +330,7 @@ instports()
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
-	perlvers=$(make -V PERL5_DEFAULT -f "${PORTSTREE}/Mk/bsd.port.mk")
-
-	for p in lang/perl${perlvers} ${PORTSLIST}; do
+	for p in ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
 		if pkg --chroot "${SYSDIR}" info --exists $p; then
 			# Check whether the ports version is newer than the
