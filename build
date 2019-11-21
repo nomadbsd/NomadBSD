@@ -118,6 +118,8 @@ initbase()
 	re="s/^menu_position =.*$/menu_position"
 	re="${re} = {x = ${MENU_POSITION_X}, y = ${MENU_POSITION_Y}}/"
 	sed -E -i '' "${re}" "${SYSDIR}"/boot/lua/drawer.lua
+	# Disable uart.1 to prevent hangs on CherryTrail systems
+	sed -E -i '' 's/^(hint\.uart\.1.*)/#\1/g' "${SYSDIR}"/boot/device.hints
 }
 
 mkfontpaths()
