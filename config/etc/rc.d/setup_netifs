@@ -9,22 +9,23 @@
 setup_netifs_enable=${setup_netifs_enable-"NO"}
 
 name="setup_netifs"
+desc="Automatically configure network interfaces"
 rcvar="setup_netifs_enable"
 start_cmd="${name}_start"
 
 setup_netifs_get_country() {
-	zone=$(cat /var/db/zoneinfo | head -1)
+	zone=$(head -1 /var/db/zoneinfo)
 	grep "${zone}" /usr/share/zoneinfo/zone.tab | cut -f1
 }
 
 setup_netifs_start() {
 	mods=$(/usr/local/libexec/dsbdriverd -l 2>/dev/null | \
-		awk -F ':+' '/[Ee]thernet|[Nn]etwork]/ { print $2 }')
+		awk -F ':+' '/[Ee]thernet|[Nn]etwork]|[Ww]ireless/ { print $2 }')
 	for m in ${mods}; do
 		kldstat -v | grep -q -E " (pci|uhub)/(${m#if_}|$m)\$" || \
 			kldload $m
 	done
-	mkdir /var/run/wpa_supplicant >/dev/null 2>&1
+	mkdir -p /var/run/wpa_supplicant
 
 	ethernets=$(ifconfig | awk ' {
 		if (/^[0-9a-zA-Z]+:/) {
@@ -40,20 +41,38 @@ setup_netifs_start() {
 	country=$(setup_netifs_get_country)
 
 	n=0
-	for i in $wlans; do
-		sysrc "wlans_${i}=wlan${n}"
-		sysrc "ifconfig_wlan${n}=up scan WPA DHCP"
-		if [ -n "${country}" ]; then
-			sysrc "create_args_wlan${n}=down country ${country}"
-		fi
-		n=$(($n + 1))
-	done
+	if [ -n "${wlans}" ]; then
+		printf "Configuring wireless device(s):"
+		for i in $wlans; do
+			printf " $i"
+		done
+		echo ""
+		for i in $wlans; do
+			sysrc "wlans_${i}=wlan${n}"
+			sysrc "ifconfig_wlan${n}=up scan WPA DHCP"
+			if [ -n "${country}" ]; then
+				sysrc "create_args_wlan${n}=down country ${country}"
+			fi
+			n=$(($n + 1))
+		done
+	else
+		echo "No wireless device(s) found!"
+	fi
 
 	n=0
-	for i in $ethernets; do
-		sysrc "ifconfig_${i}=DHCP"
-		n=$(($n + 1))
-	done
+	if [ -n "${ethernets}" ]; then
+		printf "Configuring ethernet device(s):"
+		for i in $ethernets; do
+			printf " $i"
+		done
+		echo ""
+		for i in $ethernets; do
+			sysrc "ifconfig_${i}=DHCP"
+			n=$(($n + 1))
+		done
+	else
+		echo "No ethernet device(s) found!"
+	fi
 }
 
 load_rc_config $name
