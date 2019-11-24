@@ -42,6 +42,7 @@ for s in 15 9; do
 		pgrep -U ${uid} -q $p && pkill -$s $p
 	done
 done
+eval $(dbus-launch --sh-syntax)
 
 sh ~/.config/DSB/autostart.sh
 ############################################################################
@@ -56,12 +57,12 @@ sh ~/.config/DSB/autostart.sh
 # exec /usr/local/bin/gnome-session
 
 # MATE
-# exec ck-launch-session dbus-launch --exit-with-session mate-session
+# exec ck-launch-session mate-session
 
 # KDE
 # exec ck-launch-session startkde
 #
 ###########################################################################
 
-exec ck-launch-session dbus-launch --exit-with-session openbox-session
+exec ck-launch-session openbox-session
 
