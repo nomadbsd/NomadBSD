@@ -20,7 +20,14 @@ setup_netifs_get_country() {
 
 setup_netifs_start() {
 	mods=$(/usr/local/libexec/dsbdriverd -l 2>/dev/null | \
-		awk -F ':+' '/[Ee]thernet|[Nn]etwork]|[Ww]ireless/ { print $2 }')
+		awk -F ':+' '
+			(/bus=PCI/ && /class=02|class=0d/)    ||
+			(/bus=USB/ && /class=e0|ifclass=e0/)  ||
+			(/bus=USB/ && /class=01|ifclass=01/)  ||
+			/[Ee]thernet|[Nn]etwork]|[Ww]ireless/ {
+				print $NF
+			}
+		' | sort | uniq)
 	for m in ${mods}; do
 		kldstat -v | grep -q -E " (pci|uhub)/(${m#if_}|$m)\$" || \
 			kldload $m
