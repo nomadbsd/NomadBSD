@@ -375,6 +375,9 @@ commit() {
 	status "Running pwd_mkdb on /etc/master.passwd ..."
 	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
 	set_autologin
+	status "Updating pkg repository catalogues ..."
+	pkg --chroot /mnt update -f -q 2>/dev/null
+
 	status "Unmounting /mnt ..."
 	if [ ${fstype} = "ZFS" ]; then
 		zfs umount -af
