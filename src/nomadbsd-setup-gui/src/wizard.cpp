@@ -1075,7 +1075,7 @@ void CommitPage::readCmdOutput()
 {
 	QByteArray line;
 	QFontMetrics fm(commandMsg->font());
-	const int maxc = fm.width("m") * 40;
+	const int maxc = fm.horizontalAdvance("m") * 40;
 
 	proc.setReadChannel(QProcess::StandardOutput);
 	while (!(line = proc.readLine()).isEmpty()) {
