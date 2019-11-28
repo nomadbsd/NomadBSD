@@ -67,14 +67,16 @@ show_extract() {
 
 fstab_ufs() {
 cat <<FSTAB_END
-/dev/gpt/${rootfs_label} /    ufs   rw,noatime   1 1
-tmpfs                    /tmp tmpfs rw,mode=1777 0 0
+/dev/gpt/${rootfs_label} /     ufs    rw,noatime   1 1
+tmpfs                    /tmp  tmpfs  rw,mode=1777 0 0
+proc                     /proc procfs rw           0 0
 FSTAB_END
 }
 
 fstab_zfs() {
 cat <<FSTAB_END
-tmpfs                    /tmp tmpfs rw,mode=1777,late 0 0
+tmpfs                    /tmp  tmpfs  rw,mode=1777,late 0 0
+proc                     /proc procfs rw                0 0
 FSTAB_END
 }
 
