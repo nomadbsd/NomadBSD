@@ -2,6 +2,7 @@
 <qresource>
 	<file>locale/nomadbsd-dmconfig-gui_de.qm</file>
 	<file>locale/nomadbsd-dmconfig-gui_ru.qm</file>
+	<file>locale/nomadbsd-dmconfig-gui_cs.qm</file>
 </qresource>
 </RCC>
 
