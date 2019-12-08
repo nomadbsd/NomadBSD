@@ -4,4 +4,7 @@
 	XF86AudioLowerVolume
 "exec dmenu_run"
 	m:0x4 + c:65
+"exec xfce4-screenshooter"
+  m:0x0 + c:111
+  Print
 
