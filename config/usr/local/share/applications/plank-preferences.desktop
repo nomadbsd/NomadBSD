@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Plank Preferences
+GenericName=Dock Preferences
+Exec=plank --preferences
+Icon=plank
+Terminal=false
+NoDisplay=false
+Type=Application
+Categories=Settings;System;Application
