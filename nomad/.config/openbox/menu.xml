@@ -146,6 +146,11 @@
 			<command>obconf </command>
 		</action>
 	</item>
+  <item icon="/usr/local/share/icons/hicolor/16x16/apps/plank.svg" label="Plank Preferences" comment="--- auto ---">
+		<action name="Execute">
+			<command>plank --preferences</command>
+		</action>
+	</item>
 	<item icon="/usr/local/share/icons/hicolor/scalable/apps/tint2conf.svg" label="Tint2 Settings" comment="--- auto ---">
 		<action name="Execute">
 			<command>tint2conf</command>
