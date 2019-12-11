@@ -74,7 +74,6 @@ InstallWizard::InstallWizard(QWidget *parent) : QWizard(parent)
 
 void InstallWizard::accept()
 {
-	system(REBOOT_CMD);
 	QDialog::accept();
 }
 
@@ -513,7 +512,6 @@ void CommitPage::cleanup(int exitCode, QProcess::ExitStatus /* exitStatus */)
 		    QString("%1 returned with error code %2:\n\"%3\"")
 			.arg(BACKEND_COMMIT).arg(exitCode).arg(errorMsgBuf));
 	}
-	statusMsg->setText(tr("Press \"Finish\" to reboot"));
 	emit completeChanged();
 }
 
