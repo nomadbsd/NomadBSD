@@ -2,6 +2,8 @@
 	XF86AudioRaiseVolume
 "exec mixer vol -1"
 	XF86AudioLowerVolume
+"exec metalock -t NomadBSD -f 'Droid Sans 12'"
+	Control+Alt + l
 "exec dmenu_run"
 	m:0x4 + c:65
 
