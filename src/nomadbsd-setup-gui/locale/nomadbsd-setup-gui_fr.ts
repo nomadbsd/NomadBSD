@@ -1,33 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="cs_CZ">
+<TS version="2.1" language="fr_FR">
 <context>
     <name>CommitPage</name>
     <message>
         <location filename="../src/wizard.cpp" line="1046"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">Není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="1070"/>
         <source>An unexpected error occured while executing %1: %2</source>
-        <translation>Nastala neočekávaná chyba při spouštění %1: %2</translation>
+        <translation>Une erreur s&apos;est produite lors de l&apos;exécution de %1 : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="1128"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
-        <translation>%1 se vrátil s kódem chyby %2:
+        <translation>%1 a retourné le code erreur %2 :
 &quot;%3&quot;</translation>
-    </message>
-    <message>
-        <source>%1 returned with error code %2</source>
-        <translation type="vanished">%1 se vrátil s kódem chyby %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="1131"/>
         <source>Press &quot;Finish&quot; to reboot</source>
-        <translation>Stiskni &quot;Dokončit&quot; pro restartování</translation>
+        <translation>Cliquer sur &quot;Terminer&quot; pour redémarrer</translation>
     </message>
 </context>
 <context>
@@ -36,48 +32,48 @@
         <location filename="../src/wizard.cpp" line="432"/>
         <location filename="../src/wizard.cpp" line="463"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">Není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="452"/>
         <location filename="../src/wizard.cpp" line="483"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>La commande &apos;%1&apos; a retourné une erreur.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="613"/>
         <source>Add layout</source>
-        <translation>Přidat rozvržení</translation>
+        <translation>Ajouter une disposition</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="614"/>
         <source>Remove layout</source>
-        <translation>Odebrat rozvržení</translation>
+        <translation>Supprimer une disposition</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="615"/>
         <source>Additional keyboard layouts</source>
-        <translation>Dodatečné rozvržení klávesnice</translation>
+        <translation>Dispositions de clavier supplémentaires</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="616"/>
         <source>Here you can add additional keyboard layouts. You can switch between them from the NomadBSD desktop.</source>
-        <translation>Zde můžete přidat dodatečné rozvržení klávesnice. Můžete mezi nimi přepínat z NomadBSD plochy.</translation>
+        <translation>Ici vous pouvez ajouter des dispositions de clavier supplémentaires. Vous pouvez en changer depuis le bureau NomadBSD.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="619"/>
         <source>Keyboard layout</source>
-        <translation>Rozvržení klávesnice</translation>
+        <translation>Disposition du clavier</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="620"/>
         <source>Keyboard variant</source>
-        <translation>Varianta klávesnice</translation>
+        <translation>Variante de clavier</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="622"/>
         <source>Additional layouts</source>
-        <translation type="unfinished">Dodatečná rozvržení</translation>
+        <translation>Dispositions supplémentaires</translation>
     </message>
 </context>
 <context>
@@ -86,24 +82,24 @@
         <location filename="../src/wizard.cpp" line="791"/>
         <location filename="../src/wizard.cpp" line="814"/>
         <source>Yes</source>
-        <translation>Ano</translation>
+        <translation>Oui</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="791"/>
         <location filename="../src/wizard.cpp" line="814"/>
         <source>No</source>
-        <translation>Ne</translation>
+        <translation>Non</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="792"/>
         <source>Encrypt /home using Geli</source>
-        <translation>Zašifrovat složku /home pomocí Geli</translation>
+        <translation>Chiffrer /home avec Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="793"/>
         <source>Geli encrypted /home
 </source>
-        <translation>Složka /home byla zašifrována s pomocí Geli
+        <translation>/home chiffré avec Geli
 </translation>
     </message>
     <message>
@@ -111,29 +107,29 @@
         <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
-        <translation>NomadBSD Vám umožňuje chránit Vaše osobní data zašifrováním složky /home pomocí geli(8). Jestliže nevíte co je geli(8), měli byste tuto stránku přeskočit.
+        <translation>NomadBSD peut protéger vos fichiers personnels en chiffrant la partition /home avec geli(8). Si vous ne savez pas ce qu&apos;est geli(8), vous devriez ignorer cette page.
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="798"/>
         <source>Define a password required to decrypt /home</source>
-        <translation>Definuj heslo potřebné k dekryptování složky /home</translation>
+        <translation>Définir un mot de passe requis pour déchiffrer /home</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="799"/>
         <source>Password:</source>
-        <translation>Heslo:</translation>
+        <translation>Mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="800"/>
         <source>Repeat password:</source>
-        <translation>Heslo znovu:</translation>
+        <translation>Répéter le mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="801"/>
         <source>Passwords do not match</source>
-        <translation>Hesla se neshodují</translation>
+        <translation>Les mots de passe ne correspondent pas</translation>
     </message>
 </context>
 <context>
@@ -142,38 +138,38 @@
         <location filename="../src/wizard.cpp" line="239"/>
         <location filename="../src/wizard.cpp" line="270"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="259"/>
         <location filename="../src/wizard.cpp" line="290"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>La commande &apos;%1&apos; a retourné une erreur.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="387"/>
         <source>Default keyboard layout</source>
-        <translation>Výchozí rozvržení klávesnice</translation>
+        <translation>Disposition du clavier par défaut</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="388"/>
         <source>Please choose a latin layout as system default here. The next screens allows you to add additional keyboard layouts.</source>
-        <translation>Prosím vyberte si rozvržení latin jako výchozí. Na další stránce si můžete přidat dodatečné rozvržení klávesnice.</translation>
+        <translation>Choisissez ici une disposition latin par défaut pour le système. Les écrans suivants vous permettront d&apos;ajouter des dispositions de clavier supplémentaires.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="391"/>
         <source>Keyboard layout</source>
-        <translation>Rozvržení klávesnice</translation>
+        <translation>Disposition du clavier</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="392"/>
         <source>Keyboard variant</source>
-        <translation>Varianta klávesnice</translation>
+        <translation>Variante de clavier</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="393"/>
         <source>Test your keyboard settings</source>
-        <translation>Otestuj nastavení klávesnice</translation>
+        <translation>Tester le clavier</translation>
     </message>
 </context>
 <context>
@@ -181,42 +177,42 @@
     <message>
         <location filename="../src/wizard.cpp" line="156"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="176"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>La commande &apos;%1&apos; a retourné une erreur.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="180"/>
         <source>Please select your language/locale</source>
-        <translation>Prosím vyberte svůj jazyk</translation>
+        <translation>Sélectionnez vos paramètres de langue et de région</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="201"/>
         <source>Next</source>
-        <translation>Další</translation>
+        <translation>Suivant</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="202"/>
         <source>Back</source>
-        <translation>Zpět</translation>
+        <translation>Précédent</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="203"/>
         <source>Commit</source>
-        <translation>Potvrdit</translation>
+        <translation>Appliquer</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="204"/>
         <source>Finish</source>
-        <translation>Dokončit</translation>
+        <translation>Terminer</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="205"/>
         <source>Cancel</source>
-        <translation>Zrušit</translation>
+        <translation>Annuler</translation>
     </message>
 </context>
 <context>
@@ -225,7 +221,7 @@
         <location filename="../src/wizard.cpp" line="728"/>
         <source>Set password for user and root
 </source>
-        <translation>Nastavte heslo pro uživatele a správce (root)
+        <translation>Définir le mot de passe utilisateur et root
 </translation>
     </message>
     <message>
@@ -233,24 +229,24 @@
         <source>The password you choose here will be used for your user account (nomad), and for the administration account (root)
 
 </source>
-        <translation>Heslo které zde nastavíte bude použito pro Váš uživatelský účet (nomad) a pro účet správce (root)
+        <translation>Le mot de passe que vous choisissez ici sera utilisé pour le compte utilisateur (nomad), et pour le compte administrateur (root)
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="732"/>
         <source>Password:</source>
-        <translation>Heslo:</translation>
+        <translation>Mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="733"/>
         <source>Repeat password:</source>
-        <translation>Heslo znovu:</translation>
+        <translation>Répétez le mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="734"/>
         <source>Passwords do not match</source>
-        <translation>Hesla se neshodují</translation>
+        <translation>Les mots de passe ne correspondent pas</translation>
     </message>
 </context>
 <context>
@@ -259,22 +255,22 @@
         <location filename="../src/password.cpp" line="35"/>
         <location filename="../src/password.cpp" line="97"/>
         <source>Passwords do not match</source>
-        <translation>Hesla se neshodují</translation>
+        <translation>Les mots de passe ne correspondent pas</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="38"/>
         <source>Password:</source>
-        <translation>Heslo:</translation>
+        <translation>Mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="39"/>
         <source>Repeat password:</source>
-        <translation>Heslo znovu:</translation>
+        <translation>Répétez le mot de passe :</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="77"/>
         <source>Only 7-bit ASCII characters are allowed</source>
-        <translation>Pouze 7-bitové ASCII znaky jsou povoleny </translation>
+        <translation>Seulement les charactères 7-bit ASCII sont autorisés</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="94"/>
@@ -287,58 +283,45 @@
     <message>
         <location filename="../src/wizard.cpp" line="871"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="893"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>La commande &apos;%1&apos; a retourné une erreur.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
         <source>Shell</source>
-        <translation>Příkazová řádka</translation>
+        <translation>Shell</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
         <source>Editor</source>
-        <translation>Editor</translation>
+        <translation>Éditeur</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
         <source>GUI Editor</source>
-        <translation>Grafický textový editor</translation>
-    </message>
-    <message>
-        <location filename="../src/wizard.cpp" line="918"/>
-        <source>Please choose your preferred shell, editors, and filemanager
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Email client</source>
-        <translation type="vanished">Emailový klient</translation>
-    </message>
-    <message>
-        <source>Web browser</source>
-        <translation type="vanished">Webový prohlížeč</translation>
+        <translation>Éditeur graphique (GUI)</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
         <source>File manager</source>
-        <translation>Správce souborů</translation>
+        <translation>Gestionnaire de fichiers</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="917"/>
         <source>Choose your default applications
 </source>
-        <translation>Vyberte si výchozí aplikace
+        <translation>Choisissez vos applications par défaut
 </translation>
     </message>
     <message>
-        <source>Please choose your preferred shell, editors, browser, and email client
+        <location filename="../src/wizard.cpp" line="918"/>
+        <source>Please choose your preferred shell, editors, and filemanager
 </source>
-        <translation type="vanished">Prosím vyberte si shell, editor, prohlížeč a emailový klient, který preferujete.
+        <translation>Choisissez votre shell, éditeur et gestionnaire de fichiers préféré
 </translation>
     </message>
 </context>
@@ -347,27 +330,27 @@
     <message>
         <location filename="../src/wizard.cpp" line="70"/>
         <source>NomadBSD Setup</source>
-        <translation>Nastavení NomadBSD</translation>
+        <translation>Installation de NomadBSD</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="88"/>
         <source>Rebooting. Please wait ...</source>
-        <translation>Restartování. Prosím počkejte ...</translation>
+        <translation>Redémarrage. Patientez...</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="89"/>
         <source>Rebooting</source>
-        <translation>Restartování</translation>
+        <translation>Redémarrage</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="58"/>
         <source>Fatal error</source>
-        <translation>Fatální chyba</translation>
+        <translation>Erreur fatale</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="59"/>
         <source>Error</source>
-        <translation>Chyba</translation>
+        <translation>Erreur</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="62"/>
@@ -379,43 +362,43 @@ We are sorry for the inconvenience
 </source>
         <translation>
 
-Prosím pošlete chybové hlášení na mailing list NomadBSD.
+Envoyez un rapport de bogue à la liste de diffusion de NomadBSD.
 
-Omlouváme se za potíže
+Nous sommes désolés pour le désagrément
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="66"/>
         <location filename="../src/wizard.h" line="89"/>
         <source>Shutdown</source>
-        <translation>Vypnout</translation>
+        <translation>Arrêter</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="68"/>
         <location filename="../src/wizard.h" line="91"/>
         <source>Reboot</source>
-        <translation>Restartovat</translation>
+        <translation>Redémarrer</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="70"/>
         <location filename="../src/wizard.h" line="93"/>
         <source>Exit setup</source>
-        <translation>Ukončit průvodce nastavením.</translation>
+        <translation>Quitter l&apos;installation</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="85"/>
         <source>Sure you want to cancel the setup?</source>
-        <translation>Jste si jistí, že chcete ukončit průvodce nastavením?</translation>
+        <translation>Êtes-vous sûr d&apos;annuler l&apos;installation ?</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="86"/>
         <source>Cancel setup</source>
-        <translation>Ukončit průvodce nastavením</translation>
+        <translation>Annuler l&apos;installation</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="96"/>
         <source>Cancel</source>
-        <translation>Zrušit</translation>
+        <translation>Annuler</translation>
     </message>
 </context>
 <context>
@@ -423,65 +406,54 @@ Omlouváme se za potíže
     <message>
         <location filename="../src/wizard.cpp" line="970"/>
         <source>Locale:</source>
-        <translation>Jazyk:</translation>
+        <translation>Langue :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="971"/>
         <source>Keyboard layout:</source>
-        <translation>Rozvržení klávesnice:</translation>
-    </message>
-    <message>
-        <source>Keyboard variant:</source>
-        <translation type="vanished">Varianta klávesnice:</translation>
+        <translation>Disposition du clavier :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="972"/>
         <source>Additional keyboard layouts:</source>
-        <translation>Dodatečné rozvržení klávesnice:</translation>
+        <translation>Dispositions de clavier supplémentaires :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="973"/>
         <source>Timezone:</source>
-        <translation>Časová zóna:</translation>
+        <translation>Fuseau horaire :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="974"/>
         <source>Encrypt /home:</source>
-        <translation>Zašifrovat /home:</translation>
+        <translation>Chiffrement de /home :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="975"/>
         <source>Shell:</source>
-        <translation>Shell:</translation>
+        <translation>Shell :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="976"/>
         <source>Editor:</source>
-        <translation>Editor:</translation>
+        <translation>Éditeur :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="977"/>
         <source>GUI editor:</source>
-        <translation>Grafický textový editor:</translation>
-    </message>
-    <message>
-        <source>Email client:</source>
-        <translation type="vanished">Emailový klient:</translation>
-    </message>
-    <message>
-        <source>Web browser:</source>
-        <translation type="vanished">Webový prohlížeč:</translation>
+        <translation>Éditeur graphique :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="978"/>
         <source>File manager:</source>
-        <translation>Správce souborů:</translation>
+        <translation>Gestionnaire de fichiers :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="984"/>
         <source>Summary
 </source>
-        <translation>Souhrn</translation>
+        <translation>Résumé
+</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="985"/>
@@ -490,7 +462,7 @@ Omlouváme se za potíže
 If you click &quot;commit&quot;, the changes will be written to your USB flash drive</source>
         <translation>
 
-Jestli kliknete &quot;Potvrdit&quot;, změny se zapíšou na Vaše USB zařízení</translation>
+Si vous cliquez sur &quot;appliquer&quot;, les modifications seront écrites sur votre disque USB</translation>
     </message>
 </context>
 <context>
@@ -498,17 +470,17 @@ Jestli kliknete &quot;Potvrdit&quot;, změny se zapíšou na Vaše USB zařízen
     <message>
         <location filename="../src/wizard.cpp" line="648"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation type="unfinished">není možné spustit %1: %2</translation>
+        <translation>Impossible de démarrer le processus &apos;%1&apos; : %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="668"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation type="unfinished">Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>La commande &apos;%1&apos; a retourné une erreur.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="695"/>
         <source>Please select your timezone</source>
-        <translation>Prosím vyberte Vaše časové pásmo</translation>
+        <translation>Choisissez votre fuseau horaire</translation>
     </message>
 </context>
 <context>
@@ -518,7 +490,7 @@ Jestli kliknete &quot;Potvrdit&quot;, změny se zapíšou na Vaše USB zařízen
         <source>Welcome to the NomadBSD setup wizard.
 
 </source>
-        <translation>Vítejte v průvodci nastavením NomadBSD.
+        <translation>Bienvenue dans l&apos;assistant d&apos;installation de NomadBSD.
 
 </translation>
     </message>
@@ -527,9 +499,9 @@ Jestli kliknete &quot;Potvrdit&quot;, změny se zapíšou na Vaše USB zařízen
         <source>Before you can use NomadBSD, there are some things that need to be set up.
 
 The setup will only write to the USB flash drive it is currently running from. It will not change your system.</source>
-        <translation>Předtím než začnete používat NomadBSD, jsou zde některé věci, které je nutné nastavit.
+        <translation>Avant de pouvoir utiliser NomadBSD, il y a des choses à installer.
 
-Nastavení bude zapisovat pouze na USB zařízení, ze kterého momentálně běží. Váš současný systém nebude porušen.</translation>
+L&apos;assistant d&apos;installation écrira sur le disque USB depuis lequel il est actuellement lancé. Il ne modifiera pas votre système.</translation>
     </message>
 </context>
 </TS>
