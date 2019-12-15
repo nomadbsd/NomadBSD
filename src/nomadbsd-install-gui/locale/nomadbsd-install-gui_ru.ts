@@ -4,22 +4,22 @@
 <context>
     <name>CommitPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="409"/>
+        <location filename="../src/wizard.cpp" line="408"/>
         <source>Last chance to quit installation.</source>
         <translation>Последняя возможность прервать установку.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="410"/>
+        <location filename="../src/wizard.cpp" line="409"/>
         <source>Last chance</source>
         <translation>Последняя возможность</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="413"/>
+        <location filename="../src/wizard.cpp" line="412"/>
         <source>Quit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="416"/>
+        <location filename="../src/wizard.cpp" line="415"/>
         <source>Install</source>
         <translation>Установка</translation>
     </message>
@@ -34,9 +34,8 @@
         <translation>Возникла неизвестная ошибка в процессе выполнения %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="515"/>
         <source>Press &quot;Finish&quot; to reboot</source>
-        <translation>Нажмите &quot;Завершить&quot; для перезагрузки</translation>
+        <translation type="vanished">Нажмите &quot;Завершить&quot; для перезагрузки</translation>
     </message>
 </context>
 <context>
@@ -117,73 +116,73 @@ We are sorry for the inconvenience
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="141"/>
+        <location filename="../src/wizard.cpp" line="140"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Фоновый процесс не может быть запущен %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="165"/>
+        <location filename="../src/wizard.cpp" line="164"/>
         <source>&lt;b&gt;Please select the device you want to install NomadBSD on&lt;/b&gt;</source>
         <translation>&lt;b&gt;Пожалуйста, выберите устройство на которое нужно установить NomadBSD&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="173"/>
+        <location filename="../src/wizard.cpp" line="172"/>
         <source>Target filesystem type</source>
         <translation>Тип файловой системы</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="174"/>
+        <location filename="../src/wizard.cpp" line="173"/>
         <source>&amp;UFS</source>
         <translation>&amp;UFS</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="175"/>
+        <location filename="../src/wizard.cpp" line="174"/>
         <source>&amp;ZFS</source>
         <translation>&amp;ZFS</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="190"/>
+        <location filename="../src/wizard.cpp" line="189"/>
         <source>Enable lenovofix</source>
         <translation>Использовать lenovofix</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="191"/>
+        <location filename="../src/wizard.cpp" line="190"/>
         <source>Setting this allows Lenovo systems with a buggy BIOS to boot from GPT partitions</source>
         <translation>Включение данного параметра позволит компьютерам Lenovo с ошибками в BIOS загружаться с GPT разделов</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="198"/>
+        <location filename="../src/wizard.cpp" line="197"/>
         <source>&lt;b&gt;Desired size of the swap partition&lt;/b&gt;</source>
         <translatorcomment>Или все же использовать англицизм и раздел подкачки переименовать в swap раздел так как это слово широко известно и употребимо как технический термин в русском языке?</translatorcomment>
         <translation>&lt;b&gt;Размер раздела подкачки&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="211"/>
+        <location filename="../src/wizard.cpp" line="210"/>
         <source>&lt;b&gt;Username*&lt;/b&gt;</source>
         <translation>&lt;b&gt;Имя пользователя*&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="215"/>
+        <location filename="../src/wizard.cpp" line="214"/>
         <source>Auto-login user</source>
         <translation>Автоматический вход в систему</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="217"/>
+        <location filename="../src/wizard.cpp" line="216"/>
         <source>&lt;i&gt;* The installation script will adopt nomad&apos;s complete account. Only the username changes.&lt;/i&gt;</source>
         <translation>&lt;i&gt;* Мастер установки будет использовать профиль пользователя &quot;nomad&quot;. Только имя пользователя будет изменено.&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="256"/>
+        <location filename="../src/wizard.cpp" line="255"/>
         <source>Username must not be empty</source>
         <translation>Имя пользователя не должно быть пустым</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="261"/>
+        <location filename="../src/wizard.cpp" line="260"/>
         <source>Username already in use</source>
         <translation>Имя пользователя уже используется</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="274"/>
+        <location filename="../src/wizard.cpp" line="273"/>
         <source>Couldn&apos;t read &apos;%1&apos;: %2</source>
         <translation>Невозможно прочитать &apos;%1&apos;: %2</translation>
     </message>
@@ -191,55 +190,55 @@ We are sorry for the inconvenience
 <context>
     <name>SummaryPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="342"/>
+        <location filename="../src/wizard.cpp" line="341"/>
         <source>&lt;b&gt;Summary:&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;Сводка:&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="352"/>
-        <location filename="../src/wizard.cpp" line="354"/>
+        <location filename="../src/wizard.cpp" line="351"/>
+        <location filename="../src/wizard.cpp" line="353"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="352"/>
-        <location filename="../src/wizard.cpp" line="354"/>
+        <location filename="../src/wizard.cpp" line="351"/>
+        <location filename="../src/wizard.cpp" line="353"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="359"/>
+        <location filename="../src/wizard.cpp" line="358"/>
         <source>Target disk:</source>
         <translation>Диск:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="360"/>
+        <location filename="../src/wizard.cpp" line="359"/>
         <source>Swap (in MB):</source>
         <translatorcomment>We could try to be precise and use MiB instead of MB here. It&apos;s important, I guess.</translatorcomment>
         <translation>Раздел подкачки (в МиБ):</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="361"/>
+        <location filename="../src/wizard.cpp" line="360"/>
         <source>Username:</source>
         <translation>Имя пользователя:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="362"/>
+        <location filename="../src/wizard.cpp" line="361"/>
         <source>Auto-login:</source>
         <translation>Автоматический вход:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="363"/>
+        <location filename="../src/wizard.cpp" line="362"/>
         <source>Filesystem:</source>
         <translation>Файловая система:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="364"/>
+        <location filename="../src/wizard.cpp" line="363"/>
         <source>Lenovofix:</source>
         <translation>Lenovofix:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="370"/>
+        <location filename="../src/wizard.cpp" line="369"/>
         <source>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Warning:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
 If you click &lt;i&gt;commit&lt;/i&gt;, the system will be written to &lt;i&gt;%1&lt;/i&gt;. All data on &lt;i&gt;%1&lt;/i&gt; will be lost!</source>
         <translation>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Внимание:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
@@ -249,12 +248,12 @@ If you click &lt;i&gt;commit&lt;/i&gt;, the system will be written to &lt;i&gt;%
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="97"/>
+        <location filename="../src/wizard.cpp" line="96"/>
         <source>&lt;b&gt;Welcome to the NomadBSD installation wizard.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;Добро пожаловать в мастер установки NomadBSD.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="99"/>
+        <location filename="../src/wizard.cpp" line="98"/>
         <source>This program will install your NomadBSD with its current configuration on a hard disk.
 
 </source>
