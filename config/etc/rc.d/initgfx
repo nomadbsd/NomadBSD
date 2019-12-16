@@ -121,6 +121,8 @@ do_initgfx()
 	elif [ -n "${initgfx_default}" ]; then
 		driver=${initgfx_default}
 	fi
+	echo "${driver}" > /var/run/gfxdriver
+
 	eval cfg_path=\${path_${driver}_cfg}
 	(printf "Section \"Device\"\n"; \
 	 printf "\tIdentifier \"Card0\"\n"; \

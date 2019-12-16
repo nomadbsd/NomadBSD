@@ -1110,6 +1110,8 @@ if [ -z "${driver}" ]; then
 	exit 1
 fi
 
+echo "nvidia/${driver}" > /var/run/gfxdriver
+
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
 
 srcdir="/usr/local/nvidia/${driver}"

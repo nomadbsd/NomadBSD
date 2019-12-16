@@ -70,9 +70,11 @@ if i915_drm_legacy_ids | grep -iq ${device}; then
 	xorg_cfg_intel > "${path_xorg_cfg}"
 	kldconfig -im /boot/drm_legacy >/dev/null 2>&1
 	kldload /boot/drm_legacy/i915kms.ko
+	echo "drm_legacy/i915kms.ko" > /var/run/gfxdriver
 else
 	xorg_cfg_modesetting > "${path_xorg_cfg}"
 	kldload /boot/modules/i915kms.ko
+	echo "modules/i915kms.ko" > /var/run/gfxdriver
 fi
 exit 0
 

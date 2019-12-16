@@ -529,8 +529,10 @@ device=$(echo "$config" | cut -d: -f1)
 [ "$vendor" = 1002 ] || exit 1
 if data_radeon | grep -iq ${device}; then
 	kldload /boot/modules/radeonkms.ko
+	echo "modules/radeonkms.ko" > /var/run/gfxdriver
 else
 	kldload /boot/modules/amdgpu.ko
+	echo "modules/amdgpu.ko" > /var/run/gfxdriver
 	write_xorg_cfg
 fi
 exit 0
