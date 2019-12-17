@@ -24,7 +24,7 @@ gsched_start()
 		echo "Error: Couldn't find root device!"
 		exit 1
 	fi
-	dev=`echo ${rootdev} | sed -E 's/(.*)p[0-9]/\1/'`
+	dev=`echo ${rootdev} | sed -E 's/(.*)(s|p)[0-9][a-f]?/\1/'`
 	gsched insert ${dev}
 }
 run_rc_command "$1"
