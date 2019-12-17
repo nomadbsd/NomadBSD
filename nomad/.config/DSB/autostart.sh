@@ -1,8 +1,7 @@
 #!/bin/sh
 chkmultihead&
 ~/.screenlayout/default.sh&
-~/.config/DSB/dsbds.sh&
-~/.fehbg&
+sh -c '~/.config/DSB/dsbds.sh; ~/.fehbg'&
 compton&
 tint2&
 plank&
