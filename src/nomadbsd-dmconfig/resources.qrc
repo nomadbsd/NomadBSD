@@ -1,6 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
 	<file>locale/nomadbsd-dmconfig-gui_de.qm</file>
+	<file>locale/nomadbsd-dmconfig-gui_fr.qm</file>
 	<file>locale/nomadbsd-dmconfig-gui_ru.qm</file>
 	<file>locale/nomadbsd-dmconfig-gui_cs.qm</file>
 </qresource>
