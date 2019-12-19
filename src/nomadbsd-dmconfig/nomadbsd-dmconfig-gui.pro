@@ -10,7 +10,8 @@ TEMPLATE	= app
 INSTALLS	= target desktopfile backend
 RESOURCES	= resources.qrc
 TRANSLATIONS	= locale/$${PROGRAM}_de.ts \
-		  			  locale/$${PROGRAM}_ru.ts \
+                locale/$${PROGRAM}_fr.ts \
+                locale/$${PROGRAM}_ru.ts \
 		  		  	  locale/$${PROGRAM}_cs.ts
 
 QT		+= widgets
