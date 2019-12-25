@@ -85,6 +85,7 @@ sysutils/dsbmd
 sysutils/dunst
 sysutils/fusefs-ext4fuse
 sysutils/fusefs-hfsfuse
+sysutils/fusefs-jmtpfs
 sysutils/fusefs-sshfs
 sysutils/powerdxx
 sysutils/sleuthkit
