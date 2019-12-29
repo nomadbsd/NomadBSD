@@ -24,7 +24,7 @@ setup_netifs_start() {
 			(/bus=PCI/ && /class=02|class=0d/)    ||
 			(/bus=USB/ && /class=e0|ifclass=e0/)  ||
 			(/bus=USB/ && /class=01|ifclass=01/)  ||
-			/[Ee]thernet|[Nn]etwork]|[Ww]ireless/ {
+			/[Ee]thernet|[Nn]etwork|[Ww]ireless/ {
 				print $NF
 			}
 		' | sort | uniq)
