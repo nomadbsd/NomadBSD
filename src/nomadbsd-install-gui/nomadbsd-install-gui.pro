@@ -10,7 +10,8 @@ RESOURCES    = resources.qrc
 TRANSLATIONS = locale/$${PROGRAM}_de.ts \
                locale/$${PROGRAM}_fr.ts \
                locale/$${PROGRAM}_ru.ts \
-               locale/$${PROGRAM}_cs.ts
+               locale/$${PROGRAM}_cs.ts \
+               locale/$${PROGRAM}_id.ts
 QT	    += widgets
 INCLUDEPATH += . lib
 DEFINES	    += PROGRAM=\\\"$${PROGRAM}\\\"
