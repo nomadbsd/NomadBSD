@@ -26,6 +26,8 @@ editors/libreoffice
 editors/vim
 emulators/virtualbox-ose-additions
 french/aspell
+french/hunspell
+french/mythes
 ftp/filezilla
 games/bsdtris
 german/aspell
@@ -95,6 +97,7 @@ sysutils/xfburn
 textproc/aspell
 textproc/en-aspell
 textproc/en-hunspell
+textproc/en-mythes
 textproc/hunspell
 ukrainian/aspell
 ukrainian/hunspell
