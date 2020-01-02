@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Copyright (c) 2020 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+add_prefix() {
+	sed 's/^/ /'
+}
+
+cat_file() {
+	[ -f $1 ] && add_prefix < $1
+}
+
+for i in "NOMADBSD_VERSION:cat_file /VERSION"								\
+		 "UNAME:uname -a | add_prefix"										\
+		 "SYSCTL:sysctl -a | grep -E '^dev|^kern|^net|^hw' | add_prefix"	\
+		 "PCICONF:pciconf -lv | add_prefix"									\
+		 "KLDSTAT:kldstat | add_prefix"										\
+		 "IFCONFIG:ifconfig -v | add_prefix"								\
+		 "GPART_SHOW:gpart show | add_prefix"								\
+		 "DF:df -h | add_prefix"											\
+		 "MOUNT:mount | add_prefix"											\
+		 "RC_CONF:cat_file /etc/rc.conf"									\
+		 "LOADER_CONF:cat_file /boot/loader.conf"							\
+		 "XORG_LOG:cat_file /var/log/Xorg.0.log"; do
+	l=$(echo "$i" | cut -d: -f1)
+	c=$(echo "$i" | cut -d: -f2)
+	echo "$l START"
+	eval $c
+	echo "$l END"
+	echo
+done
+
