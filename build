@@ -339,6 +339,20 @@ instports()
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
+	#
+	# We need devel/autoconf and devel/automake to build
+	# sysutils/fusefs-jmtpfs
+	#
+	if pkg --chroot "${SYSDIR}" info --exists devel/autoconf; then
+		have_autoconf=1
+	else
+		pkg --chroot "${SYSDIR}" install -y devel/autoconf
+	fi
+	if pkg --chroot "${SYSDIR}" info --exists devel/automake; then
+		have_automake=1
+	else
+		pkg --chroot "${SYSDIR}" install -y devel/automake
+	fi
 	for p in ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
 		if pkg --chroot "${SYSDIR}" info --exists $p; then
@@ -363,6 +377,15 @@ instports()
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
+	# Delete packages needed to build the ports
+	if [ -z "$have_autoconf" ]; then
+		pkg -c "${SYSDIR}" delete -y devel/autoconf
+	fi
+	if [ -z "$have_automake" ]; then
+		pkg -c "${SYSDIR}" delete -y devel/autoconf
+	fi
+	pkg -c "${SYSDIR}" autoremove -y
+
 	umount "${SYSDIR}/usr/ports"
 	umount "${SYSDIR}/dev"
 }
