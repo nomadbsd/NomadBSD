@@ -200,7 +200,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="203"/>
         <source>Commit</source>
-        <translation>Lakukan</translation>
+        <translation>Simpan</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="204"/>
@@ -455,7 +455,7 @@ Kami mohon maaf atas ketidaknyamanan ini</translation>
 If you click &quot;commit&quot;, the changes will be written to your USB flash drive</source>
         <translation>
 
-Jika anda klik &quot;lakukan&quot;, perubahan akan ditulis ke perangkat penyimpanan USB anda</translation>
+Jika anda klik &quot;simpan&quot;, perubahan akan ditulis ke perangkat penyimpanan USB anda</translation>
     </message>
 </context>
 <context>
@@ -483,7 +483,7 @@ Jika anda klik &quot;lakukan&quot;, perubahan akan ditulis ke perangkat penyimpa
         <source>Welcome to the NomadBSD setup wizard.
 
 </source>
-        <translation>Selamat datang di panduan pemasangan NomadBSD.</translation>
+        <translation>Selamat datang di panduan pengaturan NomadBSD.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="127"/>
