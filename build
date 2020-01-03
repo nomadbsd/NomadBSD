@@ -728,6 +728,13 @@ build_dmconfig()
 	umount "${SYSDIR}/dev"
 }
 
+build_chusr()
+{
+		cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
+		chroot "${SYSDIR}" \
+				sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
+}
+
 insthandbook()
 {
 	local i
@@ -810,9 +817,9 @@ all()
 	local i stages
 
 	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
-	stages="${stages} build_dmconfig build_unionfs instports buildnvidia"
-	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage cleanup"
-
+	stages="${stages} build_dmconfig build_chusr build_unionfs instports"
+	stages="${stages} buildnvidia builddrmlegacy postpkgcfg createuzip"
+	stages="${stages} createimage cleanup"
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
@@ -839,8 +846,8 @@ resumebuild()
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui build_dmconfig"
-	stages="${stages} build_unionfs instports buildnvidia builddrmlegacy"
-	stages="${stages} postpkgcfg createuzip createimage cleanup"
+	stages="${stages} build_chusr build_unionfs instports buildnvidia"
+	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage cleanup"
 	stage_found=0
 	failed_stage=$(cat .failed-stage)
 	if [ -z "${failed_stage}" ]; then
@@ -916,6 +923,7 @@ while [ $# -gt 0 ]; do
 	installgui) build_installgui;;
 	addusergui)	build_addusergui;;
 	dmconfig)	build_dmconfig;;
+	chusr)		build_chusr;;
 	src)		instsrcdist;;
 	unionfs)	build_unionfs;;
 	uzip)		createuzip;;
