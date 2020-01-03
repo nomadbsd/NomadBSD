@@ -308,7 +308,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="72"/>
         <source>Commit</source>
-        <translation>Lakukan</translation>
+        <translation>Simpan</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="73"/>
