@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Manage user accounts
+Name[de]=Benutzerkonten verwalten
+Exec=dsbsu @PROGRAM@
+Icon=icon_user
+Terminal=false
+StartupNotify=True
+Type=Application
+Categories=System;
