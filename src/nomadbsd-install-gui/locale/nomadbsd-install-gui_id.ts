@@ -54,7 +54,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="65"/>
         <source>Commit</source>
-        <translation>Lakukan</translation>
+        <translation>Terapkan</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="66"/>
@@ -234,7 +234,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
         <source>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Warning:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
 If you click &lt;i&gt;commit&lt;/i&gt;, the system will be written to &lt;i&gt;%1&lt;/i&gt;. All data on &lt;i&gt;%1&lt;/i&gt; will be lost!</source>
         <translation>&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Peringatan:&lt;br/&gt;&lt;br/&gt;&lt;/b&gt;
-Jika anda klik &lt;i&gt;lakukan&lt;/i&gt;, sistem akan ditulis ke &lt;i&gt;%1&lt;/i&gt;. Semua data di &lt;i&gt;%1&lt;/i&gt; akan hilang!</translation>
+Jika anda klik &lt;i&gt;terapkan&lt;/i&gt;, sistem akan ditulis ke &lt;i&gt;%1&lt;/i&gt;. Semua data di &lt;i&gt;%1&lt;/i&gt; akan hilang!</translation>
     </message>
 </context>
 <context>
