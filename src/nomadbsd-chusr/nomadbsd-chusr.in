@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.6
+#!/usr/local/bin/python3.7
 #
 # Copyright (c) 2020 The NomadBSD Project. All rights reserved.
 #
@@ -146,7 +146,8 @@ class MainWindow(QMainWindow):
 	def change_passwd(self):
 		proc = Popen(['pw', 'usermod', self.user_cbb.currentText(),
 					  '-h', '0'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		error = proc.communicate(self.passwd1_le.text())[1]
+        password = self.passwd1_le.text().encode()
+        error = proc.communicate(input=password)[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
@@ -311,8 +312,7 @@ class MainWindow(QMainWindow):
 			if m:
 				lclasses.append(m.group(1))
 		f.close()
-		return sorted(lclasses, lambda x,y: cmp(x.lower(), y.lower()),
-					  lambda x: x[0])
+		return sorted(lclasses, key=lambda x: x[0])
 
 	def read_etc_passwd(self):
 		recs = [];
@@ -327,8 +327,7 @@ class MainWindow(QMainWindow):
 				continue
 			recs.append(fields)
 		f.close()
-		return sorted(recs, lambda x,y: cmp(x.lower(), y.lower()),
-					  lambda x: x[0])
+		return sorted(recs, key=lambda x: x[0])
 
 	def read_etc_group(self):
 		recs = []
@@ -339,8 +338,7 @@ class MainWindow(QMainWindow):
 			fields = l.rstrip('\r\n').split(':')
 			recs.append(fields)
 		f.close()
-		return sorted(recs, lambda x,y: cmp(x.lower(), y.lower()),
-					  lambda x: x[0])
+		return sorted(recs, key=lambda x: x[0])
 
 	def qwin(self, title, text, *opts):
 		buttons = []
@@ -390,9 +388,8 @@ class MainWindow(QMainWindow):
 			proc_args.extend(['-L', self.settings.lclass])
 		if self.settings.shell:
 			proc_args.extend(['-s', self.settings.shell])
-		print(proc_args)
 		proc = Popen(proc_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		error = proc.communicate(self.passwd1_le.text())[1]
+		error = proc.communicate()[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
