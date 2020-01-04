@@ -33,7 +33,8 @@ setup_netifs_start() {
 			kldload $m
 	done
 	mkdir -p /var/run/wpa_supplicant
-
+	echo "Waiting 3 seconds for new network interfaces to appear ..."
+	sleep 3
 	ethernets=$(ifconfig | awk ' {
 		if (/^[0-9a-zA-Z]+:/) {
 			split($1, tmp, ":");
