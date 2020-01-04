@@ -730,9 +730,16 @@ build_dmconfig()
 
 build_chusr()
 {
-		cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
-		chroot "${SYSDIR}" \
-				sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
+	required_pkgs="py36-qt5-core py36-qt5-xml py36-qt5-gui py36-qt5-widgets"
+	cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
+	chroot "${SYSDIR}" \
+			sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
+	for i in ${required_pkgs}; do
+		echo "$i"
+		if ! pkg -c "${SYSDIR}" info --exists $i; then
+			pkg -c "${SYSDIR}" install -y $i
+		fi
+	done
 }
 
 insthandbook()
