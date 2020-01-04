@@ -146,8 +146,8 @@ class MainWindow(QMainWindow):
 	def change_passwd(self):
 		proc = Popen(['pw', 'usermod', self.user_cbb.currentText(),
 					  '-h', '0'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        password = self.passwd1_le.text().encode()
-        error = proc.communicate(input=password)[1]
+		password = self.passwd1_le.text().encode()
+		error = proc.communicate(input=password)[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
