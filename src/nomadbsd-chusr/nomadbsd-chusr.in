@@ -412,7 +412,7 @@ class MainWindow(QMainWindow):
 		if index < 0:
 			return
 		proc = Popen(proc_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		error = proc.communicate(self.passwd1_le.text())[1]
+		error = proc.communicate()[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
