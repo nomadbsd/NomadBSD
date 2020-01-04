@@ -735,7 +735,6 @@ build_chusr()
 	chroot "${SYSDIR}" \
 			sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
 	for i in ${required_pkgs}; do
-		echo "$i"
 		if ! pkg -c "${SYSDIR}" info --exists $i; then
 			pkg -c "${SYSDIR}" install -y $i
 		fi
