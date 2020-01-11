@@ -274,6 +274,13 @@ commit() {
 	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
 	unlink /mnt/usr/local/etc
 	mv /mnt/usr.local.etc /mnt/usr/local/etc
+	if [ -h /mnt/var/db/portsnap ]; then
+		unlink /mnt/var/db/portsnap
+	fi
+	if [ ! -d /mnt/var/db/portsnap ]; then
+		status "Creating /mnt/var/db/portsnap"
+		mkdir /mnt/var/db/portsnap
+	fi
 	status "Creating /mnt/mnt ..."
 	mkdir /mnt/mnt
 
