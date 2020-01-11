@@ -31,4 +31,4 @@ initgfx_enable="YES"
 gsched_enable="YES"
 slim_enable="YES"
 init_vbox_enable="YES"
-
+avahi_daemon_enable="YES"

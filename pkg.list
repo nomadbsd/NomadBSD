@@ -21,6 +21,7 @@ devel/qt5-buildtools
 devel/qt5-linguisttools
 devel/qt5-qmake
 devel/xdg-user-dirs
+dns/nss_mdns
 editors/leafpad
 editors/libreoffice
 editors/vim
@@ -55,6 +56,7 @@ multimedia/x264
 net-im/pidgin
 net-mgmt/wifimgr
 net-p2p/transmission
+net/avahi-app
 net/mosh
 polish/aspell
 polish/hunspell
