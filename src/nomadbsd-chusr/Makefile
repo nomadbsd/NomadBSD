@@ -1,5 +1,5 @@
 PROGRAM             = nomadbsd-chusr
-PYLUPDATE           = pylupdate5-2.7
+PYLUPDATE           = pylupdate5-3.6
 PREFIX             ?= /usr
 BINDIR              = ${PREFIX}/bin
 DATADIR             = ${PREFIX}/share/${PROGRAM}

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.7
+#!/usr/local/bin/python3.6
 #
 # Copyright (c) 2020 The NomadBSD Project. All rights reserved.
 #
@@ -146,8 +146,8 @@ class MainWindow(QMainWindow):
 	def change_passwd(self):
 		proc = Popen(['pw', 'usermod', self.user_cbb.currentText(),
 					  '-h', '0'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        password = self.passwd1_le.text().encode()
-        error = proc.communicate(input=password)[1]
+		password = self.passwd1_le.text().encode()
+		error = proc.communicate(input=password)[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
@@ -412,7 +412,7 @@ class MainWindow(QMainWindow):
 		if index < 0:
 			return
 		proc = Popen(proc_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		error = proc.communicate(self.passwd1_le.text())[1]
+		error = proc.communicate()[1]
 		if proc.returncode != 0:
 			self.errwin(self.tr('pw returned with an error'), error)
 			sys.exit(1)
