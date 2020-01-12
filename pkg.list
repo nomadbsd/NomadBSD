@@ -27,6 +27,7 @@ editors/libreoffice
 editors/vim
 emulators/virtualbox-ose-additions
 french/aspell
+french/hunspell
 ftp/filezilla
 games/bsdtris
 german/aspell
