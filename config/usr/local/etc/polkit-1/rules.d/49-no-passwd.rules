@@ -1,4 +1,4 @@
-/* Allow password-less authentication via group membership */
+/* Allow password-less authorization via group membership */
 polkit.addRule(function(action, subject) {
 	if (subject.isInGroup("operator")) {
 		return polkit.Result.YES;
