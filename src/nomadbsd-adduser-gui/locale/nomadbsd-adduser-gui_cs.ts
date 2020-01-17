@@ -81,17 +81,17 @@
     <message>
         <location filename="../src/wizard.cpp" line="229"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation>Není možné spustit %1: %2</translation>
+        <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="249"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="253"/>
         <source>Please select language/locale for the new user</source>
-        <translation>Prosím vyberte jazyk pro nového uživatele</translation>
+        <translation>Bitte wählen Sie die Sprache/Lokalisation für den neuen Benutzer</translation>
     </message>
 </context>
 <context>
@@ -100,18 +100,18 @@
         <location filename="../src/wizard.cpp" line="514"/>
         <source>Set password for new user
 </source>
-        <translation>Nastavte heslo pro nového uživatele
+        <translation>Setzen Sie das Passwort für den neuen Benutzer
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="515"/>
         <source>Password:</source>
-        <translation>Heslo:</translation>
+        <translation>Passwort:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="516"/>
         <source>Repeat password:</source>
-        <translation>Heslo znovu:</translation>
+        <translation>Passwort wiederholen:</translation>
     </message>
 </context>
 <context>
@@ -120,22 +120,22 @@
         <location filename="../src/password.cpp" line="35"/>
         <location filename="../src/password.cpp" line="97"/>
         <source>Passwords do not match</source>
-        <translation>Hesla se neshodují</translation>
+        <translation>Passwörter stimmen nicht überein</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="38"/>
         <source>Password:</source>
-        <translation>Heslo:</translation>
+        <translation>Passwort:</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="39"/>
         <source>Repeat password:</source>
-        <translation>Heslo znovu:</translation>
+        <translation>Passwort wiederholen:</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="76"/>
         <source>Only 7-bit ASCII characters are allowed</source>
-        <translation>Jsou povoleny pouze 7-bitové ASCII znaky</translation>
+        <translation>Nur 7-Bit ASCII-Zeichen sind erlaubt</translation>
     </message>
     <message>
         <location filename="../src/password.cpp" line="93"/>
@@ -148,12 +148,12 @@
     <message>
         <location filename="../src/wizard.cpp" line="576"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
-        <translation>Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>Konnte Backend &apos;%1&apos; nicht ausführen: %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="598"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Příkaz &apos;%1&apos; se vrátil s chybou.</translation>
+        <translation>Der Befehl &apos;%1&apos; wurde mit einem Fehler beendet.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="618"/>
@@ -173,24 +173,24 @@
     <message>
         <location filename="../src/wizard.cpp" line="619"/>
         <source>Mail client</source>
-        <translation>Emailový klient</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="619"/>
         <source>Web browser</source>
-        <translation>Webový prohlížeč</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="623"/>
         <source>Default applications
 </source>
-        <translation>Výchozí aplikace
+        <translation>Standard-Anwendungen
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="619"/>
         <source>File manager</source>
-        <translation>Správce souborů</translation>
+        <translation>Dateimanager</translation>
     </message>
 </context>
 <context>
@@ -198,22 +198,22 @@
     <message>
         <location filename="../src/wizard.cpp" line="676"/>
         <source>Locale:</source>
-        <translation>Lokalizace:</translation>
+        <translation>Lokalisation:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="677"/>
         <source>Additional keyboard layouts:</source>
-        <translation>Dodatečné rozvržení:</translation>
+        <translation>Zusätzliche Tastaturbelegungen:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="675"/>
         <source>Username:</source>
-        <translation>Uživatelské jméno:</translation>
+        <translation>Benutzername:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="674"/>
         <source>Full name:</source>
-        <translation>Celé jméno:</translation>
+        <translation>Vollständiger Name:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="678"/>
@@ -233,24 +233,23 @@
     <message>
         <location filename="../src/wizard.cpp" line="681"/>
         <source>File manager:</source>
-        <translation>Správce souborů:</translation>
+        <translation>Dateimanager:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="682"/>
         <source>Mail client:</source>
-        <translation>Emailový klient</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="683"/>
         <source>Web browser:</source>
-        <translation>Webový prohlížeč</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="689"/>
         <source>Summary
 </source>
-        <translation>
-        Souhrn
+        <translation>Zusammenfassung
 </translation>
     </message>
 </context>
@@ -259,36 +258,36 @@
     <message>
         <location filename="../src/wizard.cpp" line="132"/>
         <source>Full name:</source>
-        <translation>Celé jméno:</translation>
+        <translation>Vollständiger Name:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="138"/>
         <source>Username:</source>
-        <translation>Uživatelské jméno:</translation>
+        <translation>Benutzername:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="144"/>
         <source>Add a new user to the system
 
 </source>
-        <translation>Přidat do systému nového uživatele
+        <translation>Legen Sie einen neuen Benutzer an
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="162"/>
         <source>Username must not be empty</source>
-        <translation>Uživatelské jméno nesmí být prázdné</translation>
+        <translation>Benutzername darf nicht leer sein</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="167"/>
         <source>Username already in use</source>
-        <translation>Uživatelské jméno se už používá</translation>
+        <translation>Benutzername bereits vergeben</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="180"/>
         <source>Couldn&apos;t read &apos;%1&apos;: %2</source>
-        <translation>Není možné přečíst %1: %2</translation>
+        <translation>Konnte &apos;%1&apos; nicht lesen: %2</translation>
     </message>
 </context>
 <context>
@@ -296,37 +295,37 @@
     <message>
         <location filename="../src/wizard.cpp" line="68"/>
         <source>Add user</source>
-        <translation>Přidat uživatele</translation>
+        <translation>Benutzer anlegen</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="70"/>
         <source>Next</source>
-        <translation>Další</translation>
+        <translation>Weiter</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="71"/>
         <source>Back</source>
-        <translation>Zpět</translation>
+        <translation>Zurück</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="72"/>
         <source>Commit</source>
-        <translation>Potvrdit</translation>
+        <translation>Anwenden</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="73"/>
         <source>Finish</source>
-        <translation>Dokončit</translation>
+        <translation>Abschließen</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="58"/>
         <source>Fatal error</source>
-        <translation>Fatální chyba</translation>
+        <translation>Schwerwiegender Fehler</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="59"/>
         <source>Error</source>
-        <translation>Error</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="62"/>
@@ -338,32 +337,32 @@ We are sorry for the inconvenience
 </source>
         <translation>
 
-Prosím pošlete chybové hlášení na mailing list NomadBSD.
+Bitten senden Sie einen Bugreport an die NomadBSD Mailingliste.
 
-Omlouváme se za potíže
+Wir entschuldigen uns für die Unannehmlichkeiten
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="66"/>
         <source>Exit</source>
-        <translation>Ukončit</translation>
+        <translation>Beenden</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="75"/>
         <source>Sure you want to quit?</source>
-        <translation>Jste si jistí, že chcete program ukončit?</translation>
+        <translation>Sicher, dass Sie das Programm beenden wollen?</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="74"/>
         <location filename="../src/wizard.h" line="76"/>
         <location filename="../src/wizard.h" line="82"/>
         <source>Cancel</source>
-        <translation>Zrušit</translation>
+        <translation>Abbrechen</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="79"/>
         <source>Quit</source>
-        <translation>Ukončit</translation>
+        <translation>Beenden</translation>
     </message>
 </context>
 </TS>
