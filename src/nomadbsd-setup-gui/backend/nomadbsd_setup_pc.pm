@@ -183,7 +183,10 @@ sub mkgeli {
 	system("ln -s /private/home /home") == 0
 		or bail("Failed to create symlink /home -> /private/home");
 	system("chown nomad:nomad /home/nomad");
-	
+
+	status("Creating /home/freebsd-update");
+	system("mkdir /home/freebsd-update");
+
 	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
 	system("mv /etc/ppp /private/etc/");
 	system("mv /etc/wpa_supplicant.conf /private/etc");
