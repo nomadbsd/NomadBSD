@@ -30,6 +30,7 @@
 use utf8;
 use strict;
 use Fcntl qw(:flock);
+use File::Temp qw(tempfile);
 use IO::KQueue;
 
 my %category_icons = (
@@ -207,12 +208,30 @@ my %trtbl_jp = (
 	'Update menu' => '更新メニュー'
 );
 
+my %trtbl_id = (
+	'AudioVideo'  => 'AudioVideo',
+	'Audio'       => 'Audio',
+	'Video'       => 'Video',
+	'Development' => 'Pengembangan',
+	'Education'   => 'Pendidikan',
+	'Game'        => 'Game',
+	'Graphics'    => 'Grafik',
+	'Network'     => 'Jaringan',
+	'Office'      => 'Kantor',
+	'Settings'    => 'Pengaturan',
+	'System'      => 'Sistem',
+	'Utility'     => 'Utilitas',
+	'Application' => 'Aplikasi',
+	'Update menu' => 'Perbarui menu'
+);
+
 my %trtbl = (
 	cs => \%trtbl_cs,
 	de => \%trtbl_de,
 	es => \%trtbl_es,
 	fr => \%trtbl_fr,
 	gr => \%trtbl_gr,
+	id => \%trtbl_id,
 	jp => \%trtbl_jp,
 	pt => \%trtbl_pt,
 	ru => \%trtbl_ru,
@@ -641,16 +660,20 @@ sub read_obmenu {
 sub write_obmenu {
 	my $fh;
 	local $_;
-
+	my $template = "$menu_path.XXXXXX";
+	my ($tmpfh, $tmpname) = tempfile($template)
+		or Xerr(1, "Could not create temporary file");
 	chmod(0644, $menu_path);
-	open($fh, '>', $menu_path)
+	open($fh, '+<', $menu_path)
 		or Xerr(1, "Could not open \'$menu_path\'");
 	flock($fh, LOCK_EX)
 		or Xerr(1, "Could not lock $menu_path");
 	foreach(@ob_menu) {
 		chomp;
-		print $fh "$_\n"
+		print $tmpfh "$_\n"
 	}
+	rename $tmpname, $menu_path;
+	close($tmpfh);
 	flock($fh, LOCK_UN);
 	close($fh);
 	system("openbox --reconfigure");
