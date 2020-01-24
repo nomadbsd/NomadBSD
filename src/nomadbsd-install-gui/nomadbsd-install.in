@@ -373,6 +373,8 @@ commit() {
 			sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" "$i"
 		fi
 	done
+	sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" \
+		/mnt/usr/local/etc/sudoers
 	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
 	for i in setup install; do
 		rm -f "/mnt/usr/libexec/nomadbsd-$i"
