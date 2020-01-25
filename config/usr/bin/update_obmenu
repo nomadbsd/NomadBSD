@@ -668,9 +668,15 @@ sub write_obmenu {
 		or Xerr(1, "Could not open \'$menu_path\'");
 	flock($fh, LOCK_EX)
 		or Xerr(1, "Could not lock $menu_path");
+	if (@ob_menu == 0) {
+		Xerr(1, "Refusing to write empty menu");
+	}
 	foreach(@ob_menu) {
 		chomp;
-		print $tmpfh "$_\n"
+		if (!print $tmpfh "$_\n") {
+			close($tmpfh);
+			Xerr(1, "Couldn't write to temporary file");
+		}
 	}
 	rename $tmpname, $menu_path;
 	close($tmpfh);
