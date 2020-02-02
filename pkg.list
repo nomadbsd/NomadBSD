@@ -86,7 +86,7 @@ sysutils/dsbmc
 sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/dunst
-sysutils/fusefs-ext4fuse
+sysutils/fusefs-ext2
 sysutils/fusefs-hfsfuse
 sysutils/fusefs-sshfs
 sysutils/powerdxx
@@ -138,7 +138,7 @@ x11/dmenu
 x11/dsbautostart
 x11/gxkb
 x11/metalock
-x11-wm/plank
+x11/plank
 x11/sakura
 x11/setxkbmap
 x11/slim
