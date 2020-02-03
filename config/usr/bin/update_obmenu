@@ -278,6 +278,7 @@ my @toolkit_config_paths = (
 my $lang                = "en";
 my $lockfile            = "$ENV{'HOME'}/.update_obmenu.lock";
 my $menu_path           = "$ENV{'HOME'}/.config/openbox/menu.xml";
+my $rc_path             = "$ENV{'HOME'}/.config/openbox/rc.xml";
 my @menu_prefix         = qw(/etc /usr/etc /usr/local/etc);
 my $dflt_menu           = "xdg/openbox/menu.xml";
 my $default_theme       = "hicolor";
@@ -358,10 +359,19 @@ sub get_inherits {
 }
 
 sub find_icon_theme_dir {
-	my ($theme) = @_;
+	my ($theme, $use_dark_theme) = @_;
 	local $_;
 
 	foreach (@icon_prefix) {
+		if ($use_dark_theme) {
+			my @dark_themes = (
+				"$_/$theme-dark", "$_/$theme-Dark",
+				"$_/$theme-darker", "$_/$theme-Darker"
+			);
+			foreach my $d (@dark_themes) {
+				return $d if (-d $d);
+			}
+		}
 		my $dir = "$_/$theme";
 		return $dir if (-d $dir);
 	}
@@ -369,23 +379,24 @@ sub find_icon_theme_dir {
 }
 
 sub get_icon_search_paths {
-	my ($dir, $idir, $fh);
+	my ($dir, $idir, $fh, $use_dark_theme);
 	my (@list, @icon_paths);
 	local $_;
 
-	if (($dir = find_icon_theme_dir($icon_theme))) {
+	$use_dark_theme = is_dark_theme();
+	if (($dir = find_icon_theme_dir($icon_theme, $use_dark_theme))) {
 		push @icon_paths, $dir;
 		my @inherits = get_inherits($dir);
 		foreach my $ih (@inherits) {
-			my $ihdir = find_icon_theme_dir($ih);
+			my $ihdir = find_icon_theme_dir($ih, $use_dark_theme);
 			push @icon_paths, $ihdir if ($ihdir);
 		}
 	}
-	if (($dir = find_icon_theme_dir($fallback_icon_theme))) {
+	if (($dir = find_icon_theme_dir($fallback_icon_theme, $use_dark_theme))) {
 		push @icon_paths, $dir;
 		my @inherits = get_inherits($dir);
 		foreach my $ih (@inherits) {
-			my $ihdir = find_icon_theme_dir($ih);
+			my $ihdir = find_icon_theme_dir($ih, $use_dark_theme);
 			push @icon_paths, $ihdir if ($ihdir);
 		}
 	}
@@ -614,6 +625,36 @@ sub is_blacklisted {
 	foreach (@blacklist) {
 		chomp;
 		return 1 if ($f eq $_);
+	}
+	return 0;
+}
+
+sub is_dark_theme {
+	my ($fh, $buf, $in_theme, $in_name, @lines);
+	local $_;
+
+	open($fh, '<', $rc_path) or return 0;
+	foreach (<$fh>) {
+		chomp;
+		$_ =~ s/>/>\n/g;
+		$_ =~ s/(<\/.*)/\n\1/g;
+		$buf .= $_;
+	}
+	close($fh);
+	@lines = split(/\n/, $buf);
+	foreach (@lines) {
+		if (/^\s*<\s*theme\s*>/) {
+			$in_theme = 1;
+		} elsif (/^\s<\s*\/theme\s*>/) {
+			$in_theme = 0;
+		} elsif (/^\s*<\s*name\s*>/) {
+			$in_name = 1;
+		} elsif (/^<\s*\/name\s*>/) {
+			$in_name = 0;
+		} elsif ($in_theme && $in_name) {
+			return 1 if (/.*-([Dd]ark|[Nn]okto)$/);
+			return 0;
+		}
 	}
 	return 0;
 }
