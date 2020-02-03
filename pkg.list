@@ -17,6 +17,7 @@ devel/git
 devel/gmake
 devel/p5-IO-KQueue
 devel/pkgconf
+devel/py-qt5-core
 devel/qt5-buildtools
 devel/qt5-linguisttools
 devel/qt5-qmake
@@ -130,6 +131,8 @@ x11-themes/gtk-arc-themes
 x11-themes/lxappearance
 x11-themes/papirus-icon-theme
 x11-themes/qt5-style-plugins
+x11-toolkits/py-qt5-gui
+x11-toolkits/py-qt5-widgets
 x11-wm/compton
 x11-wm/obconf
 x11-wm/openbox
