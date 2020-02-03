@@ -759,6 +759,8 @@ sub commit {
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	status("Regenerating font cache");
 	system("/usr/local/bin/fc-cache -sfr");
+	status("Locking kernel module packages");
+	system("pkg lock -y -g '*-kmod'");
 	if (-l "/usr/local") {
 		status("Replacing symlink to /unionfs/usr/local by /usr/local");
 		system("unlink /usr/local && mkdir /usr/local") == 0
