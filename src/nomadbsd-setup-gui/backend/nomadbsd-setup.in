@@ -61,7 +61,7 @@ my @cfg_xkbdlayouts;
 #
 # 
 my @file_manager_list = (
-	'Thunar		Xfce file manager',
+	'thunar		Xfce file manager',
 	'pcmanfm	PCMan file manager'
 );
 
