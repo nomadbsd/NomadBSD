@@ -576,7 +576,7 @@ sub desktopsettings {
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
 	
 	my @apps = (
-		'home', 'sakura', 'firefox', 'claws-mail',
+		'home', 'sakura', 'firefox', 'thunderbird',
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
 		'mpv', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
 	);
@@ -624,7 +624,7 @@ sub desktopsettings {
 	close($fh);
 	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/EMAILCLIENT/claws-mail.desktop/g' " .
+	system("sed -i .bak -E 's/EMAILCLIENT/thunderbird.desktop/g' " .
 		   "${mimelist}");
 	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
 		   "${mimelist}");

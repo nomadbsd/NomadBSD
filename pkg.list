@@ -45,9 +45,7 @@ hungarian/hunspell
 irc/hexchat
 korean/hunspell
 mail/neomutt
-mail/claws-mail
-mail/claws-mail-libravatar
-mail/claws-mail-notification
+mail/thunderbird
 math/galculator
 misc/mc
 misc/qt5ct
