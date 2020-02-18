@@ -312,10 +312,10 @@ postpkgcfg()
 	cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
 		"${SYSDIR}/usr/local/etc/dsbmd.conf"
 	if grep -q ^cups: "${SYSDIR}/etc/group"; then
-		chroot "${SYSDIR}" sh -c 'pw groupmod cups -m root,nomad'
+		chroot "${SYSDIR}" sh -c 'pw groupmod cups -m nomad'
 	fi
 	if grep -q ^webcamd: "${SYSDIR}/etc/group"; then
-		chroot "${SYSDIR}" sh -c 'pw groupmod webcamd -m root,nomad'
+		chroot "${SYSDIR}" sh -c 'pw groupmod webcamd -m nomad'
 	fi
 	# Remove tesserac-data which uses ~1G.
 	rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
