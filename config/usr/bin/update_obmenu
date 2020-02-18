@@ -380,7 +380,8 @@ sub find_icon_theme_dir {
 
 sub get_icon_search_paths {
 	my ($dir, $idir, $fh, $use_dark_theme);
-	my (@list, @icon_paths);
+	my (@list, @icon_paths, @apps_theme_icons, @apps_inherits_icons);
+	my (@theme_icons);
 	local $_;
 
 	$use_dark_theme = is_dark_theme();
@@ -407,13 +408,24 @@ sub get_icon_search_paths {
 				$idir = $1;
 			} elsif (/^Size=(.+)/) {
 				if ($1 >= 16) {
-					push @list, "$dir/$idir";
+					if ($dir =~ /$icon_theme/) {
+						if ($idir =~ /\/apps$/) {
+							push @apps_theme_icons, "$dir/$idir";
+						} else {
+							push @theme_icons, "$dir/$idir";
+						}
+					} elsif ($idir =~ /\/apps$/) {
+						push @apps_inherits_icons, "$dir/$idir";
+					} else {
+						push @list, "$dir/$idir";
+					}
 				}
 			}
 		}
 		close $fh;
 	}
-	push @icon_search_paths, @list;
+	push @icon_search_paths, @apps_theme_icons, @theme_icons;
+	push @icon_search_paths, @apps_inherits_icons, @list;
 	push @icon_search_paths, @pixmap_search_paths;
 }
 
@@ -423,6 +435,11 @@ sub find_icon {
 	local $_;
 
 	if ($icon !~ /.*\.(svg|png|xpm)$/) {
+		foreach $dir (@icon_search_paths) {
+			foreach (glob(qq(${dir}/${icon}.*))) {
+				return "$_" if (-f "$_");
+			}
+		}
 		foreach $dir (@icon_search_paths) {
 			foreach (glob(qq(${dir}/${icon}*))) {
 				return "$_" if (-f "$_");
@@ -462,7 +479,7 @@ sub parse_desktop_file {
 	my %info;
 	my ($fh, $type, $default_comment, $default_name, $terminal, $command);
 	my ($lang1, $lang2, $name, $comment, $category, $path, $icon, $x);
-	my ($no_display, $dt_entry_section);
+	my ($no_display, $dt_entry_section, $only_show_in, $not_show_in);
 	local $_;
 
 	$lang1 = $lang;
@@ -492,6 +509,9 @@ sub parse_desktop_file {
 		$path		 = $1 if (/^Path\s*=\s*(.*)/);
 		$icon		 = $1 if (/^Icon\s*=\s*(.*)$/);
 		$no_display	 = $1 if (/^NoDisplay\s*=\s*(.*)$/);
+		$only_show_in= $1 if (/^OnlyShowIn\s*=\s*(.*)$/);
+		$not_show_in = $1 if (/^NotShowIn\s*=\s*(.*)$/);
+
 		if (/^Categories\s*=(\S*)/) {
 			foreach $x (split(/;/, $1)) {
 				foreach (@categories)
@@ -504,17 +524,18 @@ sub parse_desktop_file {
 
 	close($fh);
 	return (0) if ($type ne "Application");
+	return (0) if ($only_show_in or $not_show_in);
 
 	$command =~ s/\%[a-z,A-Z]//;
-	$info{'Icon'}	  = $icon; 
-	$info{'Name'}	  = $name ? $name : $default_name;
-	$info{'Comment'}  = $comment ? $comment : $default_comment;
- 	$info{'Type'}	  = $type;
-	$info{'Terminal'} = $terminal;
-	$info{'Exec'}	  = $command;
-	$info{'Category'} = $category ? $category : "Application";
-	$info{'Path'}	  = $path;
-	$info{'NoDisplay'}= lc($no_display);
+	$info{'Icon'}       = $icon;
+	$info{'Name'}       = $name ? $name : $default_name;
+	$info{'Comment'}    = $comment ? $comment : $default_comment;
+	$info{'Type'}       = $type;
+	$info{'Terminal'}   = $terminal;
+	$info{'Exec'}       = $command;
+	$info{'Category'}   = $category ? $category : "Application";
+	$info{'Path'}       = $path;
+	$info{'NoDisplay'}  = lc($no_display);
 	return (%info);
 }
 
