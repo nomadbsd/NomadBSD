@@ -1131,6 +1131,13 @@ for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/*; do
 	condcp "${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/$l" \
 		"/usr/local/lib/xorg/modules/extensions/$l"
 done
+for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/*; do
+	l=$(basename "$l")
+	[ $l = ".nvidia" ] && continue
+	condcp "${srcdir}/usr/local/lib/xorg/modules/extensions/$l" \
+		"/usr/local/lib/xorg/modules/extensions/$l"
+done
+
 for m in ${srcdir}/boot/modules/*.ko; do
 	m=$(basename "$m")
 	condcp "${srcdir}/boot/modules/$m" "/boot/modules/$m"
