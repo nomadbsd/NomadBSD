@@ -261,7 +261,7 @@ sub write_xorg_video_cfg {
 	print $fh qq(Section "Device"\n)     .
 	      qq(    Identifier "Card0"\n)   .
 	      qq(    Driver     "$driver"\n) .
-	      qq(    BusID      "$busID"\n)  .
+	      qq(    BusID      "PCI:$busID"\n)  .
 	      qq(EndSection\n);
 	close $fh;
 }
