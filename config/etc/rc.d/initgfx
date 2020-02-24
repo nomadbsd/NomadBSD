@@ -125,11 +125,14 @@ do_initgfx()
 		driver=${initgfx_default}
 	fi
 	echo "${driver}" > /var/run/gfxdriver
-
+	unit=$(sysctl -n hw.pci.default_vgapci_unit)
+	busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
+		sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
 	eval cfg_path=\${path_${driver}_cfg}
 	(printf "Section \"Device\"\n"; \
 	 printf "\tIdentifier \"Card0\"\n"; \
 	 printf "\tDriver \"${driver}\"\n"; \
+	 printf "\tBusID \"PCI:$busID\"\n"; \
 	 printf "EndSection\n") > ${cfg_path}
 }
 
