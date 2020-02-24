@@ -136,7 +136,7 @@ UsernamePage::UsernamePage(QWidget *parent) : QWizardPage(parent)
 
 	readUsernames();
 	ulabel->setText(tr("Username:"));
-	usernamele->setMaxLength(8);
+	usernamele->setMaxLength(16);
 	usernamele->setValidator(new QRegExpValidator(uchars));
 	form->addRow(ulabel, usernamele);
 
