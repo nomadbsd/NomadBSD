@@ -44,6 +44,8 @@ my $path_dotfiles	= "/usr/share/nomadbsd/home.nomad.tgz";
 my $path_templates	= "/usr/share/nomadbsd-setup";
 my $path_xkbd_conf	= "/usr/local/etc/X11/xorg.conf.d/10-input-keyboard.conf";
 my $path_xinitrc	= "$path_templates/xinitrc";
+my $path_scfb_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
+my $path_vesa_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 my ($xlayoutstr, $xvariantstr);
 
 my $cfg_fm;
@@ -246,6 +248,24 @@ sub newfswrp {
 	bail("\"$cmd\" failed") if (!close($fh));
 }
 
+sub write_xorg_video_cfg {
+	my $fh;
+	my ($driver, $busID) = @_;
+	if ($driver eq 'scfb') {
+		open($fh, '+>', $path_scfb_cfg)
+			or die("Couldn't write $path_scfb_cfg");
+	} else {
+		open($fh, '+>', $path_vesa_cfg)
+			or die("Couldn't write $path_vesa_cfg");
+	}
+	print $fh qq(Section "Device"\n)     .
+	      qq(    Identifier "Card0"\n)   .
+	      qq(    Driver     "$driver"\n) .
+	      qq(    BusID      "$busID"\n)  .
+	      qq(EndSection\n);
+	close $fh;
+}
+
 #
 # Initialize environment for the graphical setup.
 # 
@@ -253,9 +273,7 @@ sub newfswrp {
 # the SCFB driver (EFI) or the VESA (BIOS) driver.
 #
 sub bootstrap_gui {
-	my $path_scfb_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
-	my $path_vesa_cfg = "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
-	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms);
+	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms, $busID);
 	my @spinner = qw(| / - \\);
 
 	STDOUT->autoflush(1);
@@ -275,7 +293,14 @@ sub bootstrap_gui {
 	$efiboot = 0 if (`sysctl machdep.bootmethod` =~ /BIOS/);
 	unlink($path_vesa_cfg);
 	unlink($path_scfb_cfg);
-
+	chomp(my $unit = `sysctl -n hw.pci.default_vgapci_unit`);
+	foreach (`pciconf -lv`) {
+		chomp;
+		if (/^vgapci${unit}\@pci[0-9]:([0-9:]+):.*$/) {
+			$busID = $1;
+			last;
+		}
+	}
 	foreach (`pciconf -lv`) {
 		if (/^vgapci/) {
 			$in_vgapci = 1;
@@ -304,9 +329,9 @@ sub bootstrap_gui {
 	}
 	if (!$kms && !$vbox) {
 		if ($efiboot == 0) {
-			system("cp $path_templates/video-vesa.conf $path_vesa_cfg");
+			write_xorg_video_cfg("vesa", $busID);
 		} else {
-			system("cp $path_templates/video-scfb.conf $path_scfb_cfg");
+			write_xorg_video_cfg("scfb", $busID);
 		}
 	}
 	$ENV{XINITRC} = $path_xinitrc;
