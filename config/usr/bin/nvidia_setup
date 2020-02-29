@@ -1079,8 +1079,8 @@ rc_conf_d_END
 }
 
 condcp() {
-	local src=$1
-	local dst=$2
+	local src="$1"
+	local dst="$2"
 
 	csum=$(md5 -q "${src}")
 	if (! md5 -c "${csum}" "${dst}" >/dev/null 2>&1); then
@@ -1093,8 +1093,6 @@ find_driver() {
 	unit=$(sysctl -n hw.pci.default_vgapci_unit)
 	config=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | \
 			cut -d"'" -f 2)
-	busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
-		sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
 	for i in 440 390 340 304; do
 		data_${i} | while read ln; do
 			if (echo $config | grep -q -i -w "$ln"); then
@@ -1106,13 +1104,15 @@ find_driver() {
 	done
 }
 
+unit=$(sysctl -n hw.pci.default_vgapci_unit)
+busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
+	sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
 driver=$(find_driver)
 
 if [ -z "${driver}" ]; then
 	# No NVIDIA device
 	exit 1
 fi
-
 echo "nvidia/${driver}" > /var/run/gfxdriver
 
 [ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
@@ -1129,12 +1129,12 @@ ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
 
 condcp "${srcdir}/usr/local/lib/xorg/modules/drivers/nvidia_drv.so" \
 	"/usr/local/lib/xorg/modules/drivers/nvidia_drv.so"
-for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/*; do
+for l in $(ls ${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/); do
 	l=$(basename "$l")
 	condcp "${srcdir}/usr/local/lib/xorg/modules/extensions/.nvidia/$l" \
 		"/usr/local/lib/xorg/modules/extensions/$l"
 done
-for l in ${srcdir}/usr/local/lib/xorg/modules/extensions/*; do
+for l in $(ls ${srcdir}/usr/local/lib/xorg/modules/extensions/); do
 	l=$(basename "$l")
 	[ $l = ".nvidia" ] && continue
 	condcp "${srcdir}/usr/local/lib/xorg/modules/extensions/$l" \
@@ -1145,7 +1145,7 @@ for m in ${srcdir}/boot/modules/*.ko; do
 	m=$(basename "$m")
 	condcp "${srcdir}/boot/modules/$m" "/boot/modules/$m"
 done
-for l in ${srcdir}/usr/local/lib/vdpau/*; do
+for l in $(ls ${srcdir}/usr/local/lib/vdpau/); do
 	l=$(basename "$l")
 	condcp "${srcdir}/usr/local/lib/vdpau/$l" "/usr/local/lib/vdpau/$l"
 done
@@ -1161,6 +1161,7 @@ else
 	# nvidia 340 or 304 driver needed
 	kldload nvidia
 fi
+
 xorg_cfg > /usr/local/etc/X11/xorg.conf.d/10-nvidia.conf
 exit 0
 
