@@ -61,6 +61,7 @@ xorg_cfg_ms_END
 }
 
 unit=$(sysctl -n hw.pci.default_vgapci_unit)
+[ -z "$unit" -o "$unit" =  "-1" ] && unit=0
 config=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
 	sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
 busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \

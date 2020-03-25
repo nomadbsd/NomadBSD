@@ -1105,6 +1105,7 @@ find_driver() {
 }
 
 unit=$(sysctl -n hw.pci.default_vgapci_unit)
+[ -z "$unit" -o "$unit" =  "-1" ] && unit=0
 busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
 	sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
 driver=$(find_driver)
