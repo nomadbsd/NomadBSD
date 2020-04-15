@@ -5,8 +5,7 @@
 "exec metalock -t NomadBSD -f 'Droid Sans 12'"
 	Control+Alt + l
 "exec dmenu_run"
-	m:0x4 + c:65
+	Control + space
 "exec xfce4-screenshooter"
-  m:0x0 + c:111
-  Print
+	Print
 
