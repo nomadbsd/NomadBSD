@@ -171,7 +171,7 @@ mkzfs() {
 	zfs_create ${NOMADBSDROOT}/home
 	zfs_create -o mountpoint=/var ${NOMADBSDROOT}/var
 	zfs_create ${NOMADBSDROOT}/usr/obj
-	zfs_create -o mountpoint=/usr/ports -o exec=off -o setuid=off \
+	zfs_create -o mountpoint=/usr/ports -o setuid=off \
 		${NOMADBSDROOT}/usr/ports
 	zfs_create -o exec=off -o setuid=off -o compression=off \
 		${NOMADBSDROOT}/usr/ports/distfiles
