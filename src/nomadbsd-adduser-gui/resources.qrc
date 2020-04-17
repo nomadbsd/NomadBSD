@@ -4,6 +4,7 @@
 	<file>locale/nomadbsd-adduser-gui_fr.qm</file>
 	<file>locale/nomadbsd-adduser-gui_id.qm</file>
 	<file>locale/nomadbsd-adduser-gui_ru.qm</file>
+    <file>locale/nomadbsd-adduser-gui_es.qm</file>
 </qresource>
 </RCC>
 
