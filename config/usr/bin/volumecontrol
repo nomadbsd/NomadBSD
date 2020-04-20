@@ -1,0 +1,70 @@
+#!/bin/sh
+
+mixer_bin=/usr/sbin/mixer
+dunstify_bin=/usr/local/bin/dunstify
+oldvalue_path=/var/tmp/volumecontrol_oldvalue.$(id -un)
+
+# timeout in seconds
+notify_timeout=1
+volume_step=5
+
+dunstify_id=3728
+
+iconSound="audio-volume-high"
+iconMuted="audio-volume-muted"
+
+get_volume() {
+  ${mixer_bin} vol | cut -d: -f2
+}
+
+is_muted() {
+  [ $(get_volume) -eq 0 ] && true || false
+}
+
+set_volume() {
+  ${mixer_bin} vol ${1} >/dev/null
+}
+
+send_notification() {
+  volume=$(get_volume)
+  if is_muted ; then
+    ${dunstify_bin} -i $iconMuted -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "muted"
+  else
+    bar=$(/usr/bin/seq --separator="─" 0 "$((volume / 5))" | sed 's/[0-9]//g')
+    # Send the notification
+    ${dunstify_bin} -i $iconSound -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "$volume    $bar"
+  fi
+}
+
+if [ ! -f ${dunstify_bin} ]; then
+  echo "dunstify not found. Install x11/dunst first!" >/dev/stderr
+  exit 1
+fi
+
+volume=$(get_volume)
+
+case $1 in
+  up)
+    set_volume +${volume_step}
+    ;;
+  down)
+    set_volume -${volume_step}
+    ;;
+  mute)
+    if is_muted; then
+      if [ -f ${oldvalue_path} ]; then
+       set_volume $(cat ${oldvalue_path}) 
+      else
+        set_volume 0 > /dev/null
+      fi
+    else
+      echo $(get_volume) > ${oldvalue_path}
+      set_volume 0 > /dev/null
+    fi
+    ;;
+  *)
+    set_volume $1
+  ;;
+esac
+
+send_notification
