@@ -53,6 +53,7 @@ send_notification() {
   if is_muted ; then
     ${dunstify_bin} -i $iconMuted -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "muted"
   else
+    # Use U+2589 to print the bar
     bar=$(jot -s ▉ - 0 $((volume / 5 - 1)) | tr -d '[:digit:]')
     ${dunstify_bin} -i $iconSound -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "$volume    $bar"
   fi
