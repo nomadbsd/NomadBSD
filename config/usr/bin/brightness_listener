@@ -1,0 +1,75 @@
+#!/usr/bin/env perl
+
+# vim: set tabstop=4:
+
+# Copyright (c) 2020 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+# This script listens to events from devd and when a button press to change
+# the screen brightness is found it uses intel_backlight(1) to get the current
+# brightness level and dunst(1) to display it.
+
+use strict;
+use warnings;
+
+use IO::Socket::UNIX;
+
+my $socket = IO::Socket::UNIX->new(
+    Type => SOCK_SEQPACKET(),
+    Peer => '/var/run/devd.seqpacket.pipe',
+);
+
+die "Can't create socket: $!" unless $socket;
+
+my $intel_backlight_bin = '/usr/local/bin/intel_backlight';
+my $dunstify_bin = '/usr/local/bin/dunstify';
+my $dunstify_id = 3729;
+my $dunstify_timeout = 1;
+my $dunstify_icon = 'contrast'; # I couldn't find a 'brightness' icon
+
+$dunstify_timeout *= 1000;
+
+if ( ! -f $dunstify_bin ) {
+  print STDERR  "dunstify not found. Install x11/dunst first!\n";
+  exit 1;
+}
+
+if ( ! -f $intel_backlight_bin ) {
+  print STDERR  "intel_backlight not found. Install graphics/intel_backlight first!\n";
+  exit 1;
+}
+
+# Listen for event from devd
+while (chomp( my $line = <$socket> )) {
+	# Example line when a brightness change button on Thinkpads is pressed
+	# subsystem=IBM type=\_SB_.PCI0.LPC_.EC__.HKEY notify=0x10
+	if  ($line =~ /subsystem=IBM\ type=\\_SB_\.PCI0\.LPC_\.EC__\.HKEY\ notify=0x1[01]/) {
+		my $brightness_level = qx/$intel_backlight_bin/;
+		if ($brightness_level =~ /(\d+)%/) {
+			# Use U+2589 to print the bar
+			my $bar = sprintf "▉" x ($1 / 5 - 1);
+			qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "$1    $bar");
+		}
+	}
+}
+
