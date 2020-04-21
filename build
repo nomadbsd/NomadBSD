@@ -405,6 +405,9 @@ buildkernel()
 	if [ "${ARCH}" = "i386" ]; then
 		makeopts="${makeopts} LD=ld.lld"
 	fi
+	for i in $(pwd)/patch/usr/src/*.diff; do
+		(cd "${SYSDIR}"/usr/src && patch -N < $i)
+	done
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 	    cd /usr/src && make ${makeopts} kernel" || bail
 	umount "${SYSDIR}/dev"
