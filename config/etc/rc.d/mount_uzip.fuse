@@ -8,6 +8,7 @@
 name=mount_uzip
 start_cmd=do_mount_uzip
 stop_cmd=do_unmount
+: ${unionfs_maxfiles:=65536}
 
 spinner_pid=-1
 
@@ -66,7 +67,7 @@ do_mount_unionfs()
 		if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
 			kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
 		fi
-		unionfs -o cow,max_files=32768,direct_io \
+		unionfs -o cow,max_files=${unionfs_maxfiles},direct_io \
 		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
 		        /home/pkgs=RW:/unionfs/usr/local=RO /usr/local
 		service ldconfig start
