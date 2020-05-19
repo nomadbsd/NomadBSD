@@ -481,7 +481,6 @@ createimage()
 	    --exclude '^usr/obj*'          \
 	    --exclude '^usr/src*'          \
 	    --exclude '^usr/ports*'        \
-	    --exclude '^usr/*/doc/*'       \
 	    --exclude '^usr/local'         \
 	    --exclude '^home*'             \
 	    --exclude '^usr/home*'         \
