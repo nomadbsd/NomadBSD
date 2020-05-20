@@ -70,6 +70,9 @@ while (chomp( my $line = <$socket> )) {
 			my $bar = sprintf "▉" x ($1 / 5 - 1);
 			qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "$1    $bar");
 		}
+	} elsif ($line =~ /subsystem=Video type=brightness notify=([0-9]+)/) {
+		my $bar = sprintf "▉" x ($1 / 5 - 1);
+		qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "$1    $bar");
 	}
 }
 
