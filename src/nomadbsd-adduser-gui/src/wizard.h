@@ -129,49 +129,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Additional keyboard layouts page
-//
-//////////////////////////////////////////////////////////////////////////////
-class ExtraKbdLayoutPage : public QWizardPage
-{
-	Q_OBJECT
-
-public:
-	ExtraKbdLayoutPage(QWidget *parent = 0);
-public slots:
-	void kbdLayoutSelected(int row);
-	void kbdVariantSelected(int row);
-	void addLayout(void);
-	void removeLayout(void);
-protected:
-	void initializePage();
-private:
-	int	    lrow = -1;
-	int	    vrow = -1;
-	QLabel	    *title;
-	QLabel	    *info;
-	QLabel	    *llabel;
-	QLabel	    *xllabel;
-	QLabel	    *vlabel;
-	QLabel	    *tlabel;
-	QPushButton *addBt;
-	QPushButton *removeBt;
-	QListWidget *layoutls;
-	QListWidget *xlayoutls;
-	QListWidget *variantls;
-	//
-	// Struct to hold a keyboard variant record.
-	//
-	struct kbdvariant_s {
-		QString layout;		// Layout code (e.g, ru, de, etc.)
-		QString variant;	// Variant (e.g, nodeadkeys)
-		QString descr;		// Description (e.g, "Swedish (Dvorak)")
-	};
-	QList<kbdvariant_s> kbdvariant;	// List of all keyboard variants.
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//
 // Password page
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -234,7 +191,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 10;
+	static const int nkeys = 9;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *title;

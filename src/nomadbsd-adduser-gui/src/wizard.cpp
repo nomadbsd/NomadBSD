@@ -56,9 +56,6 @@ static QString cfg_email_client;
 static QString cfg_browser;
 static QString cfg_gui_editor;
 static QString cfg_file_manager;
-static QStringList cfg_xkbdlayouts;
-static QStringList cfg_xkbdvariants;
-static QStringList cfg_xkbdconfigdescr;
 //////////////////////////////////////////////////////////////////////////////
 
 static QTranslator translator;
@@ -76,7 +73,6 @@ Wizard::Wizard(QWidget *parent) : QWizard(parent)
 	addPage(new UsernamePage);
 	addPage(new PasswordPage);
 	addPage(new LocalePage);
-	addPage(new ExtraKbdLayoutPage);
 	addPage(new ProgramsPage);
 	addPage(new SummaryPage);
 	addPage(new CommitPage);
@@ -271,226 +267,6 @@ void LocalePage::localeSelected(int row)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Additional keyboard layouts page
-//
-//////////////////////////////////////////////////////////////////////////////
-ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
-{
-	title		    = new QLabel;
-	info		    = new QLabel;
-	llabel		    = new QLabel;
-	xllabel		    = new QLabel;
-	vlabel		    = new QLabel;
-	addBt		    = new QPushButton;
-	removeBt	    = new QPushButton;
-	layoutls	    = new QListWidget(this);
-	variantls	    = new QListWidget(this);
-	xlayoutls	    = new QListWidget(this);
-	QVBoxLayout *lvbox  = new QVBoxLayout;
-	QVBoxLayout *xlvbox = new QVBoxLayout;
-	QVBoxLayout *vvbox  = new QVBoxLayout;
-	QVBoxLayout *layout = new QVBoxLayout;
-	QHBoxLayout *hbox   = new QHBoxLayout;
-	QProcess    proc;
-        QByteArray  line;
-
-	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_KBDLAYOUTS);
-	(void)proc.waitForStarted(-1);
-
-	//
-	// According to the Qt docs, we can not rely on the return value.
-	// We have to check state().
-	//
-	if (proc.state() == QProcess::NotRunning) {
-		Wizard::errAndOut(tr("Couldn't start backend '%1': %2")
-		    .arg(BACKEND_GET_KBDLAYOUTS).arg(proc.errorString()));
-	}
-	while (proc.waitForReadyRead(-1)) {
-		while (!(line = proc.readLine()).isEmpty()) {
-			// Remove trailing newline
-			line.truncate(line.size() - 1);
-			QList<QByteArray>fields = line.split('|');
-			if (fields.count() < 2)
-				continue;
-			QString label = fields.at(1);
-			QString code  = fields.at(0);
-			QListWidgetItem *item = new QListWidgetItem(label);
-			item->setData(Qt::UserRole, QVariant(code));
-			layoutls->addItem(item);
-		}
-        }
-	proc.waitForFinished(-1);
-	if (proc.exitCode() != 0) {
-		Wizard::errAndOut(
-		    tr("Command '%1' returned with an error.")
-		    .arg(BACKEND_GET_KBDLAYOUTS));
-	}
-	//
-	// Read keyboard variants.
-	//
-	proc.start(BACKEND_GET_KBDVARIANTS);
-
-	(void)proc.waitForStarted(-1);
-
-	if (proc.state() == QProcess::NotRunning) {
-		Wizard::errAndOut(tr("Couldn't start backend '%1': %2")
-		    .arg(BACKEND_GET_KBDVARIANTS).arg(proc.errorString()));
-	}
-	while (proc.waitForReadyRead(-1)) {
-		while (!(line = proc.readLine()).isEmpty()) {
-			// Remove trailing newline
-			line.truncate(line.size() - 1);
-			QList<QByteArray>fields = line.split('|');
-			if (fields.count() < 3)
-				continue;
-			kbdvariant_s kv;
-			kv.descr   = fields.at(1);
-			kv.layout  = fields.at(2);
-			kv.variant = fields.at(0);
-			kbdvariant.append(kv);
-		}
-        }
-	proc.waitForFinished(-1);
-	if (proc.exitCode() != 0) {
-		Wizard::errAndOut(
-		    tr("Command '%1' returned with an error.")
-		    .arg(BACKEND_GET_KBDVARIANTS));
-	}
-	title->setStyleSheet("font-weight: bold;");
-	title->setAlignment(Qt::AlignHCenter);
-	info->setWordWrap(true);
-	info->setAlignment(Qt::AlignHCenter);
-	llabel->setStyleSheet("font-weight: bold;");
-	xllabel->setStyleSheet("font-weight: bold;");
-	vlabel->setStyleSheet("font-weight: bold;");
-	layout->addWidget(title);
-	layout->addWidget(info);
-
-	lvbox->addWidget(llabel);
-	lvbox->addWidget(layoutls);
-	vvbox->addWidget(vlabel);
-	vvbox->addWidget(variantls);
-	hbox->addLayout(lvbox);
-	hbox->addLayout(vvbox);
-	
-	layout->setSpacing(15);
-	layout->addLayout(hbox);
-	layout->addWidget(addBt, 1, Qt::AlignRight);
-
-	xlvbox->addWidget(xllabel);
-	xlvbox->addWidget(xlayoutls);
-	xlvbox->addWidget(removeBt, 1, Qt::AlignLeft);
-	layout->addLayout(xlvbox);
-	setLayout(layout);
-
-	new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(removeLayout()));
-	connect(layoutls, SIGNAL(currentRowChanged(int)), this,
-	    SLOT(kbdLayoutSelected(int)));
-	connect(addBt, SIGNAL(clicked()), this, SLOT(addLayout()));
-	connect(removeBt, SIGNAL(clicked()), this, SLOT(removeLayout()));
-}
-
-//
-// Show keyboard variants matching the keyboard layout code.
-//
-void ExtraKbdLayoutPage::kbdLayoutSelected(int row)
-{
-	QString kbdlayout = layoutls->item(row)->data(Qt::UserRole).toString();
-	//
-	// Disconnect the slot to prevent it from being called when
-	// removing items.
-	//
-	variantls->disconnect();
-
-	lrow = row; vrow = -1;
-
-	for (int i = variantls->count(); i > 0; i--) {
-		QListWidgetItem *item = variantls->takeItem(0);
-		delete(item);
-	}
-	for (int i = 0; i < kbdvariant.count(); i++) {
-		if (kbdvariant.at(i).layout != kbdlayout)
-			continue;
-		QListWidgetItem *item =
-		    new QListWidgetItem(kbdvariant.at(i).descr);
-		item->setData(Qt::UserRole,
-		    QVariant(kbdvariant.at(i).variant));
-		variantls->addItem(item);
-	}
-	connect(variantls, SIGNAL(currentRowChanged(int)), this,
-	    SLOT(kbdVariantSelected(int)));
-}
-
-void ExtraKbdLayoutPage::kbdVariantSelected(int row)
-{
-	vrow = row;
-}
-
-void ExtraKbdLayoutPage::addLayout()
-{
-	QString		 data, descr, ldescr, vdescr, layout, variant;
-	QListWidgetItem *item;
-
-	if (lrow == -1)
-		return;
-	ldescr = layoutls->item(lrow)->text();
-	layout = layoutls->item(lrow)->data(Qt::UserRole).toString();
-	if (vrow != -1) {
-		vdescr  = variantls->item(vrow)->text();
-		variant = variantls->item(vrow)->data(Qt::UserRole).toString();
-		descr = QString("%1 [%2]").arg(ldescr).arg(vdescr);
-		data  = QString("%1\t%2").arg(layout).arg(variant);
-	} else {
-		descr = ldescr;
-		data  = layout;
-		variant = "";
-	}
-	item = new QListWidgetItem(descr);
-	item->setData(Qt::UserRole, QVariant(data));
-	xlayoutls->addItem(item);
-	cfg_xkbdlayouts.append(data);
-	cfg_xkbdconfigdescr.append(descr);
-}
-
-void ExtraKbdLayoutPage::removeLayout()
-{
-	int row = xlayoutls->currentRow();
-	if (row < 0)
-		return;
-	QListWidgetItem *item = xlayoutls->takeItem(row);
-	delete item;
-	cfg_xkbdlayouts.removeAt(row);
-	cfg_xkbdconfigdescr.removeAt(row);
-}
-
-void ExtraKbdLayoutPage::initializePage()
-{
-	//
-	// Select the first layout matching the region code.
-	//
-	QString reg = cfg_region.toLower();
-	for (int n = 0; n < layoutls->count(); n++) {
-		QString l;
-		l = layoutls->item(n)->data(Qt::UserRole).toString();
-		if (reg == l) {
-			layoutls->setCurrentRow(n);
-			break;
-		}
-	}
-	addBt->setText(tr("Add layout"));
-	removeBt->setText(tr("Remove layout"));
-	title->setText(tr("Additional keyboard layouts"));
-	info->setText(tr("Here you can add additional keyboard layouts. " \
-			 "The user can switch between them from the " \
-			 "NomadBSD desktop."));
-	llabel->setText(tr("Keyboard layout"));
-	vlabel->setText(tr("Keyboard variant"));
-	xllabel->setText(tr("Additional layouts"));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//
 // Password page
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -666,7 +442,6 @@ SummaryPage::SummaryPage(QWidget *parent) : QWizardPage(parent)
 
 void SummaryPage::initializePage()
 {
-	QString xkbdlayouts = cfg_xkbdconfigdescr.join(",\n");
 	struct summary_s {
 		QString key;
 		QString val;
@@ -674,7 +449,6 @@ void SummaryPage::initializePage()
 		{ tr("Full name:"),			cfg_name	   },
 		{ tr("Username:"),			cfg_username	   },
 		{ tr("Locale:"),			cfg_localedescr	   },
-		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
@@ -718,7 +492,6 @@ CommitPage::CommitPage(QWidget *parent) : QWizardPage(parent)
 
 void CommitPage::initializePage()
 {
-	QString xkbdlayouts = cfg_xkbdlayouts.join(",");
 
 	struct config_s {
 		QString var;
@@ -734,7 +507,6 @@ void CommitPage::initializePage()
 		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_email_client",	cfg_email_client  },
 		{ "cfg_browser",	cfg_browser	  },
-		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);
 	proc.start(BACKEND_COMMIT);

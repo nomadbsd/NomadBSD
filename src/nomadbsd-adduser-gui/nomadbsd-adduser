@@ -31,7 +31,6 @@ binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
 my $dummy;
-my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
 my $path_datadir	= "/usr/share/nomadbsd";
 my $path_dotfiles	= "$path_datadir/home.nomad.tgz";
@@ -49,7 +48,6 @@ my $cfg_editor;
 my $cfg_gui_editor;
 my $cfg_email_client;
 my $cfg_browser;
-my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
 #
@@ -258,90 +256,6 @@ sub print_locales {
     }
 }
 
-#
-# Print a list of records of the form:
-#
-#	lang code|lang name
-#
-# Example:
-#
-#	us|English (US)
-#
-sub print_kbdlayout_list {
-	my ($latin) = @_;
-	my ($in_layout, @layout_descs, @layouts, @tmplist);
-	
-	open(my $fh, '<', $xkbdlist) or die "$!";
-	foreach (<$fh>) {
-		chomp;
-		if (/^\!\s+layout$/) {
-			$in_layout  = 1;
-		} elsif (/^\!/ && $in_layout) {
-			last;
-		} elsif ($in_layout) {
-			if (/\s+(\S+)\s+(.*)$/) {
-				next if ($latin && is_nonlatin($1));
-				push @layout_descs, $2;
-				push @layouts, $1;
-			}
-		}
-	}
-	close $fh;
-	for (my $l; $l < @layouts; $l++) {
-		push @tmplist, "$layout_descs[$l]|$layouts[$l]";
-	}
-	foreach (sort @tmplist) {
-		my ($ld, $l) = split(/\|/, $_);
-		# Layout code|Layout descr.
-		print "$l|$ld\n";
-	}
-}
-
-#
-# Print a list of records of the form:
-#
-#	Variant code|variant descr.|layout code
-#
-# Example:
-#
-#	us|English (US)
-#
-sub print_kbdvariant_list {
-	my ($layout) = @_;
-	my ($in_variant, @variant_descs, @variant_layout);
-	my (@variant_names, @tmplist);
-	
-	open(my $fh, '<', $xkbdlist) or die "$!";
-	foreach (<$fh>) {
-		chomp;
-		if (/^\!\s+variant$/) {
-			$in_variant = 1;
-		} elsif (/^\!/ && $in_variant) {
-			last;
-		} elsif ($in_variant) {
-			if (/\s+(\S+)\s+(\S+):\s+(.*)/) {
-				next if ($layout && $layout ne $2);
-				push @variant_descs, $3;
-				push @variant_layout, $2;
-				push @variant_names, $1;
-			}
-		}
-	}
-	close $fh;
-	for (my $i = 0; $i < @variant_layout; $i++) {
-		# Change order of fields, so that we can sort after layout
-		# and variant description.
-		my $rec = "$variant_descs[$i]|$variant_names[$i]|" .
-				  "$variant_layout[$i]";
-		push @tmplist, $rec;
-	}
-	foreach (sort @tmplist) {
-		my ($vd, $vn, $l) = split(/\|/, $_);
-		# Variant code|variant descr.|layout code
-		print "$vn|$vd|$l\n";
-	}
-}
-
 sub set_password {
 	my ($user, $pass) = @_;
 	open(my $fh, "| pw usermod $user -h 0") or bail("Failed to execute 'pw'");
@@ -506,25 +420,26 @@ sub desktopsettings {
 	
 	# Create localized XDG standard dirs.
 	system("su -l $cfg_username -c '/usr/local/bin/xdg-user-dirs-update'");
-	
-	# Autostart gxkb and setxkbmap if multiple keyboard layouts were set.
-	if (@cfg_xkbdlayouts > 0) {
-		for (my $l = 0; $l < @cfg_xkbdlayouts; $l++) {
-			my @lv = split(/\t/, $cfg_xkbdlayouts[$l]);
-			$xlayoutstr  .= ',';
-			$xvariantstr .= ',';
-			$xlayoutstr  .= $lv[0];
-			$xvariantstr .= $lv[1];
+
+	# Get list of keyboard layouts and variants
+	foreach (`setxkbmap -query`) {
+		if (/^layout:\s*(\S+)/) {
+			$xlayoutstr = $1;
+		} elsif (/^variant:\s*(\S+)/) {
+			$xvariantstr = $1;
 		}
-		open(my $fh, ">>", "$autostart")
-			or bail("Failed to open $autostart");
-		print $fh "setxkbmap -layout \"$xlayoutstr\" " .
-				  "-variant \"$xvariantstr\"\n";
-		print $fh "gxkb&\n";
-		close($fh);
 	}
+	open(my $fh, ">>", "$autostart")
+		or bail("Failed to open $autostart");
+	print $fh "(setxkbmap -rules evdev -layout \"$xlayoutstr\" " .
+		  "-variant \"$xvariantstr\"; xbindkeys)&\n";
+	# Autostart gxkb if multiple keyboard layouts are used.
+	if (split(/,/, $xlayoutstr) > 1) {
+		print $fh "gxkb&\n";
+	}
+	close($fh);
 	# Make user the owner of all the files under /home/username
-	system("chown -R $cfg_username /home/$cfg_username");
+	system("chown -R $cfg_username:$cfg_username /home/$cfg_username");
 }
 
 #
@@ -548,9 +463,6 @@ sub commit {
 		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
 		$cfg_email_client  = $1 if (/^cfg_email_client\s*=\s*(.*)/);
 		$cfg_browser	   = $1 if (/^cfg_browser\s*=\s*(.*)/);
-		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
-			@cfg_xkbdlayouts = split(/,/, $1);
-		}
 	}
 	STDOUT->autoflush(1);
 
@@ -617,9 +529,6 @@ sub usage {
 		  "filemanagers   Print a list of file managers\n" .
 		  "editors        Print a list of editors\n" .
 		  "guieditors     Print a list of GUI editors\n" .
-		  "kbdmodels      Print a list of X keyboard models\n" .
-		  "kbdlayouts     Print a list of keyboard layouts\n" .
-		  "kbdvariants    Print a list of keyboard varinats\n" .
 		  "commit         Read configuration from stdin, and apply it\n";
 	exit 0;
 }
@@ -701,29 +610,6 @@ while ((my ($flag, @args) = getargs('h', 0, 'n', 0))) {
 while (@ARGV) {
 	if ($ARGV[0] eq "locales") {
 		print_locales();
-		exit 0;
-	} elsif ($ARGV[0] eq "kbdlayouts") {
-		shift @ARGV;
-		my ($f, @args) = getargs('l', 0);
-		if ($f eq 'l') {
-			print_kbdlayout_list(1);
-		} else {
-			print_kbdlayout_list(0);
-		}
-		exit 0;
-	} elsif ($ARGV[0] eq "kbdmodels") {
-		print_xkbdmodels();
-		exit 0;
-	} elsif ($ARGV[0] eq "kbdvariants") {
-		my $variant;
-		
-		shift @ARGV;
-		my ($f, @args) = getargs('l', 1);
-		if ($f eq 'l') {
-			shift;
-			$variant = pop @args;
-		}
-		print_kbdvariant_list($variant);
 		exit 0;
 	} elsif ($ARGV[0] eq "browsers") {
 		remove_not_installed(\@browser_list);
