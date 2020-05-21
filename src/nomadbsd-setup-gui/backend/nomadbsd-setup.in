@@ -666,14 +666,12 @@ sub desktopsettings {
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
 	open(my $fh, ">>", "$autostart")
 			or bail("Failed to open $autostart");
-	print $fh "setxkbmap -rules evdev -layout \"$xlayoutstr\" " .
-			  "-variant \"$xvariantstr\"&\n";
+	print $fh "(setxkbmap -rules evdev -layout \"$xlayoutstr\" " .
+			  "-variant \"$xvariantstr\"; xbindkeys)&\n";
 	# Autostart gxkb if multiple keyboard layouts were set.
 	if (@cfg_xkbdlayouts > 0) {
 		print $fh "gxkb&\n";
 	}
-	# Finally add xbindkeys
-	print $fh "xbindkeys&\n";
 	close($fh);
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
