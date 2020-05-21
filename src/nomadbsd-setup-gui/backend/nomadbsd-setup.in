@@ -664,15 +664,17 @@ sub desktopsettings {
 	# Create dconf file from plank.ini
 	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-	# Autostart gxkb and setxkbmap if multiple keyboard layouts were set.
-	if (@cfg_xkbdlayouts > 0) {
-		open(my $fh, ">>", "$autostart")
+	open(my $fh, ">>", "$autostart")
 			or bail("Failed to open $autostart");
-		print $fh "setxkbmap -layout \"$xlayoutstr\" " .
-				  "-variant \"$xvariantstr\"\n";
+	print $fh "setxkbmap -rules evdev -layout \"$xlayoutstr\" " .
+			  "-variant \"$xvariantstr\"&\n";
+	# Autostart gxkb if multiple keyboard layouts were set.
+	if (@cfg_xkbdlayouts > 0) {
 		print $fh "gxkb&\n";
-		close($fh);
 	}
+	# Finally add xbindkeys
+	print $fh "xbindkeys&\n";
+	close($fh);
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
 }

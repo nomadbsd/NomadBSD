@@ -10,6 +10,5 @@ dsbbatmon&
 dsbmixer -i&
 redshift -l$(getlalo)&
 dunst&
-xbindkeys&
 brightness_listener&
 daemon -f update_obmenu -a -p 5&
