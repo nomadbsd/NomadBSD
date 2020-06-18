@@ -43,13 +43,15 @@ panasonic_kmod="acpi_panasonic"
 load_acpi_start()
 {
 	config=$(devinfo -rv)
+	found=0
 	for i in ${vendors}; do
+		[ ${found} -gt 0 ] && break
 		eval hids=\$${i}_hids
 		for j in ${hids}; do
 			if echo "${config}" | grep -q -i _HID=${j}; then
 				eval kmod=\$${i}_kmod
 				kldload ${kmod}
-				exit 0
+				found=1; break
 			fi
 		done
 	done
