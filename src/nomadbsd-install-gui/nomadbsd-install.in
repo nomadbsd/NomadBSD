@@ -167,22 +167,27 @@ mkzfs() {
 	zfs set atime=off ${POOL}
 	zfs_create -o mountpoint=none ${POOL}/ROOT
 	zfs_create -o mountpoint=/ ${NOMADBSDROOT}
-	zfs_create -o mountpoint=/usr ${NOMADBSDROOT}/usr
-	zfs_create ${NOMADBSDROOT}/home
-	zfs_create -o mountpoint=/var ${NOMADBSDROOT}/var
-	zfs_create ${NOMADBSDROOT}/usr/obj
+	zfs_create -o canmount=off -o mountpoint=/usr ${POOL}/usr
+	zfs_create  ${POOL}/usr/home
+	zfs_create -o exec=off -o setuid=off ${POOL}/usr/src
+	zfs_create ${POOL}/usr/obj
 	zfs_create -o mountpoint=/usr/ports -o setuid=off \
-		${NOMADBSDROOT}/usr/ports
+		${POOL}/usr/ports
 	zfs_create -o exec=off -o setuid=off -o compression=off \
-		${NOMADBSDROOT}/usr/ports/distfiles
+		${POOL}/usr/ports/distfiles
 	zfs_create -o exec=off -o setuid=off -o compression=off \
-		${NOMADBSDROOT}/usr/ports/packages
-	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/audit
-	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/crash
-	zfs_create -o exec=off -o setuid=off ${NOMADBSDROOT}/var/log
+		${POOL}/usr/ports/packages
+	zfs_create -o canmount=off -o mountpoint=/var ${POOL}/var
+	zfs_create -o exec=off -o setuid=off ${POOL}/var/audit
+	zfs_create -o exec=off -o setuid=off ${POOL}/var/crash
+	zfs_create -o exec=off -o setuid=off ${POOL}/var/log
 	zfs_create -o atime=on -o exec=off -o setuid=off \
-		${NOMADBSDROOT}/var/mail
-	zpool set bootfs=${NOMADBSDROOT} zroot
+		${POOL}/var/mail
+	zfs_create -o exec=on -o setuid=off   ${POOL}/var/tmp
+	ln -s usr/home /mnt/home
+	ln -s usr/src/sys /mnt/sys
+	chmod 1777 /mnt/var/tmp
+	zpool set bootfs=${NOMADBSDROOT} ${POOL}
 }
 
 set_autologin() {
