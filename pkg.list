@@ -14,7 +14,6 @@ devel/cmake
 devel/dconf
 devel/geany
 devel/git
-devel/gmake
 devel/p5-IO-KQueue
 devel/pkgconf
 devel/py-qt5-core
