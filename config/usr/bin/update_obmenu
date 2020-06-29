@@ -282,6 +282,9 @@ my $rc_path             = "$ENV{'HOME'}/.config/openbox/rc.xml";
 my @menu_prefix         = qw(/etc /usr/etc /usr/local/etc);
 my $dflt_menu           = "xdg/openbox/menu.xml";
 my $default_theme       = "hicolor";
+my $update_notify_icon  = "reload";
+my $update_notify_msg   = "Updating Openbox menu ...";
+
 my ($progname, $icon_theme, $fallback_icon_theme, $xterm);
 my (@ob_menu, @blacklist, @apps, @icon_search_paths);
 my %cats_hash;
@@ -815,6 +818,16 @@ sub getargs {
 	return -1;
 }
 
+sub notify {
+	my ($icon, $msg) = @_;
+	chomp(my $id = `dunstify -i "$icon" -p "$msg"`);
+	return $id;
+}
+
+sub close_notify {
+	system(qq(dunstify -C $_[0]));
+}
+
 sub help {
 	my @htext = (<<"HTEXT_END" =~ m/^\t*(.+)/gm);
 	Usage: $progname [options] -n
@@ -992,6 +1005,7 @@ while (1) {
 		}
 		read_obmenu();
 	}
+	my $nid = notify($update_notify_icon, $update_notify_msg);
 	@apps = ();
 	%cats_hash = ();
 	foreach $path (@apps_paths) {
@@ -1043,6 +1057,7 @@ while (1) {
 	add_me();
 	write_obmenu();
 	$update = 0;
+	close_notify($nid);
 }
 
 # Add an entry for this script to the Openbox root menu.
