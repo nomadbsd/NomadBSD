@@ -1053,14 +1053,11 @@ while (1) {
 		}
 		@capps = ();
 	}
-	last if (!$aflag);
 	add_me();
 	write_obmenu();
 	$update = 0;
 	close_notify($nid);
+	last if (!$aflag);
 }
 
-# Add an entry for this script to the Openbox root menu.
-add_me();
-write_obmenu();
 exit(0);
