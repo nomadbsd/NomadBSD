@@ -6,7 +6,7 @@
 
 . /etc/rc.subr
 
-load_iichid_enable=${ackfwl_enable-"NO"}
+load_iichid_enable=${load_iichid_enable-"NO"}
 
 name="load_iichid"
 rcvar="load_iichid_enable"
