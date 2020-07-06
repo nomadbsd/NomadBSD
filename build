@@ -911,6 +911,11 @@ if [ ! -f /usr/ports/Makefile ]; then
 	exit 1
 fi
 
+if [ ${ARCH} = "i386" ]; then
+	export UNAME_m=i386
+	export UNAME_p=i386
+fi
+
 trap bail SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
