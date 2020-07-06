@@ -4,6 +4,7 @@
 
 path_amd_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf"
 path_ati_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-ati.conf"
+path_modesetting_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-modesetting.conf"
 
 data_radeon() {
 cat << radeon_END
@@ -529,6 +530,16 @@ EndSection
 ati_xorg_cfg_END
 }
 
+modesetting_xorg_cfg() {
+cat <<modesetting_xorg_cfg_END
+Section "Device"
+    Identifier "ATI/AMD Graphics card"
+    Driver     "modesetting"
+    BusID      "PCI:$busID"
+EndSection
+modesetting_xorg_cfg_END
+}
+
 write_xorg_cfg() {
 	eval path=\${path_${driver}_xorg_cfg}
 	if [ ! -f ${path} ]; then
@@ -546,6 +557,7 @@ busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
 vendor=$(echo "$config" | cut -d: -f2)
 device=$(echo "$config" | cut -d: -f1)
 [ "$vendor" = 1002 ] || exit 1
+
 if data_radeon | grep -iq ${device}; then
 	driver="ati"
 	kldload /boot/modules/radeonkms.ko
@@ -555,6 +567,10 @@ else
 	kldload /boot/modules/amdgpu.ko
 	echo "modules/amdgpu.ko" > /var/run/gfxdriver
 fi
+if [ "$(uname -p)" = "i386" ]; then
+	driver="modesetting"
+fi
+
 write_xorg_cfg
 exit 0
 

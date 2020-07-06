@@ -22,6 +22,7 @@ path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
 path_vesa_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf"
 path_ati_cfg="/usr/local/etc/X11/xorg.conf.d/20-ati.conf"
 path_amd_cfg="/usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf"
+path_modesetting_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-modesetting.conf"
 path_libmap_cfg="/usr/local/etc/libmap.d/nvidia.conf"
 
 initgfx_autodetect=0
@@ -81,6 +82,7 @@ do_initgfx()
 	rm -f ${path_scfb_cfg}
 	rm -f ${path_ati_cfg}
 	rm -f ${path_amd_cfg}
+	rm -f ${path_modesetting_cfg}
 	rm -f ${path_libmap_cfg}
 
 	# In VirtualBox we are done here
