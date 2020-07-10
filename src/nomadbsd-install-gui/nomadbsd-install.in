@@ -206,9 +206,24 @@ set_autologin() {
 }
 
 commit() {
-	status "Creating GPT partition scheme ..."
+	# Wipe ZFS metadata
+	status "Wiping old ZFS metadata ..."
+	for d in $(ls /dev/${disk}* | sort -r); do
+		zpool labelclear -f "$d"
+	done
+
+	status "Destroying old GPT partition scheme ..."
 	gpart destroy -F ${disk}
+
+	# Zero first and last 100 sectors
 	dd if=/dev/zero of=/dev/${disk} count=100
+	skipbs=$(geom disk list ${disk} | awk -F " " '/Mediasize:/ {
+		skipbs = int($2 / 512) - 100;
+		print skipbs
+	}')
+	dd if=/dev/zero of=/dev/${disk} bs=512 count=100 oseek=$skipbs
+
+	status "Creating GPT partition scheme ..."
 	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
 	status "Creating boot partition ..."
 	gpart add -a 4k -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
@@ -227,7 +242,40 @@ commit() {
 		gpart add -a 4k -t efi -l gpefiboot -s ${efipartsz} ${disk} || \
 			bail "Couldn't create EFI partition"
 		idx=$((idx + 1))
-		gpart bootcode -p /boot/boot1.efifat -i ${idx} ${disk}
+		newfs_msdos -F 32 -c 1 /dev/${disk}p${idx} || \
+			bail "Couldn't create MSDOSFS on /dev/${disk}p${idx}"
+		mount -t msdosfs /dev/${disk}p${idx} /mnt || bail
+		mkdir -p /mnt/EFI/NOMADBSD || \
+			bail "Couldn't create directory /mnt/EFI/NOMADBSD"
+		cp /boot/boot1.efi /mnt/EFI/NOMADBSD/BOOTx64.EFI || \
+			bail "Couldn't copy /boot/boot1.efi to /mnt/EFI/NOMADBSD"
+		# Use OEM string of HDD/SSD as UEFI variable label
+		oem=$(devlist | grep ${disk} | cut -d'|' -f 2)
+		if [ -z "${oem}" ]; then
+			# Could not get OEM string. Use an alternative string
+			efilabel="NomadBSD-${version}"
+		else
+			efilabel="NomadBSD:${oem}"
+		fi
+		# Remove duplicated entries
+		efibootmgr | awk -F" " -v efilabel="${efilabel}" '
+			$0 ~ efilabel && $1 ~ /Boot[0-9]+/ {
+				bootvars[nb++] = substr($1, 5, 4)
+			}
+			END {
+			for (i = 0; i < nb; i++) {
+				cmd = sprintf("efibootmgr -B %s", bootvars[i]);
+				system(cmd);
+			}
+		}
+		'
+		bvar=$(efibootmgr -c -l /mnt/EFI/NOMADBSD/BOOTx64.EFI \
+			-L "${efilabel}" | grep -w "${efilabel}" | sort | tail -1 | \
+			sed -E 's/.*Boot([0-9]+).*/\1/')
+		if [ -n "${bvar}" ]; then
+			efibootmgr -a ${bvar}
+		fi
+		umount /mnt || umount -f /mnt
 	fi
 	if [ -n "${lenovofix}" ]; then
 		status "Setting lenovofix ..."
