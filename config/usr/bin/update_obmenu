@@ -286,7 +286,7 @@ my $update_notify_icon  = "reload";
 my $update_notify_msg   = "Updating Openbox menu ...";
 
 my ($progname, $icon_theme, $fallback_icon_theme, $xterm);
-my (@ob_menu, @blacklist, @apps, @icon_search_paths);
+my (@ob_menu, @ignorelist, @apps, @icon_search_paths);
 my %cats_hash;
 ##############################################################################
 
@@ -630,23 +630,23 @@ sub add_me {
 	splice @ob_menu, $idx + 4, 0, qq(\t<\/item>);
 }
 
-sub read_blacklist {
-	my $path_blacklist = "$ENV{HOME}/.config/update_obmenu.ignore";
+sub read_ignorelist {
+	my $path_ignorelist = "$ENV{HOME}/.config/update_obmenu.ignore";
 
-	return if (! -f $path_blacklist);
+	return if (! -f $path_ignorelist);
 
-	open(my $fh, '<', $path_blacklist)
-		or die "Failed to open $path_blacklist";
-	@blacklist = <$fh>;
+	open(my $fh, '<', $path_ignorelist)
+		or die "Failed to open $path_ignorelist";
+	@ignorelist = <$fh>;
 
 	close($fh);
 }
 
-sub is_blacklisted {
+sub is_ignorelisted {
 	my ($f) = @_;
 	local $_;
 
-	foreach (@blacklist) {
+	foreach (@ignorelist) {
 		chomp;
 		return 1 if ($f eq $_);
 	}
@@ -978,7 +978,7 @@ lookup_icon_theme();
 $icon_theme          = $default_theme if (!$icon_theme);
 $fallback_icon_theme = $default_theme if (!$fallback_icon_theme);
 get_icon_search_paths();
-read_blacklist();
+read_ignorelist();
 
 while (1) {
 	if ($aflag) {
@@ -1012,7 +1012,7 @@ while (1) {
 		foreach (`find $path -name "*.desktop" 2>/dev/null`) {
 			chomp;
 			next if (/userapp-/);
-			next if (is_blacklisted($_));
+			next if (is_ignorelisted($_));
 			my %i;
 			if ((%i = parse_desktop_file($_))) {
 				next if (find_application($i{'Name'}));
