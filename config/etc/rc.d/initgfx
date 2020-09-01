@@ -82,7 +82,7 @@ check_configured()
 	local prev_id curr_id
 	[ ! -f "${path_config_id}" ] && return 1
 	prev_id=$(cat "${path_config_id}")
-	curr_id=$(calc_id)
+	curr_id=$(calc_config_id)
 	[ "${prev_id}" = "${curr_id}" ] && return 0
 	initgfx_debug "System configuration changed"
 	return 1
