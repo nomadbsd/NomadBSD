@@ -35,132 +35,255 @@ start_cmd="do_initgfx"
 
 rcvar=initgfx_enable
 
-load_rc_config $name
+load_rc_config ${name}
 
 : ${initgfx_enable:="YES"}
-: ${initgfx_menu:="YES"}
 
-path_intel_cfg="/usr/local/etc/X11/xorg.conf.d/10-intel.conf"
-path_nvidia_cfg="/usr/local/etc/X11/xorg.conf.d/10-nvidia.conf"
-path_scfb_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf"
-path_vesa_cfg="/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf"
-path_ati_cfg="/usr/local/etc/X11/xorg.conf.d/20-ati.conf"
-path_amd_cfg="/usr/local/etc/X11/xorg.conf.d/20-amdgpu.conf"
-path_modesetting_xorg_cfg="/usr/local/etc/X11/xorg.conf.d/20-modesetting.conf"
-path_libmap_cfg="/usr/local/etc/libmap.d/nvidia.conf"
+path_config_id="/var/initgfx_config.id"
+path_xorg_cfg_dir="/usr/local/etc/X11/xorg.conf.d"
+path_xorg_cfg="${path_xorg_cfg_dir}/10-video-${name}.conf"
 
-initgfx_autodetect=0
-initgfx_use_vesa=0
-initgfx_use_scfb=0
+path_drm_legacy="/boot/drm_legacy"
+path_nvidia="/usr/local/nvidia"
 
-gfx_menu()
+path_initgfx_xorg_templates="/etc/${name}_xorg.cfg"
+path_initgfx_device_db="/etc/${name}_device.db"
+
+# Include device info DB
+. ${path_initgfx_device_db}
+
+# Include Xorg config file templates
+. ${path_initgfx_xorg_templates}
+
+initgfx_warn()
 {
-	local ret="/tmp/gfx_menu.ret"
-	local driver msg efiboot
-	if sysctl machdep.bootmethod | grep -q BIOS; then
-		efiboot=0
-		driver="VESA"
+	echo "${name}:" $* >&2
+}
+
+initgfx_debug()
+{
+	echo "${name}:" $* >&2
+}
+
+del_stale_files()
+{
+	rm -f "/usr/local/etc/libmap.d/nvidia.conf" > /dev/null 2>&1
+	rm -f "${path_xorg_cfg}" > /dev/null 2>&1
+	rm -f "${path_config_id}" > /dev/null 2>&1
+}
+
+calc_config_id()
+{
+	sysctl dev.vgapci | sort | md5
+}
+
+check_configured()
+{
+	local prev_id curr_id
+	[ ! -f "${path_config_id}" ] && return 1
+	prev_id=$(cat "${path_config_id}")
+	curr_id=$(calc_id)
+	[ "${prev_id}" = "${curr_id}" ] && return 0
+	initgfx_debug "System configuration changed"
+	return 1
+}
+
+save_config_id()
+{
+	calc_config_id > "${path_config_id}"
+	sync
+}
+
+set_kldconfig_path()
+{
+	local path
+	path=$(realpath -q "$1")
+	[ -z "${path}" ] && return
+	if [ ! -d "${path}" ]; then
+		mod_dir=$(dirname "${path}")
 	else
-		efiboot=1
-		driver="SCFB"
+		mod_dir=${path}
 	fi
-	msg="If you encountered graphics driver problems, you can choose"
-	msg="${msg} ${driver} here. The ${driver} driver doesn't support accelerated"
-	msg="${msg} graphics, but will work on most systems.\n\n"
-	msg="${msg} Press <SPACE> to activate an item"
-	opts="Autodetect:Autodetect accelerated graphics driver:on"
-	if [ ${efiboot} -eq 1 ]; then
-		opts="${opts}:SCFB:System Console Frame Buffer:off"
+	if ! (kldconfig -r | grep -q "${mod_dir}"); then
+		kldconfig -im ${mod_dir} >/dev/null 2>&1
+	fi
+}
+
+test_x()
+{
+	PATH="${PATH}:/usr/local/bin" /usr/local/bin/xinit /usr/bin/true -- :0 
+}
+
+get_device_info() {
+	local chip
+	unit=$(sysctl -n hw.pci.default_vgapci_unit)
+	[ -z "$unit" -o "$unit" =  "-1" ] && unit=0
+	chip=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
+		sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
+	busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
+		sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
+	vendor=$(echo "${chip}" | cut -d: -f2)
+	device=$(echo "${chip}" | cut -d: -f1)
+}
+
+rc_conf_d_ldconfig()
+{
+cat << rc_conf_d_END
+#!/bin/sh
+ldconfig_paths="\${ldconfig_paths} $1"
+rc_conf_d_END
+}
+
+setup_intel()
+{
+	local kmod
+
+	[ "${vendor}" != 8086 ] && return 1
+	if i915_drm_legacy_ids | grep -iq ${device}; then
+		kmod="${path_drm_legacy}/i915kms.ko"
+		xorg_cfg_intel > "${path_xorg_cfg}"
 	else
-		opts="${opts}:VESA:Non-accelerated generic video driver:off"
+		kmod="/boot/modules/i915kms.ko"
+		xorg_cfg_modesetting > "${path_xorg_cfg}"
 	fi
-	while [ true ]; do
-		local IFS=:
-		TERM=xterm dialog --title "Graphics driver" --radiolist "${msg}" \
-			15 60 3 ${opts} 2>${ret}
-		[ $? -ne 0 ] && continue
-		opt=$(cat ${ret})
-		rm -f ${ret}
-		case ${opt} in
-			Autodetect)
-				initgfx_autodetect=1
-				;;
-			SCFB)
-				initgfx_use_scfb=1
-				;;
-			VESA)
-				initgfx_use_vesa=1
-				;;
-		esac
-		return
+	set_kldconfig_path "${kmod}"
+	kldload "${kmod}"
+	set_kldconfig_path "${kmod}"
+	sysrc initgfx_kmods="${kmod}"
+	sync
+	return 0
+}
+
+setup_ati_amd()
+{
+	local path driver kmod
+
+	[ "${vendor}" != 1002 ] && return 1
+	if radeon_ids | grep -iq ${device}; then
+		driver="ati"
+		kmod="/boot/modules/radeonkms.ko"
+	else
+		driver="amd"
+		kmod="/boot/modules/amdgpu.ko"
+	fi
+	kldload ${kmod}
+	sysrc initgfx_kmods="${kmod}"
+	eval ${driver}_xorg_cfg > "${path_xorg_cfg}"
+	sync
+	return 0
+}
+
+setup_nvidia()
+{
+	local d dir driver device srcdir
+
+	[ "${vendor}" != "10de" ] && return 1
+	device=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | \
+		cut -d"'" -f 2)
+	driver=""
+	for d in 440 390 340 304; do
+		nvidia_${d}_ids | awk -v device="$device" '
+			match(tolower(device), tolower($0)) > 0 {
+				printf("%s ~ %s\n", device, $0);
+				exit(100)
+			}
+		'
+		if [ $? -eq 100 ]; then
+			driver=$d
+			break
+		fi
 	done
+	[ -z "${driver}" ] && return 1
+	[ ! -d /usr/local/etc/libmap.d ] && mkdir /usr/local/etc/libmap.d
+
+	srcdir="${path_nvidia}/${driver}"
+
+	dir=/usr/local/etc/libmap.d 
+	tar -C ${srcdir}${dir} -cf - . | tar -C ${dir} -xkf -
+
+	rc_conf_d_ldconfig ${srcdir}/usr/local/lib > \
+		/etc/rc.conf.d/ldconfig
+	ldconfig -m /usr/local/nvidia/${driver}/usr/local/lib
+
+	dir=/usr/local/lib/xorg/modules/drivers
+	tar -C "${srcdir}${dir}" -cf - . | tar -C "${dir}" -xkf -
+
+	dir=/usr/local/lib/xorg/modules/extensions
+	tar -C "${srcdir}${dir}/.nvidia" -cf - . | tar -C ${dir} -xkf -
+	tar -C "${srcdir}${dir}" \
+		--exclude '.nvidia' -cf - . | tar -C "${dir}" -xkf -
+
+	dir=/usr/local/lib/vdpau
+	tar -C "${srcdir}${dir}" -cf - . | tar -C ${dir} -xkf -
+
+	if [ ${driver} -ge 390 ]; then
+		kmods="${srcdir}/boot/modules/nvidia.ko"
+		kmods="${kmods} ${srcdir}/boot/modules/nvidia-modeset.ko"
+	else
+		# nvidia 340 or 304 driver needed
+		kmods="${srcdir}/boot/modules/nvidia.ko"
+	fi
+	kldload ${kmods}
+	sysrc initgfx_kmods="${kmods}"
+	nvidia_xorg_cfg > "${path_xorg_cfg}"
+	sync
+	return 0
 }
 
 do_initgfx()
 {
 	local cfg_path driver
-	
-	rm -f ${path_intel_cfg}
-	rm -f ${path_nvidia_cfg}
-	rm -f ${path_vesa_cfg}
-	rm -f ${path_scfb_cfg}
-	rm -f ${path_ati_cfg}
-	rm -f ${path_amd_cfg}
-	rm -f ${path_modesetting_cfg}
-	rm -f ${path_libmap_cfg}
+
+	unalias echo
+	if check_configured; then
+		initgfx_debug "Using previous configuration ..."
+		for m in ${initgfx_kmods}; do
+			set_kldconfig_path $m
+			kldload $m
+		done
+		return
+	fi
+	initgfx_debug "Creating new configuration ..."
+	del_stale_files
 
 	# In VirtualBox we are done here
-	pciconf -lv | grep -B3 display | grep -q -i virtualbox && return
-
-	# Do not show menu if syscons is disabled or initgfx_menu="NO"
-	syscons_disabled=$(kenv | awk -F '["=]+' '
-		/hw.syscons.disable/ { print $2 }')
-	if [ ${syscons_disabled:=0} -eq 0 ]; then
-		sysons_disabled=$(sysctl -n hw.syscons.disable 2>/dev/null)
+	if (pciconf -lv | grep -B3 display | grep -q -i virtualbox); then
+		save_config_id
+		return
 	fi
-	if checkyesno initgfx_menu; then
-		if [ ${syscons_disabled:=0} -eq 0 ]; then
-			gfx_menu
-		else
-			initgfx_autodetect=1
-		fi
-	elif [ -n "${initgfx_default}" ]; then
-		case ${initgfx_default} in
-		vesa|scfb)
-			initgfx_autodetect=0
-			;;
-		*)
-			echo "Error: Unknown driver ${initgfx_default}. " \
-				 "Use scfb or vesa" >&2
-			initgfx_autodetect=1
-			;;
-		esac
-	else
-		initgfx_autodetect=1
-	fi
-	if [ ${initgfx_autodetect} -eq 1 ]; then
-		for i in nvidia intel ati_amd; do
-			/usr/bin/${i}_setup && return
-		done
-	fi
-	if [ ${initgfx_use_vesa} -eq 1 ]; then
+	if sysctl machdep.bootmethod | grep -q BIOS; then
 		driver="vesa"
-	elif [ ${initgfx_use_scfb} -eq 1 ]; then
+	else
 		driver="scfb"
-	elif [ -n "${initgfx_default}" ]; then
-		driver=${initgfx_default}
 	fi
-	echo "${driver}" > /var/run/gfxdriver
-	unit=$(sysctl -n hw.pci.default_vgapci_unit)
-	[ -z "$unit" -o "$unit" =  "-1" ] && unit=0
-	busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
-		sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
+	initgfx_debug "Auto-detecting graphics driver ..."
+	get_device_info
+	for i in nvidia intel ati_amd; do
+		if setup_${i}; then
+			initgfx_debug "Testing Xorg configuration ..."
+			if test_x; then
+				# FIXME: Without the delay the result is a
+				# reboot when using a Nvidia GPU.
+				sleep 3
+				save_config_id
+				return
+			else
+				initgfx_warn "Failed to use $i driver. " \
+							 "Using ${driver} instead ..." >&2
+				del_stale_files
+			fi
+			break
+		fi
+	done
 	eval cfg_path=\${path_${driver}_cfg}
 	(printf "Section \"Device\"\n"; \
 	 printf "\tIdentifier \"Card0\"\n"; \
 	 printf "\tDriver \"${driver}\"\n"; \
 	 printf "\tBusID \"PCI:$busID\"\n"; \
-	 printf "EndSection\n") > ${cfg_path}
+	 printf "EndSection\n") > "${path_xorg_cfg}"
+
+	sysrc -x initgfx_kmods
 }
 
 run_rc_command "$1"
+
