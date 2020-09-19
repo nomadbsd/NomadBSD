@@ -49,6 +49,8 @@ for s in 15 9; do
 done
 eval $(dbus-launch --sh-syntax)
 
+tpquirk
+
 sh ~/.config/DSB/autostart.sh
 ############################################################################
 # Uncomment one of the following lines depending on the DE/WM you intend to

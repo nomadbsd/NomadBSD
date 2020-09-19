@@ -106,3 +106,4 @@ nomad ALL=(ALL) ALL
 ## (the '#' here does not indicate a comment)
 #includedir /usr/local/etc/sudoers.d
 %wheel	ALL=(ALL)	NOPASSWD:	/usr/sbin/acpiconf *
+%wheel	ALL=(ALL)	NOPASSWD:	/sbin/sysctl kern.evdev.rcpt_mask=*
