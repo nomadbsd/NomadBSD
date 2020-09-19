@@ -52,24 +52,7 @@ eval $(dbus-launch --sh-syntax)
 tpquirk
 
 sh ~/.config/DSB/autostart.sh
-############################################################################
-# Uncomment one of the following lines depending on the DE/WM you intend to
-# start:
-#
 
-# Xfce
-# . /usr/local/etc/xdg/xfce4/xinitrc
-
-# GNOME
-# exec /usr/local/bin/gnome-session
-
-# MATE
-# exec ck-launch-session mate-session
-
-# KDE
-# exec ck-launch-session startkde
-#
-###########################################################################
-
-exec ck-launch-session openbox-session
+[ "$1" = "default" ] && exec ck-launch-session openbox-session
+exec ck-launch-session "$1"
 
