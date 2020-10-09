@@ -787,13 +787,13 @@ sub commit {
 	system("/usr/local/bin/fc-cache -sfr");
 	status("Locking kernel module packages");
 	system("pkg lock -y -g '*-kmod'");
+	unlink($path_vesa_cfg);
+	unlink($path_scfb_cfg);
 	if (-l "/usr/local") {
 		status("Replacing symlink to /unionfs/usr/local by /usr/local");
 		system("unlink /usr/local && mkdir /usr/local") == 0
 			or bail("Couldn't create directory '/usr/local'");
 	}
-	unlink($path_vesa_cfg);
-	unlink($path_scfb_cfg);
 	status("Sync'ing filesystems");
 	system("sync");
 	exit 0;
