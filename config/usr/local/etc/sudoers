@@ -107,3 +107,4 @@ nomad ALL=(ALL) ALL
 #includedir /usr/local/etc/sudoers.d
 %wheel	ALL=(ALL)	NOPASSWD:	/usr/sbin/acpiconf *
 %wheel	ALL=(ALL)	NOPASSWD:	/sbin/sysctl kern.evdev.rcpt_mask=*
+%wheel	ALL=(ALL)	NOPASSWD:SETENV:	/usr/local/bin/networkmgr
