@@ -782,6 +782,7 @@ sub commit {
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
+	system("touch /etc/wpa_supplicant.conf");
 	status("Regenerating font cache");
 	system("/usr/local/bin/fc-cache -sfr");
 	status("Locking kernel module packages");
@@ -791,6 +792,8 @@ sub commit {
 		system("unlink /usr/local && mkdir /usr/local") == 0
 			or bail("Couldn't create directory '/usr/local'");
 	}
+	unlink($path_vesa_cfg);
+	unlink($path_scfb_cfg);
 	status("Sync'ing filesystems");
 	system("sync");
 	exit 0;
