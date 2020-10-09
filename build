@@ -630,7 +630,7 @@ createuzip()
 	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
 	mount /dev/${mddev} "${UZIP_MNT}" || bail
 	(cd "${SYSDIR}/usr/local" && tar -cf -	\
-	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) || bail
+	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) #|| bail
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
 	[ ! -d pkgcache ] && mkdir pkgcache
 	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
