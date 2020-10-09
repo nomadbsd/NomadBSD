@@ -8,6 +8,7 @@ plank&
 dsbmc -i&
 dsbbatmon&
 dsbmixer -i&
+sudo -E networkmgr&
 redshift -l$(getlalo)&
 dunst&
 brightness_listener&

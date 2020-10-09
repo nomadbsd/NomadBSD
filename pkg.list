@@ -54,7 +54,7 @@ multimedia/simplescreenrecorder
 multimedia/vlc
 multimedia/x264
 net-im/pidgin
-net-mgmt/wifimgr
+net-mgmt/networkmgr
 net-p2p/transmission
 net/avahi-app
 net/mosh
