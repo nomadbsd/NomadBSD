@@ -111,7 +111,9 @@ set_kldconfig_path()
 
 test_x()
 {
-	PATH="${PATH}:/usr/local/bin" /usr/local/bin/xinit /usr/bin/true -- :0 
+	local cfgdir="/tmp/${name}_empty.$$"
+	mkdir "${cfgdir}" 2>/dev/null
+	PATH="${PATH}:/usr/local/bin" /usr/local/bin/xinit /usr/bin/true -- -configdir "${cfgdir}"
 }
 
 get_device_info() {
