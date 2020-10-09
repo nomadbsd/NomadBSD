@@ -234,7 +234,7 @@ setup_nvidia()
 
 do_initgfx()
 {
-	local cfg_path driver
+	local driver
 
 	unalias echo
 	if check_configured; then
@@ -277,7 +277,6 @@ do_initgfx()
 			break
 		fi
 	done
-	eval cfg_path=\${path_${driver}_cfg}
 	(printf "Section \"Device\"\n"; \
 	 printf "\tIdentifier \"Card0\"\n"; \
 	 printf "\tDriver \"${driver}\"\n"; \
