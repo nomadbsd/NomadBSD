@@ -49,6 +49,8 @@ path_nvidia="/usr/local/nvidia"
 path_initgfx_xorg_templates="/etc/${name}_xorg.cfg"
 path_initgfx_device_db="/etc/${name}_device.db"
 
+path_cfg_test_dir="/tmp/${name}.$$"
+
 # Include device info DB
 . ${path_initgfx_device_db}
 
@@ -111,9 +113,12 @@ set_kldconfig_path()
 
 test_x()
 {
-	local cfgdir="/tmp/${name}_empty.$$"
-	mkdir "${cfgdir}" 2>/dev/null
-	PATH="${PATH}:/usr/local/bin" /usr/local/bin/xinit /usr/bin/true -- -configdir "${cfgdir}"
+	if [ ! -d "${path_cfg_test_dir}" ]; then
+		mkdir "${path_cfg_test_dir}" 2>/dev/null
+	fi
+	cp "${path_xorg_cfg}" "${path_cfg_test_dir}"
+	PATH="${PATH}:/usr/local/bin" /usr/local/bin/xinit \
+		/usr/bin/true -- -configdir "${path_cfg_test_dir}"
 }
 
 get_device_info() {
