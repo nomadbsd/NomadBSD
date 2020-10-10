@@ -126,7 +126,6 @@ x11-fonts/xorg-fonts
 x11-themes/gnome-icons-faenza
 x11-themes/lxappearance
 x11-themes/papirus-icon-theme
-x11-themes/qt5-style-plugins
 x11-toolkits/py-qt5-gui
 x11-toolkits/py-qt5-widgets
 x11-wm/compton
