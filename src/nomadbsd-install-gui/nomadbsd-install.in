@@ -27,16 +27,39 @@
 arch=$(sysctl -n hw.machine_arch)
 version=$(cat /VERSION)
 efipartsz=@EFI_PART_SIZE@
-
-idx=0
+DESTDIR="/tmp/nbsdinstaller.$$"
 rootfs_label="nbsdrootfs"
 swap_label="nbsdswap"
-[ -z "${version}" ] && bail "NomadBSD version not set. Check /VERSION"
 POOL="zroot"
 NOMADBSDROOT="${POOL}/ROOT/nomadbsd-${version}"
 
+fstab_ufs() {
+cat <<FSTAB_END
+/dev/gpt/${rootfs_label} /     ufs    rw,noatime   1 1
+tmpfs                    /tmp  tmpfs  rw,mode=1777 0 0
+proc                     /proc procfs rw           0 0
+FSTAB_END
+}
+
+fstab_zfs() {
+cat <<FSTAB_END
+tmpfs                    /tmp  tmpfs  rw,mode=1777,late 0 0
+proc                     /proc procfs rw                0 0
+FSTAB_END
+}
+
+cleanup() {
+	! (mount | grep -q ${DESTDIR}) && return
+	if [ ${fstype} = "ZFS" ]; then
+		zfs umount -af
+	else
+		umount ${DESTDIR}
+	fi
+}
+
 bail() {
 	echo "nomadbsd-install: $1" >&2
+	cleanup
 	exit 1
 }
 
@@ -55,7 +78,7 @@ show_extract() {
 		if (nfiles <= 0)
 			exit;
 		while (getline > 0) {
-			if ($0 !~ /^x/)
+			if (($0 !~ /^\//) && ($0 !~ /^.\//))
 				continue;
 			p = int(++n * 100 / nfiles);
 			print ">" $0;
@@ -65,19 +88,27 @@ show_extract() {
 	}'
 }
 
-fstab_ufs() {
-cat <<FSTAB_END
-/dev/gpt/${rootfs_label} /     ufs    rw,noatime   1 1
-tmpfs                    /tmp  tmpfs  rw,mode=1777 0 0
-proc                     /proc procfs rw           0 0
-FSTAB_END
-}
-
-fstab_zfs() {
-cat <<FSTAB_END
-tmpfs                    /tmp  tmpfs  rw,mode=1777,late 0 0
-proc                     /proc procfs rw                0 0
-FSTAB_END
+#
+# Traverses through the given directory and prints
+# each filename to stdout, unless it matches any of
+# the patterns read from stdin.
+#
+exclfind() {
+	local dir=$1
+	local args=$(tr ' \t' '\n\n' | awk '
+		BEGIN { printf("\\( "); }
+		{
+			if ($0 !~ /^$/) {
+				if (n++ > 0)
+					printf(" -or -path \"%s\" ", $0)
+				else
+					printf("-path \"%s\"", $0)
+			}
+		}
+		END { print "\\)" }
+	')
+	eval find "$dir" \
+		'\(' -type f -or -type d -or -type l -or -type p '\)' -and -not $args
 }
 
 getrootdev()
@@ -111,6 +142,15 @@ devlist() {
 	else
 		echo "$list"
 	fi
+}
+
+#
+# Returns the index of the last partition
+#
+get_part_idx() {
+	local disk=$1
+	gpart show ${disk} | sed '/^$/d' | tail -2 | head -1 | \
+		awk -F '[\t ]+' '{ print $4 }'
 }
 
 newfswrp() {
@@ -150,9 +190,8 @@ newfswrp() {
 mkufs() {
 	status "Creating UFS filesystem ..."
 	newfswrp "newfs -t -U $1"
-	status "Mounting /dev/${disk}p$idx on /mnt ..."
-	mount /dev/${disk}p${idx} /mnt || \
-		bail "Failed to mount /dev/${disk}p${idx}"
+	status "Mounting $1 on ${DESTDIR} ..."
+	mount "$1" ${DESTDIR} || bail "Failed to mount $1"
 }
 
 zfs_create() {
@@ -161,7 +200,7 @@ zfs_create() {
 }
 
 mkzfs() {
-	zpool create -o altroot=/mnt -m none -f ${POOL} $1 || \
+	zpool create -o altroot=${DESTDIR} -m none -f ${POOL} $1 || \
 		bail "Couldn't create pool ${POOL}"
 	zfs set compress=on ${POOL}
 	zfs set atime=off ${POOL}
@@ -184,14 +223,136 @@ mkzfs() {
 	zfs_create -o atime=on -o exec=off -o setuid=off \
 		${POOL}/var/mail
 	zfs_create -o exec=on -o setuid=off   ${POOL}/var/tmp
-	ln -s usr/home /mnt/home
-	ln -s usr/src/sys /mnt/sys
-	chmod 1777 /mnt/var/tmp
+	ln -s usr/home ${DESTDIR}/home
+	ln -s usr/src/sys ${DESTDIR}/sys
+	chmod 1777 ${DESTDIR}/var/tmp
 	zpool set bootfs=${NOMADBSDROOT} ${POOL}
 }
 
+wipe_disk() {
+	local disk=$1
+	# Wipe ZFS metadata
+	status "Wiping old ZFS metadata ..."
+	for d in $(ls /dev/${disk}* | sort -r); do
+		zpool labelclear -f "$d"
+	done
+	status "Destroying old GPT partition scheme ..."
+	gpart destroy -F ${disk}
+
+	# Zero first and last 100 sectors
+	dd if=/dev/zero of=/dev/${disk} count=100
+	skipbs=$(geom disk list ${disk} | awk -F " " '/Mediasize:/ {
+		skipbs = int($2 / 512) - 100;
+		print skipbs
+	}')
+	dd if=/dev/zero of=/dev/${disk} bs=512 count=100 oseek=$skipbs
+}
+
+mkefi() {
+	local disk=$1
+	local idx
+
+	gpart add -a 4k -t efi -l gpefiboot -s ${efipartsz} ${disk} || \
+		bail "Couldn't create EFI partition"
+	idx=$(get_part_idx ${disk})
+	newfs_msdos -F 32 -c 1 /dev/${disk}p${idx} || \
+		bail "Couldn't create MSDOSFS on /dev/${disk}p${idx}"
+	mount -t msdosfs /dev/${disk}p${idx} ${DESTDIR} || bail
+	mkdir -p ${DESTDIR}/EFI/NOMADBSD || \
+		bail "Couldn't create directory ${DESTDIR}/EFI/NOMADBSD"
+	cp /boot/boot1.efi ${DESTDIR}/EFI/NOMADBSD/BOOTx64.EFI || \
+		bail "Couldn't copy /boot/boot1.efi to ${DESTDIR}/EFI/NOMADBSD"
+	# Use OEM string of HDD/SSD as UEFI variable label
+	oem=$(devlist | grep ${disk} | cut -d'|' -f 2)
+	if [ -z "${oem}" ]; then
+		# Could not get OEM string. Use an alternative string
+		efilabel="NomadBSD-${version}"
+	else
+		efilabel="NomadBSD:${oem}"
+	fi
+	# Remove duplicated entries
+	efibootmgr | awk -F" " -v efilabel="${efilabel}" '
+		$0 ~ efilabel && $1 ~ /Boot[0-9]+/ {
+			bootvars[nb++] = substr($1, 5, 4)
+		}
+		END {
+		for (i = 0; i < nb; i++) {
+			cmd = sprintf("efibootmgr -B %s", bootvars[i]);
+			system(cmd);
+		}
+	}
+	'
+	bvar=$(efibootmgr -c -l ${DESTDIR}/EFI/NOMADBSD/BOOTx64.EFI \
+		-L "${efilabel}" | grep -w "${efilabel}" | sort | tail -1 | \
+		sed -E 's/.*Boot([0-9]+).*/\1/')
+	if [ -n "${bvar}" ]; then
+		efibootmgr -a ${bvar}
+	fi
+	umount ${DESTDIR} || umount -f ${DESTDIR}
+}
+
+mkrootfs() {
+	local disk=$1
+	local idx=$2
+
+	if [ ${fstype} = "UFS" ]; then
+		gpart add -a 1m -t freebsd-ufs -l ${rootfs_label} ${disk} || \
+			bail "Couldn't create partition"
+		mkufs "/dev/${disk}p${idx}"
+	else
+		gpart add -a 1m -t freebsd-zfs -l ${rootfs_label} ${disk} || \
+			bail "Couldn't create partition"
+		mkzfs "/dev/gpt/${rootfs_label}"
+	fi
+}
+
+install_bootcode() {
+	local disk=$1
+	local idx=$(get_part_idx ${disk})
+
+	status "Installing boot code ..."
+	if [ ${fstype} = "UFS" ]; then
+		partcode="/boot/gptboot"
+	else
+		partcode="/boot/gptzfsboot"
+	fi
+	gpart bootcode -b /boot/pmbr -p ${partcode} \
+		-i ${idx} ${disk} || bail "Couldn't install boot code"
+}
+
+part_disk() {
+	local disk=$1
+	local idx
+
+	status "Creating GPT partition scheme ..."
+	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
+	status "Creating boot partition ..."
+	gpart add -a 4k -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
+		bail "Couldn't create partition"
+	install_bootcode ${disk}
+
+	if [ "${arch}" = "amd64" ]; then
+		status "Creating EFI partition ..."
+		mkefi ${disk}
+	fi
+	if [ -n "${lenovofix}" ]; then
+		status "Setting lenovofix ..."
+		gpart set -a lenovofix ${disk}
+	fi
+	if [ ${swapsize} -gt 0 ]; then
+		status "Creating swap partition ..."
+		gpart add -a 1m -t freebsd-swap -l ${swap_label} \
+			-s ${swapsize}M ${disk} || \
+				bail "Couldn't create swap partition"
+	fi
+	status "Creating partition for / ..."
+	idx=$(get_part_idx ${disk})
+	idx=$((idx + 1))
+	mkrootfs ${disk} ${idx}
+}
+
 set_autologin() {
-	path_slim="/mnt/usr/local/etc/slim.conf"
+	path_slim="${DESTDIR}/usr/local/etc/slim.conf"
 	awk -v user=$username -v autologin=${autologin:=0} '
 		! /^default_user/ && ! /^auto_login/ {
 			print $0;
@@ -205,220 +366,65 @@ set_autologin() {
 	mv $path_slim.tmp $path_slim
 }
 
-commit() {
-	# Wipe ZFS metadata
-	status "Wiping old ZFS metadata ..."
-	for d in $(ls /dev/${disk}* | sort -r); do
-		zpool labelclear -f "$d"
-	done
-
-	status "Destroying old GPT partition scheme ..."
-	gpart destroy -F ${disk}
-
-	# Zero first and last 100 sectors
-	dd if=/dev/zero of=/dev/${disk} count=100
-	skipbs=$(geom disk list ${disk} | awk -F " " '/Mediasize:/ {
-		skipbs = int($2 / 512) - 100;
-		print skipbs
-	}')
-	dd if=/dev/zero of=/dev/${disk} bs=512 count=100 oseek=$skipbs
-
-	status "Creating GPT partition scheme ..."
-	gpart create -s gpt ${disk} || bail "Couldn't create GPT partition scheme"
-	status "Creating boot partition ..."
-	gpart add -a 4k -t freebsd-boot -l gpboot -b 40 -s 512K ${disk} || \
-		bail "Couldn't create partition"
-	idx=$((idx + 1))
-	status "Installing boot code ..."
-	if [ ${fstype} = "UFS" ]; then
-		gpart bootcode -b /boot/pmbr -p /boot/gptboot \
-			-i ${idx} ${disk} || bail "Couldn't install boot code"
-	else
-		gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot \
-			-i ${idx} ${disk} || bail "Couldn't install boot code"
+pkgwrp() {
+	if ! (mount | grep ${DESTDIR}/dev); then
+		chroot ${DESTDIR} sh -c 'mount -t devfs devfs /dev'
 	fi
-	if [ "${arch}" = "amd64" ]; then
-		status "Creating EFI partition ..."
-		gpart add -a 4k -t efi -l gpefiboot -s ${efipartsz} ${disk} || \
-			bail "Couldn't create EFI partition"
-		idx=$((idx + 1))
-		newfs_msdos -F 32 -c 1 /dev/${disk}p${idx} || \
-			bail "Couldn't create MSDOSFS on /dev/${disk}p${idx}"
-		mount -t msdosfs /dev/${disk}p${idx} /mnt || bail
-		mkdir -p /mnt/EFI/NOMADBSD || \
-			bail "Couldn't create directory /mnt/EFI/NOMADBSD"
-		cp /boot/boot1.efi /mnt/EFI/NOMADBSD/BOOTx64.EFI || \
-			bail "Couldn't copy /boot/boot1.efi to /mnt/EFI/NOMADBSD"
-		# Use OEM string of HDD/SSD as UEFI variable label
-		oem=$(devlist | grep ${disk} | cut -d'|' -f 2)
-		if [ -z "${oem}" ]; then
-			# Could not get OEM string. Use an alternative string
-			efilabel="NomadBSD-${version}"
-		else
-			efilabel="NomadBSD:${oem}"
+	pkg -c ${DESTDIR} $*
+	umount ${DESTDIR}/dev || umount -f ${DESTDIR}/dev
+}
+
+install_gfxdrv() {
+	local kmods=$(sysrc -n initgfx_kmods)
+	local path_rc_conf="${DESTDIR}/etc/rc.conf"
+
+	if [ -z "${kmods}" ]; then
+		kmods=$(cat /var/run/gfxdriver)
+		[ -z "${kmods}" ] && return
+	fi
+	if (echo ${kmods} | grep -qE '.*/nvidia/[0-9]+/.*'); then
+		nvidia_version=$(echo ${kmods} | sed -E 's/.*nvidia\/([0-9]+)\/.*/\1/')
+		status "Installing nvidia-driver-${nvidia_version}"
+		pkgwrp install -y "nvidia-driver-${nvidia_version}" || return
+		if [ "${nvidia_version}" -ge 390 ]; then
+			sysrc -f $path_rc_conf kld_list+=" /boot/modules/nvidia-modeset.ko"
 		fi
-		# Remove duplicated entries
-		efibootmgr | awk -F" " -v efilabel="${efilabel}" '
-			$0 ~ efilabel && $1 ~ /Boot[0-9]+/ {
-				bootvars[nb++] = substr($1, 5, 4)
-			}
-			END {
-			for (i = 0; i < nb; i++) {
-				cmd = sprintf("efibootmgr -B %s", bootvars[i]);
-				system(cmd);
-			}
-		}
-		'
-		bvar=$(efibootmgr -c -l /mnt/EFI/NOMADBSD/BOOTx64.EFI \
-			-L "${efilabel}" | grep -w "${efilabel}" | sort | tail -1 | \
-			sed -E 's/.*Boot([0-9]+).*/\1/')
-		if [ -n "${bvar}" ]; then
-			efibootmgr -a ${bvar}
-		fi
-		umount /mnt || umount -f /mnt
+		sysrc -f $path_rc_conf kld_list+=" /boot/modules/nvidia.ko"
+		sysrc -f $path_rc_conf initgfx_enable=NO
+		return
 	fi
-	if [ -n "${lenovofix}" ]; then
-		status "Setting lenovofix ..."
-		gpart set -a lenovofix ${disk}
+	if (echo "${kmods}" | grep -q legacy); then
+		pkgwrp unlock -gy drm-\*kmod\*
+		status "Deinstalling drm-kmod"
+		pkgwrp delete -gy drm-\*kmod\* || return
+		status "Installing drm-legacy-kmod"
+		pkgwrp install -y drm-legacy-kmod || return
 	fi
-	if [ ${swapsize} -gt 0 ]; then
-		status "Creating swap partition ..."
-		gpart add -a 1m -t freebsd-swap -l ${swap_label} \
-			-s ${swapsize}M ${disk} || \
-				bail "Couldn't create swap partition"
-		idx=$((idx + 1))
-	fi
-	status "Creating partition for / ..."
-	if [ ${fstype} = "UFS" ]; then
-		gpart add -a 1m -t freebsd-ufs -l ${rootfs_label} ${disk} || \
-			bail "Couldn't create partition"
-		idx=$((idx + 1))
-		mkufs "/dev/${disk}p${idx}"
-	else
-		gpart add -a 1m -t freebsd-zfs -l ${rootfs_label} ${disk} || \
-			bail "Couldn't create partition"
-		idx=$((idx + 1))
-		mkzfs "/dev/gpt/${rootfs_label}"
-	fi
-	status "Counting files to copy ..."
-	progress -1
-	re="^/(dev/.*|var/run/.*|mnt/.*|uzip.*|private.*|unionfs.*|home.*|";
-	re="${re}nomadbsd-backup.tar.xz|etc/rc.d/mount_uzip)"
-	nfiles=$(find / \( -type f -or -type d -or 	 \
-			 -type l -or -type p \) 2>/dev/null | \
-			 egrep -v "$re" | wc -l | tr -d ' ')
-	status "Copying files ..."
-	(cd / && tar cf -						\
-		--exclude '*/.gvfs'					\
-		--exclude '^dev*'					\
-		--exclude '^var/run*'				\
-		--exclude '^mnt*'					\
-		--exclude '^uzip*'					\
-		--exclude '^nomadbsd-backup.tar.xz'	\
-		--exclude '^etc/rc.d/mount_uzip'	\
-		--exclude '^unionfs*'				\
-		--exclude '^private*'				\
-		--exclude '^home*'  .) |			\
-		(cd /mnt && tar xmvf - 2>&1) | show_extract $nfiles
-	status "Creating /mnt/dev ..."
-	mkdir /mnt/dev
-	status "Creating /mnt/var/run ..."
-	mkdir /mnt/var/run
-	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
-	unlink /mnt/usr/local/etc
-	mv /mnt/usr.local.etc /mnt/usr/local/etc
-	if [ -h /mnt/var/db/portsnap ]; then
-		unlink /mnt/var/db/portsnap
-	fi
-	if [ ! -d /mnt/var/db/portsnap ]; then
-		status "Creating /mnt/var/db/portsnap"
-		mkdir /mnt/var/db/portsnap
-	fi
-	status "Creating /mnt/mnt ..."
-	mkdir /mnt/mnt
+	case "${kmods}" in
+	*radeon*)
+		sysrc -f $path_rc_conf kld_list+=" /boot/modules/radeonkms.ko" ;;
+	*amdgpu*)
+		sysrc -f $path_rc_conf kld_list+=" /boot/modules/amdgpu.ko" ;;
+	*i915*)
+		sysrc -f $path_rc_conf kld_list+=" /boot/modules/i915kms.ko" ;;
+	*)
+		return ;;
+	esac
+	sysrc -f $path_rc_conf initgfx_enable=NO
+}
 
-	status "Writing fstab ..."
-	if [ ${fstype} = "UFS" ]; then
-		fstab_ufs > /mnt/etc/fstab
-	else
-		fstab_zfs > /mnt/etc/fstab
-	fi
-	if [ ${swapsize} -gt 0 ]; then
-		status "Adding swap entry to fstab ..."
-		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
-			>> /mnt/etc/fstab
-	fi
-	if [ ${fstype} = "ZFS" ]; then
-		echo zfs_load=\"YES\" >> /mnt/boot/loader.conf
-		echo vfs.root.mountfrom=\"zfs:${NOMADBSDROOT}\" \
-			>> /mnt/boot/loader.conf
-	fi
+replace_user() {
 	status "Changing username ..."
-	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/master.passwd
-	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" /mnt/etc/group
-	sed -i .bak -E '/^geli.*/d' /mnt/etc/rc.conf
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" ${DESTDIR}/etc/master.passwd
+	sed -i .bak -E "s/[[:<:]]nomad[[:>:]]/${username}/g" ${DESTDIR}/etc/group
+	sed -i .bak -E '/^geli.*/d' ${DESTDIR}/etc/rc.conf
 
-	sysrc -f /mnt/etc/rc.conf -x gsched_enable
-	sysrc -f /mnt/etc/rc.conf -x local_startup
-	sed -i '' 's,^WorkDir.*,WorkDir /var/db/freebsd-update,' \
-		/mnt/etc/freebsd-update.conf
-	sed -E -i '' '/^\/etc\/rc.d\/mount_uzip.*$/d' /mnt/etc/rc.shutdown
-
-	if [ ${fstype} = "ZFS" ]; then
-		sysrc -f /mnt/etc/rc.conf zfs_enable=YES
-	fi
-	if [ -L /compat -a -d /home/compat ]; then
-		unlink /mnt/compat
-		if [ ! -d /mnt/compat ]; then
-			mkdir /mnt/compat || bail "Couldn't create /mnt/compat"
-		fi
-		status "Counting files to copy from /home/compat ..."
-		progress -1
-		nfiles=$(cd /home/compat && find . \( -type f -or -type d -or	\
-			-type l -or -type p \) 2>/dev/null | wc -l | tr -d ' ')
-		status "Copying files from /home/compat to /mnt/compat ..."
-		(cd /home/compat && tar cf - .) | \
-			(cd /mnt/compat && tar xmvf - 2>&1) | show_extract $nfiles
-	fi
-	if [ ! -d /mnt/home ]; then
-			mkdir /mnt/home || bail "Couldn't create /mnt/home"
-	fi
-	if [ -L /home -a -d /private/home/nomad ]; then
-		status "Counting files to copy from /private/home ..."
-		progress -1
-		nfiles=$(cd /private/home && find . \( -type f -or -type d -or	\
-			-type l -or -type p \) 2>/dev/null | \
-			egrep -v '^\./(pkgs/|compat/)' | wc -l | tr -d ' ')
-
-		status "Copying files from /private/home ..."
-		(cd /private/home && tar cf -	\
-			--exclude '*/.gvfs'			\
-			--exclude '^pkgs*'			\
-			--exclude '^compat*' .) | (cd /mnt/home && tar xmvf - 2>&1) | \
-			show_extract $nfiles
-		unlink /mnt/etc/wpa_supplicant.conf
-		unlink /mnt/etc/ppp
-		(cd /private/etc && tar cf - .) | (cd /mnt/etc && tar xmf -)
-	else
-		status "Counting files to copy from /home ..."
-		progress -1
-		nfiles=$(cd /home && find . \( -type f -or -type d -or	\
-			-type l -or -type p \) 2>/dev/null | \
-			egrep -v '^\./(pkgs/|compat/)' | wc -l | tr -d ' ')
-
-		status "Copying files from /home ..."
-		(cd /home && tar cf -			\
-			--exclude '*/.gvfs'			\
-			--exclude '^pkgs*'			\
-			--exclude '^compat*' .) | (cd /mnt/home && tar xmvf - 2>&1) | \
-			show_extract $nfiles
-	fi
 	status "Counting config files ..."
 	progress -1
-	nfiles=$(find /mnt/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
+	nfiles=$(find ${DESTDIR}/home/nomad/ -type f -exec file {} \; | grep text | wc -l)
 
 	status "Replacing nomad by ${username} in config files ..."
-	find /mnt/home/nomad/ -type f | while read i; do
+	find ${DESTDIR}/home/nomad/ -type f | while read i; do
 		if (file "$i" | grep -q text); then
 			n=$(($n + 1))
 			p=$(($n * 100 / $nfiles))
@@ -427,27 +433,189 @@ commit() {
 		fi
 	done
 	sed -i '' -E "s/[[:<:]]nomad[[:>:]]/${username}/g" \
-		/mnt/usr/local/etc/sudoers
-	rm -rf /mnt/home/nomad/.config/DSB/dsblogoutmgr
-	for i in setup install; do
-		rm -f "/mnt/usr/libexec/nomadbsd-$i"
-		rm -f "/mnt/usr/bin/nomadbsd-$i-gui"
-	done
-	rm -f /mnt/usr/local/share/applications/nomadbsd-install-gui.desktop
-	status "Moving /mnt/home/nomad to /mnt/home/$username ..."
-	mv /mnt/home/nomad /mnt/home/${username}
+		${DESTDIR}/usr/local/etc/sudoers
+	status "Moving ${DESTDIR}/home/nomad to ${DESTDIR}/home/$username ..."
+	mv ${DESTDIR}/home/nomad ${DESTDIR}/home/${username}
 	status "Running pwd_mkdb on /etc/master.passwd ..."
-	chroot /mnt sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
-	set_autologin
-	status "Updating pkg repository catalogues ..."
-	pkg --chroot /mnt update -f -q 2>/dev/null
+	chroot ${DESTDIR} sh -c '/usr/sbin/pwd_mkdb -p /etc/master.passwd'
+}
 
-	status "Unmounting /mnt ..."
-	if [ ${fstype} = "ZFS" ]; then
-		zfs umount -af
-	else
-		umount /mnt
+copy_home() {
+	local exlst="
+	./pkgs
+	./pkgs/*
+	./compat
+	./compat/*
+	*/.gvfs.*
+	"
+	if [ ! -d ${DESTDIR}/home ]; then
+		mkdir ${DESTDIR}/home || bail "Couldn't create ${DESTDIR}/home"
 	fi
+	if [ -L /home -a -d /private/home/nomad ]; then
+		homedir="/private/home"
+	else
+		homedir="/home"
+	fi
+	status "Counting files to copy from ${homedir} ..."
+	progress -1
+	nfiles=$(cd ${homedir} && echo "${exlst}" | \
+			exclfind . 2>/dev/null | wc -l | tr -d ' ')
+	status "Copying files from /private/home ..."
+	(cd ${homedir} && echo "${exlst}" | \
+		exclfind . 2>/dev/null | cpio -vpdmu ${DESTDIR}/home 2>&1) | \
+		show_extract $nfiles
+	if [ "${homedir}" = "/private/home" ]; then
+		unlink ${DESTDIR}/etc/wpa_supplicant.conf
+		unlink ${DESTDIR}/etc/ppp
+		(cd /private/etc && tar cf - .) | (cd ${DESTDIR}/etc && tar xmf -)
+	fi
+	rm -rf ${DESTDIR}/home/nomad/.config/DSB/dsblogoutmgr
+	unlink ${DESTDIR}/home/nomad/.cache
+}
+
+copy_base() {
+	local exlst="
+	${DESTDIR}
+	${DESTDIR}/*
+	/dev/
+	/dev/*
+	/mnt
+	/mnt/*
+	/uzip
+	/uzip/*
+	/private
+	/private/*
+	/unionfs
+	/unionfs/*
+	/home
+	/home/*
+	/nomadbsd-backup.tar.xz
+	/etc/rc.d/mount_uzip
+	/media
+	/media/*
+	/tmp
+	/tmp/*
+	"
+	local pseudofs=$(mount | awk -F"[\t (),]+" '
+		/procfs/ || /linprocfs/ || /linsysfs/ || /devfs/ {
+			print $3
+		}
+	')
+	for i in ${pseudofs}; do
+		exlst="${exlst} $i"
+		exlst="${exlst} $i/*"
+	done
+
+	status "Counting files to copy ..."
+	progress -1
+	nfiles=$(echo "${exlst}" | exclfind / 2>/dev/null | wc -l | tr -d ' ')
+	status "Copying files ..."
+	echo "${exlst}" | \
+		exclfind / 2>/dev/null | cpio -vpdmu ${DESTDIR} 2>&1 | show_extract $nfiles
+	status "Creating ${DESTDIR}/dev ..."
+	mkdir ${DESTDIR}/dev
+	status "Creating ${DESTDIR}/proc ..."
+	mkdir ${DESTDIR}/proc
+	status "Creating ${DESTDIR}/media ..."
+	mkdir ${DESTDIR}/media
+	status "Creating ${DESTDIR}/tmp ..."
+	mkdir ${DESTDIR}/tmp
+	chmod a=rwxt ${DESTDIR}/tmp
+
+	status "Replacing ${DESTDIR}/usr/local/etc by ${DESTDIR}/usr.local.etc ..."
+	unlink ${DESTDIR}/usr/local/etc
+	mv ${DESTDIR}/usr.local.etc ${DESTDIR}/usr/local/etc
+
+	if [ -h ${DESTDIR}/var/db/portsnap ]; then
+		unlink ${DESTDIR}/var/db/portsnap
+	fi
+	if [ ! -d ${DESTDIR}/var/db/portsnap ]; then
+		status "Creating ${DESTDIR}/var/db/portsnap"
+		mkdir ${DESTDIR}/var/db/portsnap
+	fi
+
+	status "Creating ${DESTDIR}/mnt ..."
+	mkdir ${DESTDIR}/mnt
+}
+
+copy_compat() {
+	local exlst="
+	./linux/sys
+	./linux/sys/*
+	./linux/proc
+	./linux/proc/*
+	"
+	[ ! \( -L /compat -a -d /home/compat \) ] && return
+	unlink ${DESTDIR}/compat
+	if [ ! -d ${DESTDIR}/compat ]; then
+		mkdir ${DESTDIR}/compat || bail "Couldn't create ${DESTDIR}/compat"
+	fi
+	status "Counting files to copy from /home/compat ..."
+	progress -1
+	nfiles=$(cd /home/compat && echo "${exlst}" | \
+		exclfind . 2>/dev/null | wc -l | tr -d ' ')
+	status "Copying files from /home/compat to ${DESTDIR}/compat ..."
+	(cd /home/compat && echo "${exlst}" | \
+		exclfind . 2>/dev/null | \
+		cpio -vpdmu ${DESTDIR}/compat 2>&1) | show_extract $nfiles
+	if [ -d ${DESTDIR}/compat/linux ]; then
+		mkdir ${DESTDIR}/compat/linux/sys
+		mkdir ${DESTDIR}/compat/linux/proc
+	fi
+}
+
+commit() {
+	if [ ! -d ${DESTDIR} ]; then
+		mkdir -p ${DESTDIR} || bail "Couldn't create ${DESTDIR}"
+	fi
+	wipe_disk ${disk}
+	part_disk ${disk}
+	copy_base
+	copy_compat
+	copy_home
+	replace_user
+
+	status "Writing fstab ..."
+	if [ ${fstype} = "UFS" ]; then
+		fstab_ufs > ${DESTDIR}/etc/fstab
+	else
+		fstab_zfs > ${DESTDIR}/etc/fstab
+	fi
+	if [ ${swapsize} -gt 0 ]; then
+		status "Adding swap entry to fstab ..."
+		printf "%s\tswap\tswap\tsw\t0\t0\n" "/dev/gpt/${swap_label}" \
+			>> ${DESTDIR}/etc/fstab
+	fi
+	if [ ${fstype} = "ZFS" ]; then
+		echo zfs_load=\"YES\" >> ${DESTDIR}/boot/loader.conf
+		echo vfs.root.mountfrom=\"zfs:${NOMADBSDROOT}\" \
+			>> ${DESTDIR}/boot/loader.conf
+	fi
+	sysrc -f ${DESTDIR}/etc/rc.conf -x gsched_enable
+	sysrc -f ${DESTDIR}/etc/rc.conf -x local_startup
+	sed -i '' 's,^WorkDir.*,WorkDir /var/db/freebsd-update,' \
+		${DESTDIR}/etc/freebsd-update.conf
+	sed -E -i '' '/^\/etc\/rc.d\/mount_uzip.*$/d' ${DESTDIR}/etc/rc.shutdown
+
+	if [ ${fstype} = "ZFS" ]; then
+		sysrc -f ${DESTDIR}/etc/rc.conf zfs_enable=YES
+	fi
+	for i in setup install; do
+		rm -f "${DESTDIR}/usr/libexec/nomadbsd-$i"
+		rm -f "${DESTDIR}/usr/bin/nomadbsd-$i-gui"
+	done
+	rm -f ${DESTDIR}/usr/local/share/applications/nomadbsd-install-gui.desktop
+
+	set_autologin
+
+	status "Updating pkg repository catalogues ..."
+	pkg --chroot ${DESTDIR} update -f -q 2>/dev/null
+
+	status "Installing graphics driver"
+	install_gfxdrv
+
+	status "Unmounting ${DESTDIR} ..."
+	cleanup
 	status "Done!"
 }
 
@@ -460,17 +628,17 @@ dummy_commit() {
 	status "Creating swap partition ..."
 	status "Creating partition for / ..."
 	status "Creating UFS filesystem ..."
-	status "Mounting /dev/${disk}p$idx on /mnt ..."
+	status "Mounting /dev/${disk}p$idx on ${DESTDIR} ..."
 	status "Copying files ..."
-	status "Replacing /mnt/usr/local/etc by /mnt/usr.local.etc ..."
-	status "Creating /mnt/mnt ..."
+	status "Replacing ${DESTDIR}/usr/local/etc by ${DESTDIR}/usr.local.etc ..."
+	status "Creating ${DESTDIR}/mnt ..."
 	status "Writing fstab ..."
 	status "Adding swap entry to fstab ..."
 	status "Changing username ..."
 	status "Replacing nomad by $username in config files ..."
-	status "Moving /mnt/home/nomad to /mnt/home/${username} ..."
+	status "Moving ${DESTDIR}/home/nomad to ${DESTDIR}/home/${username} ..."
 	status "Running pwd_mkdb on /etc/master.passwd ..."
-	status "Unmounting /mnt ..."
+	status "Unmounting ${DESTDIR} ..."
 	status "Done!"
 }
 
@@ -488,6 +656,8 @@ usage() {
 	echo "-a     Auto-login user (Slim)."
 	exit 1
 }
+
+[ -z "${version}" ] && bail "NomadBSD version not set. Check /VERSION"
 
 [ $# -lt 1 ] && usage
 case $1 in
