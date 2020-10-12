@@ -1,11 +1,11 @@
 #!/bin/sh
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/bin:/home/nomad/bin
 
-if grep -q "drm_legacy" /var/run/gfxdriver; then
+if (grep -q "drm_legacy" /var/run/gfxdriver 2>/dev/null || \
+    sysrc -nq initgfx_kmods | grep -q drm_legacy); then
 	# https://lists.freebsd.org/pipermail/freebsd-stable/2020-March/092068.html
 	export LIBGL_DRI3_DISABLE=1
 fi
-
 export QT_QPA_PLATFORMTHEME=gtk2
 
 uid=$(id -u)
@@ -53,6 +53,6 @@ tpquirk
 
 sh ~/.config/DSB/autostart.sh
 
-[ "$1" = "default" ] && exec ck-launch-session openbox-session
+[ -z "$1" -o "$1" = "default" ] && exec ck-launch-session openbox-session
 exec ck-launch-session "$1"
 
