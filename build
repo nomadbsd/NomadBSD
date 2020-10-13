@@ -640,11 +640,12 @@ createuzip()
 	    /dev/${mddev} || bail
 	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
 	mount /dev/${mddev} "${UZIP_MNT}" || bail
-	(cd "${SYSDIR}/usr/local" && tar -cf -	\
-	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) #|| bail
+	(cd "${SYSDIR}/usr/local" && \
+		find . -not \( -path "./etc" -or -path "./etc/*" \) | \
+		cpio -pdmu "${UZIP_MNT}")
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
 	[ ! -d pkgcache ] && mkdir pkgcache
-	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
+	_umount "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
 	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
