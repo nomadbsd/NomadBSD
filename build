@@ -54,22 +54,6 @@
 #
 . ./build.cfg
 
-for i in RELEASE SYSDIR DISTDIR PATCHDIR; do
-	eval var=\${$i}
-	if [ -z "${var}" ]; then
-		echo "$i must not be empty" >&2
-		exit 1
-	fi
-done
-
-for i in SYSDIR DISTDIR PATCHDIR; do
-	eval var=\${$i}
-	if [ "$(realpath -q ${var})" = "/" ]; then
-		echo "Refusing to use '/' as $i"
-		exit 1
-	fi
-done
-
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
@@ -77,18 +61,35 @@ RELEASE|BETA|RC*)
 	URL="${BASEURL}/snapshots";;
 esac
 
+WORKDIR="${PWD}/work"
+# Where the FreeBSD installation resides.
+SYSDIR="${WORKDIR}/sys"
+# Where bsdinstall stores fetched files.
+DISTDIR="${WORKDIR}/dists"
+PATCHDIR="${WORKDIR}/patchset"
 DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
-UZIP_IMAGE="uzip_image"
-UZIP_MNT="uzip_mnt"
+UZIP_IMAGE="${WORKDIR}/uzip_image"
+UZIP_MNT="${WORKDIR}/uzip_mnt"
 ROOTLABEL=nomadroot
-TMP_BASE_DIR=tmpbase
-TMP_IMAGE_NAME=tmpbase.img
+TMP_BASE_DIR=$"{WORKDIR}/tmpbase"
+TMP_IMAGE_NAME="${WORKDIR}/tmpbase.img"
 KERNCONF_DIR="${SYSDIR}/usr/src/sys/${ARCH}/conf"
 KERNCONF_NOMADBSD="${KERNCONF_DIR}/NOMADBSD"
 KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
+
+_umount()
+{
+	local n=3
+	while [ $n -gt 0 ]; do
+		umount "$1" && return
+		n=$(($n - 1))
+		sleep 1
+	done
+	umount -f "$1"
+}
 
 instusrcfg()
 {
@@ -100,7 +101,7 @@ initbase()
 {
 	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 	if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
 		chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
 		    -G wheel,operator,video,games -s /bin/csh'
@@ -163,7 +164,7 @@ createbase()
 {
 	local version srcurl
 
-	[ ! -d "${SYSDIR}" ] && mkdir "${SYSDIR}"
+	[ ! -d "${SYSDIR}" ] && mkdir -p "${SYSDIR}" || bail
 	for d in base.txz kernel.txz; do
 		fetch ${DISTSITE}/$d -o /tmp/$d || bail
 		tar --unlink -xvpJf /tmp/$d -C "${SYSDIR}" || bail
@@ -201,6 +202,8 @@ updatebase()
 
 buildnvidia()
 {
+	local d v pkgname have_gsed
+
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
 	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
 		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
@@ -208,42 +211,33 @@ buildnvidia()
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
-	[ ! -d "nvidia" ] && mkdir "nvidia" 
 	# Building nvidia-driver>=410 requires textproc/gsed
 	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
 		have_gsed=1
 	else
 		pkg --chroot "${SYSDIR}" install -y textproc/gsed
 	fi
-	for d in nvidia-driver-304 nvidia-driver-340 \
-			 nvidia-driver-390 nvidia-driver; do
-		# Skip nvidia-driver-440 on i386
-		[ ${ARCH} = "i386" -a $d = "nvidia-driver" ] && continue
-
-		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
-		[ -f nvidia/${pkgname}.txz ] && continue
-		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
-		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
-		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
-	done
-	umount "${SYSDIR}/usr/ports"
-	umount "${SYSDIR}/dev"
-	# Remove textproc/gsed if we just installed it for building nvidia-driver
-	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-
-	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
-	if [ ${ARCH} = "amd64" ]; then
-		mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
-	fi
 	for v in 304 340 390 440; do
 		# Skip nvidia-driver-440 on i386
-		[ ${ARCH} = "i386" -a $v = "440" ] && continue
-		cat nvidia/nvidia-driver-${v}*.txz | \
-		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+		[ ${ARCH} = "i386" -a $v -eq 440 ] && continue
+		if [ $v -eq 440 ]; then
+			d="nvidia-driver"
+		else
+			d="nvidia-driver-$v"
+		fi
+		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
+		[ -f "${PKGDIR}/${pkgname}.txz" ] && continue
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
+			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
+		mkdir -p "${SYSDIR}/usr/local/nvidia/$v" 2>/dev/null
+		cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" | \
+			(cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
+	# Remove textproc/gsed if we just installed it for building nvidia-driver
+	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
+	_umount "${SYSDIR}/usr/ports"
+	_umount "${SYSDIR}/dev"
 }
 
 builddrmlegacy()
@@ -265,8 +259,8 @@ builddrmlegacy()
 			   (cd work/stage/boot/modules && tar cf - . | \
 			   (cd /boot/drm_legacy && tar xvf -)); \
 			   make clean; kldxref /boot/drm_legacy'
-	umount "${SYSDIR}/usr/ports"
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/usr/ports"
+	_umount "${SYSDIR}/dev"
 }
 
 instpkgs()
@@ -282,7 +276,7 @@ instpkgs()
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 instgit()
@@ -304,7 +298,7 @@ instgit()
 		[ -z "${build_cmd}" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
 	done
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 postpkgcfg()
@@ -391,8 +385,8 @@ instports()
 	fi
 	pkg -c "${SYSDIR}" autoremove -y
 
-	umount "${SYSDIR}/usr/ports"
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/usr/ports"
+	_umount "${SYSDIR}/dev"
 }
 
 buildkernel()
@@ -410,7 +404,7 @@ buildkernel()
 	done
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 	    cd /usr/src && make ${makeopts} kernel" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 instsrcdist()
@@ -465,7 +459,7 @@ createimage()
 		echo "${TMP_BASE_DIR} already exists." >&2
 		bail
 	fi
-	mkdir ${TMP_BASE_DIR}
+	mkdir -p ${TMP_BASE_DIR}
 
 	createtmpimage
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
@@ -562,7 +556,7 @@ createimage()
 			else
 				cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
 			fi
-			umount mnt
+			_umount mnt
 		fi
 		gpart add -t freebsd -a 4k -s ${basesz}M ${mddev}
 		pn=$(($pn + 1))
@@ -589,7 +583,7 @@ createimage()
 		else
 			cp ${SYSDIR}/boot/boot1.efi mnt/EFI/BOOT/BOOTX64.EFI || bail
 		fi
-		umount mnt
+		_umount mnt
 		gpart add -t freebsd-ufs -l ${ROOTLABEL} -s ${basesz}M ${mddev} || bail
 		pn=$((${pn} + 1))
 		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
@@ -597,14 +591,14 @@ createimage()
 		mount /dev/${mddev}p${pn} mnt || bail
 	fi
 	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd mnt && tar pxf -) || bail
-	umount mnt || umount -f mnt
+	_umount mnt
 	if [ -z ${mac} ]; then
 		glabel label nomadroot /dev/${mddev}s${pn}a || bail
 	fi
 	mdconfig -d -u ${mddev}
 	rmdir mnt
 	chflags -R noschg,nosunlnk ${TMP_BASE_DIR}
-	umount ${TMP_BASE_DIR} || bail
+	_umount ${TMP_BASE_DIR} || bail
 	mdconfig -d -u ${tmpimgdev}
 	rm -f ${TMP_IMAGE_NAME}
 	rm -rf ${TMP_BASE_DIR}
@@ -629,26 +623,26 @@ createuzip()
 	    /dev/${mddev} || bail
 	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
 	mount /dev/${mddev} "${UZIP_MNT}" || bail
-	(cd "${SYSDIR}/usr/local" && tar -cf -	\
-	    --exclude '^etc' .) | (cd "${UZIP_MNT}" && tar pxf -) #|| bail
+	(cd "${SYSDIR}/usr/local" && \
+		find . -not \( -path "./etc" -or -path "./etc/*" \) | \
+		cpio -pdmu "${UZIP_MNT}")
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
-	[ ! -d pkgcache ] && mkdir pkgcache
-	umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
+	_umount "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
 	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
 	if [ "${mversion}" = "13" ]; then
-		mkuzip -Z -j ${MKUZIP_JOBS} -d -s 19456 -A zstd -C 19 \
+		mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} -A zstd -C 19 \
 				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 	else
-		mkuzip -Z -j ${MKUZIP_JOBS} -d -s 19456 \
+		mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} \
 				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 	fi
 }
 
 createpatch()
 {
-	[ ! -d "${PATCHDIR}" ] && mkdir "${PATCHDIR}"
+	[ ! -d "${PATCHDIR}" ] && mkdir -p "${PATCHDIR}" || bail
 	if [ -z "${PATCHVERSION}" ]; then
 		echo "PATCHVERSION not defined" >&2
 		bail
@@ -682,7 +676,7 @@ build_unionfs()
 	fi
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/unionfs-fuse && cmake . && make" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfs" "${SYSDIR}/usr/bin" || bail
 	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfsctl" "${SYSDIR}/usr/bin" || bail
 	cp "${SYSDIR}/tmp/unionfs-fuse/LICENSE" \
@@ -700,7 +694,7 @@ build_setupgui()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-setup-gui && make distclean; \
 		qmake ${QMAKE_VARS} && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 build_installgui()
@@ -714,7 +708,7 @@ build_installgui()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-install-gui && make distclean; \
 		qmake ${QMAKE_VARS} && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 build_addusergui()
@@ -723,7 +717,7 @@ build_addusergui()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-adduser-gui && make distclean; \
 		qmake && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 build_dmconfig()
@@ -732,12 +726,12 @@ build_dmconfig()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-dmconfig && make distclean; \
 		qmake && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	_umount "${SYSDIR}/dev"
 }
 
 build_chusr()
 {
-	required_pkgs="py36-qt5-core py36-qt5-xml py36-qt5-gui py36-qt5-widgets"
+	required_pkgs="py37-qt5-core py37-qt5-xml py37-qt5-gui py37-qt5-widgets"
 	cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" \
 			sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
@@ -752,43 +746,44 @@ insthandbook()
 {
 	local i
 
-	if [ ! -d handbook ]; then
-		git clone https://github.com/nomadbsd/handbook.git
+	if [ ! -d "${WORKDIR}/handbook" ]; then
+		git clone https://github.com/nomadbsd/handbook.git \
+			"${WORKDIR}/handbook"
 	else
-		(cd handbook && git pull)
+		(cd "${WORKDIR}/handbook" && git pull)
 	fi
-	(cd handbook && make)
+	(cd "${WORKDIR}/handbook" && make)
 	if [ ! -d "${SYSDIR}/usr/share/nomadbsd-handbook" ]; then
 		mkdir "${SYSDIR}/usr/share/nomadbsd-handbook"
 	fi
 	for i in style.css handbook.html images; do
-		cp -r handbook/$i "${SYSDIR}/usr/share/nomadbsd-handbook/"
+		cp -r "${WORKDIR}/handbook/$i" "${SYSDIR}/usr/share/nomadbsd-handbook/"
 	done
 }
 
 cleanup()
 {
 	if (mount | grep "${SYSDIR}/usr/ports"); then
-		umount "${SYSDIR}/usr/ports" || umount -f "${SYSDIR}/usr/ports"
+		_umount "${SYSDIR}/usr/ports"
 	fi
 	if (mount | grep "${SYSDIR}/dev"); then
-		umount "${SYSDIR}/dev" || umount -f "${SYSDIR}/dev"
+		_umount "${SYSDIR}/dev"
 	fi
 	if (mount | grep "${UZIP_MNT}"); then
-		umount "${UZIP_MNT}" || umount -f "${UZIP_MNT}"
+		_umount "${UZIP_MNT}"
 	fi
 	if (mount | grep "${PWD}/mnt" || mount | grep './mnt'); then
-		umount ./mnt || umount -f ./mnt
+		_umount ./mnt
 	fi
-	if (mount | grep "${PWD}/${TMP_BASE_DIR}" || \
-	    mount | grep './${TMP_BASE_DIR}'); then
-		umount ./${TMP_BASE_DIR} || umount -f ./${TMP_BASE_DIR}
+	if (mount | grep "${TMP_BASE_DIR}" || \
+	    mount | grep "${TMP_BASE_DIR}"); then
+		_umount ${TMP_BASE_DIR}
 	fi
 	rmdir "${UZIP_MNT}" ./mnt ./${TMP_BASE_DIR} 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
-	rm -f ./${TMP_BASE_DIR}.img 2>/dev/null
+	rm -f "${TMP_IMAGE_NAME}" 2>/dev/null
 }
 
 bail()
@@ -812,11 +807,7 @@ baseclean()
 allclean()
 {
 	baseclean
-	rm -rf ./"${PATCHDIR}"
-	rm -rf "${DISTDIR}"
-	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
-	rm -rf nvidia
-	rm -rf handbook
+	rm -rf "${WORKDIR}"
 }
 
 _init()
@@ -952,4 +943,3 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
-
