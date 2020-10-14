@@ -460,7 +460,7 @@ copy_home() {
 	progress -1
 	nfiles=$(cd ${homedir} && echo "${exlst}" | \
 			exclfind . 2>/dev/null | wc -l | tr -d ' ')
-	status "Copying files from /private/home ..."
+	status "Copying files from ${homedir} ..."
 	(cd ${homedir} && echo "${exlst}" | \
 		exclfind . 2>/dev/null | cpio -vpdmu ${DESTDIR}/home 2>&1) | \
 		show_extract $nfiles
