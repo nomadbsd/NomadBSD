@@ -871,8 +871,6 @@ resumebuild()
 	done
 	rm -f ".failed-stage"
 }
-buildnvidia
-exit 0
 
 usage()
 {
