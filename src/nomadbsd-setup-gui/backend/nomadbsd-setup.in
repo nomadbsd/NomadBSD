@@ -787,6 +787,8 @@ sub commit {
 	system("/usr/local/bin/fc-cache -sfr");
 	status("Locking kernel module packages");
 	system("pkg lock -y -g '*-kmod'");
+	status("Locking e2fsprogs");
+	system("pkg lock -y e2fsprogs");
 	if (-l "/usr/local") {
 		status("Replacing symlink to /unionfs/usr/local by /usr/local");
 		system("unlink /usr/local && mkdir /usr/local") == 0
