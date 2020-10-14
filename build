@@ -806,10 +806,6 @@ baseclean()
 allclean()
 {
 	baseclean
-	rm -rf "${PATCHDIR}"
-	rm -rf "${DISTDIR}"
-	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
-	rm -rf handbook
 	rm -rf "${WORKDIR}"
 }
 
