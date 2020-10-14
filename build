@@ -627,7 +627,6 @@ createuzip()
 		find . -not \( -path "./etc" -or -path "./etc/*" \) | \
 		cpio -pdmu "${UZIP_MNT}")
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
-	[ ! -d pkgcache ] && mkdir pkgcache
 	_umount "${UZIP_MNT}"
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
