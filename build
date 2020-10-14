@@ -745,17 +745,18 @@ insthandbook()
 {
 	local i
 
-	if [ ! -d handbook ]; then
-		git clone https://github.com/nomadbsd/handbook.git
+	if [ ! -d "${WORKDIR}/handbook" ]; then
+		git clone https://github.com/nomadbsd/handbook.git \
+			"${WORKDIR}/handbook"
 	else
-		(cd handbook && git pull)
+		(cd "${WORKDIR}/handbook" && git pull)
 	fi
-	(cd handbook && make)
+	(cd "${WORKDIR}/handbook" && make)
 	if [ ! -d "${SYSDIR}/usr/share/nomadbsd-handbook" ]; then
 		mkdir "${SYSDIR}/usr/share/nomadbsd-handbook"
 	fi
 	for i in style.css handbook.html images; do
-		cp -r handbook/$i "${SYSDIR}/usr/share/nomadbsd-handbook/"
+		cp -r "${WORKDIR}/handbook/$i" "${SYSDIR}/usr/share/nomadbsd-handbook/"
 	done
 }
 
