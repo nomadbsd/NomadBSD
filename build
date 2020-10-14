@@ -209,42 +209,33 @@ buildnvidia()
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
-	[ ! -d "nvidia" ] && mkdir "nvidia" 
 	# Building nvidia-driver>=410 requires textproc/gsed
 	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
 		have_gsed=1
 	else
 		pkg --chroot "${SYSDIR}" install -y textproc/gsed
 	fi
-	for d in nvidia-driver-304 nvidia-driver-340 \
-			 nvidia-driver-390 nvidia-driver; do
-		# Skip nvidia-driver-440 on i386
-		[ ${ARCH} = "i386" -a $d = "nvidia-driver" ] && continue
-
-		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
-		[ -f nvidia/${pkgname}.txz ] && continue
-		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
-		cp "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" nvidia || bail
-		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
-	done
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
-	# Remove textproc/gsed if we just installed it for building nvidia-driver
-	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-
-	mkdir -p "${SYSDIR}/usr/local/nvidia/304" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/340" 2>/dev/null
-	mkdir -p "${SYSDIR}/usr/local/nvidia/390" 2>/dev/null
-	if [ ${ARCH} = "amd64" ]; then
-		mkdir -p "${SYSDIR}/usr/local/nvidia/440" 2>/dev/null
-	fi
 	for v in 304 340 390 440; do
 		# Skip nvidia-driver-440 on i386
-		[ ${ARCH} = "i386" -a $v = "440" ] && continue
-		cat nvidia/nvidia-driver-${v}*.txz | \
-		    (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+		[ ${ARCH} = "i386" -a $v -eq 440 ] && continue
+		if [ $v -eq 440 ]; then
+			d="nvidia-driver"
+		else
+			d="nvidia-driver-$v"
+		fi
+		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
+		[ -f "${PKGDIR}/${pkgname}.txz" ] && continue
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
+			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
+		mkdir -p "${SYSDIR}/usr/local/nvidia/$v" 2>/dev/null
+		cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" | \
+			(cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
+		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
+	# Remove textproc/gsed if we just installed it for building nvidia-driver
+	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
+	_umount "${SYSDIR}/usr/ports"
+	_umount "${SYSDIR}/dev"
 }
 
 builddrmlegacy()
@@ -817,7 +808,6 @@ allclean()
 	rm -rf "${PATCHDIR}"
 	rm -rf "${DISTDIR}"
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
-	rm -rf nvidia
 	rm -rf handbook
 	rm -rf "${WORKDIR}"
 }
@@ -881,6 +871,8 @@ resumebuild()
 	done
 	rm -f ".failed-stage"
 }
+buildnvidia
+exit 0
 
 usage()
 {
