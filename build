@@ -54,22 +54,6 @@
 #
 . ./build.cfg
 
-for i in RELEASE SYSDIR DISTDIR PATCHDIR; do
-	eval var=\${$i}
-	if [ -z "${var}" ]; then
-		echo "$i must not be empty" >&2
-		exit 1
-	fi
-done
-
-for i in SYSDIR DISTDIR PATCHDIR; do
-	eval var=\${$i}
-	if [ "$(realpath -q ${var})" = "/" ]; then
-		echo "Refusing to use '/' as $i"
-		exit 1
-	fi
-done
-
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
@@ -77,15 +61,21 @@ RELEASE|BETA|RC*)
 	URL="${BASEURL}/snapshots";;
 esac
 
+WORKDIR="${PWD}/work"
+# Where the FreeBSD installation resides.
+SYSDIR="${WORKDIR}/sys"
+# Where bsdinstall stores fetched files.
+DISTDIR="${WORKDIR}/dists"
+PATCHDIR="${WORKDIR}/patchset"
 DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
-UZIP_IMAGE="uzip_image"
-UZIP_MNT="${PWD}/uzip_mnt"
+UZIP_IMAGE="${WORKDIR}/uzip_image"
+UZIP_MNT="${WORKDIR}/uzip_mnt"
 ROOTLABEL=nomadroot
-TMP_BASE_DIR=tmpbase
-TMP_IMAGE_NAME=tmpbase.img
+TMP_BASE_DIR=$"{WORKDIR}/tmpbase"
+TMP_IMAGE_NAME="${WORKDIR}/tmpbase.img"
 KERNCONF_DIR="${SYSDIR}/usr/src/sys/${ARCH}/conf"
 KERNCONF_NOMADBSD="${KERNCONF_DIR}/NOMADBSD"
 KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
@@ -174,7 +164,7 @@ createbase()
 {
 	local version srcurl
 
-	[ ! -d "${SYSDIR}" ] && mkdir "${SYSDIR}"
+	[ ! -d "${SYSDIR}" ] && mkdir -p "${SYSDIR}" || bail
 	for d in base.txz kernel.txz; do
 		fetch ${DISTSITE}/$d -o /tmp/$d || bail
 		tar --unlink -xvpJf /tmp/$d -C "${SYSDIR}" || bail
@@ -476,7 +466,7 @@ createimage()
 		echo "${TMP_BASE_DIR} already exists." >&2
 		bail
 	fi
-	mkdir ${TMP_BASE_DIR}
+	mkdir -p ${TMP_BASE_DIR}
 
 	createtmpimage
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
@@ -660,7 +650,7 @@ createuzip()
 
 createpatch()
 {
-	[ ! -d "${PATCHDIR}" ] && mkdir "${PATCHDIR}"
+	[ ! -d "${PATCHDIR}" ] && mkdir -p "${PATCHDIR}" || bail
 	if [ -z "${PATCHVERSION}" ]; then
 		echo "PATCHVERSION not defined" >&2
 		bail
@@ -792,15 +782,15 @@ cleanup()
 	if (mount | grep "${PWD}/mnt" || mount | grep './mnt'); then
 		_umount ./mnt
 	fi
-	if (mount | grep "${PWD}/${TMP_BASE_DIR}" || \
-	    mount | grep './${TMP_BASE_DIR}'); then
-		_umount ./${TMP_BASE_DIR}
+	if (mount | grep "${TMP_BASE_DIR}" || \
+	    mount | grep "${TMP_BASE_DIR}"); then
+		_umount ${TMP_BASE_DIR}
 	fi
 	rmdir "${UZIP_MNT}" ./mnt ./${TMP_BASE_DIR} 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
-	rm -f ./${TMP_BASE_DIR}.img 2>/dev/null
+	rm -f "${TMP_IMAGE_NAME}" 2>/dev/null
 }
 
 bail()
@@ -829,6 +819,7 @@ allclean()
 	rm -f ${UZIP_IMAGE}.img ${UZIP_IMAGE}.uzip
 	rm -rf nvidia
 	rm -rf handbook
+	rm -rf "${WORKDIR}"
 }
 
 _init()
@@ -964,4 +955,3 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
-
