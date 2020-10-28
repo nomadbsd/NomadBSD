@@ -50,6 +50,7 @@ done
 eval $(dbus-launch --sh-syntax)
 
 tpquirk
+enable_tapping
 
 sh ~/.config/DSB/autostart.sh
 
