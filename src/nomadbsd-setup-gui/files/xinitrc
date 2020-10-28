@@ -9,6 +9,9 @@ feh --no-fehbg --bg-fill /usr/share/nomadbsd-setup/background.jpg
 # Use sysmouse if there is a problem with the touchpad
 /usr/bin/tpquirk
 
+# Enable tapping on touchpad
+/usr/bin/enable_tapping
+
 /usr/bin/nomadbsd-setup-gui&
 exec openbox-session
 
