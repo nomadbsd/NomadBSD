@@ -457,11 +457,7 @@ createimage()
 	blksize=$((${FRAGSIZE} * 8))
 	uzipsz=$(du -m ${UZIP_IMAGE}.uzip | cut -f1)
 
-	if [ -d ${TMP_BASE_DIR} ]; then
-		echo "${TMP_BASE_DIR} already exists." >&2
-		bail
-	fi
-	mkdir -p ${TMP_BASE_DIR}
+	[ ! -d "${TMP_BASE_DIR}" ] mkdir -p ${TMP_BASE_DIR}
 
 	createtmpimage
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
@@ -541,7 +537,7 @@ createimage()
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
 	[ $? -ne 0 ] && bail
-	dd if=/dev/zero of=/dev/${mddev} bs=1M
+	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
 	[ ! -d "${MNT}" ] && mkdir -p "${MNT}"
 	pn=0
 	if [ -z ${mac} ]; then
