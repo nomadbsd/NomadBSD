@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 #
 # vim: set tabstop=4:
 #
@@ -457,7 +458,7 @@ createimage()
 	blksize=$((${FRAGSIZE} * 8))
 	uzipsz=$(du -m ${UZIP_IMAGE}.uzip | cut -f1)
 
-	[ ! -d "${TMP_BASE_DIR}" ] mkdir -p ${TMP_BASE_DIR}
+	[ ! -d "${TMP_BASE_DIR}" ] && mkdir -p ${TMP_BASE_DIR}
 
 	createtmpimage
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
