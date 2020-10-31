@@ -774,14 +774,14 @@ cleanup()
 	if (mount | grep "${UZIP_MNT}"); then
 		_umount "${UZIP_MNT}"
 	fi
-	if (mount | grep "${PWD}/mnt" || mount | grep './mnt'); then
-		_umount ./mnt
+	if (mount | grep "${WORKDIR}/mnt"); then
+		_umount "${WORDIR}/mnt"
 	fi
 	if (mount | grep "${TMP_BASE_DIR}" || \
 	    mount | grep "${TMP_BASE_DIR}"); then
 		_umount ${TMP_BASE_DIR}
 	fi
-	rmdir "${UZIP_MNT}" ./mnt ./${TMP_BASE_DIR} 2>/dev/null
+	rmdir "${UZIP_MNT}" "${WORKDIR}/mnt" ./${TMP_BASE_DIR} 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
