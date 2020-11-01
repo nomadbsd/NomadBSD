@@ -88,7 +88,7 @@ Defaults timestamp_type=global
 ##
 root ALL=(ALL) ALL
 
-nomad ALL=(ALL) ALL
+%wheel ALL=(ALL) ALL
 
 ## Uncomment to allow members of group wheel to execute any command
 # %wheel ALL=(ALL) ALL
