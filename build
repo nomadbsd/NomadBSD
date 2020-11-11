@@ -416,9 +416,13 @@ instsrcdist()
 }
 
 estimgsize() {
+	local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
+	if [ "${rootfs}" = "zfs" ]; then
+	    du_extra_args="-A"
+	fi
 	nfiles=$(find "$1" | wc -l)
 	wasted=$(($nfiles * (${FRAGSIZE} / 2) / (1024 * 1024)))
-	size=$(du -mc -B ${FRAGSIZE} "$1" | tail -1 | cut -f 1)
+	size=$(du -mc ${du_extra_args} -B ${FRAGSIZE} "$1" | tail -1 | cut -f 1)
 	size=$((${size} + ${wasted}))
 	echo ${size}
 }
