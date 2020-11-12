@@ -485,6 +485,7 @@ createimage()
 	    --exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
 	mkdir ${TMP_BASE_DIR}/var/log
 	mkdir ${TMP_BASE_DIR}/usr/share/nomadbsd
+	mkdir ${TMP_BASE_DIR}/compat
 	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
 		${TMP_BASE_DIR}/usr/share/nomadbsd/home.nomad.tgz
 	mkdir ${TMP_BASE_DIR}/usr.local.etc
