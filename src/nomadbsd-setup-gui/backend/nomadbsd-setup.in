@@ -289,51 +289,6 @@ sub bootstrap_gui {
 			$n = $n % @spinner;
 		}
 	}
-	$efiboot = 1;
-	$efiboot = 0 if (`sysctl machdep.bootmethod` =~ /BIOS/);
-	unlink($path_vesa_cfg);
-	unlink($path_scfb_cfg);
-	chomp(my $unit = `sysctl -n hw.pci.default_vgapci_unit`);
-	foreach (`pciconf -lv`) {
-		chomp;
-		if (/^vgapci${unit}\@pci[0-9]:([0-9:]+):.*$/) {
-			$busID = $1;
-			last;
-		}
-	}
-	foreach (`pciconf -lv`) {
-		if (/^vgapci/) {
-			$in_vgapci = 1;
-		} elsif (/^\S*/) {
-			$in_vgapci = 0;
-		} elsif ($in_vgapci && /\s*display\s*=\s*.VirtualBox/) {
-			$vbox = 1;
-			last
-		}
-	}
-	# 
-	# Make sure we don't create a config file for VESA or SCFB
-	# if i915kms, radeonkms, nvidia, or amdgpu has already been
-	# loaded. 
-	#
-	foreach (`kldstat`) {
-		my $m;
-		if (/(\S+)\.ko$/) {
-			$m = $1
-		} else {
-			next
-		}
-		foreach my $k (qw(i915kms radeonkms nvidia amdgpu)) {
-			$kms = 1 if ($m =~ /$k/);
-		}
-	}
-	if (!$kms && !$vbox) {
-		if ($efiboot == 0) {
-			write_xorg_video_cfg("vesa", $busID);
-		} else {
-			write_xorg_video_cfg("scfb", $busID);
-		}
-	}
 	$ENV{XINITRC} = $path_xinitrc;
 	$ENV{PATH}	  = "$ENV{PATH}:/usr/local/bin";
 	exec("/usr/local/bin/xinit");
@@ -781,6 +736,7 @@ sub commit {
 	status("Disabling auto-login on ttyv0");
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
+	system("sysrc -e initgfx_kmods >> /etc/rc.conf.in");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	system("touch /etc/wpa_supplicant.conf");
 	status("Regenerating font cache");
