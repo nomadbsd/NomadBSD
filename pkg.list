@@ -145,6 +145,7 @@ x11/tint
 x11/xauth
 x11/xbindkeys
 x11/xev
+x11/xinput
 x11/xfce4-screenshooter-plugin
 x11/xinit
 x11/xmessage
