@@ -13,3 +13,4 @@ redshift -l$(getlalo)&
 dunst&
 brightness_listener&
 daemon -f update_obmenu -a -p 5&
+~/.config/DSB/dsbxinput.sh&
