@@ -17,6 +17,7 @@ devel/git
 devel/p5-IO-KQueue
 devel/pkgconf
 devel/py-qt5-core
+devel/py-xdg
 devel/qt5-buildtools
 devel/qt5-linguisttools
 devel/qt5-qmake
