@@ -618,7 +618,7 @@ sub desktopsettings {
 	# Create dconf file from plank.ini
 	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-	$cmd = qq(su -l nomad -c 'printf "setxkbmap -rules evdev -layout \\\"%s\\\" -variant \\\"%s\\\"" "$xlayoutstr" "$xvarinatsstr" | dsbautostart -c');
+	my $cmd = qq(su -l nomad -c 'printf "setxkbmap -rules evdev -layout \\\"%s\\\" -variant \\\"%s\\\"" "$xlayoutstr" "$xvariantstr" | dsbautostart -c');
 	system($cmd);
 	# Autostart gxkb if multiple keyboard layouts were set.
 	if (@cfg_xkbdlayouts > 0) {

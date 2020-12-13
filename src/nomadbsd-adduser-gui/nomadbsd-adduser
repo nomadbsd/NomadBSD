@@ -429,15 +429,13 @@ sub desktopsettings {
 			$xvariantstr = $1;
 		}
 	}
-	open(my $fh, ">>", "$autostart")
-		or bail("Failed to open $autostart");
-	print $fh "(setxkbmap -rules evdev -layout \"$xlayoutstr\" " .
-		  "-variant \"$xvariantstr\"; xbindkeys)&\n";
-	# Autostart gxkb if multiple keyboard layouts are used.
+	my $cmd = qq(su -l $cfg_username -c 'printf "setxkbmap -rules evdev -layout \\\"%s\\\" -variant \\\"%s\\\"" "$xlayoutstr" "$xvariantstr" | dsbautostart -c');
+	system($cmd);
+	# Autostart gxkb if multiple keyboard layouts were set.
 	if (split(/,/, $xlayoutstr) > 1) {
-		print $fh "gxkb&\n";
+		$cmd = qq(su -l $cfg_username -c 'echo gxkb | dsbautostart -c');
+		system($cmd);
 	}
-	close($fh);
 	# Make user the owner of all the files under /home/username
 	system("chown -R $cfg_username:$cfg_username /home/$cfg_username");
 }
