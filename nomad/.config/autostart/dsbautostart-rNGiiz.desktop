@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Exec=sudo -E networkmgr
+Hidden=false
+Terminal=false

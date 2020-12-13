@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Exec=~/.screenlayout/default.sh
+Hidden=false
+Terminal=false

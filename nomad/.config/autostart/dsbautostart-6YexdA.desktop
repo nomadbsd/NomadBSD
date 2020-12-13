@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Exec=xbindkeys
+Hidden=false
+Terminal=false
