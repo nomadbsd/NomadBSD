@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=HP System Tray Service
+Comment=HP System Tray Service
+Exec=hp-systray -x
+Hidden=true
+Terminal=false
