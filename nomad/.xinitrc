@@ -7,6 +7,11 @@ if (grep -q "drm_legacy" /var/run/gfxdriver 2>/dev/null || \
 	export LIBGL_DRI3_DISABLE=1
 fi
 export QT_QPA_PLATFORMTHEME=gtk2
+#
+# If not set to "unix", gvfs will use bsdisks which fails to unmount volumes
+# mounted on directories it does not expect.
+#
+export GIO_USE_VOLUME_MONITOR=unix
 
 uid=$(id -u)
 
