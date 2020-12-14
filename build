@@ -122,7 +122,7 @@ initbase()
 	# Disable uart.1 to prevent hangs on CherryTrail systems
 	sed -E -i '' 's/^(hint\.uart\.1.*)/#\1/g' "${SYSDIR}"/boot/device.hints
 	# Add mdns to "hosts:" line in /etc/nsswitch.conf
-	if ! grep -q 'hosts:.*mdns*' /etc/nsswitch.conf; then
+	if ! grep -q 'hosts:.*mdns*' "${SYSDIR}"/etc/nsswitch.conf; then
 		sed -E -i '' 's/^(hosts:) (.*)/\1 \2 mdns/' \
 			"${SYSDIR}"/etc/nsswitch.conf
 	fi
