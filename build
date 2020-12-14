@@ -48,8 +48,6 @@
 #
 # clean		 Remove base system dir, distfiles, patch dir, and uzip images.
 #
-# drmlegacy	 Build drm-legacy-kmod, and install modules under /boot/drm_legacy.
-#
 # dmconfig	 (Re)build and (re)install nomadbsd-dmconfig-gui
 #
 . ./build.cfg
@@ -236,29 +234,6 @@ buildnvidia()
 	done
 	# Remove textproc/gsed if we just installed it for building nvidia-driver
 	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
-}
-
-builddrmlegacy()
-{
-	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
-	fi
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
-	# Build, and copy the kmods to /boot/drm_legacy
-	if [ ! -d "${SYSDIR}/boot/drm_legacy" ]; then
-		mkdir "${SYSDIR}/boot/drm_legacy" || bail
-	fi
-	chroot "${SYSDIR}" \
-	    sh -c 'cd /usr/ports/graphics/drm-legacy-kmod && \
-			   make clean && make BATCH=1 && \
-			   (cd work/stage/boot/modules && tar cf - . | \
-			   (cd /boot/drm_legacy && tar xvf -)); \
-			   make clean; kldxref /boot/drm_legacy'
 	_umount "${SYSDIR}/usr/ports"
 	_umount "${SYSDIR}/dev"
 }
@@ -823,7 +798,7 @@ all()
 
 	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
 	stages="${stages} build_dmconfig build_chusr build_unionfs instports"
-	stages="${stages} buildnvidia builddrmlegacy postpkgcfg createuzip"
+	stages="${stages} buildnvidia postpkgcfg createuzip"
 	stages="${stages} createimage cleanup"
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -852,7 +827,7 @@ resumebuild()
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui build_dmconfig"
 	stages="${stages} build_chusr build_unionfs instports buildnvidia"
-	stages="${stages} builddrmlegacy postpkgcfg createuzip createimage cleanup"
+	stages="${stages} postpkgcfg createuzip createimage cleanup"
 	stage_found=0
 	failed_stage=$(cat .failed-stage)
 	if [ -z "${failed_stage}" ]; then
@@ -917,7 +892,6 @@ while [ $# -gt 0 ]; do
 	all)		all;;
 	clean)		allclean;;
 	cleanup)	cleanup;;
-	drmlegacy)	builddrmlegacy;;
 	git)		instgit;;
 	handbook)	insthandbook;;
 	image)		createimage;;

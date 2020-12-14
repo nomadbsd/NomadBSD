@@ -147,12 +147,11 @@ setup_intel()
 
 	[ "${vendor}" != 8086 ] && return 1
 	if i915_drm_legacy_ids | grep -iq ${device}; then
-		kmod="${path_drm_legacy}/i915kms.ko"
 		xorg_cfg_intel > "${path_xorg_cfg}"
 	else
-		kmod="/boot/modules/i915kms.ko"
 		xorg_cfg_modesetting > "${path_xorg_cfg}"
 	fi
+	kmod="/boot/modules/i915kms.ko"
 	set_kldconfig_path "${kmod}"
 	kldload "${kmod}"
 	set_kldconfig_path "${kmod}"
