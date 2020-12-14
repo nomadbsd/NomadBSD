@@ -51,7 +51,7 @@ eval $(dbus-launch --sh-syntax)
 
 tpquirk
 enable_tapping
-
+~/.config/xkbdmap.sh
 [ -z "$1" -o "$1" = "default" ] && exec ck-launch-session openbox-session
 exec ck-launch-session "$1"
 

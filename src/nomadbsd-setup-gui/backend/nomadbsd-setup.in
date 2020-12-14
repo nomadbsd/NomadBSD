@@ -553,7 +553,8 @@ sub desktopsettings {
 	my $plank_ini	= "/home/nomad/.config/plank.ini";
 	my $plank_launcher_dir	= "/home/nomad/.config/plank/dock1/launchers";
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
-	
+	my $path_xkbdmap = "/home/nomad/.config/xkbdmap.sh";
+
 	my @apps = (
 		'home', 'sakura', 'firefox', 'thunderbird',
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
@@ -618,11 +619,13 @@ sub desktopsettings {
 	# Create dconf file from plank.ini
 	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
 	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-	my $cmd = qq(su -l nomad -c 'printf "setxkbmap -rules evdev -layout \\\"%s\\\" -variant \\\"%s\\\"" "$xlayoutstr" "$xvariantstr" | dsbautostart -c');
-	system($cmd);
+	open(my $fh, ">$path_xkbdmap") or bail("Couldn't create $path_xkbdmap");
+	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
+	close($fh);
+	chmod(0744, $path_xkbdmap);
 	# Autostart gxkb if multiple keyboard layouts were set.
 	if (@cfg_xkbdlayouts > 0) {
-		$cmd = qq(su -l nomad -c 'echo gxkb | dsbautostart -c');
+		my $cmd = qq(su -l nomad -c 'echo gxkb | dsbautostart -c');
 		system($cmd);
 	}
 	# Make nomad the owner of all the files under /home/nomad

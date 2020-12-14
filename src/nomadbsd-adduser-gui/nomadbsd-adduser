@@ -349,7 +349,8 @@ sub desktopsettings {
 	my $plank_ini	= "/home/$cfg_username/.config/plank.ini";
 	my $plank_launcher_dir	= "/home/$cfg_username/.config/plank/dock1/launchers";
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
-	
+	my $path_xkbdmap = "/home/$cfg_username/.config/xkbdmap.sh";
+
 	my @apps = (
 		'home', 'sakura', $cfg_browser, $cfg_email_client,
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
@@ -429,11 +430,13 @@ sub desktopsettings {
 			$xvariantstr = $1;
 		}
 	}
-	my $cmd = qq(su -l $cfg_username -c 'printf "setxkbmap -rules evdev -layout \\\"%s\\\" -variant \\\"%s\\\"" "$xlayoutstr" "$xvariantstr" | dsbautostart -c');
-	system($cmd);
+	open(my $fh, ">$path_xkbdmap") or bail("Couldn't create $path_xkbdmap");
+	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
+	close($fh);
+	chmod(0744, $path_xkbdmap);
 	# Autostart gxkb if multiple keyboard layouts were set.
 	if (split(/,/, $xlayoutstr) > 1) {
-		$cmd = qq(su -l $cfg_username -c 'echo gxkb | dsbautostart -c');
+		my $cmd = qq(su -l $cfg_username -c 'echo gxkb | dsbautostart -c');
 		system($cmd);
 	}
 	# Make user the owner of all the files under /home/username
