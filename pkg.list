@@ -104,7 +104,6 @@ vietnamese/aspell
 vietnamese/hunspell
 www/firefox-esr
 www/lynx
-x11-drivers/xf86-input-wacom
 x11-drivers/xf86-input-libinput
 x11-drivers/xf86-video-ati
 x11-drivers/xf86-video-intel
