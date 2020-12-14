@@ -41,7 +41,7 @@ load_rc_config ${name}
 
 path_config_id="/var/initgfx_config.id"
 path_xorg_cfg_dir="/usr/local/etc/X11/xorg.conf.d"
-path_xorg_cfg="${path_xorg_cfg_dir}/10-video-${name}.conf"
+path_xorg_cfg="${path_xorg_cfg_dir}/00-video-${name}.conf"
 
 path_drm_legacy="/boot/drm_legacy"
 path_nvidia="/usr/local/nvidia"
