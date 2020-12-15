@@ -505,6 +505,7 @@ copy_base() {
 	status "Copying files ..."
 	echo "${exlst}" | \
 		exclfind / 2>/dev/null | cpio -vpdmu ${DESTDIR} 2>&1 | show_extract $nfiles
+	cp -a /usr/local/share/applications/* ${DESTDIR}/usr/local/share/applications/
 	status "Creating ${DESTDIR}/dev ..."
 	mkdir ${DESTDIR}/dev
 	status "Creating ${DESTDIR}/proc ..."
