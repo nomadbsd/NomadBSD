@@ -183,7 +183,7 @@ sub mkgeli {
 	status("Adding fstab entry for /dev/gpt/${gpthome}.eli");
 	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
-	print $fh "/private/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/private/home/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 
 	close($fh);
 }
