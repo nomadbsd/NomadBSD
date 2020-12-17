@@ -439,6 +439,8 @@ copy_home() {
 	./pkgs/*
 	./compat
 	./compat/*
+	./freebsd-update
+	./freebsd-update/*
 	*/.gvfs.*
 	"
 	if [ ! -d ${DESTDIR}/home ]; then
@@ -488,9 +490,10 @@ copy_base() {
 	/media/*
 	/tmp
 	/tmp/*
+	/usr/share/applications/nomadbsd-install-gui.desktop
 	"
 	local pseudofs=$(mount | awk -F"[\t (),]+" '
-		/procfs/ || /linprocfs/ || /linsysfs/ || /devfs/ {
+		/procfs/ || /linprocfs/ || /linsysfs/ || /devfs/ || /tmpfs/ {
 			print $3
 		}
 	')
@@ -515,7 +518,9 @@ copy_base() {
 	status "Creating ${DESTDIR}/tmp ..."
 	mkdir ${DESTDIR}/tmp
 	chmod a=rwxt ${DESTDIR}/tmp
-
+	for i in ${pseudofs}; do
+		mkdir -p "${DESTDIR}/$i" >/dev/null 2>&1
+	done
 	status "Replacing ${DESTDIR}/usr/local/etc by ${DESTDIR}/usr.local.etc ..."
 	unlink ${DESTDIR}/usr/local/etc
 	mv ${DESTDIR}/usr.local.etc ${DESTDIR}/usr/local/etc
