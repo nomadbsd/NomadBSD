@@ -718,6 +718,14 @@ build_chusr()
 	done
 }
 
+build_lbi_gui()
+{
+	cp -a src/lbi-gui "${SYSDIR}/tmp/"
+	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
+		cd /tmp/lbi-gui && make && make install" || bail
+	_umount "${SYSDIR}/dev"
+}
+
 insthandbook()
 {
 	local i
@@ -797,8 +805,8 @@ all()
 	local i stages
 
 	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
-	stages="${stages} build_dmconfig build_chusr build_unionfs instports"
-	stages="${stages} buildnvidia postpkgcfg createuzip"
+	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
+	stages="${stages} instports buildnvidia postpkgcfg createuzip"
 	stages="${stages} createimage cleanup"
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
@@ -826,8 +834,8 @@ resumebuild()
 	local i stages stage_found failed_stage
 	stages="updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui build_dmconfig"
-	stages="${stages} build_chusr build_unionfs instports buildnvidia"
-	stages="${stages} postpkgcfg createuzip createimage cleanup"
+	stages="${stages} build_chusr build_lbi_gui build_unionfs instports"
+	stages="${stages} buildnvidia postpkgcfg createuzip createimage cleanup"
 	stage_found=0
 	failed_stage=$(cat .failed-stage)
 	if [ -z "${failed_stage}" ]; then
