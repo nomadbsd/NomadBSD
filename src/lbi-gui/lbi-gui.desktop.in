@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Linux Browser Installer GUI
+Comment=Installs linux browsers which allow using Netflix, Prime Video, and Spotify
+Exec=dsbsu @PROGRAM@
+Icon=web-browser
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Network;

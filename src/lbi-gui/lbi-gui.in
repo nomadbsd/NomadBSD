@@ -1,0 +1,237 @@
+#!/usr/local/bin/python3.7
+#
+# Copyright (c) 2020 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+import os, sys
+
+PREFIX		 = '@PREFIX@'
+PROGRAM		 = '@PROGRAM@'
+REPO_URL	 = '@REPO_URL@'
+LOCALE_PATH	 = '@LOCALE_PATH@'
+PATH_LBI_DIR = '@PATH_LBI_DIR@'
+
+class MainWindow(QMainWindow):
+	def __init__(self, *args, **kwargs):
+		super(MainWindow, self).__init__(*args, **kwargs)
+		container		= QWidget()
+		layout			= QVBoxLayout(container)
+		bbox			= QHBoxLayout()
+		icon			= QIcon.fromTheme('web-browser')
+		self.chrome_rb	= QRadioButton('Chromium')
+		self.brave_rb	= QRadioButton('Brave')
+		self.install_bt	= QPushButton(self.tr('&Install'))
+		self.deinstall_bt = QPushButton(self.tr('&Deinstall'))
+		self.cancel_bt	= QPushButton(self.tr('&Cancel'))
+		self.quit_bt	= QPushButton(self.tr('&Quit'))
+		self.output		= QPlainTextEdit()
+		text			= QLabel()
+
+		text.setWordWrap(True)
+		text.setText(
+			self.tr(
+				'This program installs the <em>Widevine</em> capable Linux ' +
+				'version of the <em>Chromium</em> or <em>Brave</em> ' +
+				'browser. Both browsers allow you to use web services like ' +
+				'<em>Netflix</em>, <em>Prime Video</em>, or ' +
+				'<em>Spotify</em>\n\n'
+			)
+		)
+		self.setWindowTitle(self.tr('Linux Browser Installer GUI'))
+		self.setWindowIcon(icon)
+		self.setContentsMargins(10, 1, 10, 1)
+		self.statusBar().showMessage('', 1)
+		layout.addWidget(text)
+		layout.addWidget(self.chrome_rb)
+		layout.addWidget(self.brave_rb)
+		layout.addWidget(self.output)
+		bbox.addWidget(self.install_bt, 1, Qt.AlignLeft)
+		bbox.addWidget(self.deinstall_bt, 1, Qt.AlignLeft)
+		bbox.addWidget(self.cancel_bt, 1, Qt.AlignLeft)
+		bbox.addWidget(self.quit_bt, 0, Qt.AlignRight)
+		layout.addLayout(bbox)
+		self.setCentralWidget(container)
+		self.output.setTextInteractionFlags(
+			(self.output.textInteractionFlags() & ~Qt.TextEditable)
+		)
+		self.cancel_bt.setEnabled(False)
+		self.deinstall_bt.setEnabled(False)
+		self.install_bt.setEnabled(False)
+		self.install_bt.clicked.connect(self.install)
+		self.deinstall_bt.clicked.connect(self.deinstall)
+		self.quit_bt.clicked.connect(self.quit)
+		self.chrome_rb.clicked.connect(self.update_buttons)
+		self.brave_rb.clicked.connect(self.update_buttons)
+		self.cancel_bt.clicked.connect(self.cancel_cmd)
+
+	def xerrx(self, error, title, msg):
+		msgbox = QMessageBox()
+		icon = msgbox.style().standardIcon(QStyle.SP_MessageBoxCritical)
+		msgbox.setIcon(QMessageBox.Critical)
+		msgbox.setWindowIcon(icon)
+		msgbox.setWindowTitle(title)
+		msgbox.setContentsMargins(10, 1, 10, 1)
+		msgbox.setText('<b>{}</b><br/><br/>{}'.format(title, msg))
+		msgbox.exec()
+		sys.exit(error)
+
+	def install(self):
+		self.disable_buttons()
+		self.output.moveCursor(QTextCursor.End)
+		self.output.insertPlainText('\n')
+		self.proc = QProcess()
+		self.proc.readyReadStandardOutput.connect(self.read_stdout)
+		self.proc.readyReadStandardError.connect(self.read_stderr)
+		self.action = self.install
+
+		if not os.path.exists(PATH_LBI_DIR):
+			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
+			self.proc.finished.connect(self.git_finished)
+			self.proc.start('git', args)
+			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			return
+		elif self.chrome_rb.isChecked():
+			args = [ 'install', 'chrome' ]
+		elif self.brave_rb.isChecked():
+			args = [ 'install', 'brave' ]
+		self.proc.finished.connect(self.cmd_finished)
+		os.chdir(PATH_LBI_DIR)
+		self.proc.start('./linux-browser-installer', args)
+		self.statusBar().showMessage(self.tr('Installing ...'), -1)
+
+	def deinstall(self):
+		self.disable_buttons()
+		self.output.moveCursor(QTextCursor.End)
+		self.output.insertPlainText('\n')
+		self.proc = QProcess()
+		self.proc.readyReadStandardOutput.connect(self.read_stdout)
+		self.proc.readyReadStandardError.connect(self.read_stderr)
+		self.action = self.deinstall
+		if not os.path.exists(PATH_LBI_DIR):
+			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
+			self.proc.finished.connect(self.git_finished)
+			self.proc.start('git', args)
+			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			return
+		elif self.chrome_rb.isChecked():
+			args = [ 'deinstall', 'chrome' ]
+		elif self.brave_rb.isChecked():
+			args = [ 'deinstall', 'brave' ]
+		self.proc.finished.connect(self.cmd_finished)
+		os.chdir(PATH_LBI_DIR)
+		self.proc.start('./linux-browser-installer', args)
+		self.statusBar().showMessage(self.tr('Deinstalling ...'), -1)
+
+	def update_buttons(self):
+		enabled = False
+		if self.brave_rb.isChecked():
+			if os.path.exists('/compat/ubuntu/bin/brave'):
+				enabled = False
+			else:
+				enabled = True
+		elif self.chrome_rb.isChecked():
+			if os.path.exists('/compat/ubuntu/bin/chrome'):
+				enabled = False
+			else:
+				enabled = True
+		self.install_bt.setEnabled(enabled)
+		self.deinstall_bt.setEnabled(not enabled)
+
+	def disable_buttons(self):
+		self.chrome_rb.setEnabled(False)
+		self.brave_rb.setEnabled(False)
+		self.quit_bt.setEnabled(False)
+		self.cancel_bt.setEnabled(True)
+		self.install_bt.setEnabled(False)
+		self.deinstall_bt.setEnabled(False)
+		self.chrome_rb.setEnabled(False)
+		self.brave_rb.setEnabled(False)
+
+	def show_output(self, data):
+		self.output.moveCursor(QTextCursor.End)
+		self.output.insertPlainText(bytes(data).decode('utf-8'))
+		self.output.moveCursor(QTextCursor.End)
+
+	def read_stdout(self):
+		self.show_output(self.proc.readAllStandardOutput())
+
+	def read_stderr(self):
+		self.show_output(self.proc.readAllStandardError())
+
+	def cmd_finished(self, exitCode, exitStatus):
+		if exitCode != 0:
+			self.xerrx(
+				1, self.tr('Error'),
+				self.tr('Command "{}" exited with error code {}')
+					.format(self.proc.program(), exitCode)
+			)
+		self.statusBar().showMessage(self.tr('Done'), -1)
+		self.reset()
+
+	def git_finished(self, exitCode, exitStatus):
+		if exitCode != 0:
+			self.xerrx(
+				1, self.tr('Error'),
+				self.tr('Command {} exited with error code {}')
+					.format(self.proc.program(), exitCode)
+			)
+		self.proc.disconnect()
+		self.action()
+
+	def cancel_cmd(self):
+		self.proc.terminate()
+		self.proc.disconnect()
+		self.reset()
+		self.statusBar().showMessage(self.tr('Canceled'), -1)
+
+	def reset(self):
+		self.chrome_rb.setEnabled(True)
+		self.brave_rb.setEnabled(True)
+		self.quit_bt.setEnabled(True)
+		self.cancel_bt.setEnabled(False)
+		self.deinstall_bt.setEnabled(False)
+		self.update_buttons()
+
+	def quit(self):
+		sys.exit(0)
+
+def main():
+	app = QApplication(sys.argv)
+	QCoreApplication.setApplicationName(PROGRAM)
+	os.environ['RESOURCE_NAME'] = PROGRAM
+	translator = QTranslator()
+	if translator.load(QLocale(), PROGRAM, '_', LOCALE_PATH):
+		app.installTranslator(translator)
+	win = MainWindow()
+	if os.getuid() != 0:
+		win.xerrx(
+			1, win.tr('Error'), win.tr('You must be root to run this program')
+		)
+	win.show()
+	sys.exit(app.exec_())
+
+if __name__ == '__main__':
+	main()
