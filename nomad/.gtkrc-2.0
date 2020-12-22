@@ -2,12 +2,12 @@
 include "/usr/local/share/themes/Adapta/gtk-2.0/gtkrc"
 
 style "user-font" {
-	font_name = "Droid Sans 11"
+	font_name = "Droid Sans 12"
 }
 
 widget_class "*" style "user-font"
 
-gtk-font-name="Droid Sans 11"
+gtk-font-name="Droid Sans 12"
 
 include "/home/nomad/.gtkrc.mine"
 
