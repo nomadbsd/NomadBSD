@@ -236,6 +236,18 @@ buildnvidia()
 	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
 	_umount "${SYSDIR}/usr/ports"
 	_umount "${SYSDIR}/dev"
+	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
+	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/extensions
+
+	rm -f "${SYSDIR}/usr/local/lib/xorg/modules/drivers/nvidia_drv.so"
+	ln -sf "/nvidia/usr/local/lib/xorg/modules/drivers/nvidia_drv.so" \
+		"${SYSDIR}/usr/local/lib/xorg/modules/drivers/"
+	for l in libglx.so libglx.so.1 libglxserver_nvidia.so \
+			 libglxserver_nvidia.so.1; do
+		rm -f "${SYSDIR}/usr/local/lib/xorg/modules/extensions/$l"
+		ln -sf "/nvidia/usr/local/lib/xorg/modules/extensions/$l" \
+			"${SYSDIR}/usr/local/lib/xorg/modules/extensions/"
+	done
 }
 
 instpkgs()
@@ -244,6 +256,8 @@ instpkgs()
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	export ASSUME_ALWAYS_YES=yes
+	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
+
 	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
 
 	# Lock all kernel module packages to prevent kernel version mismatch
@@ -831,8 +845,6 @@ all()
 
 resumebuild()
 {
-	local i stages stage_found failed_stage
-	stages="updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui build_dmconfig"
 	stages="${stages} build_chusr build_lbi_gui build_unionfs instports"
 	stages="${stages} buildnvidia postpkgcfg createuzip createimage cleanup"
