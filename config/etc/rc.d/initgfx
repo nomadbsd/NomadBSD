@@ -141,6 +141,17 @@ ldconfig_paths="\${ldconfig_paths} $1"
 rc_conf_d_END
 }
 
+__wait()
+{
+	n=$1
+	while [ $n -gt 0 ]; do
+		printf "\rWaiting %02d seconds" $n
+		n=$((n - 1))
+		sleep 1
+	done
+	echo
+}
+
 setup_intel()
 {
 	local kmod
@@ -230,6 +241,7 @@ setup_nvidia()
 		kmods="${srcdir}/boot/modules/nvidia.ko"
 	fi
 	kldload ${kmods}
+	__wait 10
 	sysrc initgfx_kmods="${kmods}"
 	nvidia_xorg_cfg > "${path_xorg_cfg}"
 	sync
@@ -270,7 +282,7 @@ do_initgfx()
 			if test_x; then
 				# FIXME: Without the delay the result is a
 				# reboot when using a Nvidia GPU.
-				sleep 3
+				__wait 10
 				save_config_id
 				return
 			else
