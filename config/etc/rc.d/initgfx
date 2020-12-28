@@ -50,6 +50,7 @@ path_initgfx_xorg_templates="/etc/${name}_xorg.cfg"
 path_initgfx_device_db="/etc/${name}_device.db"
 
 path_cfg_test_dir="/tmp/${name}.$$"
+path_tmp_rc_conf="/tmp/rc.conf.$$"
 
 # Include device info DB
 . ${path_initgfx_device_db}
@@ -175,7 +176,7 @@ setup_intel()
 	set_kldconfig_path "${kmod}"
 	kldload "${kmod}"
 	set_kldconfig_path "${kmod}"
-	sysrc initgfx_kmods="${kmod}"
+	sysrc -f "${path_tmp_rc_conf}" initgfx_kmods="${kmod}"
 	sync
 	return 0
 }
@@ -193,7 +194,7 @@ setup_ati_amd()
 		kmod="/boot/modules/amdgpu.ko"
 	fi
 	kldload ${kmod}
-	sysrc initgfx_kmods="${kmod}"
+	sysrc -f "${path_tmp_rc_conf}" initgfx_kmods="${kmod}"
 	eval ${driver}_xorg_cfg > "${path_xorg_cfg}"
 	sync
 	return 0
@@ -266,7 +267,7 @@ setup_nvidia()
 		kmods="${srcdir}/boot/modules/nvidia.ko"
 	fi
 	kldload ${kmods}
-	sysrc initgfx_kmods="${kmods}"
+	sysrc -f "${path_tmp_rc_conf}" initgfx_kmods="${kmods}"
 	nvidia_xorg_cfg > "${path_xorg_cfg}"
 	return 0
 }
@@ -286,6 +287,7 @@ do_initgfx()
 	fi
 	initgfx_debug "Creating new configuration ..."
 	del_stale_files
+	cp -a /etc/rc.conf "${path_tmp_rc_conf}"
 
 	# In VirtualBox we are done here
 	if (pciconf -lv | grep -B3 display | grep -q -i virtualbox); then
@@ -307,6 +309,7 @@ do_initgfx()
 				# reboot when using a Nvidia GPU.
 				__wait 3
 				save_config_id
+				cp -a "${path_tmp_rc_conf}" /etc/rc.conf
 				return
 			else
 				initgfx_warn "Failed to use $i driver. " \
@@ -322,6 +325,7 @@ do_initgfx()
 	 printf "\tBusID \"PCI:$busID\"\n"; \
 	 printf "EndSection\n") > "${path_xorg_cfg}"
 
+	cp -a "${path_tmp_rc_conf}" /etc/rc.conf
 	sysrc -x initgfx_kmods
 }
 
