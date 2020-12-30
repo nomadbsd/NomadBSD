@@ -845,9 +845,11 @@ all()
 
 resumebuild()
 {
-	stages="${stages} instpkgs build_installgui build_addusergui build_dmconfig"
-	stages="${stages} build_chusr build_lbi_gui build_unionfs instports"
-	stages="${stages} buildnvidia postpkgcfg createuzip createimage cleanup"
+	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
+	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
+	stages="${stages} instports buildnvidia postpkgcfg createuzip"
+	stages="${stages} createimage cleanup"
+
 	stage_found=0
 	failed_stage=$(cat .failed-stage)
 	if [ -z "${failed_stage}" ]; then
