@@ -391,6 +391,8 @@ install_gfxdrv() {
 		fi
 		sysrc -f $path_rc_conf kld_list+=" /boot/modules/nvidia.ko"
 		sysrc -f $path_rc_conf initgfx_enable=NO
+		rm -rf "${DESTDIR}/nvidia"
+		rm -rf "${DESTDIR}/usr/local/nvidia"
 		return
 	fi
 	case "${kmods}" in
@@ -404,6 +406,8 @@ install_gfxdrv() {
 		return ;;
 	esac
 	sysrc -f $path_rc_conf initgfx_enable=NO
+	rm -rf "${DESTDIR}/nvidia"
+	rm -rf "${DESTDIR}/usr/local/nvidia"
 }
 
 replace_user() {
