@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 		cancel_icon		= QIcon.fromTheme('cancel')
 		install_icon	= QIcon.fromTheme('system-software-install')
 		deinstall_icon	= QIcon.fromTheme('edit-delete')
-		self.chrome_rb	= QRadioButton('Chromium')
+		self.chrome_rb	= QRadioButton('Google Chrome')
 		self.brave_rb	= QRadioButton('Brave')
 		self.install_bt	= QPushButton(install_icon, self.tr('&Install'))
 		self.deinstall_bt = QPushButton(deinstall_icon, self.tr('&Deinstall'))
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
 		text.setText(
 			self.tr(
 				'This program installs the <em>Widevine</em> capable Linux ' +
-				'version of the <em>Chromium</em> or <em>Brave</em> ' +
+				'version of the <em>Google Chrome</em> or <em>Brave</em> ' +
 				'browser. Both browsers allow you to use web services like ' +
 				'<em>Netflix</em>, <em>Prime Video</em>, or ' +
 				'<em>Spotify</em>\n\n'
