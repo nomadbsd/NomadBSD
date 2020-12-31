@@ -20,10 +20,10 @@
     </message>
     <message>
         <location filename="../lbi-gui" line="54"/>
-        <source>This program installs the &lt;em&gt;Widevine&lt;/em&gt; capable Linux version of the &lt;em&gt;Chromium&lt;/em&gt; or &lt;em&gt;Brave&lt;/em&gt; browser. Both browsers allow you to use web services like &lt;em&gt;Netflix&lt;/em&gt;, &lt;em&gt;Prime Video&lt;/em&gt;, or &lt;em&gt;Spotify&lt;/em&gt;
+        <source>This program installs the &lt;em&gt;Widevine&lt;/em&gt; capable Linux version of the &lt;em&gt;Google Chrome&lt;/em&gt; or &lt;em&gt;Brave&lt;/em&gt; browser. Both browsers allow you to use web services like &lt;em&gt;Netflix&lt;/em&gt;, &lt;em&gt;Prime Video&lt;/em&gt;, or &lt;em&gt;Spotify&lt;/em&gt;
 
 </source>
-        <translation>Dieses Programm installiert die &lt;em&gt;Widevine&lt;/em&gt;-fähige Linux-Version des &lt;em&gt;Chromium&lt;/em&gt;- oder &lt;em&gt;Brave&lt;/em&gt;-Browsers. Beide Browser ermöglichen es, &lt;em&gt;Netflix&lt;/em&gt;, &lt;em&gt;Prime Video&lt;/em&gt; oder &lt;em&gt;Spotify&lt;/em&gt; zu benutzen.
+        <translation>Dieses Programm installiert die &lt;em&gt;Widevine&lt;/em&gt;-fähige Linux-Version des &lt;em&gt;Google Chrome&lt;/em&gt;- oder &lt;em&gt;Brave&lt;/em&gt;-Browsers. Beide Browser ermöglichen es, &lt;em&gt;Netflix&lt;/em&gt;, &lt;em&gt;Prime Video&lt;/em&gt; oder &lt;em&gt;Spotify&lt;/em&gt; zu benutzen.
 
 </translation>
     </message>
