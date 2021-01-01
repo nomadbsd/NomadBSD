@@ -234,7 +234,7 @@ class MainWindow(QMainWindow):
 		   os.path.exists('/compat/ubuntu/bin/chrome')):
 			   self.upgrade_bt.setEnabled(True)
 		else:
-			   self.upgrade_bt.setEnabled(True)
+			   self.upgrade_bt.setEnabled(False)
 
 	def quit(self):
 		sys.exit(0)
