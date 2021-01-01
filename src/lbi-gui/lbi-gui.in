@@ -83,9 +83,8 @@ class MainWindow(QMainWindow):
 		self.output.setTextInteractionFlags(
 			(self.output.textInteractionFlags() & ~Qt.TextEditable)
 		)
-		self.reset()
 		self.brave_rb.setChecked(True)
-
+		self.reset()
 		self.upgrade_bt.clicked.connect(self.upgrade)
 		self.install_bt.clicked.connect(self.install)
 		self.deinstall_bt.clicked.connect(self.deinstall)
@@ -161,19 +160,24 @@ class MainWindow(QMainWindow):
 		self.statusBar().showMessage(self.tr('Upgrading ...'), -1)
 
 	def update_buttons(self):
-		enabled = False
+		can_install = can_deinstall = False
 		if self.brave_rb.isChecked():
 			if os.path.exists('/compat/ubuntu/bin/brave'):
-				enabled = False
+				can_deinstall = True
 			else:
-				enabled = True
+				can_install = True
 		elif self.chrome_rb.isChecked():
 			if os.path.exists('/compat/ubuntu/bin/chrome'):
-				enabled = False
+				can_deinstall = True
 			else:
-				enabled = True
-		self.install_bt.setEnabled(enabled)
-		self.deinstall_bt.setEnabled(not enabled)
+				can_install = True
+		if (os.path.exists('/compat/ubuntu/bin/brave') or
+		   os.path.exists('/compat/ubuntu/bin/chrome')):
+			   self.upgrade_bt.setEnabled(True)
+		else:
+			   self.upgrade_bt.setEnabled(False)
+		self.install_bt.setEnabled(can_install)
+		self.deinstall_bt.setEnabled(can_deinstall)
 
 	def disable_buttons(self):
 		self.chrome_rb.setEnabled(False)
@@ -228,13 +232,7 @@ class MainWindow(QMainWindow):
 		self.brave_rb.setEnabled(True)
 		self.quit_bt.setEnabled(True)
 		self.cancel_bt.setEnabled(False)
-		self.deinstall_bt.setEnabled(False)
 		self.update_buttons()
-		if (os.path.exists('/compat/ubuntu/bin/brave') or
-		   os.path.exists('/compat/ubuntu/bin/chrome')):
-			   self.upgrade_bt.setEnabled(True)
-		else:
-			   self.upgrade_bt.setEnabled(False)
 
 	def quit(self):
 		sys.exit(0)
