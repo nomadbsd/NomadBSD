@@ -105,20 +105,25 @@ class MainWindow(QMainWindow):
 		msgbox.exec()
 		sys.exit(error)
 
-	def install(self):
+	def prepare_proc(self):
 		self.disable_buttons()
 		self.output.moveCursor(QTextCursor.End)
 		self.output.insertPlainText('\n')
 		self.proc = QProcess()
 		self.proc.readyReadStandardOutput.connect(self.read_stdout)
 		self.proc.readyReadStandardError.connect(self.read_stderr)
-		self.action = self.install
 
+	def clone_repo(self):
+		args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
+		self.proc.finished.connect(self.git_finished)
+		self.proc.start('git', args)
+		self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+
+	def install(self):
+		self.prepare_proc()
+		self.action = self.install
 		if not os.path.exists(PATH_LBI_DIR):
-			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
-			self.proc.finished.connect(self.git_finished)
-			self.proc.start('git', args)
-			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			self.clone_repo()
 			return
 		elif self.chrome_rb.isChecked():
 			args = [ 'install', 'chrome' ]
@@ -130,18 +135,10 @@ class MainWindow(QMainWindow):
 		self.statusBar().showMessage(self.tr('Installing ...'), -1)
 
 	def deinstall(self):
-		self.disable_buttons()
-		self.output.moveCursor(QTextCursor.End)
-		self.output.insertPlainText('\n')
-		self.proc = QProcess()
-		self.proc.readyReadStandardOutput.connect(self.read_stdout)
-		self.proc.readyReadStandardError.connect(self.read_stderr)
+		self.prepare_proc()
 		self.action = self.deinstall
 		if not os.path.exists(PATH_LBI_DIR):
-			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
-			self.proc.finished.connect(self.git_finished)
-			self.proc.start('git', args)
-			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			self.clone_repo()
 			return
 		elif self.chrome_rb.isChecked():
 			args = [ 'deinstall', 'chrome' ]
@@ -153,18 +150,10 @@ class MainWindow(QMainWindow):
 		self.statusBar().showMessage(self.tr('Deinstalling ...'), -1)
 
 	def upgrade(self):
-		self.disable_buttons()
-		self.output.moveCursor(QTextCursor.End)
-		self.output.insertPlainText('\n')
-		self.proc = QProcess()
-		self.proc.readyReadStandardOutput.connect(self.read_stdout)
-		self.proc.readyReadStandardError.connect(self.read_stderr)
+		self.prepare_proc()
 		self.action = self.upgrade
 		if not os.path.exists(PATH_LBI_DIR):
-			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
-			self.proc.finished.connect(self.git_finished)
-			self.proc.start('git', args)
-			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			self.clone_repo()
 			return
 		self.proc.finished.connect(self.cmd_finished)
 		os.chdir(PATH_LBI_DIR)
