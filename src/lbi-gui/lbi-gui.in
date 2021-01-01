@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
 		cancel_icon		= QIcon.fromTheme('cancel')
 		install_icon	= QIcon.fromTheme('system-software-install')
 		deinstall_icon	= QIcon.fromTheme('edit-delete')
+		upgrade_icon	= QIcon.fromTheme('arrow-up')
 		self.chrome_rb	= QRadioButton('Google Chrome')
 		self.brave_rb	= QRadioButton('Brave')
 		self.install_bt	= QPushButton(install_icon, self.tr('&Install'))
@@ -53,7 +54,7 @@ class MainWindow(QMainWindow):
 		self.quit_bt	= QPushButton(quit_icon, self.tr('&Quit'))
 		self.output		= QPlainTextEdit()
 		text			= QLabel()
-
+		self.upgrade_bt = QPushButton(upgrade_icon, self.tr('&Upgrade browser(s)'))
 		text.setWordWrap(True)
 		text.setText(
 			self.tr(
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow):
 		layout.addWidget(self.chrome_rb)
 		layout.addWidget(self.brave_rb)
 		layout.addWidget(self.output)
+		bbox.addWidget(self.upgrade_bt, 1, Qt.AlignLeft)
 		bbox.addWidget(self.install_bt, 1, Qt.AlignLeft)
 		bbox.addWidget(self.deinstall_bt, 1, Qt.AlignLeft)
 		bbox.addWidget(self.cancel_bt, 1, Qt.AlignLeft)
@@ -81,9 +83,10 @@ class MainWindow(QMainWindow):
 		self.output.setTextInteractionFlags(
 			(self.output.textInteractionFlags() & ~Qt.TextEditable)
 		)
-		self.cancel_bt.setEnabled(False)
-		self.deinstall_bt.setEnabled(False)
-		self.install_bt.setEnabled(False)
+		self.reset()
+		self.brave_rb.setChecked(True)
+
+		self.upgrade_bt.clicked.connect(self.upgrade)
 		self.install_bt.clicked.connect(self.install)
 		self.deinstall_bt.clicked.connect(self.deinstall)
 		self.quit_bt.clicked.connect(self.quit)
@@ -149,6 +152,25 @@ class MainWindow(QMainWindow):
 		self.proc.start('./linux-browser-installer', args)
 		self.statusBar().showMessage(self.tr('Deinstalling ...'), -1)
 
+	def upgrade(self):
+		self.disable_buttons()
+		self.output.moveCursor(QTextCursor.End)
+		self.output.insertPlainText('\n')
+		self.proc = QProcess()
+		self.proc.readyReadStandardOutput.connect(self.read_stdout)
+		self.proc.readyReadStandardError.connect(self.read_stderr)
+		self.action = self.upgrade
+		if not os.path.exists(PATH_LBI_DIR):
+			args = [ 'clone', REPO_URL, PATH_LBI_DIR ]
+			self.proc.finished.connect(self.git_finished)
+			self.proc.start('git', args)
+			self.statusBar().showMessage(self.tr('Cloning repo ...'), -1)
+			return
+		self.proc.finished.connect(self.cmd_finished)
+		os.chdir(PATH_LBI_DIR)
+		self.proc.start('./linux-browser-installer', [ 'jail', 'upgrade'])
+		self.statusBar().showMessage(self.tr('Upgrading ...'), -1)
+
 	def update_buttons(self):
 		enabled = False
 		if self.brave_rb.isChecked():
@@ -173,6 +195,7 @@ class MainWindow(QMainWindow):
 		self.deinstall_bt.setEnabled(False)
 		self.chrome_rb.setEnabled(False)
 		self.brave_rb.setEnabled(False)
+		self.upgrade_bt.setEnabled(False)
 
 	def show_output(self, data):
 		self.output.moveCursor(QTextCursor.End)
@@ -218,6 +241,11 @@ class MainWindow(QMainWindow):
 		self.cancel_bt.setEnabled(False)
 		self.deinstall_bt.setEnabled(False)
 		self.update_buttons()
+		if (os.path.exists('/compat/ubuntu/bin/brave') or
+		   os.path.exists('/compat/ubuntu/bin/chrome')):
+			   self.upgrade_bt.setEnabled(True)
+		else:
+			   self.upgrade_bt.setEnabled(True)
 
 	def quit(self):
 		sys.exit(0)
