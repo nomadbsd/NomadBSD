@@ -60,16 +60,16 @@ do_mount_unionfs()
 	fi
 	# Create and mount a writeable directory to /usr/local using
 	# unionfs, so users can install packages.
-	if (mount | grep -qE '(/home |/private )'); then
-		if [ ! -d /home/pkgs ]; then
-			mkdir /home/pkgs
+	if (mount | grep -q '/data '); then
+		if [ ! -d /data/pkgs ]; then
+			mkdir /data/pkgs
 		fi
 		if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
 			kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
 		fi
 		unionfs -o cow,max_files=${unionfs_maxfiles} \
 		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
-		        /home/pkgs=RW:/unionfs/usr/local=RO /usr/local
+		        /data/pkgs=RW:/unionfs/usr/local=RO /usr/local
 		service ldconfig start
 	fi
 }

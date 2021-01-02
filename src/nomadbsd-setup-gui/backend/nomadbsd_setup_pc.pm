@@ -29,7 +29,7 @@ binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
 my $rootlabel = "nomadroot";
-my $homelabel = "nomadhome";
+my $datalabel = "nomaddata";
 
 #
 # 1. Get the device mounted on /, which must be label/$rootlabel
@@ -54,20 +54,20 @@ sub get_rootdev {
 
 #
 # Return the device and slice the /home partition is stored on.
-# It must match the label label/$homelabel, and must be on the
+# It must match the label label/$datalabel, and must be on the
 # root device.
 #
-sub get_homedev {
-	my ($rootdev, $homedev, @output);
+sub get_datadev {
+	my ($rootdev, $datadev, @output);
 	
 	$rootdev = get_rootdev();
 	bail("Couldn't find root device") if (!$rootdev);
 	@output = `df /`;
 	# Skip header
-	$homedev = (split(/\s+/, $output[1]))[0];
-	$homedev =~ s#/dev/##;
-	bail("label/$homelabel not mounted on /home")
-		if ($output[1] ne "label/$homelabel");
+	$datadev = (split(/\s+/, $output[1]))[0];
+	$datadev =~ s#/dev/##;
+	bail("label/$datalabel not mounted on /data")
+		if ($output[1] ne "label/$datalabel");
 	@output = `glabel status`;
 	# Skip header
 	shift @output;
@@ -76,26 +76,26 @@ sub get_homedev {
 		# Remove leading spaces
 		$_ =~ s/^\s+//;
 		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "label/$homelabel") {
+		if ($l eq "label/$datalabel") {
 			return $d if ($d =~ /$rootdev[ps]{1}[0-9]{1,}[a-f]?$/);
-			bail("label/$homelabel not on $rootdev");
+			bail("label/$datalabel not on $rootdev");
 		}
 	}
-	bail("Couldn't find label/$homelabel");
+	bail("Couldn't find label/$datalabel");
 }
 
-sub mkhomepart {
+sub mkdatapart {
 	my $dev = get_rootdev();
-	my ($partdev, $homedev);
+	my ($partdev, $datadev);
 	bail("Failed to find root device.") if (!$dev);
 	#
-	# Check if label/${homelabel} already exists.
+	# Check if label/${datalabel} already exists.
 	#
 	foreach (`glabel status`) {
 		$_ =~ s/\s+//;
 		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "label/$homelabel") {
-			bail("Error: label/$homelabel already exists");
+		if ($l eq "label/$datalabel") {
+			bail("Error: label/$datalabel already exists");
 		}
 	}
 	system("gpart recover $dev >/dev/null");
@@ -106,50 +106,43 @@ sub mkhomepart {
 	system("dd if=/dev/zero of=/dev/${partdev} bs=1M count=100");
 	system("gpart create -s bsd ${partdev}") == 0
 		or bail("'gpart create -s bsd ${partdev}' failed");
-	chomp($homedev = `gpart add -t freebsd-ufs -b 16 ${partdev}`);
+	chomp($datadev = `gpart add -t freebsd-ufs -b 16 ${partdev}`);
 	bail("'gpart add -t freebsd-ufs -b 16 $partdev' failed") if ($?);
-	bail("Unexpected gpart output: '$homedev'")
-		if (!($homedev =~ s/^([a-z0-9]+)\s(added|created)/$1/));
-	system("glabel label ${homelabel} /dev/${homedev}") == 0
-		or bail("Couldn't create label on /dev/${homedev}.");
+	bail("Unexpected gpart output: '$datadev'")
+		if (!($datadev =~ s/^([a-z0-9]+)\s(added|created)/$1/));
+	system("glabel label ${datalabel} /dev/${datadev}") == 0
+		or bail("Couldn't create label on /dev/${datadev}.");
 }
 
-sub mkhome {
-	my $dev = "/dev/label/$homelabel";
+sub mkdatafs {
+	my $dev = "/dev/label/$datalabel";
 	my $cmd = "newfs -t -E -U -O 1 -o time -b ${main::blksize} " .
 		  "-f ${main::fragsize} -m 8 $dev";
-	mkhomepart();
+	mkdatapart();
 	status("Creating filesystem on $dev");
 	newfswrp($cmd);
-	if (! -d "/home") {
-		status("Creating /home");
-		system("mkdir /home") == 0
-			or bail("Failed to create directory /home");
+	if (! -d "/data") {
+		status("Creating /data");
+		system("mkdir /data") == 0
+			or bail("Failed to create directory /data");
 	}
-	status("Mounting $dev on /home");
-	system("mount $dev /home") == 0
-		or bail("Couldn't mount $dev on /home");
-	status("Creating /home/nomad");
-	system("mkdir /home/nomad") == 0
-		or bail("Couldn't create /home/nomad");
-	system("chown nomad:nomad /home/nomad");
-	status("Creating /home/freebsd-update");
-	system("mkdir /home/freebsd-update");
-	status("Adding fstab entry for /home");
+	status("Mounting $dev on /data");
+	system("mount $dev /data") == 0
+		or bail("Couldn't mount $dev on /data");
+	status("Adding fstab entry for /data");
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "$dev\t/home\t\t\tufs\trw,noatime\t1 1\n";
-	print $fh "/home/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "$dev\t/data\t\t\tufs\trw,noatime\t1 1\n";
 	close($fh);
 }
 
-sub mkgeli {
-	my $dev			= "/dev/label/$homelabel";
+sub mkgelidata {
+	my $dev			= "/dev/label/$datalabel";
 	my $geli_init	= "geli init -s 4096 -e AES-XTS -l 256 -J - $dev";
 	my $geli_attach	= "geli attach -j - $dev";
 	my $newfscmd	= "newfs -t -E -U -O 1 -o time -b ${main::blksize} -f " .
 					  "${main::fragsize} -m 8 ${dev}.eli";
-	status("Creating partition for /private/home");
-	mkhomepart();
+	status("Creating partition for /data");
+	mkdatapart();
 	status("Initializing geli volume");
 	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
 	print $fh "${main::cfg_geli_password}\n";
@@ -160,45 +153,44 @@ sub mkgeli {
 	bail("Failed to attach geli volume.") if (!close($fh));
 	status("Creating filesystem on ${dev}.eli");
 	newfswrp($newfscmd);
-	if (! -d "/private") {
-		system("unlink /private >/dev/null 2>&1");
-		status("Creating /private");
-		system("mkdir /private") == 0 or bail("Failed to create /private");
+	if (! -d "/data") {
+		system("unlink /data >/dev/null 2>&1");
+		status("Creating /data");
+		system("mkdir /data") == 0 or bail("Failed to create /data");
 	}
-	status("Mounting ${dev}.eli on /private");
-	system("mount ${dev}.eli /private") == 0
+	status("Mounting ${dev}.eli on /data");
+	system("mount ${dev}.eli /data") == 0
 		or bail("Failed to mount filesystem.");
-	status("Creating /private/home");
-	system("mkdir /private/home") == 0
-		or bail("Failed to create /private/home");
-	status("Creating /private/etc");
-	system("mkdir /private/etc") == 0
-		or bail("Failed to create /private/etc");
-	status("Creating /private/home/nomad");
-	system("mkdir /private/home/nomad") == 0
-		or bail("Failed to create /private/home/nomad");
+	status("Creating /data/home");
+	system("mkdir /data/home") == 0
+		or bail("Failed to create /data/home");
+	status("Creating /data/etc");
+	system("mkdir /data/etc") == 0
+		or bail("Failed to create /data/etc");
+	status("Creating /data/home/nomad");
+	system("mkdir /data/home/nomad") == 0
+		or bail("Failed to create /data/home/nomad");
 	system("unlink /home >/dev/null 2>&1");
 	system("rmdir -rf /home 2>&1");
-	status("Symlinking /home to /private/home");
+	status("Symlinking /home to /data/home");
 	
-	system("ln -s /private/home /home") == 0
-		or bail("Failed to create symlink /home -> /private/home");
+	system("ln -s /data/home /home") == 0
+		or bail("Failed to create symlink /home -> /data/home");
 	system("chown nomad:nomad /home/nomad");
 
-	status("Creating /home/freebsd-update");
-	system("mkdir /home/freebsd-update");
+	status("Creating /data/freebsd-update");
+	system("mkdir /data/freebsd-update");
 
 	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
-	system("mv /etc/ppp /private/etc/");
-	system("mv /etc/wpa_supplicant.conf /private/etc");
-	system("touch /private/etc/wpa_supplicant.conf");
-	system("cd /etc && ln -sf /private/etc/ppp; " .
-		   "ln -sf /private/etc/wpa_supplicant.conf");
-	system("sysrc -f /etc/rc.conf.in in geli_devices=\"label/${homelabel}\"");
+	system("mv /etc/ppp /data/etc/");
+	system("mv /etc/wpa_supplicant.conf /data/etc");
+	system("touch /data/etc/wpa_supplicant.conf");
+	system("cd /etc && ln -sf /data/etc/ppp; " .
+		   "ln -sf /data/etc/wpa_supplicant.conf");
+	system("sysrc -f /etc/rc.conf.in in geli_devices=\"label/${datalabel}\"");
 	status("Adding fstab entry for ${dev}.eli");
 	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "${dev}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
-	print $fh "/private/home/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "${dev}.eli\t/data\t\t\tufs\trw,noatime\t1 1\n";
 	close($fh);
 }
 

@@ -694,14 +694,34 @@ sub commit {
 	system("cap_mkdb /etc/login.conf");
 	
 	if ($cfg_geli_password) {
-		mkgeli();
+		mkgelidata();
 	} else {
-		mkhome();
+		mkdatafs();
 	}
-	status("Creating /home/pkgs");
-	system("mkdir /home/pkgs") == 0 or bail("Couldn't create /home/pkgs");
-	status("Creating /home/compat");
-	system("mkdir /home/compat") == 0 or bail("Couldn't create /home/compat");
+	status("Creating /data/pkgs");
+	system("mkdir /data/pkgs") == 0 or bail("Couldn't create /data/pkgs");
+	status("Creating /data/compat");
+	system("mkdir /data/compat") == 0 or bail("Couldn't create /data/compat");
+	status("Creating /data/var/tmp");
+	system("mkdir -p /data/var/tmp") == 0
+		or bail("Couldn't create /data/var/tmp");
+	system("chmod a+rwxt /data/var/tmp");
+		system("unlink /home >/dev/null 2>&1");
+	system("rmdir -rf /home 2>&1");
+	status("Creating /data/home/nomad");
+	system("mkdir -p /data/home/nomad") == 0
+		or bail("Couldn't create /data/home/nomad");
+	system("chown nomad:nomad /data/home/nomad");
+	status("Symlinking /home to /data/home");
+	system("ln -s /data/home /home") == 0
+		or bail("Failed to create symlink /home -> /data/home");
+	status("Creating /data/freebsd-update");
+	system("mkdir /data/freebsd-update");
+	
+	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
+	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
+	close($fh);
 	status("Counting files to copy");
 	progress(-1);
 	foreach (`tar tf ${path_dotfiles}`) {
@@ -766,7 +786,7 @@ sub dummy_commit {
 	} else {
 		status("Creating /home");
 	}
-	status("Creating /home/pkgs");
+	status("Creating /data/pkgs");
 	status("Extracting dot files and directories for user nomad");
 	for (my $p = 0; $p < 100; $p++) {
 		print "%$p\n"; usleep(50000);

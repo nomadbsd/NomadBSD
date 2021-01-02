@@ -28,7 +28,7 @@ binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
 my $gptroot = "nomadroot";
-my $gpthome = "nomadhome";
+my $gptdata = "nomaddata";
 
 #
 # 1. Get the device mounted on /, which must be gpt/$gptroot
@@ -52,21 +52,21 @@ sub get_rootdev {
 }
 
 #
-# Return the device and slice the /home partition is stored on.
-# It must match the label gpt/$gpthome, and must be on the
+# Return the device and slice the /data partition is stored on.
+# It must match the label gpt/$gptdata, and must be on the
 # root device.
 #
-sub get_homedev {
-	my ($rootdev, $homedev, @output);
+sub get_datadev {
+	my ($rootdev, $datadev, @output);
 	
 	$rootdev = get_rootdev();
 	bail("Couldn't find root device") if (!$rootdev);
 	@output = `df /`;
 	# Skip header
-	$homedev = (split(/\s+/, $output[1]))[0];
-	$homedev =~ s#/dev/##;
-	bail("gpt/$gpthome not mounted on /home")
-		if ($output[1] ne "gpt/$gpthome");
+	$datadev = (split(/\s+/, $output[1]))[0];
+	$datadev =~ s#/dev/##;
+	bail("gpt/$gptdata not mounted on /data")
+		if ($output[1] ne "gpt/$gptdata");
 	@output = `glabel status`;
 	# Skip header
 	shift @output;
@@ -75,15 +75,15 @@ sub get_homedev {
 		# Remove leading spaces
 		$_ =~ s/^\s+//;
 		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "gpt/$gpthome") {
+		if ($l eq "gpt/$gptdata") {
 			return $d if ($d =~ /$rootdev[ps]{1}[0-9]{1,}[a-f]?$/);
-			bail("gpt/$gpthome not on $rootdev");
+			bail("gpt/$gptdata not on $rootdev");
 		}
 	}
-	bail("Couldn't find gpt/$gpthome");
+	bail("Couldn't find gpt/$gptdata");
 }
 	
-sub mkhomepart {
+sub mkdatapart {
 	my $dev = get_rootdev();
 
 	bail("Failed to find root device.") if (!$dev);
@@ -93,98 +93,80 @@ sub mkhomepart {
 	foreach (`glabel status`) {
 		$_ =~ s/\s+//;
 		my ($l, $s, $d) = split(/\s+/, $_);
-		if ($l eq "gpt/$gpthome") {
-			bail("Error: gpt/$gpthome already exists");
+		if ($l eq "gpt/$gptdata") {
+			bail("Error: gpt/$gptdata already exists");
 		}
 	}
 	system("gpart recover $dev");
-	system("gpart add -t freebsd-ufs -l $gpthome $dev") == 0
-		or bail("Couldn't create home partition: gpart failed.");
+	system("gpart add -t freebsd-ufs -l $gptdata $dev") == 0
+		or bail("Couldn't create data partition: gpart failed.");
 }
 
-sub mkhome {
+sub mkdatafs {
 	my $cmd = "newfs -t -E -U -O 1 -o time -b ${main::blksize} " .
-			  "-f ${main::fragsize} -m 8 /dev/gpt/$gpthome";
-	mkhomepart();
-	status("Creating filesystem on /dev/gpt/$gpthome");
+			  "-f ${main::fragsize} -m 8 /dev/gpt/$gptdata";
+	mkdatapart();
+	status("Creating filesystem on /dev/gpt/$gptdata");
 	newfswrp($cmd);
-	if (! -d "/home") {
-		status("Creating /home");
-		system("mkdir /home") == 0
-			or bail("Failed to create directory /home");
+	if (! -d "/data") {
+		status("Creating /data");
+		system("mkdir /data") == 0
+			or bail("Failed to create directory /data");
 	}
-	status("Mounting /dev/gpt/${gpthome} on /home");
-	system("mount /dev/gpt/${gpthome} /home") == 0
-		or bail("Couldn't mount /dev/gpt/${gpthome} on /home");
-	status("Creating /home/nomad");
-	system("mkdir /home/nomad") == 0
-		or bail("Couldn't create /home/nomad");
-	system("chown nomad:nomad /home/nomad");
-	status("Adding fstab entry for /home");
+	status("Mounting /dev/gpt/${gptdata} on /data");
+	system("mount /dev/gpt/${gptdata} /data") == 0
+		or bail("Couldn't mount /dev/gpt/${gptdata} on /data");
+	status("Adding fstab entry for /data");
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/dev/gpt/${gpthome}\t/home\t\t\tufs\trw,noatime\t1 1\n";
-	print $fh "/home/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/dev/gpt/${gptdata}\t/data\t\t\tufs\trw,noatime\t1 1\n";
 	close($fh);
 }
 
-sub mkgeli {
-	my $dev			= "/dev/gpt/$gpthome";
+sub mkgelidata {
+	my $dev			= "/dev/gpt/$gptdata";
 	my $geli_init	= "geli init -s 4096 -e AES-XTS -l 256 -J - $dev";
 	my $geli_attach	= "geli attach -j - $dev";
 	my $newfscmd	= "newfs -t -E -U -O 1 -o time -b ${main::blksize} -f " .
 					  "${main::fragsize} -m 8 ${dev}.eli";
-	status("Creating partition for /private/home");
-	mkhomepart();
+	status("Creating partition for /data");
+	mkdatapart();
 	status("Initializing geli volume");
 	open(my $fh, "|$geli_init") or bail("Couldn't init geli volume");
 	print $fh "${main::cfg_geli_password}\n";
-	bail("Failed to init geli volume.")	if (!close($fh));
+	bail("Failed to init geli volume.") if (!close($fh));
 	status("Attaching geli volume");
 	open(my $fh, "|$geli_attach") or bail("Couldn't attach geli volume");
 	print $fh "${main::cfg_geli_password}\n";
 	bail("Failed to attach geli volume.") if (!close($fh));
-	status("Creating filesystem on /dev/gpt/${gpthome}.eli");
+	status("Creating filesystem on /dev/gpt/${gptdata}.eli");
 	newfswrp($newfscmd);
-	if (! -d "/private") {
-		system("unlink /private >/dev/null 2>&1");
-		status("Creating /private");
-		system("mkdir /private") == 0 or bail("Failed to create /private");
+	if (! -d "/data") {
+		system("unlink /data >/dev/null 2>&1");
+		status("Creating /data");
+		system("mkdir /data") == 0 or bail("Failed to create /data");
 	}
-	status("Mounting /dev/gpt/${gpthome}.eli on /private");
-	system("mount /dev/gpt/$gpthome.eli /private") == 0
+	status("Mounting /dev/gpt/${gptdata}.eli on /data");
+	system("mount /dev/gpt/$gptdata.eli /data") == 0
 		or bail("Failed to mount filesystem.");
-	status("Creating /private/home");
-	system("mkdir /private/home") == 0
-		or bail("Failed to create /private/home");
-	status("Creating /private/etc");
-	system("mkdir /private/etc") == 0
-		or bail("Failed to create /private/etc");
-	status("Creating /private/home/nomad");
-	system("mkdir /private/home/nomad") == 0
-		or bail("Failed to create /private/home/nomad");
-	system("unlink /home >/dev/null 2>&1");
-	system("rmdir -rf /home 2>&1");
-	status("Symlinking /home to /private/home");
-	
-	system("ln -s /private/home /home") == 0
-		or bail("Failed to create symlink /home -> /private/home");
-	system("chown nomad:nomad /home/nomad");
-
-	status("Creating /home/freebsd-update");
-	system("mkdir /home/freebsd-update");
-
+	status("Creating /data/home");
+	system("mkdir /data/home") == 0
+		or bail("Failed to create /data/home");
+	status("Creating /data/etc");
+	system("mkdir /data/etc") == 0
+		or bail("Failed to create /data/etc");
+	status("Creating /data/home/nomad");
+	system("mkdir /data/home/nomad") == 0
+		or bail("Failed to create /data/home/nomad");
 	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
-	system("mv /etc/ppp /private/etc/");
-	system("mv /etc/wpa_supplicant.conf /private/etc");
-	system("touch /private/etc/wpa_supplicant.conf");
-	system("cd /etc && ln -sf /private/etc/ppp; " .
-		   "ln -sf /private/etc/wpa_supplicant.conf");
-	system("sysrc -f /etc/rc.conf.in in geli_devices=\"gpt/${gpthome}\"");
-	status("Adding fstab entry for /dev/gpt/${gpthome}.eli");
+	system("mv /etc/ppp /data/etc/");
+	system("mv /etc/wpa_supplicant.conf /data/etc");
+	system("touch /data/etc/wpa_supplicant.conf");
+	system("cd /etc && ln -sf /data/etc/ppp; " .
+		   "ln -sf /data/etc/wpa_supplicant.conf");
+	system("sysrc -f /etc/rc.conf.in in geli_devices=\"gpt/${gptdata}\"");
+	status("Adding fstab entry for /dev/gpt/${gptdata}.eli");
 	open($fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/dev/gpt/${gpthome}.eli\t/private\t\t\tufs\trw,noatime\t1 1\n";
-	print $fh "/private/home/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
-
+	print $fh "/dev/gpt/${gptdata}.eli\t/data\t\t\tufs\trw,noatime\t1 1\n";
 	close($fh);
 }
 

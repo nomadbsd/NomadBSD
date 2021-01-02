@@ -439,22 +439,14 @@ replace_user() {
 
 copy_home() {
 	local exlst="
-	./pkgs
-	./pkgs/*
-	./compat
-	./compat/*
-	./freebsd-update
-	./freebsd-update/*
+	/data
+	/data/*
 	*/.gvfs.*
 	"
 	if [ ! -d ${DESTDIR}/home ]; then
 		mkdir ${DESTDIR}/home || bail "Couldn't create ${DESTDIR}/home"
 	fi
-	if [ -L /home -a -d /private/home/nomad ]; then
-		homedir="/private/home"
-	else
-		homedir="/home"
-	fi
+	homedir="/data/home"
 	status "Counting files to copy from ${homedir} ..."
 	progress -1
 	nfiles=$(cd ${homedir} && echo "${exlst}" | \
@@ -463,11 +455,6 @@ copy_home() {
 	(cd ${homedir} && echo "${exlst}" | \
 		exclfind . 2>/dev/null | cpio -vpdmu ${DESTDIR}/home 2>&1) | \
 		show_extract $nfiles
-	if [ "${homedir}" = "/private/home" ]; then
-		unlink ${DESTDIR}/etc/wpa_supplicant.conf
-		unlink ${DESTDIR}/etc/ppp
-		(cd /private/etc && tar cf - .) | (cd ${DESTDIR}/etc && tar xmf -)
-	fi
 	rm -rf ${DESTDIR}/home/nomad/.config/DSB/dsblogoutmgr
 	unlink ${DESTDIR}/home/nomad/.cache
 }
@@ -482,8 +469,8 @@ copy_base() {
 	/mnt/*
 	/uzip
 	/uzip/*
-	/private
-	/private/*
+	/data
+	/data/*
 	/unionfs
 	/unionfs/*
 	/home
@@ -536,35 +523,11 @@ copy_base() {
 		status "Creating ${DESTDIR}/var/db/portsnap"
 		mkdir ${DESTDIR}/var/db/portsnap
 	fi
-
+	unlink ${DESTDIR}/etc/wpa_supplicant.conf
+	unlink ${DESTDIR}/etc/ppp
+	(cd /data/etc && tar cf - .) | (cd ${DESTDIR}/etc && tar xmf -)
 	status "Creating ${DESTDIR}/mnt ..."
 	mkdir ${DESTDIR}/mnt
-}
-
-copy_compat() {
-	local exlst="
-	./linux/sys
-	./linux/sys/*
-	./linux/proc
-	./linux/proc/*
-	"
-	[ ! \( -L /compat -a -d /home/compat \) ] && return
-	unlink ${DESTDIR}/compat
-	if [ ! -d ${DESTDIR}/compat ]; then
-		mkdir ${DESTDIR}/compat || bail "Couldn't create ${DESTDIR}/compat"
-	fi
-	status "Counting files to copy from /home/compat ..."
-	progress -1
-	nfiles=$(cd /home/compat && echo "${exlst}" | \
-		exclfind . 2>/dev/null | wc -l | tr -d ' ')
-	status "Copying files from /home/compat to ${DESTDIR}/compat ..."
-	(cd /home/compat && echo "${exlst}" | \
-		exclfind . 2>/dev/null | \
-		cpio -vpdmu ${DESTDIR}/compat 2>&1) | show_extract $nfiles
-	if [ -d ${DESTDIR}/compat/linux ]; then
-		mkdir ${DESTDIR}/compat/linux/sys
-		mkdir ${DESTDIR}/compat/linux/proc
-	fi
 }
 
 commit() {
@@ -574,7 +537,6 @@ commit() {
 	wipe_disk ${disk}
 	part_disk ${disk}
 	copy_base
-	copy_compat
 	copy_home
 	replace_user
 

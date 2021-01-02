@@ -25,7 +25,7 @@
 # vim: set tabstop=4:
 
 rootlabel="nomadroot"
-homelabel="nomadhome"
+datalabel="nomaddata"
 backupfile="/usr/share/nomadbsd/nomadbsd-backup.tar.xz"
 
 exitmenu() {
@@ -70,30 +70,28 @@ getrootdev()
 	echo "${rootdev}" | sed -E 's/(.*)s[0-9][a-f]/\1/'
 }
 
-delhome()
+deldatapart()
 {
-	local idx rootdev homedev
+	local idx rootdev datadev
 
 	rootdev=$(getrootdev)
 	if [ -z "${rootdev}" ]; then
 		errandout "Error: Failed to find root device."
 	fi
-	homedev=$(glabel status | awk -v dev=${rootdev} \
-								  -v label="label/${homelabel}" -F" " '{
+	datadev=$(glabel status | awk -v dev=${rootdev} \
+								  -v label="label/${datalabel}" -F" " '{
 		if ($1 == label && $3 ~ dev) {
 			print $3
 		}
 	}')
-	if [ -z "${homedev}" ]; then
-		errandout "Error: Unable to find label/${homelabel} on ${rootdev}"
+	if [ -z "${datadev}" ]; then
+		errandout "Error: Unable to find label/${datalabel} on ${rootdev}"
 	fi
-	idx=$(echo ${homedev} | sed -E "s/${rootdev}s([0-9]+)[a-z]/\1/")
-	umount -f /private 2>/dev/null
-	umount -f /home 2>/dev/null
+	idx=$(echo ${datadev} | sed -E "s/${rootdev}s([0-9]+)[a-z]/\1/")
+	umount -af 2>/dev/null
 	gpart delete -i ${idx} ${rootdev} || \
-		errandout "Error: Failed to delete label/${homelabel}"
-	rm -rf /private
-	rm -rf /home
+		errandout "Error: Failed to delete label/${datalabel}"
+	rm -rf /data
 }
 
 delsysdir()
@@ -129,8 +127,8 @@ rollback() {
 
 			umount -f /var/log 2>/dev/null
 			umount -f /var/run 2>/dev/null
-			dialog --infobox "Deleting home partition ..." 5 40
-			delhome
+			dialog --infobox "Deleting data partition ..." 5 40
+			deldatapart
 			for d in ${dirs}; do
 				delsysdir $d
 			done

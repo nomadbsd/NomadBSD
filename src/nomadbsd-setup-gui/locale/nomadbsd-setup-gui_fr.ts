@@ -92,29 +92,29 @@
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="792"/>
-        <source>Encrypt /home using Geli</source>
-        <translation>Chiffrer /home avec Geli</translation>
+        <source>Encrypt /data using Geli</source>
+        <translation>Chiffrer /data avec Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="793"/>
-        <source>Geli encrypted /home
+        <source>Geli encrypted /data
 </source>
-        <translation>/home chiffré avec Geli
+        <translation>/data chiffré avec Geli
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="794"/>
-        <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
+        <source>NomadBSD allows you to protect your personal files by encrypting the /data partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
-        <translation>NomadBSD peut protéger vos fichiers personnels en chiffrant la partition /home avec geli(8). Si vous ne savez pas ce qu&apos;est geli(8), vous devriez ignorer cette page.
+        <translation>NomadBSD peut protéger vos fichiers personnels en chiffrant la partition /data avec geli(8). Si vous ne savez pas ce qu&apos;est geli(8), vous devriez ignorer cette page.
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="798"/>
-        <source>Define a password required to decrypt /home</source>
-        <translation>Définir un mot de passe requis pour déchiffrer /home</translation>
+        <source>Define a password required to decrypt /data</source>
+        <translation>Définir un mot de passe requis pour déchiffrer /data</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="799"/>
@@ -425,8 +425,8 @@ Nous sommes désolés pour le désagrément
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="974"/>
-        <source>Encrypt /home:</source>
-        <translation>Chiffrement de /home :</translation>
+        <source>Encrypt /data:</source>
+        <translation>Chiffrement de /data :</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="975"/>

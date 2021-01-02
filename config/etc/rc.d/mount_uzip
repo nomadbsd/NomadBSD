@@ -43,11 +43,11 @@ do_mount_uzip()
 
 	# Create and mount a writeable directory to /usr/local using
 	# unionfs, so users can install packages.
-	if (mount | grep -qE '(/home |/private )'); then
-		if [ ! -d /home/pkgs ]; then
-			mkdir /home/pkgs
+	if (mount | grep -qE '/data '); then
+		if [ ! -d /data/pkgs ]; then
+			mkdir /data/pkgs
 		fi
-		mount -t unionfs -o rw,noatime /home/pkgs /usr/local
+		mount -t unionfs -o rw,noatime /data/pkgs /usr/local
 	fi
 }
 

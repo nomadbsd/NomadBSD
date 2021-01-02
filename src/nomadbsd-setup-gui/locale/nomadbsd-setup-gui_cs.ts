@@ -96,29 +96,29 @@
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="792"/>
-        <source>Encrypt /home using Geli</source>
-        <translation>Zašifrovat složku /home pomocí Geli</translation>
+        <source>Encrypt /data using Geli</source>
+        <translation>Zašifrovat složku /data pomocí Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="793"/>
-        <source>Geli encrypted /home
+        <source>Geli encrypted /data
 </source>
-        <translation>Složka /home byla zašifrována s pomocí Geli
+        <translation>Složka /data byla zašifrována s pomocí Geli
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="794"/>
-        <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
+        <source>NomadBSD allows you to protect your personal files by encrypting the /data partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
-        <translation>NomadBSD Vám umožňuje chránit Vaše osobní data zašifrováním složky /home pomocí geli(8). Jestliže nevíte co je geli(8), měli byste tuto stránku přeskočit.
+        <translation>NomadBSD Vám umožňuje chránit Vaše osobní data zašifrováním složky /data pomocí geli(8). Jestliže nevíte co je geli(8), měli byste tuto stránku přeskočit.
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="798"/>
-        <source>Define a password required to decrypt /home</source>
-        <translation>Definuj heslo potřebné k dekryptování složky /home</translation>
+        <source>Define a password required to decrypt /data</source>
+        <translation>Definuj heslo potřebné k dekryptování složky /data</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="799"/>
@@ -446,8 +446,8 @@ Omlouváme se za potíže
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="974"/>
-        <source>Encrypt /home:</source>
-        <translation>Zašifrovat /home:</translation>
+        <source>Encrypt /data:</source>
+        <translation>Zašifrovat /data:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="975"/>

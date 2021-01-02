@@ -789,13 +789,13 @@ void GeliPage::initializePage()
 {
 	gelicb->setChecked(cfg_use_geli);
 	cfg_geli = cfg_use_geli ? tr("Yes") : tr("No");
-	gelicb->setText(tr("Encrypt /home using Geli"));
-	title->setText(tr("Geli encrypted /home\n"));
+	gelicb->setText(tr("Encrypt /data using Geli"));
+	title->setText(tr("Geli encrypted /data\n"));
 	intro->setText(tr("NomadBSD allows you to protect your personal "  \
-			  "files by encrypting the /home partition using " \
+			  "files by encrypting the /data partition using " \
 			  "geli(8). If you don't know what geli(8) is, "  \
 			  "you should skip this page.\n\n"));
-	pwdLabel->setText(tr("Define a password required to decrypt /home"));
+	pwdLabel->setText(tr("Define a password required to decrypt /data"));
 	pass->setPl1Text(tr("Password:"));
 	pass->setPl2Text(tr("Repeat password:"));
 	pass->setStatusText(tr("Passwords do not match"));
@@ -971,7 +971,7 @@ void SummaryPage::initializePage()
 		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
 		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
-		{ tr("Encrypt /home:"),			cfg_geli	   },
+		{ tr("Encrypt /data:"),			cfg_geli	   },
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },

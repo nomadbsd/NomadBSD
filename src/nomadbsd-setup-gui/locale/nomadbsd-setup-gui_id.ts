@@ -92,27 +92,27 @@
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="792"/>
-        <source>Encrypt /home using Geli</source>
-        <translation>Mengenkripsi /home dengan Geli</translation>
+        <source>Encrypt /data using Geli</source>
+        <translation>Mengenkripsi /data dengan Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="793"/>
-        <source>Geli encrypted /home
+        <source>Geli encrypted /data
 </source>
-        <translation>/home terenkripsi dengan Geli</translation>
+        <translation>/data terenkripsi dengan Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="794"/>
-        <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
+        <source>NomadBSD allows you to protect your personal files by encrypting the /data partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
-        <translation>NomadBSD dapat melindungi dokumen pribadi anda dengan mengenkripsi partisi /home menggunakan geli(8). Jika anda tidak mengetahui tentang geli(8), silahkan melewati halaman ini.
+        <translation>NomadBSD dapat melindungi dokumen pribadi anda dengan mengenkripsi partisi /data menggunakan geli(8). Jika anda tidak mengetahui tentang geli(8), silahkan melewati halaman ini.
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="798"/>
-        <source>Define a password required to decrypt /home</source>
-        <translation>Masukkan kata kunci untuk membuka /home</translation>
+        <source>Define a password required to decrypt /data</source>
+        <translation>Masukkan kata kunci untuk membuka /data</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="799"/>
@@ -418,8 +418,8 @@ Kami mohon maaf atas ketidaknyamanan ini</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="974"/>
-        <source>Encrypt /home:</source>
-        <translation>Enkripsi /home:</translation>
+        <source>Encrypt /data:</source>
+        <translation>Enkripsi /data:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="975"/>

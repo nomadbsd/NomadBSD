@@ -84,29 +84,29 @@
     <name>GeliPage</name>
     <message>
         <location filename="../src/wizard.cpp" line="792"/>
-        <source>Encrypt /home using Geli</source>
-        <translation>Verschlüssele /home mit Geli</translation>
+        <source>Encrypt /data using Geli</source>
+        <translation>Verschlüssele /data mit Geli</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="793"/>
-        <source>Geli encrypted /home
+        <source>Geli encrypted /data
 </source>
-        <translation>Geli verschlüsseltes /home
+        <translation>Geli verschlüsseltes /data
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="794"/>
-        <source>NomadBSD allows you to protect your personal files by encrypting the /home partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
+        <source>NomadBSD allows you to protect your personal files by encrypting the /data partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
-        <translation>NomadBSD bietet Ihnen die Möglichkeit, die /home-Partition mit geli(8) zu verschlüsseln. Wenn Sie nicht wissen, was geli(8) ist, sollten Sie diesen Schritt überspringen.
+        <translation>NomadBSD bietet Ihnen die Möglichkeit, die /data-Partition mit geli(8) zu verschlüsseln. Wenn Sie nicht wissen, was geli(8) ist, sollten Sie diesen Schritt überspringen.
 
 </translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="798"/>
-        <source>Define a password required to decrypt /home</source>
-        <translation>Vergeben Sie ein Passwort um /home entschüsseln zu können</translation>
+        <source>Define a password required to decrypt /data</source>
+        <translation>Vergeben Sie ein Passwort um /data entschüsseln zu können</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="799"/>
@@ -455,8 +455,8 @@ Wenn Sie auf &quot;Anwenden&quot; klicken, werden die Änderungen auf den USB-St
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="974"/>
-        <source>Encrypt /home:</source>
-        <translation>Verschlüssele /home:</translation>
+        <source>Encrypt /data:</source>
+        <translation>Verschlüssele /data:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="975"/>
