@@ -131,16 +131,37 @@ test_x()
 			"${path_cfg_test_dir}"
 }
 
-get_device_info() {
-	local chip
+get_device_info()
+{
 	unit=$(sysctl -n hw.pci.default_vgapci_unit)
 	[ -z "$unit" -o "$unit" =  "-1" ] && unit=0
-	chip=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
-		sed -E 's#.* chip=0x([0-9a-z]{4})([0-9a-z]{4}).*$#\1:\2#')
-	busID=$(pciconf -lv | grep ^vgapci${unit} | head -1 | \
-		sed -E 's/^vgapci[0-9]@pci[0-9]:([0-9:]+):.*$/\1/')
-	vendor=$(echo "${chip}" | cut -d: -f2)
-	device=$(echo "${chip}" | cut -d: -f1)
+	local info=$(pciconf -lv | grep "^vgapci${unit}" | awk -F'[ \t]+' ' {
+		for (i = 1; i <= NF; i++) {
+			if ($i ~ /^vgapci[0-9]/) {
+				if (split($i, a, ":") < 4)
+					exit(1);
+				busID = sprintf("%d:%d:%d", a[2], a[3], a[4])
+			} else if ($i ~ /^chip=/) {
+				device = substr($i, 8, 4);
+				vendor = substr($i, 12, 4);
+			} else if ($i ~ /^vendor=/) {
+				split($i, a, /=0x/);
+				vendor = a[2];
+			} else if ($i ~ /^device=/) {
+				split($i, a, /=0x/);
+				device = a[2];
+			}
+		}
+	}
+	END {
+		printf("%s %s %s", busID, vendor, device);
+	}')
+	set -- $info
+	device=$3; vendor=$2; busID=$1
+	if [ -z "${vendor}" -o -z "${device}" -o -z "${busID}" ]; then
+		echo "${name}: Error parsing 'pciconf' output"
+		exit 1
+	fi
 }
 
 rc_conf_d_ldconfig()
