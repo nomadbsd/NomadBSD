@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Refresh background
+Comment=Refreshes the wallpaper when the screen settings change
+Exec=/usr/bin/refreshbg
+Hidden=false
+Terminal=false
