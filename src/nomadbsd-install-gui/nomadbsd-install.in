@@ -558,8 +558,6 @@ commit() {
 	fi
 	sysrc -f ${DESTDIR}/etc/rc.conf -x gsched_enable
 	sysrc -f ${DESTDIR}/etc/rc.conf -x local_startup
-	sed -i '' 's,^WorkDir.*,WorkDir /var/db/freebsd-update,' \
-		${DESTDIR}/etc/freebsd-update.conf
 	sed -E -i '' '/^\/etc\/rc.d\/mount_uzip.*$/d' ${DESTDIR}/etc/rc.shutdown
 
 	if [ ${fstype} = "ZFS" ]; then
