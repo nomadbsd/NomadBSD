@@ -721,6 +721,7 @@ sub commit {
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/freebsd-update\t/var/db/freebsd-update\t\t\tnullfs\trw,late\t0 0\n";
 	close($fh);
 	status("Counting files to copy");
 	progress(-1);
