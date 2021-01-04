@@ -4,7 +4,18 @@ export LC_ALL=en_US.UTF-8
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 export QT_QPA_PLATFORMTHEME=gtk2
 export GTK2_RC_FILES="/usr/share/nomadbsd-setup/gtkrc-2.0"
-feh --no-fehbg --bg-fill /usr/share/nomadbsd-setup/background.jpg
+
+wallpaper="/usr/share/nomadbsd-setup/background.jpg"
+
+(xev -root -event randr | awk -v bg="${wallpaper}" '
+	BEGIN {
+		cmd = sprintf("feh --no-fehbg --bg-fill '%s'", bg);
+		system(cmd);
+	}
+	/RRScreenChangeNotify/ {
+		system(cmd);
+	}
+')&
 
 # Use sysmouse if there is a problem with the touchpad
 /usr/bin/tpquirk
