@@ -717,11 +717,26 @@ sub commit {
 		or bail("Failed to create symlink /home -> /data/home");
 	status("Creating /data/var/db/freebsd-update");
 	system("mkdir -p /data/var/db/freebsd-update");
-	
+
+	status("Creating /data/var/db/portsnap");
+	system("mkdir -p /data/var/db/portsnap");
+
+	status("Creating /var/db/portsnap");
+	system("mkdir -p /var/db/portsnap");
+
+	status("Creating /data/usr/ports");
+	system("mkdir -p /data/usr/ports");
+
+	status("Creating /usr/ports");
+	system("mkdir -p /usr/ports");
+
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/db/freebsd-update\t/var/db/freebsd-update\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/db/portsnap\t/var/db/portsnap\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
+
 	close($fh);
 	status("Counting files to copy");
 	progress(-1);
