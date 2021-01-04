@@ -715,7 +715,7 @@ sub commit {
 	status("Symlinking /home to /data/home");
 	system("ln -s /data/home /home") == 0
 		or bail("Failed to create symlink /home -> /data/home");
-	status("Creating /data/freebsd-update");
+	status("Creating /data/var/db/freebsd-update");
 	system("mkdir -p /data/var/db/freebsd-update");
 	
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
