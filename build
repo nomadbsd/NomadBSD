@@ -357,8 +357,7 @@ instports()
 		pname=$(echo $p | cut -d/ -f2 | tr '.-' '__')
 		eval popts=\${${pname}_OPTS}
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-			make BATCH=1 OPTIONS_DEFAULT=\"${popts}\" \
-			OPTIONS_UNSET=DOCS clean deinstall install" || bail
+			make BATCH=1 ${popts} clean deinstall install" || bail
 	done
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
