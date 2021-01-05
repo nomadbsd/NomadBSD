@@ -318,6 +318,57 @@ postpkgcfg()
 	mkfontpaths
 }
 
+#
+# Check if the port options of an installed package matches
+# the given options. Options are defined as follows:
+# "OPT1=<on|off> OPT2=<on|off> ... OPTn=<on|off>"
+# Return != 0 if the value of one of the given options do not
+# match the returned (pkg query) options.
+#
+check_port_opts()
+{
+	local port=$1
+	local opts=$2
+	local curopts=$(pkg -c ${SYSDIR} query -i "%Ok=%Ov" ${port})
+
+	for o in ${opts}; do
+		if ! (echo ${curopts} | grep -q $o); then
+			return 1
+		fi
+	done
+	return 0
+}
+
+#
+# Creates a port's _SET and _UNSET make variables from a list
+# of OPT=<on|off> pairs.
+#
+# Example: port_popts cat/fooport "FOO=on BAR=off BAZ=on"
+#          becomes cat_fooport_SET="FOO BAZ" cat_fooport_UNSET="BAR"
+#
+port_opts()
+{
+	local popts=$2
+	local pname=$(echo $1 | tr '/' '_')
+
+	echo ${popts} | tr ' ' '\n' | awk -v pname=${pname} '{
+		split($0, a, /=/);
+		if (a[2] ~ /on/) {
+			set_vars = sprintf("%s%s%s", set_vars,
+			    set_vars ? " " : "", a[1]);
+		} else if (a[2] ~ /off/) {
+			unset_vars = sprintf("%s%s%s", unset_vars,
+			    unset_vars ? " " : "", a[1]);
+		}
+	}
+	END {
+		if (set_vars)
+			printf("%s_SET=\"%s\" ", pname, set_vars);
+		if (unset_vars)
+			printf("%s_UNSET=\"%s\"", pname, unset_vars);
+	}'
+}
+
 instports()
 {
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
@@ -343,22 +394,25 @@ instports()
 	fi
 	for p in ${PORTSLIST}; do
 		echo "Checking whether $p is already installed" >&2
-		if pkg --chroot "${SYSDIR}" info --exists $p; then
-			# Check whether the ports version is newer than the
-			# installed version.
-			p1=$(pkg --chroot "${SYSDIR}" info $p | head -1)
-			p2=$(cd ${SYSDIR}/usr/ports/$p && make -VPKGNAME);
-			result=$(pkg version -t $p2 $p1)
-
-			[ $result = '<' -o $result = '=' ] && continue
-			echo "Building newer version from ports ..."
-		fi
-		echo "Building $p ..." >&2
 		pname=$(echo $p | cut -d/ -f2 | tr '.-' '__')
 		eval popts=\${${pname}_OPTS}
-		pvar=$(echo $p | tr '/' '_')
+		if pkg --chroot "${SYSDIR}" info --exists $p; then
+			if check_port_opts $p "${popts}"; then
+				# Port options not changed. Check whether the ports
+				# version is newer than the installed version.
+				p1=$(pkg --chroot "${SYSDIR}" info $p | head -1)
+				p2=$(cd ${SYSDIR}/usr/ports/$p && make -VPKGNAME);
+				result=$(pkg version -t $p2 $p1)
+				[ $result = '<' -o $result = '=' ] && continue
+				echo "Building newer version from ports ..."
+			else
+				echo "Options of installed package do not match."
+			fi
+		fi
+		echo "Building $p ..." >&2
+		local opts=$(port_opts $p "${popts}")
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-			make BATCH=1 ${pvar}_SET=\"${popts}\" clean deinstall install" || bail
+			make BATCH=1 ${opts} clean deinstall install" || bail
 	done
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
