@@ -62,7 +62,9 @@ class MainWindow(QMainWindow):
 				'version of the <em>Google Chrome</em> or <em>Brave</em> ' +
 				'browser. Both browsers allow you to use web services like ' +
 				'<em>Netflix</em>, <em>Prime Video</em>, or ' +
-				'<em>Spotify</em>\n\n'
+				'<em>Spotify</em>. The installation requires approx. 1GB ' +
+				'for the Linux environment, and approx. 100MB for the '
+				'browser.\n\n'
 			)
 		)
 		self.setWindowTitle(self.tr('Linux Browser Installer GUI'))
