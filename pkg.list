@@ -150,4 +150,5 @@ x11/xfce4-screenshooter-plugin
 x11/xinit
 x11/xmessage
 x11/xrandr
+x11/xrdb
 x11/zenity
