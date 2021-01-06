@@ -8,6 +8,8 @@ export QT_QPA_PLATFORMTHEME=gtk2
 #
 export GIO_USE_VOLUME_MONITOR=unix
 
+xrdb ~/.Xresources
+
 uid=$(id -u)
 
 #
