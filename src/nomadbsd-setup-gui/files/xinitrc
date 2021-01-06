@@ -6,6 +6,7 @@ export QT_QPA_PLATFORMTHEME=gtk2
 export GTK2_RC_FILES="/usr/share/nomadbsd-setup/gtkrc-2.0"
 
 wallpaper="/usr/share/nomadbsd-setup/background.jpg"
+xrdb /usr/share/nomadbsd-setup/Xresources
 
 (xev -root -event randr | awk -v bg="${wallpaper}" '
 	BEGIN {
