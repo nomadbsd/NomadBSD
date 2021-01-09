@@ -51,7 +51,7 @@ for s in 15 9; do
 done
 eval $(dbus-launch --sh-syntax)
 
-# Apply screen settings from DSBDisplaymgr
+# Apply screen settings from DSBDisplaySettings
 ~/.config/DSB/dsbds.sh
 
 # Apply screen settings from ArandR
