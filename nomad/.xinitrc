@@ -51,9 +51,16 @@ for s in 15 9; do
 done
 eval $(dbus-launch --sh-syntax)
 
+# Apply screen settings from DSBDisplaymgr
+~/.config/DSB/dsbds.sh
+
+# Apply screen settings from ArandR
+~/.screenlayout/default.sh
+
 tpquirk
 enable_tapping
 ~/.config/xkbdmap.sh
+
 [ -z "$1" -o "$1" = "default" ] && exec ck-launch-session openbox-session
 exec ck-launch-session "$1"
 
