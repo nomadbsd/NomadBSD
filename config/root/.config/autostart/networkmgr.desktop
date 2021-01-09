@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=NetworkMgr
+Comment=Network Manager
+Exec=sudo networkmgr
+Terminal=false
+Type=Application
+Categories=
+NoDisplay=true
+X-Mate-Autostart-Notify=true
+X-KDE-autostart-after=panel
+Hidden=true
