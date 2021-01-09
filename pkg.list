@@ -144,6 +144,7 @@ x11/slim
 x11/tint
 x11/xauth
 x11/xbindkeys
+x11/xdpyinfo
 x11/xev
 x11/xinput
 x11/xfce4-screenshooter-plugin
