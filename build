@@ -186,11 +186,11 @@ createbase()
 updatebase()
 {
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
-		-f config/etc/freebsd-update.conf -b "${SYSDIR}" \
-		-d ${SYSDIR}/var/db/freebsd-update fetch && \
+		-f "${SYSDIR}/etc/freebsd-update.conf" -b "${SYSDIR}" \
+		-d "${SYSDIR}/var/db/freebsd-update" fetch && \
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
-		-f config/etc/freebsd-update.conf -b "${SYSDIR}" \
-		-d ${SYSDIR}/var/db/freebsd-update install
+		-f "${SYSDIR}/etc/freebsd-update.conf" -b "${SYSDIR}" \
+		-d "${SYSDIR}/var/db/freebsd-update" install
 	if [ "${RELEASE##*-}" = "RELEASE" ]; then
 		version=$(echo ${RELEASE} | cut -d'-' -f1)
 		srcurl="${SRCURL}/releng"
