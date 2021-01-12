@@ -788,11 +788,5 @@
 
   # end of the example
 -->
-    <application class="*">
-      <position>
-        <x>center</x>
-        <y>center</y>
-      </position>
-    </application>
   </applications>
 </openbox_config>
