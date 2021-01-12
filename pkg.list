@@ -128,7 +128,7 @@ x11-themes/lxappearance
 x11-themes/papirus-icon-theme
 x11-toolkits/py-qt5-gui
 x11-toolkits/py-qt5-widgets
-x11-wm/compton
+x11-wm/picom
 x11-wm/obconf
 x11-wm/openbox
 x11/arandr
