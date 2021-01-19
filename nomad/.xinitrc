@@ -2,6 +2,8 @@
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/bin:/home/nomad/bin
 
 export QT_QPA_PLATFORMTHEME=gtk2
+export QT_FONT_DPI=96
+
 #
 # If not set to "unix", gvfs will use bsdisks which fails to unmount volumes
 # mounted on directories it does not expect.
