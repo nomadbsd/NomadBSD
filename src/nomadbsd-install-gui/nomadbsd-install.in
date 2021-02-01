@@ -523,8 +523,12 @@ copy_base() {
 		status "Creating ${DESTDIR}/var/db/portsnap"
 		mkdir ${DESTDIR}/var/db/portsnap
 	fi
-	unlink ${DESTDIR}/etc/wpa_supplicant.conf
-	unlink ${DESTDIR}/etc/ppp
+	if [ -L ${DESTDIR}/etc/wpa_supplicant.conf ]; then
+		unlink ${DESTDIR}/etc/wpa_supplicant.conf
+	fi
+	if [ -L ${DESTDIR}/etc/ppp ]; then
+		unlink ${DESTDIR}/etc/ppp
+	fi
 	(cd /data/etc && tar cf - .) | (cd ${DESTDIR}/etc && tar xmf -)
 	status "Creating ${DESTDIR}/mnt ..."
 	mkdir ${DESTDIR}/mnt
