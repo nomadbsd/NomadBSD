@@ -106,6 +106,16 @@ class MainWindow(QMainWindow):
 		msgbox.exec()
 		sys.exit(error)
 
+	def msgwin(self, title, msg):
+		msgbox = QMessageBox()
+		icon = msgbox.style().standardIcon(QStyle.SP_MessageBoxInformation)
+		msgbox.setIcon(QMessageBox.Information)
+		msgbox.setWindowIcon(icon)
+		msgbox.setWindowTitle(title)
+		msgbox.setContentsMargins(10, 1, 10, 1)
+		msgbox.setText('<b>{}</b><br/><br/>{}'.format(title, msg))
+		msgbox.exec()
+
 	def prepare_proc(self):
 		self.disable_buttons()
 		self.output.moveCursor(QTextCursor.End)
@@ -211,6 +221,10 @@ class MainWindow(QMainWindow):
 					.format(self.proc.program(), exitCode)
 			)
 		self.statusBar().showMessage(self.tr('Done'), -1)
+		self.msgwin(
+			self.tr('Command finished'),
+			self.tr('Command finished successfully.')
+		)
 		self.reset()
 
 	def git_finished(self, exitCode, exitStatus):
