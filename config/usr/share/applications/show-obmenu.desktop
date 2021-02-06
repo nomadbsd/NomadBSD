@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Show Openbox menu
+Type=Application
+Exec=/usr/bin/show-obmenu
+Icon=nomadbsd-logo-bright.png
+NoDisplay=true

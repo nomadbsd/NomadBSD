@@ -202,8 +202,9 @@ launcher_icon_size = 22
 launcher_icon_asb = 100 0 0
 launcher_icon_theme = Papirus
 launcher_icon_theme_override = 0
-startup_notifications = 1
+startup_notifications = 0
 launcher_tooltip = 0
+launcher_item_app = /usr/share/applications/show-obmenu.desktop
 
 #-------------------------------------
 # Clock
