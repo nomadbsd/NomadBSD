@@ -501,8 +501,11 @@ createimage()
 		echo "${UZIP_IMAGE}.uzip does not exist." >&2
 		bail
 	fi
+	if [ "${rootfs}" = "zfs" ]; then
+	    du_extra_args="-A"
+	fi
 	blksize=$((${FRAGSIZE} * 8))
-	uzipsz=$(du -m ${UZIP_IMAGE}.uzip | cut -f1)
+	uzipsz=$(du -m ${du_extra_args} ${UZIP_IMAGE}.uzip | cut -f1)
 
 	[ ! -d "${TMP_BASE_DIR}" ] && mkdir -p ${TMP_BASE_DIR}
 
