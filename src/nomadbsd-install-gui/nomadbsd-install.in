@@ -563,7 +563,8 @@ commit() {
 	sysrc -f ${DESTDIR}/etc/rc.conf -x gsched_enable
 	sysrc -f ${DESTDIR}/etc/rc.conf -x local_startup
 	sed -E -i '' '/^\/etc\/rc.d\/mount_uzip.*$/d' ${DESTDIR}/etc/rc.shutdown
-
+	sed -i '' 's#^PKG_CACHEDIR.*$#PKG_CACHEDIR = "/var/cache/pkg";#' \
+		${DESTDIR}/usr/local/etc/pkg.conf
 	if [ ${fstype} = "ZFS" ]; then
 		sysrc -f ${DESTDIR}/etc/rc.conf zfs_enable=YES
 	fi
