@@ -38,6 +38,7 @@ local default_safe_mode = false
 local default_single_user = false
 local default_verbose = false
 local default_disable_syscons = false
+local default_disable_gfxdetect = false
 
 local function composeLoaderCmd(cmd_name, argstr)
 	if argstr ~= nil then
@@ -56,15 +57,19 @@ local function recordDefaults()
 	local boot_single = loader.getenv("boot_single") or "no"
 	local boot_verbose = loader.getenv("boot_verbose") or "no"
 	local disable_syscons = loader.getenv("hw.syscons.disable") or "0"
+	local disable_gfxdetect = loader.getenv("initgfx.detect.disable") or "0"
+
 	default_single_user = boot_single:lower() ~= "no"
 	default_verbose = boot_verbose:lower() ~= "no"
 	default_disable_syscons = disable_syscons:lower() ~= "0"
+	default_disable_gfxdetect = disable_gfxdetect:lower() ~= "0"
 	if boot_acpi then
 		core.setACPI(true)
 	end
 	core.setSingleUser(default_single_user)
 	core.setVerbose(default_verbose)
 	core.disableSyscons(default_disable_syscons)
+	core.disableGfxDetect(default_disable_gfxdetect)
 end
 
 
@@ -122,6 +127,20 @@ function core.disableSyscons(disable_syscons)
 	end
 	core.disable_syscons = disable_syscons
 end
+
+function core.disableGfxDetect(disable_gfxdetect)
+	if disable_gfxdetect == nil then
+		disable_gfxdetect = not core.disable_gfxdetect
+	end
+
+	if disable_gfxdetect then
+		loader.setenv("initgfx.detect.disable", "1")
+	else
+		loader.setenv("initgfx.detect.disable", "0")
+	end
+	core.disable_gfxdetect = disable_gfxdetect
+end
+
 
 function core.setSingleUser(single_user)
 	if single_user == nil then

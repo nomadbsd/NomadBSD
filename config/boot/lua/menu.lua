@@ -364,6 +364,17 @@ menu.welcome = {
 			end,
 			alias = {"l", "L"},
 		},
+		-- disable gfx detection
+		{
+			entry_type = core.MENU_ENTRY,
+			name = function()
+				return OnOff("Disable automatic " ..
+				    color.highlight("G") .. "raphics detec" ..
+				    "tion: ", core.disable_gfxdetect)
+			end,
+			func = core.disableGfxDetect,
+			alias = {"g", "G"},
+		}
 	},
 }
 

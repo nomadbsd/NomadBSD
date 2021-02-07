@@ -293,11 +293,41 @@ setup_nvidia()
 	return 0
 }
 
+is_virtualbox()
+{
+	pciconf -lv | grep -B3 display | grep -q -i virtualbox
+}
+
+get_fallback_driver()
+{
+	if sysctl machdep.bootmethod | grep -q BIOS; then
+		fallback_driver="vesa"
+	else
+		fallback_driver="scfb"
+	fi
+}
+
+write_fallback_cfg()
+{
+	(printf "Section \"Device\"\n"; \
+	 printf "\tIdentifier \"Card0\"\n"; \
+	 printf "\tDriver \"${fallback_driver}\"\n"; \
+	 printf "\tBusID \"PCI:$busID\"\n"; \
+	 printf "EndSection\n") > "${path_xorg_cfg}"
+}
+
 do_initgfx()
 {
-	local driver
-
 	unalias echo
+	if [ "$(kenv -q initgfx.detect.disable)" = "1" ]; then
+		del_stale_files
+		get_device_info
+		if ! is_virtualbox; then
+			get_fallback_driver
+			write_fallback_cfg
+		fi
+		return
+	fi
 	if check_configured; then
 		initgfx_debug "Using previous configuration ..."
 		for m in ${initgfx_kmods}; do
@@ -311,15 +341,11 @@ do_initgfx()
 	cp -a /etc/rc.conf "${path_tmp_rc_conf}"
 
 	# In VirtualBox we are done here
-	if (pciconf -lv | grep -B3 display | grep -q -i virtualbox); then
+	if is_virtualbox; then
 		save_config_id
 		return
 	fi
-	if sysctl machdep.bootmethod | grep -q BIOS; then
-		driver="vesa"
-	else
-		driver="scfb"
-	fi
+	get_fallback_driver
 	initgfx_debug "Auto-detecting graphics driver ..."
 	get_device_info
 	for i in nvidia intel ati_amd; do
@@ -334,18 +360,13 @@ do_initgfx()
 				return
 			else
 				initgfx_warn "Failed to use $i driver. " \
-							 "Using ${driver} instead ..." >&2
+							 "Using ${fallback_driver} instead ..." >&2
 				del_stale_files
 			fi
 			break
 		fi
 	done
-	(printf "Section \"Device\"\n"; \
-	 printf "\tIdentifier \"Card0\"\n"; \
-	 printf "\tDriver \"${driver}\"\n"; \
-	 printf "\tBusID \"PCI:$busID\"\n"; \
-	 printf "EndSection\n") > "${path_xorg_cfg}"
-
+	write_fallback_cfg
 	cp -a "${path_tmp_rc_conf}" /etc/rc.conf
 	sysrc -x initgfx_kmods
 }
