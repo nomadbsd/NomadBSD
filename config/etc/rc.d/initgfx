@@ -348,6 +348,9 @@ do_initgfx()
 	get_fallback_driver
 	initgfx_debug "Auto-detecting graphics driver ..."
 	get_device_info
+
+	# Prepare for a crash.
+	mount -u -o sync /
 	for i in nvidia intel ati_amd; do
 		if setup_${i}; then
 			initgfx_debug "Testing Xorg configuration ..."
@@ -357,6 +360,7 @@ do_initgfx()
 				__wait 3
 				save_config_id
 				cp -a "${path_tmp_rc_conf}" /etc/rc.conf
+				mount -u /
 				return
 			else
 				initgfx_warn "Failed to use $i driver. " \
@@ -369,6 +373,7 @@ do_initgfx()
 	write_fallback_cfg
 	cp -a "${path_tmp_rc_conf}" /etc/rc.conf
 	sysrc -x initgfx_kmods
+	mount -u /
 }
 
 run_rc_command "$1"
