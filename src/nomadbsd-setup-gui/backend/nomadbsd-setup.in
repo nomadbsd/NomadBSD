@@ -698,8 +698,8 @@ sub commit {
 	} else {
 		mkdatafs();
 	}
-	status("Creating /data/pkgs");
-	system("mkdir /data/pkgs") == 0 or bail("Couldn't create /data/pkgs");
+	status("Creating /data/usr/local");
+	system("mkdir -p /data/usr/local") == 0 or bail("Couldn't create /data/usr/local");
 	status("Creating /data/compat");
 	system("mkdir /data/compat") == 0 or bail("Couldn't create /data/compat");
 	status("Creating /data/var/tmp");
@@ -813,7 +813,7 @@ sub dummy_commit {
 	} else {
 		status("Creating /home");
 	}
-	status("Creating /data/pkgs");
+	status("Creating /data/usr/local");
 	status("Extracting dot files and directories for user nomad");
 	for (my $p = 0; $p < 100; $p++) {
 		print "%$p\n"; usleep(50000);
