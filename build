@@ -528,7 +528,8 @@ createimage()
 	    --exclude '^var/cache/pkg*'    \
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'    \
-	    --exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
+	    --exclude '^var/db/pkg/*'      \
+		--exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
 	mkdir ${TMP_BASE_DIR}/var/log
 	mkdir ${TMP_BASE_DIR}/usr/share/nomadbsd
 	mkdir ${TMP_BASE_DIR}/compat
@@ -579,7 +580,10 @@ createimage()
 	fi
 	(cd ${TMP_BASE_DIR} && \
 		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
-		etc root var usr.local.etc) || bail
+			etc root var usr.local.etc) || bail
+	(cd ${SYSDIR} && \
+		tar cfJ ${TMP_BASE_DIR}/usr/share/nomadbsd/var.db.pkg.tar.xz \
+			var/db/pkg || bail)
 	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
 	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
 	touch ${IMAGE_NAME}

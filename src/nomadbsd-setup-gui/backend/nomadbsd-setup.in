@@ -730,10 +730,20 @@ sub commit {
 	status("Creating /usr/ports");
 	system("mkdir -p /usr/ports");
 
+	status("Creating /var/db/pkg");
+	system("mkdir -p /var/db/pkg");
+
+	status("Extracting package database to /data/var/db/pkg");
+	system("cd /data && tar xf /usr/share/nomadbsd/var.db.pkg.tar.xz");
+
+	status("Mounting /data/var/db/pkg to /var/db/pkg");
+	system("mount -t nullfs /data/var/db/pkg /var/db/pkg");
+
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/db/freebsd-update\t/var/db/freebsd-update\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/db/pkg\t/var/db/pkg\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/db/portsnap\t/var/db/portsnap\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
 
