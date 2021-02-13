@@ -707,6 +707,10 @@ sub commit {
 		or bail("Couldn't create /data/var/tmp");
 	system("chmod a+rwxt /data/var/tmp");
 		system("unlink /home >/dev/null 2>&1");
+
+	status("Creating /data/var/db");
+	system("mkdir -p /data/var/db");
+
 	system("rmdir -rf /home 2>&1");
 	status("Creating /data/home/nomad");
 	system("mkdir -p /data/home/nomad") == 0
@@ -715,14 +719,6 @@ sub commit {
 	status("Symlinking /home to /data/home");
 	system("ln -s /data/home /home") == 0
 		or bail("Failed to create symlink /home -> /data/home");
-	status("Creating /data/var/db/freebsd-update");
-	system("mkdir -p /data/var/db/freebsd-update");
-
-	status("Creating /data/var/db/portsnap");
-	system("mkdir -p /data/var/db/portsnap");
-
-	status("Creating /var/db/portsnap");
-	system("mkdir -p /var/db/portsnap");
 
 	status("Creating /data/usr/ports");
 	system("mkdir -p /data/usr/ports");
@@ -730,21 +726,19 @@ sub commit {
 	status("Creating /usr/ports");
 	system("mkdir -p /usr/ports");
 
-	status("Creating /var/db/pkg");
-	system("mkdir -p /var/db/pkg");
+	status("Extracting databases to /data/var/db/");
+	system("cd /data && tar xf /usr/share/nomadbsd/var.db.tar.xz");
 
-	status("Extracting package database to /data/var/db/pkg");
-	system("cd /data && tar xf /usr/share/nomadbsd/var.db.pkg.tar.xz");
+	# Copy new files and directories to /data/var/db
+	system("tar -C /var -cf - db | tar -C /data/var -xf -");
 
-	status("Mounting /data/var/db/pkg to /var/db/pkg");
-	system("mount -t nullfs /data/var/db/pkg /var/db/pkg");
+	status("Mounting /data/var/db to /var/db");
+	system("mount -t nullfs /data/var/db /var/db");
 
 	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
 	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/db/freebsd-update\t/var/db/freebsd-update\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/db/pkg\t/var/db/pkg\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/db/portsnap\t/var/db/portsnap\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/db\t/var/db\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
 
 	close($fh);
