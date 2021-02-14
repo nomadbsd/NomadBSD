@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
 		upgrade_icon	= QIcon.fromTheme('arrow-up')
 		self.chrome_rb	= QRadioButton('Google Chrome')
 		self.brave_rb	= QRadioButton('Brave')
+		self.vivaldi_rb	= QRadioButton('Vivaldi')
 		self.install_bt	= QPushButton(install_icon, self.tr('&Install'))
 		self.deinstall_bt = QPushButton(deinstall_icon, self.tr('&Deinstall'))
 		self.cancel_bt	= QPushButton(cancel_icon, self.tr('&Cancel'))
@@ -59,9 +60,9 @@ class MainWindow(QMainWindow):
 		text.setText(
 			self.tr(
 				'This program installs the <em>Widevine</em> capable Linux ' +
-				'version of the <em>Google Chrome</em> or <em>Brave</em> ' +
-				'browser. Both browsers allow you to use web services like ' +
-				'<em>Netflix</em>, <em>Prime Video</em>, or ' +
+				'version of <em>Google Chrome</em>, the <em>Brave</em> or ' +
+				'<em>Vivaldi</em> browser. They allow you to use web ' +
+				'services like <em>Netflix</em>, <em>Prime Video</em>, or ' +
 				'<em>Spotify</em>. The installation requires approx. 1GB ' +
 				'for the Linux environment, and approx. 100MB for the '
 				'browser.\n\n'
@@ -74,6 +75,7 @@ class MainWindow(QMainWindow):
 		layout.addWidget(text)
 		layout.addWidget(self.chrome_rb)
 		layout.addWidget(self.brave_rb)
+		layout.addWidget(self.vivaldi_rb)
 		layout.addWidget(self.output)
 		bbox.addWidget(self.upgrade_bt, 1, Qt.AlignLeft)
 		bbox.addWidget(self.install_bt, 1, Qt.AlignLeft)
@@ -93,6 +95,7 @@ class MainWindow(QMainWindow):
 		self.quit_bt.clicked.connect(self.quit)
 		self.chrome_rb.clicked.connect(self.update_buttons)
 		self.brave_rb.clicked.connect(self.update_buttons)
+		self.vivaldi_rb.clicked.connect(self.update_buttons)
 		self.cancel_bt.clicked.connect(self.cancel_cmd)
 
 	def xerrx(self, error, title, msg):
@@ -142,6 +145,9 @@ class MainWindow(QMainWindow):
 		elif self.brave_rb.isChecked():
 			self.browser = 'Brave'
 			args = [ 'install', 'brave' ]
+		elif self.vivaldi_rb.isChecked():
+			self.browser = 'Vivaldi'
+			args = [ 'install', 'vivaldi' ]
 		self.proc.finished.connect(self.cmd_finished)
 		os.chdir(PATH_LBI_DIR)
 		self.proc.start('./linux-browser-installer', args)
@@ -159,6 +165,9 @@ class MainWindow(QMainWindow):
 		elif self.brave_rb.isChecked():
 			self.browser = 'Brave'
 			args = [ 'deinstall', 'brave' ]
+		elif self.vivaldi_rb.isChecked():
+			self.browser = 'Vivaldi'
+			args = [ 'install', 'vivaldi' ]
 		self.proc.finished.connect(self.cmd_finished)
 		os.chdir(PATH_LBI_DIR)
 		self.proc.start('./linux-browser-installer', args)
@@ -187,8 +196,14 @@ class MainWindow(QMainWindow):
 				can_deinstall = True
 			else:
 				can_install = True
+		elif self.vivaldi_rb.isChecked():
+			if os.path.exists('/compat/ubuntu/bin/vivaldi'):
+				can_deinstall = True
+			else:
+				can_install = True
 		if (os.path.exists('/compat/ubuntu/bin/brave') or
-		   os.path.exists('/compat/ubuntu/bin/chrome')):
+		   os.path.exists('/compat/ubuntu/bin/chrome') or
+		   os.path.exists('/compat/ubuntu/bin/vivaldi')):
 			   self.upgrade_bt.setEnabled(True)
 		else:
 			   self.upgrade_bt.setEnabled(False)
@@ -204,6 +219,7 @@ class MainWindow(QMainWindow):
 		self.deinstall_bt.setEnabled(False)
 		self.chrome_rb.setEnabled(False)
 		self.brave_rb.setEnabled(False)
+		self.vivaldi_rb.setEnabled(False)
 		self.upgrade_bt.setEnabled(False)
 
 	def show_output(self, data):
@@ -255,6 +271,7 @@ class MainWindow(QMainWindow):
 	def reset(self):
 		self.chrome_rb.setEnabled(True)
 		self.brave_rb.setEnabled(True)
+		self.vivaldi_rb.setEnabled(True)
 		self.quit_bt.setEnabled(True)
 		self.cancel_bt.setEnabled(False)
 		self.update_buttons()
