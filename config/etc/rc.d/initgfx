@@ -351,7 +351,7 @@ do_initgfx()
 
 	# Prepare for a crash.
 	mount -u -o sync /
-	for i in nvidia intel ati_amd; do
+	for i in nvidia ati_amd intel; do
 		if setup_${i}; then
 			initgfx_debug "Testing Xorg configuration ..."
 			if test_x; then
