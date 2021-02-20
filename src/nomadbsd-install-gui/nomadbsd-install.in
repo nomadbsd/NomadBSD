@@ -81,7 +81,6 @@ show_extract() {
 			if (($0 !~ /^\//) && ($0 !~ /^.\//))
 				continue;
 			p = int(++n * 100 / nfiles);
-			print ">" $0;
 			print "%" p;
 			fflush();
 		}
