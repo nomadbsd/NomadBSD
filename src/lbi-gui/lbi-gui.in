@@ -167,7 +167,7 @@ class MainWindow(QMainWindow):
 			args = [ 'deinstall', 'brave' ]
 		elif self.vivaldi_rb.isChecked():
 			self.browser = 'Vivaldi'
-			args = [ 'install', 'vivaldi' ]
+			args = [ 'deinstall', 'vivaldi' ]
 		self.proc.finished.connect(self.cmd_finished)
 		os.chdir(PATH_LBI_DIR)
 		self.proc.start('./linux-browser-installer', args)
@@ -242,9 +242,9 @@ class MainWindow(QMainWindow):
 			)
 		self.statusBar().showMessage(self.tr('Done'), -1)
 		if self.action == self.install:
-			msg = self.tr(f'Installation of {self.browser} finished')
+			msg = self.tr('Installation of {} finished').format(self.browser)
 		elif self.action == self.deinstall:
-			msg = self.tr(f'Deinstallation of {self.browser} finished')
+			msg = self.tr('Deinstallation of {} finished').format(self.browser)
 		elif self.action == self.upgrade:
 			msg = self.tr('Upgrade finished')
 		else:
