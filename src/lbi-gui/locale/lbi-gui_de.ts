@@ -79,16 +79,6 @@
         <translation>Aktualisiere ...</translation>
     </message>
     <message>
-        <location filename="../lbi-gui" line="245"/>
-        <source>Installation of {self.browser} finished</source>
-        <translation>Installation von {self.browser} abgeschlossen</translation>
-    </message>
-    <message>
-        <location filename="../lbi-gui" line="247"/>
-        <source>Deinstallation of {self.browser} finished</source>
-        <translation>Deinstallation von {self.browser} abgeschlossen</translation>
-    </message>
-    <message>
         <location filename="../lbi-gui" line="249"/>
         <source>Upgrade finished</source>
         <translation>Upgrade abgeschlossen</translation>
@@ -111,6 +101,16 @@
         <translation>Dieses Programm installiert die &lt;em&gt;Widevine&lt;/em&gt;-fähige Linux-Version von &lt;em&gt;Google Chrome&lt;/em&gt;, dem &lt;em&gt;Brave&lt;/em&gt;- oder &lt;em&gt;Vivaldi&lt;/em&gt;-Browser. Sie ermöglichen die Nutzung von z.B. &lt;em&gt;Netflix&lt;/em&gt;, &lt;em&gt;Prime Video&lt;/em&gt; oder &lt;em&gt;Spotify&lt;/em&gt;. Die Installtion benötigt etwa 1GB für die Linux-Umgebung, und ungefähr 100MB für den jeweiligen Browser.
 
 </translation>
+    </message>
+    <message>
+        <location filename="../lbi-gui" line="245"/>
+        <source>Installation of {} finished</source>
+        <translation>Installation von {} abgeschlossen</translation>
+    </message>
+    <message>
+        <location filename="../lbi-gui" line="247"/>
+        <source>Deinstallation of {} finished</source>
+        <translation>Deinstallation von {} abgeschlossen</translation>
     </message>
 </context>
 <context>
