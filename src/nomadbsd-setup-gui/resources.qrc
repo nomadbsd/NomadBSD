@@ -6,6 +6,7 @@
 	<file>locale/nomadbsd-setup-gui_cs.qm</file>
 	<file>locale/nomadbsd-setup-gui_id.qm</file>
 	<file>images/logo.png</file>
+	<file>images/logo-large.png</file>
 </qresource>
 </RCC>
 

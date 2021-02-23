@@ -69,6 +69,7 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	resize(640, 480);
 	setWindowTitle(tr("NomadBSD Setup"));
 	setWindowIcon(QPixmap(":/images/logo.png"));
+	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo-large.png"));
 	addPage(new LocalePage);
 	addPage(new WelcomePage);
 	addPage(new KbdLayoutPage);
@@ -114,8 +115,6 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 	intro->setWordWrap(true);
 	title->setStyleSheet("font-weight: bold;");
 	title->setAlignment(Qt::AlignHCenter);
-	setPixmap(QWizard::WatermarkPixmap, QPixmap(":/images/logo.png"));
-	setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo.png"));
 	layout->addWidget(title);
 	layout->addWidget(intro);
 	setLayout(layout);
@@ -452,6 +451,8 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDLAYOUTS));
 	}
+	layoutls->setFixedHeight(layoutls->sizeHintForRow(0) * 4);
+
 	//
 	// Read keyboard variants.
 	//
@@ -483,6 +484,7 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 		    tr("Command '%1' returned with an error.")
 		    .arg(BACKEND_GET_KBDVARIANTS));
 	}
+
 	title->setStyleSheet("font-weight: bold;");
 	title->setAlignment(Qt::AlignHCenter);
 	info->setWordWrap(true);
@@ -506,10 +508,15 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	//layout->addWidget(tlabel);
 	//layout->addWidget(test);
 	layout->addWidget(addBt, 1, Qt::AlignRight);
-	
-	xlvbox->addWidget(xllabel);
-	xlvbox->addWidget(xlayoutls);
+	xlvbox->addWidget(xllabel, 0, Qt::AlignTop);
+	xlvbox->addWidget(xlayoutls, 0, Qt::AlignTop);
 	xlvbox->addWidget(removeBt, 1, Qt::AlignLeft);
+
+	QListWidgetItem *_tmpItem = new QListWidgetItem(" ");
+	xlayoutls->addItem(_tmpItem);
+	xlayoutls->setFixedHeight(xlayoutls->sizeHintForRow(0) * 2);
+	delete _tmpItem;
+
 	layout->addLayout(xlvbox);
 	setLayout(layout);
 
@@ -547,6 +554,7 @@ void ExtraKbdLayoutPage::kbdLayoutSelected(int row)
 		    QVariant(kbdvariant.at(i).variant));
 		variantls->addItem(item);
 	}
+	variantls->setFixedHeight(layoutls->sizeHintForRow(0) * 4);
 	connect(variantls, SIGNAL(currentRowChanged(int)), this,
 	    SLOT(kbdVariantSelected(int)));
 }
