@@ -108,6 +108,8 @@ x11-drivers/xf86-video-ati
 x11-drivers/xf86-video-intel
 x11-drivers/xf86-video-openchrome
 x11-drivers/xf86-video-scfb
+x11-drivers/xf86-input-vmmouse
+x11-drivers/xf86-video-vmware
 x11-drivers/xf86-video-vesa
 x11-fm/pcmanfm
 x11-fm/thunar
