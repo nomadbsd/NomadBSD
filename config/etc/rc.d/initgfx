@@ -196,7 +196,6 @@ setup_intel()
 	kmod="/boot/modules/i915kms.ko"
 	set_kldconfig_path "${kmod}"
 	kldload "${kmod}"
-	set_kldconfig_path "${kmod}"
 	sysrc -f "${path_tmp_rc_conf}" initgfx_kmods="${kmod}"
 	sync
 	return 0
