@@ -292,9 +292,9 @@ setup_nvidia()
 	return 0
 }
 
-is_virtualbox()
+is_vm()
 {
-	pciconf -lv | grep -B3 display | grep -q -i virtualbox
+	pciconf -lv | grep -B3 display | grep -E -q -i 'virtualbox|VMware'
 }
 
 get_fallback_driver()
@@ -321,7 +321,7 @@ do_initgfx()
 	if [ "$(kenv -q initgfx.detect.disable)" = "1" ]; then
 		del_stale_files
 		get_device_info
-		if ! is_virtualbox; then
+		if ! is_vm; then
 			get_fallback_driver
 			write_fallback_cfg
 		fi
@@ -339,8 +339,8 @@ do_initgfx()
 	del_stale_files
 	cp -a /etc/rc.conf "${path_tmp_rc_conf}"
 
-	# In VirtualBox we are done here
-	if is_virtualbox; then
+	# In VirtualBox and VMware we are done here
+	if is_vm; then
 		save_config_id
 		return
 	fi
