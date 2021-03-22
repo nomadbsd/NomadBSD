@@ -75,6 +75,22 @@ del_stale_files()
 	rm -f "${path_config_id}" > /dev/null 2>&1
 }
 
+restore_symlinks()
+{
+	local extpath=/usr/local/lib/xorg/modules/extensions
+
+	if [ -L "${extpath}/libglx.so" ]; then
+		rm -f "${extpath}/libglx.so"
+		ln -s "${extpath}/.xorg/libglx.so" ${extpath}/
+	fi
+}
+
+__reset()
+{
+	del_stale_files
+	restore_symlinks
+}
+
 calc_config_id()
 {
 	sysctl dev.vgapci | sort | md5
@@ -319,8 +335,7 @@ do_initgfx()
 {
 	unalias echo
 	if [ "$(kenv -q initgfx.detect.disable)" = "1" ]; then
-		del_stale_files
-		get_device_info
+		__reset
 		if ! is_vm; then
 			get_fallback_driver
 			write_fallback_cfg
@@ -336,7 +351,7 @@ do_initgfx()
 		return
 	fi
 	initgfx_debug "Creating new configuration ..."
-	del_stale_files
+	__reset
 	cp -a /etc/rc.conf "${path_tmp_rc_conf}"
 
 	# In VirtualBox and VMware we are done here
@@ -362,7 +377,7 @@ do_initgfx()
 			else
 				initgfx_warn "Failed to use $i driver. " \
 							 "Using ${fallback_driver} instead ..." >&2
-				del_stale_files
+				__reset
 			fi
 			break
 		fi
