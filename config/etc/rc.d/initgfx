@@ -81,6 +81,8 @@ restore_symlinks()
 
 	if [ -L "${extpath}/libglx.so" ]; then
 		rm -f "${extpath}/libglx.so"
+	fi
+	if [ ! -e "${extpath}/libglx.so" ]; then
 		ln -s "${extpath}/.xorg/libglx.so" ${extpath}/
 	fi
 }
