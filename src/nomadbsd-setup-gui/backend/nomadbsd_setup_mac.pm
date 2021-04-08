@@ -98,7 +98,7 @@ sub mkdatapart {
 		}
 	}
 	system("gpart recover $dev");
-	system("gpart add -t freebsd-ufs -a 1M -l $gptdata $dev") == 0
+	system("gpart add -t freebsd-ufs -a 1m -l $gptdata $dev") == 0
 		or bail("Couldn't create data partition: gpart failed.");
 }
 
