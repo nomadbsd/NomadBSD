@@ -615,7 +615,7 @@ createimage()
 		gpart create -s bsd ${mddev}s${pn}
 		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev}
 		gpart bootcode -b "${SYSDIR}/boot/boot" ${mddev}s${pn}
-		gpart add -t freebsd-ufs -a 1m ${mddev}s${pn} || bail
+		gpart add -t freebsd-ufs -a 1m -b 16 ${mddev}s${pn} || bail
 		gpart set -a active -i ${pn} ${mddev}
 		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 			  -m ${UFS_MINFREE} /dev/${mddev}s${pn}a || bail
