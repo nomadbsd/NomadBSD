@@ -26,7 +26,7 @@
 -- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 -- SUCH DAMAGE.
 --
--- $FreeBSD: releng/12.0/stand/lua/loader.lua 338394 2018-08-30 13:29:32Z kevans $
+-- $FreeBSD$
 --
 
 -- The cli module should be included first here. Some of the functions that it
@@ -38,31 +38,21 @@ local color = require("color")
 local core = require("core")
 local config = require("config")
 local password = require("password")
--- The menu module will be brought in after config has loaded if we actually
--- need it.
-local menu
-
-try_include("local")
 
 config.load()
-if string.lower(loader.getenv("smbios.system.product")) == "virtualbox" then
-	loader.setenv("kern.hz", 100)
-end
--- Our console may have been setup for a different color scheme before we get
--- here, so make sure we set the default.
-if color.isEnabled() then
-	printc(color.default())
-end
-if not core.isMenuSkipped() then
-	menu = require("menu")
-end
+
 if core.isUEFIBoot() then
 	loader.perform("efi-autoresizecons")
 end
+-- Our console may have been setup with different settings before we get
+-- here, so make sure we reset everything back to default.
+if color.isEnabled() then
+	printc(core.KEYSTR_RESET)
+end
+try_include("local")
 password.check()
--- menu might be disabled
-if menu ~= nil then
-	menu.run()
+if not core.isMenuSkipped() then
+	require("menu").run()
 else
 	-- Load kernel/modules before we go
 	config.loadelf()

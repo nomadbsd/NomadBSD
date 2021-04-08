@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
 --
 -- Copyright (c) 2015 Pedro Souza <pedrosouza@freebsd.org>
--- Copyright (C) 2018 Kyle Evans <kevans@FreeBSD.org>
+-- Copyright (c) 2018 Kyle Evans <kevans@FreeBSD.org>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 -- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 -- SUCH DAMAGE.
 --
--- $FreeBSD: releng/12.0/stand/lua/menu.lua 340244 2018-11-08 03:25:18Z kevans $
+-- $FreeBSD$
 --
 
 local cli = require("cli")
@@ -47,10 +47,10 @@ local return_menu_entry = {
 local function OnOff(str, value)
 	if value then
 		return str .. color.escapefg(color.GREEN) .. "On" ..
-		    color.escapefg(color.WHITE)
+		    color.resetfg()
 	else
 		return str .. color.escapefg(color.RED) .. "off" ..
-		    color.escapefg(color.WHITE)
+		    color.resetfg()
 	end
 end
 
@@ -132,6 +132,9 @@ menu.boot_environments = {
 		},
 		{
 			entry_type = core.MENU_ENTRY,
+			visible = function()
+				return core.isRewinded() == false
+			end,
 			name = function()
 				return color.highlight("b") .. "ootfs: " ..
 				    core.bootenvDefault()
@@ -171,7 +174,7 @@ menu.boot_options = {
 			visible = core.isSystem386,
 			name = function()
 				return OnOff(color.highlight("A") ..
-				    "CPI           :", core.acpi)
+				    "CPI       :", core.acpi)
 			end,
 			func = core.setACPI,
 			alias = {"a", "A"},
@@ -181,7 +184,7 @@ menu.boot_options = {
 			entry_type = core.MENU_ENTRY,
 			name = function()
 				return OnOff("Safe " .. color.highlight("M") ..
-				    "ode      :", core.sm)
+				    "ode  :", core.sm)
 			end,
 			func = core.setSafeMode,
 			alias = {"m", "M"},
@@ -191,7 +194,7 @@ menu.boot_options = {
 			entry_type = core.MENU_ENTRY,
 			name = function()
 				return OnOff(color.highlight("S") ..
-				    "ingle user    :", core.su)
+				    "ingle user:", core.su)
 			end,
 			func = core.setSingleUser,
 			alias = {"s", "S"},
@@ -212,7 +215,7 @@ menu.boot_options = {
 			entry_type = core.MENU_ENTRY,
 			name = function()
 				return OnOff(color.highlight("V") ..
-				    "erbose        :", core.verbose)
+				    "erbose    :", core.verbose)
 			end,
 			func = core.setVerbose,
 			alias = {"v", "V"},
@@ -223,30 +226,53 @@ menu.boot_options = {
 menu.welcome = {
 	entries = function()
 		local menu_entries = menu.welcome.all_entries
-		-- Swap the first two menu items on single user boot
+		local multi_user = menu_entries.multi_user
+		local single_user = menu_entries.single_user
+		local boot_entry_1, boot_entry_2
 		if core.isSingleUserBoot() then
-			-- We'll cache the swapped menu, for performance
-			if menu.welcome.swapped_menu ~= nil then
-				return menu.welcome.swapped_menu
+			-- Swap the first two menu items on single user boot.
+			-- We'll cache the alternate entries for performance.
+			local alts = menu_entries.alts
+			if alts == nil then
+				single_user = core.deepCopyTable(single_user)
+				multi_user = core.deepCopyTable(multi_user)
+				single_user.name = single_user.alternate_name
+				multi_user.name = multi_user.alternate_name
+				menu_entries.alts = {
+					single_user = single_user,
+					multi_user = multi_user,
+				}
+			else
+				single_user = alts.single_user
+				multi_user = alts.multi_user
 			end
-			-- Shallow copy the table
-			menu_entries = core.deepCopyTable(menu_entries)
-
-			-- Swap the first two menu entries
-			menu_entries[1], menu_entries[2] =
-			    menu_entries[2], menu_entries[1]
-
-			-- Then set their names to their alternate names
-			menu_entries[1].name, menu_entries[2].name =
-			    menu_entries[1].alternate_name,
-			    menu_entries[2].alternate_name
-			menu.welcome.swapped_menu = menu_entries
+			boot_entry_1, boot_entry_2 = single_user, multi_user
+		else
+			boot_entry_1, boot_entry_2 = multi_user, single_user
 		end
-		return menu_entries
+		return {
+			boot_entry_1,
+			boot_entry_2,
+			menu_entries.prompt,
+			menu_entries.reboot,
+			menu_entries.console,
+			{
+				entry_type = core.MENU_SEPARATOR,
+			},
+			{
+				entry_type = core.MENU_SEPARATOR,
+				name = "Options:",
+			},
+			menu_entries.kernel_options,
+			menu_entries.boot_options,
+			menu_entries.zpool_checkpoints,
+			menu_entries.boot_envs,
+			menu_entries.chainload,
+			menu_entries.disable_gfxdetect
+		}
 	end,
 	all_entries = {
-		-- boot multi user
-		{
+		multi_user = {
 			entry_type = core.MENU_ENTRY,
 			name = color.highlight("B") .. "oot Multi user " ..
 			    color.highlight("[Enter]"),
@@ -259,8 +285,7 @@ menu.welcome = {
 			end,
 			alias = {"b", "B"},
 		},
-		-- boot single user
-		{
+		single_user = {
 			entry_type = core.MENU_ENTRY,
 			name = "Boot " .. color.highlight("S") .. "ingle user",
 			-- Not a standard menu entry function!
@@ -272,8 +297,17 @@ menu.welcome = {
 			end,
 			alias = {"s", "S"},
 		},
-		-- escape to interpreter
-		{
+		console = {
+			entry_type = core.MENU_ENTRY,
+			name = function()
+				return color.highlight("C") .. "ons: " .. core.getConsoleName()
+			end,
+			func = function()
+				core.nextConsoleChoice()
+			end,
+			alias = {"c", "C"},
+		},
+		prompt = {
 			entry_type = core.MENU_RETURN,
 			name = color.highlight("Esc") .. "ape to loader prompt",
 			func = function()
@@ -281,8 +315,7 @@ menu.welcome = {
 			end,
 			alias = {core.KEYSTR_ESCAPE},
 		},
-		-- reboot
-		{
+		reboot = {
 			entry_type = core.MENU_ENTRY,
 			name = color.highlight("R") .. "eboot",
 			func = function()
@@ -290,15 +323,7 @@ menu.welcome = {
 			end,
 			alias = {"r", "R"},
 		},
-		{
-			entry_type = core.MENU_SEPARATOR,
-		},
-		{
-			entry_type = core.MENU_SEPARATOR,
-			name = "Options:",
-		},
-		-- kernel options
-		{
+		kernel_options = {
 			entry_type = core.MENU_CAROUSEL_ENTRY,
 			carousel_id = "kernel",
 			items = core.kernelList,
@@ -330,15 +355,39 @@ menu.welcome = {
 			end,
 			alias = {"k", "K"},
 		},
-		-- boot options
-		{
+		boot_options = {
 			entry_type = core.MENU_SUBMENU,
 			name = "Boot " .. color.highlight("O") .. "ptions",
 			submenu = menu.boot_options,
 			alias = {"o", "O"},
 		},
-		-- boot environments
-		{
+		zpool_checkpoints = {
+			entry_type = core.MENU_ENTRY,
+			name = function()
+				local rewind = "No"
+				if core.isRewinded() then
+					rewind = "Yes"
+				end
+				return "Rewind ZFS " .. color.highlight("C") ..
+					"heckpoint: " .. rewind
+			end,
+			func = function()
+				core.changeRewindCheckpoint()
+				if core.isRewinded() then
+					bootenvSet(
+					    core.bootenvDefaultRewinded())
+				else
+					bootenvSet(core.bootenvDefault())
+				end
+				config.setCarouselIndex("be_active", 1)
+			end,
+			visible = function()
+				return core.isZFSBoot() and
+				    core.isCheckpointed()
+			end,
+			alias = {"c", "C"},
+		},
+		boot_envs = {
 			entry_type = core.MENU_SUBMENU,
 			visible = function()
 				return core.isZFSBoot() and
@@ -348,8 +397,7 @@ menu.welcome = {
 			submenu = menu.boot_environments,
 			alias = {"e", "E"},
 		},
-		-- chainload
-		{
+		chainload = {
 			entry_type = core.MENU_ENTRY,
 			name = function()
 				return 'Chain' .. color.highlight("L") ..
@@ -364,8 +412,7 @@ menu.welcome = {
 			end,
 			alias = {"l", "L"},
 		},
-		-- disable gfx detection
-		{
+		disable_gfxdetect = {
 			entry_type = core.MENU_ENTRY,
 			name = function()
 				return OnOff("Disable automatic " ..
@@ -516,7 +563,7 @@ function menu.autoboot(delay)
 end
 
 -- CLI commands
-function cli.menu(...)
+function cli.menu()
 	menu.run()
 end
 

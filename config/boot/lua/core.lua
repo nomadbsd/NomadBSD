@@ -26,7 +26,7 @@
 -- OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 -- SUCH DAMAGE.
 --
--- $FreeBSD: releng/12.0/stand/lua/core.lua 340012 2018-11-01 17:37:20Z kevans $
+-- $FreeBSD$
 --
 
 local config = require("config")
@@ -39,6 +39,8 @@ local default_single_user = false
 local default_verbose = false
 local default_disable_syscons = false
 local default_disable_gfxdetect = false
+
+local bootenv_list = "bootenvs"
 
 local function composeLoaderCmd(cmd_name, argstr)
 	if argstr ~= nil then
@@ -61,6 +63,7 @@ local function recordDefaults()
 
 	default_single_user = boot_single:lower() ~= "no"
 	default_verbose = boot_verbose:lower() ~= "no"
+
 	default_disable_syscons = disable_syscons:lower() ~= "0"
 	default_disable_gfxdetect = disable_gfxdetect:lower() ~= "0"
 	if boot_acpi then
@@ -72,17 +75,32 @@ local function recordDefaults()
 	core.disableGfxDetect(default_disable_gfxdetect)
 end
 
-
 -- Globals
 -- try_include will return the loaded module on success, or false and the error
 -- message on failure.
 function try_include(module)
-	local status, ret = pcall(require, module)
-	-- ret is the module if we succeeded.
-	if status then
-		return ret
+	if module:sub(1, 1) ~= "/" then
+		local lua_path = loader.lua_path
+		-- XXX Temporary compat shim; this should be removed once the
+		-- loader.lua_path export has sufficiently spread.
+		if lua_path == nil then
+			lua_path = "/boot/lua"
+		end
+		module = lua_path .. "/" .. module
+		-- We only attempt to append an extension if an absolute path
+		-- wasn't specified.  This assumes that the caller either wants
+		-- to treat this like it would require() and specify just the
+		-- base filename, or they know what they're doing as they've
+		-- specified an absolute path and we shouldn't impede.
+		if module:match(".lua$") == nil then
+			module = module .. ".lua"
+		end
 	end
-	return false, ret
+	if lfs.attributes(module, "mode") ~= "file" then
+		return
+	end
+
+	return dofile(module)
 end
 
 -- Module exports
@@ -95,6 +113,7 @@ core.KEY_DELETE		= 127
 -- other contexts (outside of Lua) may mean 'octal'
 core.KEYSTR_ESCAPE	= "\027"
 core.KEYSTR_CSI		= core.KEYSTR_ESCAPE .. "["
+core.KEYSTR_RESET	= core.KEYSTR_ESCAPE .. "c"
 
 core.MENU_RETURN	= "return"
 core.MENU_ENTRY		= "entry"
@@ -140,7 +159,6 @@ function core.disableGfxDetect(disable_gfxdetect)
 	end
 	core.disable_gfxdetect = disable_gfxdetect
 end
-
 
 function core.setSingleUser(single_user)
 	if single_user == nil then
@@ -288,7 +306,7 @@ function core.bootenvDefault()
 end
 
 function core.bootenvList()
-	local bootenv_count = tonumber(loader.getenv("bootenvs_count"))
+	local bootenv_count = tonumber(loader.getenv(bootenv_list .. "_count"))
 	local bootenvs = {}
 	local curenv
 	local envcount = 0
@@ -299,7 +317,12 @@ function core.bootenvList()
 	end
 
 	-- Currently selected bootenv is always first/default
-	curenv = core.bootenvDefault()
+	-- On the rewinded list the bootenv may not exists
+	if core.isRewinded() then
+		curenv = core.bootenvDefaultRewinded()
+	else
+		curenv = core.bootenvDefault()
+	end
 	if curenv ~= nil then
 		envcount = envcount + 1
 		bootenvs[envcount] = curenv
@@ -307,7 +330,7 @@ function core.bootenvList()
 	end
 
 	for curenv_idx = 0, bootenv_count - 1 do
-		curenv = loader.getenv("bootenvs[" .. curenv_idx .. "]")
+		curenv = loader.getenv(bootenv_list .. "[" .. curenv_idx .. "]")
 		if curenv ~= nil and unique[curenv] == nil then
 			envcount = envcount + 1
 			bootenvs[envcount] = curenv
@@ -315,6 +338,40 @@ function core.bootenvList()
 		end
 	end
 	return bootenvs
+end
+
+function core.isCheckpointed()
+	return loader.getenv("zpool_checkpoint") ~= nil
+end
+
+function core.bootenvDefaultRewinded()
+	local defname =  "zfs:!" .. string.sub(core.bootenvDefault(), 5)
+	local bootenv_count = tonumber("bootenvs_check_count")
+
+	if bootenv_count == nil or bootenv_count <= 0 then
+		return defname
+	end
+
+	for curenv_idx = 0, bootenv_count - 1 do
+		local curenv = loader.getenv("bootenvs_check[" .. curenv_idx .. "]")
+		if curenv == defname then
+			return defname
+		end
+	end
+
+	return loader.getenv("bootenvs_check[0]")
+end
+
+function core.isRewinded()
+	return bootenv_list == "bootenvs_check"
+end
+
+function core.changeRewindCheckpoint()
+	if core.isRewinded() then
+		bootenv_list = "bootenvs"
+	else
+		bootenv_list = "bootenvs_check"
+	end
 end
 
 function core.setDefaults()
@@ -357,6 +414,16 @@ function core.isZFSBoot()
 
 	if c ~= nil then
 		return c:match("^zfs:") ~= nil
+	end
+	return false
+end
+
+function core.isSerialConsole()
+	local c = loader.getenv("console")
+	if c ~= nil then
+		if c:find("comconsole") ~= nil then
+			return true
+		end
 	end
 	return false
 end
@@ -417,6 +484,40 @@ function core.popFrontTable(tbl)
 	end
 
 	return first_value, new_tbl
+end
+
+function core.getConsoleName()
+	if loader.getenv("boot_multicons") ~= nil then
+		if loader.getenv("boot_serial") ~= nil then
+			return "Dual (Serial primary)"
+		else
+			return "Dual (Video primary)"
+		end
+	else
+		if loader.getenv("boot_serial") ~= nil then
+			return "Serial"
+		else
+			return "Video"
+		end
+	end
+end
+
+function core.nextConsoleChoice()
+	if loader.getenv("boot_multicons") ~= nil then
+		if loader.getenv("boot_serial") ~= nil then
+			loader.unsetenv("boot_serial")
+		else
+			loader.unsetenv("boot_multicons")
+			loader.setenv("boot_serial", "YES")
+		end
+	else
+		if loader.getenv("boot_serial") ~= nil then
+			loader.unsetenv("boot_serial")
+		else
+			loader.setenv("boot_multicons", "YES")
+			loader.setenv("boot_serial", "YES")
+		end
+	end
 end
 
 recordDefaults()
