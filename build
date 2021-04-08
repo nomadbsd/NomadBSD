@@ -598,7 +598,7 @@ createimage()
 		dd if=/dev/zero of=/dev/${mddev} bs=1M count=100
 		gpart create -s mbr ${mddev}
 		if [ "${ARCH}" != "i386" ]; then
-			gpart add -a 4k -t efi -s 40M ${mddev}
+			gpart add -a 1M -t efi -b 0 -s 40M ${mddev}
 			pn=$(($pn + 1))
 			newfs_msdos -F 32 -c 1 /dev/${mddev}s${pn} || bail
 			mount -t msdosfs /dev/${mddev}s${pn} "${MNT}" || bail
@@ -610,12 +610,12 @@ createimage()
 			fi
 			_umount "${MNT}"
 		fi
-		gpart add -t freebsd -a 4k -s ${basesz}M ${mddev}
+		gpart add -t freebsd -a 1M -s ${basesz}M ${mddev}
 		pn=$(($pn + 1))
 		gpart create -s bsd ${mddev}s${pn}
 		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev}
 		gpart bootcode -b "${SYSDIR}/boot/boot" ${mddev}s${pn}
-		gpart add -t freebsd-ufs -b 16 ${mddev}s${pn} || bail
+		gpart add -t freebsd-ufs ${mddev}s${pn} || bail
 		gpart set -a active -i ${pn} ${mddev}
 		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 			  -m ${UFS_MINFREE} /dev/${mddev}s${pn}a || bail
@@ -625,7 +625,7 @@ createimage()
 		gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 		pn=$((${pn} + 1))
 		gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${pn} ${mddev} || bail
-		gpart add -t efi -a 4k -l gpefiboot -s 200M ${mddev} || bail
+		gpart add -t efi -a 1M -l gpefiboot -s 200M ${mddev} || bail
 		pn=$((${pn} + 1))
 		newfs_msdos -F 32 -c 1 /dev/${mddev}p${pn} || bail
 		mount -t msdosfs /dev/${mddev}p${pn} "${MNT}" || bail
@@ -636,7 +636,7 @@ createimage()
 			cp ${SYSDIR}/boot/boot1.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
 		fi
 		_umount "${MNT}"
-		gpart add -t freebsd-ufs -l ${ROOTLABEL} -s ${basesz}M ${mddev} || bail
+		gpart add -t freebsd-ufs -a 1M -l ${ROOTLABEL} -s ${basesz}M ${mddev} || bail
 		pn=$((${pn} + 1))
 		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
 		      -m ${UFS_MINFREE} /dev/${mddev}p${pn} || bail
