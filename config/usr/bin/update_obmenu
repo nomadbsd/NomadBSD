@@ -140,6 +140,23 @@ my %trtbl_gr = (
 	'Update menu' => 'Ενημέρωση μενού'
 );
 
+my %trtbl_it = (
+	'AudioVideo'  => 'Audio/Video',
+	'Audio'       => 'Audio',
+	'Video'       => 'Video',
+	'Development' => 'Sviluppo',
+	'Education'   => 'Formazione scolastica',
+	'Game'        => 'Gioco',
+	'Graphics'    => 'Grafica',
+	'Network'     => 'Rete',
+	'Office'      => 'Ufficio',
+	'Settings'    => 'impostazioni',
+	'System'      => 'Sistema',
+	'Utility'     => 'Utilità',
+	'Application' => 'Applicazione',
+	'Update menu' => 'Aggiorna menu'
+);
+
 my %trtbl_pt = (
 	'AudioVideo'  => 'Áudio/Vídeo',
 	'Audio'       => 'Áudio',
@@ -232,6 +249,7 @@ my %trtbl = (
 	fr => \%trtbl_fr,
 	gr => \%trtbl_gr,
 	id => \%trtbl_id,
+	it => \%trtbl_it,
 	jp => \%trtbl_jp,
 	pt => \%trtbl_pt,
 	ru => \%trtbl_ru,
