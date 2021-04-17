@@ -241,8 +241,6 @@ instpkgs()
 	export ASSUME_ALWAYS_YES=yes
 	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
 
-	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
-
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
