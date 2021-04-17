@@ -163,24 +163,12 @@ createbase()
 	local version srcurl
 
 	[ ! -d "${SYSDIR}" ] && mkdir -p "${SYSDIR}" || bail
-	for d in base.txz kernel.txz; do
+	for d in base.txz kernel.txz src.txz; do
 		fetch ${DISTSITE}/$d -o /tmp/$d || bail
 		tar --unlink -xvpJf /tmp/$d -C "${SYSDIR}" || bail
 		rm -f /tmp/$d
 	done
 	cp /etc/resolv.conf "${SYSDIR}"/etc
-
-	version=$(echo ${RELEASE} | cut -d'-' -f1)
-	case ${RELEASE##*-} in
-	RELEASE)
-		srcurl="${SRCURL}/releng"
-		svnlite checkout ${srcurl}/${version} "${SYSDIR}/usr/src" || bail
-		;;
-	*)
-		fetch ${DISTSITE}/src.txz -o /tmp/src.txz || bail
-		tar --unlink -xvpJf /tmp/src.txz -C "${SYSDIR}" || bail
-	    ;;
-	esac
 }
 
 updatebase()
@@ -191,11 +179,6 @@ updatebase()
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f "${SYSDIR}/etc/freebsd-update.conf" -b "${SYSDIR}" \
 		-d "${SYSDIR}/var/db/freebsd-update" install
-	if [ "${RELEASE##*-}" = "RELEASE" ]; then
-		version=$(echo ${RELEASE} | cut -d'-' -f1)
-		srcurl="${SRCURL}/releng"
-		(cd "${SYSDIR}/usr/src" && svnlite up) || bail
-	fi
 }
 
 buildnvidia()
