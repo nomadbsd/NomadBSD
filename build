@@ -65,7 +65,6 @@ SYSDIR="${WORKDIR}/sys"
 # Where bsdinstall stores fetched files.
 DISTDIR="${WORKDIR}/dists"
 PATCHDIR="${WORKDIR}/patchset"
-DISTSITE=${URL}/${ARCH}/${RELEASE}
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
@@ -74,9 +73,31 @@ UZIP_MNT="${WORKDIR}/uzip_mnt"
 ROOTLABEL=nomadroot
 TMP_BASE_DIR="${WORKDIR}/tmpbase"
 TMP_IMAGE_NAME="${WORKDIR}/tmpbase.img"
-KERNCONF_DIR="${SYSDIR}/usr/src/sys/${ARCH}/conf"
 KERNCONF_NOMADBSD="${KERNCONF_DIR}/NOMADBSD"
 KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
+
+init_vars()
+{
+	local _ARCH=${ARCH}
+
+	case "${ARCH}" in
+	i386)
+		export UNAME_m=i386
+		export UNAME_p=i386
+		;;
+	amd64)
+		;;
+	mac)
+		_ARCH=amd64
+		;;
+	*)
+		echo "Invalid architecture '${ARCH}'. Must be one of i386, amd64, or mac" >&2
+		exit 1
+		;;
+	esac
+	DISTSITE=${URL}/${_ARCH}/${RELEASE}
+	KERNCONF_DIR="${SYSDIR}/usr/src/sys/${_ARCH}/conf"
+}
 
 _umount()
 {
@@ -467,13 +488,69 @@ createtmpimage()
 	mdconfig -d -u ${mddev}
 }
 
+#
+# Returns the shortened, current git commit ID, or the tag if given.
+#
+get_version()
+{
+	git log --oneline --decorate=full | head -1 | awk -F'[ \t()]+' '{
+		ID=$1;
+		for (i = 1; i <= NF; i++) {
+			if ($i ~ /tags/) {
+				n = split($i, a, "/")
+				print a[n];
+				exit(0);
+			}
+		}
+		print ID;
+	}'
+}
+
+#
+# Returns an abbreviated base system version string
+#
+get_baseversion()
+{
+	echo ${RELEASE} | tr -d '.' | awk -F'[-]+' '{
+		v = $1
+		if ($2 == "RELEASE") s = "R"
+		else if ($2 == "CURRENT") s = "C"
+		else if ($2 == "STABLE") s = "S"
+		else if ($2 ~ /BETA/) {
+			n = substr($2, 5);
+			s = sprintf("B%d", n)
+		} else if ($2 ~ /ALPHA/) {
+			n = substr($2, 6);
+			s = sprintf("A%d", n);
+		} else s = $2
+		p = ""
+		if (NF >= 3)
+			p = $3
+		printf("%d%s%s", v, s, p);
+	}'
+}
+
+#
+# Creates an image name of the form
+#	nomadbsd-<base version>-<git tag/ID>.<arch>.img
+#
+imagename()
+{
+	local version=$(get_version)
+	local baseversion=$(get_baseversion)
+	local image="nomadbsd"
+	image="nomadbsd-${baseversion}-${version}"
+	echo "${image}.${ARCH}.img"
+}
+
 createimage()
 {
 	local tmpimgdev used pn MNT
 
 	MNT="${WORKDIR}/mnt"
 
-	[ ! -z ${mac} ] && IMAGE_NAME=${IMAGE_NAME%.img}.mac.img
+	IMAGE_NAME=$(imagename)
+
 	if [ -f ${IMAGE_NAME} ]; then
 		echo "${IMAGE_NAME} already exists" >&2
 		bail
@@ -494,6 +571,8 @@ createimage()
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
 	[ $? -ne 0 ] && bail
 	mount /dev/${tmpimgdev}p1 ${TMP_BASE_DIR} || bail
+
+	get_version > ${TMP_BASE_DIR}/VERSION
 
 	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
 	(cd "${SYSDIR}" && tar -cf -       \
@@ -542,7 +621,7 @@ createimage()
 		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.fuse || bail
 	fi
 	rm -rf "${TMP_BASE_DIR}/root/.subversion"
-	if [ ! -z ${mac} ]; then
+	if [ ${ARCH} = "mac" ]; then
 		# echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
 		for i in ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac; do
 			mv $i ${i%.mac}
@@ -575,7 +654,7 @@ createimage()
 	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
 	[ ! -d "${MNT}" ] && mkdir -p "${MNT}"
 	pn=0
-	if [ -z ${mac} ]; then
+	if [ "${ARCH}" != "mac" ]; then
 		dd if=/dev/zero of=/dev/${mddev} bs=1M count=100
 		gpart create -s mbr ${mddev}
 		if [ "${ARCH}" != "i386" ]; then
@@ -625,7 +704,7 @@ createimage()
 	fi
 	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd "${MNT}" && tar pxf -) || bail
 	_umount "${MNT}"
-	if [ -z ${mac} ]; then
+	if [ "${ARCH}" != "mac" ]; then
 		glabel label nomadroot /dev/${mddev}s${pn}a || bail
 	fi
 	mdconfig -d -u ${mddev}
@@ -718,7 +797,7 @@ build_unionfs()
 
 build_setupgui()
 {
-	if [ -n "${mac}" ]; then
+	if [ "${ARCH}" = "mac" ]; then
 		QMAKE_VARS="MAC=1"
 	else
 		QMAKE_VARS=""
@@ -732,7 +811,7 @@ build_setupgui()
 
 build_installgui()
 {
-	if [ -n "${mac}" ]; then
+	if [ "${ARCH}" = "mac" ]; then
 		QMAKE_VARS="MAC=1"
 	else
 		QMAKE_VARS=""
@@ -857,6 +936,17 @@ _init()
 	initbase
 }
 
+save_stage()
+{
+	echo "ARCH=${ARCH}" > ".failed-stage"
+	echo "__stage=$1" >> ".failed-stage"
+}
+
+restore_stage()
+{
+	. ./.failed-stage
+}
+
 all()
 {
 	local i stages
@@ -868,19 +958,19 @@ all()
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
-		echo updatebase > ".failed-stage"
+		save_stage updatebase
 		updatebase
 	fi 
 	if [ ! -z "${BUILD_KERNEL}" ]; then
 		case ${BUILD_KERNEL} in
 		[yY][eE][sS])
-			echo buildkernel > ".failed-stage"
+			save_stage buildkernel
 			buildkernel
 			;;
 		esac
 	fi
 	for i in ${stages}; do
-		echo $i > ".failed-stage"
+		save_stage "$i"
 		$i
 	done
 	rm -f ".failed-stage"
@@ -895,14 +985,16 @@ resumebuild()
 	stages="${stages} createimage cleanup"
 
 	stage_found=0
-	failed_stage=$(cat .failed-stage)
+	restore_stage
+	init_vars
+	failed_stage=$__stage
 	if [ -z "${failed_stage}" ]; then
 		echo "There is nothing to continue" >&2
 		exit 1
 	fi
 	for i in ${stages}; do
 		if  [ ${stage_found} -eq 1 ]; then
-			echo $i > ".failed-stage"
+			save_stage "$i"
 			$i
 		elif [ "${failed_stage}" = $i ]; then
 			stage_found=1
@@ -944,17 +1036,32 @@ if [ ! -f /usr/ports/Makefile ]; then
 	exit 1
 fi
 
-if [ ${ARCH} = "i386" ]; then
-	export UNAME_m=i386
-	export UNAME_p=i386
-fi
-
 trap bail SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	-m)			mac=1;;
-	-h)			help;;
+	-a)
+		shift
+		[ $# -eq 0 ] && usage
+		ARCH=$1
+		;;
+	-h)
+		help;;
+	-*)
+		echo "Invalid option '$1'" >&2
+		usage
+		;;
+	*)
+		break
+		;;
+	esac
+	shift
+done
+
+init_vars
+
+while [ $# -gt 0 ]; do
+	case "$1" in
 	all)		all;;
 	clean)		allclean;;
 	cleanup)	cleanup;;
