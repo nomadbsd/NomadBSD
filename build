@@ -254,13 +254,26 @@ buildnvidia()
 	done
 }
 
+pkglist()
+{
+	if [ ${ARCH} = "i386" ]; then
+		awk '
+			!/virtualbox-ose-additions/ {
+				print $0
+			}
+		' < ${PKGLIST}
+	else
+		cat ${PKGLIST}
+	fi
+}
+
 instpkgs()
 {
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	export ASSUME_ALWAYS_YES=yes
-	cat ${PKGLIST} | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
+	pkglist | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
 
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
