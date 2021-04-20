@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# This script batch builds the image for amd64, mac, and i386.
+#
+
+. ./common
+
+sha256_chksum()
+{
+	echo "Calculating sha256 checksum for $1 ..."
+	sha256 "$1" > "$1".sha256
+}
+
+lzma_compress()
+{
+	echo "Compressing $1 ..."
+	lzma -k -9 "$1"
+}
+
+post_process()
+{
+	sha256_chksum "$1"
+	lzma_compress "$1"
+	sha256_chksum "$1".lzma
+}
+
+clean()
+{
+	echo "Cleaning ..."
+	./build clean
+}
+
+clean
+
+# Order of arch is important. After building the amd64 image we can
+# use most of it for the mac image.
+for arch in amd64 mac i386; do
+	image=$(imagename)
+
+	echo "Building ${image} ..."
+	if [ ${arch} = "mac" ]; then
+		# There is no need to rebuild everything for the mac image
+		(./build -a ${arch} initbase && ./build -a ${arch} setupgui && \
+		 ./build -a ${arch} installgui) || \
+			echo "Building of ${image} failed." >&2
+			exit 1
+		clean
+	elif ! ./build -a ${arch} all; then
+		echo "Building of ${image} failed." >&2
+		exit 1
+	fi
+	post_process "${image}"
+done
+
