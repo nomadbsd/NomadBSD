@@ -1,0 +1,57 @@
+. ./build.cfg
+
+#
+# Returns the shortened, current git commit ID, or the tag if given.
+#
+get_version()
+{
+	git log --oneline --decorate=full | head -1 | awk -F'[ \t()]+' '{
+		ID=$1;
+		for (i = 1; i <= NF; i++) {
+			if ($i ~ /tags/) {
+				n = split($i, a, "/")
+				print a[n];
+				exit(0);
+			}
+		}
+		print ID;
+	}'
+}
+
+#
+# Returns an abbreviated base system version string
+#
+get_baseversion()
+{
+	echo ${RELEASE} | tr -d '.' | awk -F'[-]+' '{
+		v = $1
+		if ($2 == "RELEASE") s = "R"
+		else if ($2 == "CURRENT") s = "C"
+		else if ($2 == "STABLE") s = "S"
+		else if ($2 ~ /BETA/) {
+			n = substr($2, 5);
+			s = sprintf("B%d", n)
+		} else if ($2 ~ /ALPHA/) {
+			n = substr($2, 6);
+			s = sprintf("A%d", n);
+		} else s = $2
+		p = ""
+		if (NF >= 3)
+			p = $3
+		printf("%d%s%s", v, s, p);
+	}'
+}
+
+#
+# Creates an image name of the form
+#	nomadbsd-<base version>-<git tag/ID>.<arch>.img
+#
+imagename()
+{
+	local version=$(get_version)
+	local baseversion=$(get_baseversion)
+	local image="nomadbsd"
+	image="nomadbsd-${baseversion}-${version}"
+	echo "${image}.${ARCH}.img"
+}
+
