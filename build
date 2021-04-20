@@ -312,6 +312,10 @@ postpkgcfg()
 	# Remove useless Xfce desktop file
 	rm -f "${SYSDIR}"/usr/local/share/applications/xfce4-about.desktop
 
+	# Remove Networkmgr's netcardmgr script which messes with our auto-
+	# configured network interfaces in /etc/rc.conf.
+	rm -f "${SYSDIR}"/usr/local/bin/netcardmgr
+
 	# Use the Papirus terminal icon as default icon for Sakura
 	cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
 	"${SYSDIR}"/usr/local/share/pixmaps/terminal.svg
