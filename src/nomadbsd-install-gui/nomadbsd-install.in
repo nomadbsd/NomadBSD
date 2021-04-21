@@ -281,7 +281,7 @@ mkefi() {
 		}
 		END {
 		for (i = 0; i < nb; i++) {
-			cmd = sprintf("efibootmgr -B %s", bootvars[i]);
+			cmd = sprintf("efibootmgr -B -b %s", bootvars[i]);
 			system(cmd);
 		}
 	}
@@ -290,7 +290,7 @@ mkefi() {
 		-L "${efilabel}" | grep -w "${efilabel}" | sort | tail -1 | \
 		sed -E 's/.*Boot([0-9]+).*/\1/')
 	if [ -n "${bvar}" ]; then
-		efibootmgr -a ${bvar}
+		efibootmgr -a -b ${bvar}
 	fi
 	umount ${DESTDIR} || umount -f ${DESTDIR}
 }
