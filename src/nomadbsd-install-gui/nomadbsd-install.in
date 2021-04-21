@@ -74,13 +74,18 @@ progress() {
 }
 
 show_extract() {
-	awk -v nfiles=$1 '{
+	awk -v nfiles=$1 ' {
 		if (nfiles <= 0)
 			exit;
+		print "%0";
+		fflush();
 		while (getline > 0) {
 			if (($0 !~ /^\//) && ($0 !~ /^.\//))
 				continue;
 			p = int(++n * 100 / nfiles);
+			if (p == lastp)
+				continue;
+			lastp = p;
 			print "%" p;
 			fflush();
 		}
