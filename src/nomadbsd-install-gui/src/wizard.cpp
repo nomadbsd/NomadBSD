@@ -126,10 +126,12 @@ SettingsPage::SettingsPage(QWidget *parent) : QWizardPage(parent)
 	QRegExp	    chars   = QRegExp("[a-z]+");
 	QProcess    proc;
         QByteArray  line;
+	QStringList args;
+	args << "devlist";
 
 	readUsernames();
   	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_DISKS);
+	proc.start(PATH_NOMADBSD_INSTALL, args);
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -417,17 +419,20 @@ void CommitPage::initializePage()
 	if (msgBox.clickedButton() == leave) {
 		std::exit(0);
 	}
-	QString cmd = QString("%1 -u %2 -d %3 -s %4 -f %5 %6 %7")
-			.arg(BACKEND_COMMIT)
-			.arg(cfg_username).arg(cfg_disk).arg(cfg_swap)
-			.arg(cfg_fs)
-			.arg(cfg_lenovofix.toInt(0, 10) != 0 ? "-l" : "")
-			.arg(cfg_autologin.toInt(0, 10) != 0 ? "-a" : "");
+	QStringList args;
+	args << "commit" <<
+		"-u" << cfg_username <<
+		"-d" << cfg_disk <<
+		"-s" << cfg_swap <<
+		"-f" << cfg_fs;
+	if (cfg_lenovofix.toInt(0, 10) != 0)
+		args.append("-l");
+	if (cfg_autologin.toInt(0, 10) != 0)
+		args.append("-a");
 	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(cmd);
+	proc.start(PATH_NOMADBSD_INSTALL, args);
 	pid = (pid_t)proc.processId();
 	(void)proc.waitForStarted(-1);
-
 	//
 	// According to the Qt docs, we can not rely on the return value.
 	// We have to check state().
