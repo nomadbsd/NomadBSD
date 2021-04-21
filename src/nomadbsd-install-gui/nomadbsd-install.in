@@ -302,10 +302,12 @@ mkrootfs() {
 	if [ ${fstype} = "UFS" ]; then
 		gpart add -a 1m -t freebsd-ufs -l ${rootfs_label} ${disk} || \
 			bail "Couldn't create partition"
+		sleep 5
 		mkufs "/dev/${disk}p${idx}"
 	else
 		gpart add -a 1m -t freebsd-zfs -l ${rootfs_label} ${disk} || \
 			bail "Couldn't create partition"
+		sleep 5
 		mkzfs "/dev/gpt/${rootfs_label}"
 	fi
 }
