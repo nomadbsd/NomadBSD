@@ -114,6 +114,7 @@ x11-drivers/xf86-video-vesa
 x11-fm/pcmanfm
 x11-fm/thunar
 x11-fonts/bitstream-vera
+x11-fonts/cantarell-fonts
 x11-fonts/droid-fonts-ttf
 x11-fonts/font-gost
 x11-fonts/freefont-ttf
