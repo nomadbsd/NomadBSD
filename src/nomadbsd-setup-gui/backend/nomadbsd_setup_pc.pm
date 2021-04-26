@@ -106,8 +106,8 @@ sub mkdatapart {
 	system("dd if=/dev/zero of=/dev/${partdev} bs=1M count=100");
 	system("gpart create -s bsd ${partdev}") == 0
 		or bail("'gpart create -s bsd ${partdev}' failed");
-	chomp($datadev = `gpart add -t freebsd-ufs -a 1m ${partdev}`);
-	bail("'gpart add -t freebsd-ufs -a 1m $partdev' failed") if ($?);
+	chomp($datadev = `gpart add -t freebsd-ufs -a 1m -b 16 ${partdev}`);
+	bail("'gpart add -t freebsd-ufs -a 1m -b 16 $partdev' failed") if ($?);
 	bail("Unexpected gpart output: '$datadev'")
 		if (!($datadev =~ s/^([a-z0-9]+)\s(added|created)/$1/));
 	system("glabel label ${datalabel} /dev/${datadev}") == 0
