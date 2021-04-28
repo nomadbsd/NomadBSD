@@ -793,6 +793,10 @@ sub commit {
 			or bail("Couldn't create directory '/usr/local'");
 	}
 	system("rm -rf /root/.config/autostart");
+	# Force initgfx to re-configure the gfx driver, because there might be
+	# missing files it couldn't write, since /usr/local is r/o when running
+	# the setup.
+	system("rm -f /var/initgfx_config.id");
 	status("Sync'ing filesystems");
 	system("sync");
 	exit 0;
