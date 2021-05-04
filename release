@@ -40,10 +40,11 @@ for arch in amd64 mac i386; do
 	echo "Building ${image} ..."
 	if [ ${arch} = "mac" ]; then
 		# There is no need to rebuild everything for the mac image
-		(./build -a ${arch} initbase && ./build -a ${arch} setupgui && \
-		 ./build -a ${arch} installgui) || \
+		if ! (./build -a ${arch} initbase && ./build -a ${arch} setupgui && \
+		 ./build -a ${arch} installgui && ./build -a ${arch} image); then
 			echo "Building of ${image} failed." >&2
 			exit 1
+		fi
 		clean
 	elif ! ./build -a ${arch} all; then
 		echo "Building of ${image} failed." >&2
