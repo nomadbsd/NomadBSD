@@ -506,24 +506,6 @@ createtmpimage()
 	mdconfig -d -u ${mddev}
 }
 
-#
-# Returns the shortened, current git commit ID, or the tag if given.
-#
-get_version()
-{
-	git log --oneline --decorate=full | head -1 | awk -F'[ \t()]+' '{
-		ID=$1;
-		for (i = 1; i <= NF; i++) {
-			if ($i ~ /tags/) {
-				n = split($i, a, "/")
-				print a[n];
-				exit(0);
-			}
-		}
-		print ID;
-	}'
-}
-
 createimage()
 {
 	local tmpimgdev used pn MNT
