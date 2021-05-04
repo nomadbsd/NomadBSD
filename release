@@ -35,8 +35,8 @@ clean
 # Order of arch is important. After building the amd64 image we can
 # use most of it for the mac image.
 for arch in amd64 mac i386; do
+	ARCH=${arch}
 	image=$(imagename)
-
 	echo "Building ${image} ..."
 	if [ ${arch} = "mac" ]; then
 		# There is no need to rebuild everything for the mac image
