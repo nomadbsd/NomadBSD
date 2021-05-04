@@ -5,17 +5,10 @@
 #
 get_version()
 {
-	git log --oneline --decorate=full | head -1 | awk -F'[ \t()]+' '{
-		ID=$1;
-		for (i = 1; i <= NF; i++) {
-			if ($i ~ /tags/) {
-				n = split($i, a, "/")
-				print a[n];
-				exit(0);
-			}
-		}
-		print ID;
-	}'
+	cid=$(git log --oneline | cut -f1 -d' ' | head -1)
+	version=$(git describe --exact-match "${cid}" 2>/dev/null)
+	[ -z "${version}" ] && version="${cid}"
+	echo "${version}"
 }
 
 #
