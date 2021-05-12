@@ -60,9 +60,6 @@ RELEASE|BETA|RC*)
 	URL="${BASEURL}/snapshots";;
 esac
 
-WORKDIR="${PWD}/work"
-# Where the FreeBSD installation resides.
-SYSDIR="${WORKDIR}/sys"
 # Where bsdinstall stores fetched files.
 DISTDIR="${WORKDIR}/dists"
 PATCHDIR="${WORKDIR}/patchset"

@@ -38,6 +38,7 @@ for arch in amd64 mac i386; do
 	ARCH=${arch}
 	image=$(imagename)
 	echo "Building ${image} ..."
+	exit 1
 	if [ ${arch} = "mac" ]; then
 		# There is no need to rebuild everything for the mac image
 		if ! (./build -a ${arch} initbase && ./build -a ${arch} setupgui && \
@@ -45,10 +46,13 @@ for arch in amd64 mac i386; do
 			echo "Building of ${image} failed." >&2
 			exit 1
 		fi
+		pkg -c "${SYSDIR}" info > "${image%img}manifest"
 		clean
 	elif ! ./build -a ${arch} all; then
 		echo "Building of ${image} failed." >&2
 		exit 1
+	else
+		pkg -c "${SYSDIR}" info > "${image%img}manifest"
 	fi
 	post_process "${image}"
 done
