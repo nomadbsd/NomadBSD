@@ -38,7 +38,6 @@ for arch in amd64 mac i386; do
 	ARCH=${arch}
 	image=$(imagename)
 	echo "Building ${image} ..."
-	exit 1
 	if [ ${arch} = "mac" ]; then
 		# There is no need to rebuild everything for the mac image
 		if ! (./build -a ${arch} initbase && ./build -a ${arch} setupgui && \
