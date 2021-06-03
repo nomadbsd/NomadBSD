@@ -388,11 +388,18 @@ install_gfxdrv() {
 		kmods=$(cat /var/run/gfxdriver)
 		[ -z "${kmods}" ] && return
 	fi
-	if (echo ${kmods} | grep -qE '.*/nvidia/[0-9]+/.*'); then
-		nvidia_version=$(echo ${kmods} | sed -E 's/.*nvidia\/([0-9]+)\/.*/\1/')
-		status "Installing nvidia-driver-${nvidia_version}"
-		pkgwrp install -y "nvidia-driver-${nvidia_version}" || return
-		if [ "${nvidia_version}" -ge 390 ]; then
+	if (echo ${kmods} |grep -qE '.*/nvidia/([0-9]+|latest)/.*'); then
+		nvidia_version=$(echo ${kmods} | \
+			sed -E 's/.*nvidia\/([0-9]+|latest)\/.*/\1/')
+		if [ "${nvidia_version}" = "latest" ]; then
+			status "Installing nvidia-driver"
+			pkgwrp install -y nvidia-driver || return
+		else
+			status "Installing nvidia-driver-${nvidia_version}"
+			pkgwrp install -y "nvidia-driver-${nvidia_version}" || return
+		fi
+		if [ "${nvidia_version}" = "latest" ] ||
+		   [ "${nvidia_version}" -ge 390 ]; then
 			sysrc -f $path_rc_conf kld_list+=" /boot/modules/nvidia-modeset.ko"
 		fi
 		sysrc -f $path_rc_conf kld_list+=" /boot/modules/nvidia.ko"

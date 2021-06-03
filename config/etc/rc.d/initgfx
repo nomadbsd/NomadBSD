@@ -246,7 +246,7 @@ setup_nvidia()
 	device=$(pciconf -lv | grep -A3 ^vgapci${unit} | grep device | \
 		cut -d"'" -f 2)
 	driver=""
-	for d in 440 390 340 304; do
+	for d in latest 390 340 304; do
 		nvidia_${d}_ids | awk -v device="$device" '
 			match(tolower(device), tolower($0)) > 0 {
 				printf("%s ~ %s\n", device, $0);
@@ -297,7 +297,7 @@ setup_nvidia()
 	tar -C "${srcdir}${dir}" \
 		--exclude '.nvidia' -cf - . | tar -C "/nvidia/${dir}" -xf -
 
-	if [ ${driver} -ge 390 ]; then
+	if [ ${driver} = "latest" ] || [ ${driver} -ge 390 ]; then
 		kmods="${srcdir}/boot/modules/nvidia.ko"
 		kmods="${kmods} ${srcdir}/boot/modules/nvidia-modeset.ko"
 	else
