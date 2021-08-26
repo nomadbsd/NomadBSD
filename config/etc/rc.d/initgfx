@@ -310,6 +310,14 @@ setup_nvidia()
 	return 0
 }
 
+setup_nv()
+{
+	local driver device
+
+	[ "${vendor}" != "10de" ] && return 1
+	nv_xorg_cfg > "${path_xorg_cfg}"
+}
+
 is_vm()
 {
 	pciconf -lv | grep -B3 display | grep -E -q -i 'virtualbox|VMware'
@@ -366,7 +374,7 @@ do_initgfx()
 	get_device_info
 
 	# Prepare for a crash.
-	for i in nvidia ati_amd intel; do
+	for i in nvidia nv ati_amd intel; do
 		if setup_${i}; then
 			initgfx_debug "Testing Xorg configuration ..."
 			if test_x; then
@@ -377,8 +385,13 @@ do_initgfx()
 				cp -a "${path_tmp_rc_conf}" /etc/rc.conf
 				return
 			else
-				initgfx_warn "Failed to use $i driver. " \
-							 "Using ${fallback_driver} instead ..." >&2
+				if [ $i = "nvidia" ]; then
+					initgfx_warn "Failed to use $i driver. Trying nv ...">&2
+					continue
+				else
+					initgfx_warn "Failed to use $i driver. " \
+								 "Using ${fallback_driver} instead ..." >&2
+				fi
 				__reset
 			fi
 			break
