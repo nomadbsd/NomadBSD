@@ -316,6 +316,20 @@ setup_nv()
 
 	[ "${vendor}" != "10de" ] && return 1
 	nv_xorg_cfg > "${path_xorg_cfg}"
+	return 0
+}
+
+setup_via()
+{
+	[ "${vendor}" != "1106" ] && return 1
+	via_ids | awk -v device="0x${device}" '
+		$1 == device {
+			exit(100);
+		}
+	'
+	[ $? -ne 100 ] && return 1
+	nv_xorg_cfg > "${path_xorg_cfg}"
+	return 0
 }
 
 is_vm()
@@ -374,7 +388,7 @@ do_initgfx()
 	get_device_info
 
 	# Prepare for a crash.
-	for i in nvidia nv ati_amd intel; do
+	for i in nvidia nv ati_amd intel via; do
 		if setup_${i}; then
 			initgfx_debug "Testing Xorg configuration ..."
 			if test_x; then
