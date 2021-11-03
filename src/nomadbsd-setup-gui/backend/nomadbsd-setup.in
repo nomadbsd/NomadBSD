@@ -783,8 +783,6 @@ sub commit {
 	system("/usr/local/bin/fc-cache -sfr");
 	status("Locking kernel module packages");
 	system("pkg lock -y -g '*-kmod'");
-	status("Locking e2fsprogs");
-	system("pkg lock -y e2fsprogs");
 	unlink($path_vesa_cfg);
 	unlink($path_scfb_cfg);
 	if (-l "/usr/local") {
