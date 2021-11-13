@@ -1597,6 +1597,7 @@ cat << radeon_ids_END
 0x6778
 0x6779
 0x677B
+0x515e
 radeon_ids_END
 }
 
