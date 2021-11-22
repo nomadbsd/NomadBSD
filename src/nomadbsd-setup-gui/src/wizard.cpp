@@ -42,8 +42,8 @@
 // Global variables to hold the configuration
 //
 //////////////////////////////////////////////////////////////////////////////
-static bool    cfg_use_geli = false;
-static QString cfg_geli;
+static bool    cfg_use_zfs_enc = false;
+static QString cfg_zfs_enc;
 static QString cfg_locale;
 static QString cfg_localedescr;
 static QString cfg_region;
@@ -53,7 +53,7 @@ static QString cfg_kbdconfigdescr;
 static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
-static QString cfg_geli_password;
+static QString cfg_zfs_enc_password;
 static QString cfg_editor;
 static QString cfg_gui_editor;
 static QString cfg_file_manager;
@@ -76,7 +76,7 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	addPage(new ExtraKbdLayoutPage);
 	addPage(new TimezonePage);
 	addPage(new PasswordPage);
-	addPage(new GeliPage);
+	addPage(new ZFSEncPage);
 	addPage(new ProgramsPage);
 	addPage(new SummaryPage);
 	addPage(new CommitPage);
@@ -715,7 +715,7 @@ void TimezonePage::timezoneSelected(int row)
 //////////////////////////////////////////////////////////////////////////////
 PasswordPage::PasswordPage(QWidget *parent) : QWizardPage(parent)
 {
-	pass		    = new PasswordWidget;
+	pass		    = new PasswordWidget(1);
 	title		    = new QLabel;
 	intro		    = new QLabel;
 	QVBoxLayout *layout = new QVBoxLayout;
@@ -758,13 +758,13 @@ bool PasswordPage::isComplete() const
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Geli page
+// ZFSEnc page
 //
 //////////////////////////////////////////////////////////////////////////////
-GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
+ZFSEncPage::ZFSEncPage(QWidget *parent) : QWizardPage(parent)
 {
-	pass			  = new PasswordWidget;
-	gelicb			  = new QCheckBox;
+	pass			  = new PasswordWidget(8);
+	zfsenccb		  = new QCheckBox;
 	passContainer		  = new QWidget;
 	intro			  = new QLabel;
 	title			  = new QLabel;
@@ -779,54 +779,53 @@ GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
 	containerBox->addWidget(pwdLabel);
 	containerBox->addWidget(pass);
 
-	passContainer->setEnabled(cfg_use_geli);
-	gelicb->setTristate(false);
+	passContainer->setEnabled(cfg_use_zfs_enc);
+	zfsenccb->setTristate(false);
 
 	layout->addWidget(title);
 	layout->addWidget(intro);
-	layout->addWidget(gelicb);
+	layout->addWidget(zfsenccb);
 	layout->addWidget(passContainer);
 	setLayout(layout);
 
 	connect(pass, SIGNAL(passwordChanged()), this,
 	    SLOT(passwordChanged()));
-	connect(gelicb, SIGNAL(toggled(bool)), this, SLOT(setGeli(bool)));
+	connect(zfsenccb, SIGNAL(toggled(bool)), this, SLOT(setZFSEnc(bool)));
 }
 
-void GeliPage::initializePage()
+void ZFSEncPage::initializePage()
 {
-	gelicb->setChecked(cfg_use_geli);
-	cfg_geli = cfg_use_geli ? tr("Yes") : tr("No");
-	gelicb->setText(tr("Encrypt /data using Geli"));
-	title->setText(tr("Geli encrypted /data\n"));
+	zfsenccb->setChecked(cfg_use_zfs_enc);
+	cfg_zfs_enc = cfg_use_zfs_enc ? tr("Yes") : tr("No");
+	zfsenccb->setText(tr("Use encrypted ZFS dataset"));
+	title->setText(tr("Encrypted ZFS dataset for personal files\n"));
 	intro->setText(tr("NomadBSD allows you to protect your personal "  \
-			  "files by encrypting the /data partition using " \
-			  "geli(8). If you don't know what geli(8) is, "  \
-			  "you should skip this page.\n\n"));
-	pwdLabel->setText(tr("Define a password required to decrypt /data"));
+			  "files by storing user directories under an " \
+			  "encrypting ZFS dataset\n\n"));
+	pwdLabel->setText(tr("Define a password required to decrypt /private"));
 	pass->setPl1Text(tr("Password:"));
 	pass->setPl2Text(tr("Repeat password:"));
 	pass->setStatusText(tr("Passwords do not match"));
 }
 
-void GeliPage::passwordChanged()
+void ZFSEncPage::passwordChanged()
 {
 	if (pass->isValid())
-		cfg_geli_password = pass->password();
+		cfg_zfs_enc_password = pass->password();
 	emit completeChanged();
 }
 
-void GeliPage::setGeli(bool state)
+void ZFSEncPage::setZFSEnc(bool state)
 {
 	passContainer->setEnabled(state);
-	cfg_geli = state ? tr("Yes") : tr("No");
-	cfg_use_geli = state;
+	cfg_zfs_enc = state ? tr("Yes") : tr("No");
+	cfg_use_zfs_enc = state;
 	emit completeChanged();
 }
 
-bool GeliPage::isComplete() const
+bool ZFSEncPage::isComplete() const
 {
-	if (gelicb->isChecked() && !pass->isValid())
+	if (zfsenccb->isChecked() && !pass->isValid())
 		return (false);
 	return (true);
 }
@@ -979,7 +978,7 @@ void SummaryPage::initializePage()
 		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
 		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
-		{ tr("Encrypt /data:"),			cfg_geli	   },
+		{ tr("Encrypt /private:"),		cfg_zfs_enc	   },
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
@@ -1035,7 +1034,7 @@ void CommitPage::initializePage()
 		{ "cfg_kbdlayout",	cfg_kbdlayout	  },
 		{ "cfg_kbdvariant",	cfg_kbdvariant	  },
 		{ "cfg_password",	cfg_password	  },
-		{ "cfg_geli_password",	cfg_geli_password },
+		{ "cfg_zfs_enc_password",cfg_zfs_enc_password },
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
 		{ "cfg_gui_editor",	cfg_gui_editor	  },

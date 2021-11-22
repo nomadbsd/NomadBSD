@@ -3,8 +3,6 @@ PROGRAM	     = nomadbsd-setup-gui
 BACKEND      = nomadbsd-setup
 DATA_DIR     = $${PREFIX}/share/nomadbsd-setup
 BACKEND_DIR  = $${PREFIX}/libexec
-MAC_MOD      = nomadbsd_setup_mac.pm
-PC_MOD       = nomadbsd_setup_pc.pm
 PATH_BACKEND = $${BACKEND_DIR}/$${BACKEND}
 TARGET	     = $${PROGRAM}
 TEMPLATE     = app
@@ -26,13 +24,19 @@ for(a, TRANSLATIONS) {
 	cmd = $$LRELEASE $${a}
 	system($$cmd)
 }
-
-isEmpty(MAC) {
-	cmd = sed -E \"s/@MODULE_ARCH@/pc/;
-} else {
-	cmd = sed -E \"s/@MODULE_ARCH@/mac/;
+isEmpty(POOLNAME) {
+	POOLNAME = nomadbsd_zroot
 }
-cmd += s|@MODULE_PATH@|$${BACKEND_DIR}|\" backend/$${BACKEND}.in
+isEmpty(ROOTLABEL) {
+	ROOTLABEL = nomadroot
+}
+isEmpty(DATALABEL) {
+	DATALABEL = nomaddata
+}
+
+cmd  = sed -E \"s|@POOLNAME@|$${POOLNAME}|; s|@ROOTLABEL@|$${ROOTLABEL}|;
+cmd += s|@DATALABEL@|$${DATALABEL}|\" backend/$${BACKEND}.in
+
 system($$cmd > backend/$${BACKEND})
 system(chmod a+x backend/$${BACKEND})
 
@@ -43,11 +47,6 @@ distclean.depends      = cleanqm clean_backend
 target.files           = $${PROGRAM}
 target.path            = $${PREFIX}/bin
 
-isEmpty(MAC) {
-backend.files          = backend/$${PC_MOD}
-} else {
-backend.files          = backend/$${MAC_MOD}
-}
 backend.files         += backend/$${BACKEND}
 backend.path           = $${BACKEND_DIR}
 backend.CONFIG         = nostrip

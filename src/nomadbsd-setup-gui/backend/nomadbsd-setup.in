@@ -26,16 +26,13 @@ use utf8;
 use strict;
 use POSIX ":sys_wait_h";
 use Time::HiRes "usleep";
-use lib('@MODULE_PATH@');
-use nomadbsd_setup_@MODULE_ARCH@;
 
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
-our $fragsize		= 4096;
-our $blksize		= $fragsize * 8;
-our $cfg_geli_password;
-
+my $pool			= "@POOLNAME@";
+my $rootlabel		= "@ROOTLABEL@";
+my $datalabel		= "@DATALABEL@";
 my $dummy;
 my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
@@ -57,6 +54,7 @@ my $cfg_kbdlayout;
 my $cfg_kbdvariant;
 my $cfg_editor;
 my $cfg_gui_editor;
+my $cfg_zfs_enc_password;
 my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
@@ -658,10 +656,82 @@ sub set_kbdmap {
 }
 
 #
+# 1. Get the device associated with our ZFS pool
+# 2. Get the device name from glabel if a device label was used.
+# 3. Return (device name, slice number). E.g. (da0, 2)
+#
+sub get_rootdev {
+	my ($device, $partition, $found_pool);
+
+	foreach (`zpool list -H -v`) {
+		if ($found_pool) {
+			$device = (split(/\s+/, $_))[1];
+			last;
+		} elsif (/^${pool}\s+/) {
+			$found_pool = 1;
+		}
+	}
+	return if (!$device);
+
+	$device =~ s#/dev/##;
+
+	if ($device =~ /^(gpt|label|gptid)\//) {
+		foreach (`glabel status`) {
+			$_ =~ s/\s+//;
+			my ($l, $s, $d) = split(/\s+/, $_);
+			if ($l eq $device) {
+				$device = $d;
+				last;
+			}
+		}
+	}
+	if ($device =~ /([a-zA-Z0-9]+)[sp]([0-9]{1,})[a-f]?$/) {
+		$device = $1; $partition = $2;
+		# Get partition type: GPT or MBR
+		my @out = `gpart show $device`;
+		my @fields = split(/\s+/, $out[0]); 
+		return ($device, $partition, $fields[4]);
+	}
+}
+
+sub mk_enc_zfs_dataset {
+	my $dataset     = "${pool}/private";
+	my $create_cmd  = "zfs create -o encryption=on -o keylocation=prompt " .
+					  "-o keyformat=passphrase $dataset";
+	status("Creating encrypted ZFS dataset on $dataset");
+	open(my $fh, "|$create_cmd") or bail("Couldn't create $dataset");
+	print $fh "${cfg_zfs_enc_password}\n";
+	bail("Failed to create $dataset.")	if (!close($fh));
+	system("zfs set mountpoint=/private $dataset") == 0
+		or bail("Couldn't mount $dataset");
+	status("Creating /data/etc");
+	system("mkdir /private/etc") == 0
+		or bail("Failed to create /private/etc");
+	status("Creating /private/home/nomad");
+	system("mkdir -p /private/home/nomad") == 0
+		or bail("Failed to create /private/home/nomad");
+	system("unlink /home >/dev/null 2>&1");
+	system("rmdir -rf /home 2>&1");
+	status("Symlinking /home to /data/home");
+	system("ln -s /private/home /home") == 0
+		or bail("Failed to create symlink /home -> /private/home");
+	system("chown nomad:nomad /home/nomad");
+
+	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
+	system("mv /etc/ppp /private/etc/");
+	system("mv /etc/wpa_supplicant.conf /private/etc");
+	system("touch /private/etc/wpa_supplicant.conf");
+	system("cd /etc && ln -sf /private/etc/ppp; " .
+		   "ln -sf /private/etc/wpa_supplicant.conf");
+	system("sysrc -f /etc/rc.conf.in mount_enc_zfs_enable=YES");
+	system("sysrc -f /etc/rc.conf.in mount_enc_zfs_dataset=\"${dataset}\"");
+}
+
+#
 # Read the configuration from stdin, and do the installation
 #
 sub commit {
-	my ($nfiles, $n);
+	my ($nfiles, $device, $rootdev, $rootpart, $parttype, $gpart_parttype, $n);
 
 	while ($_ = <STDIN>) {
 		my $ofh = select STDIN;
@@ -673,7 +743,7 @@ sub commit {
 		$cfg_timezone	   = $1 if (/^cfg_timezone\s*=\s*(.*)/);
 		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
 		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
-		$cfg_geli_password = $1 if (/^cfg_geli_password\s*=\s*(.*)/);
+		$cfg_zfs_enc_password  = $1 if (/^cfg_zfs_enc_password\s*=\s*(.*)/);
 		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
@@ -687,61 +757,56 @@ sub commit {
 		dummy_commit();
 		exit 0;
 	}
+	#
+	# Since we can't run 'zpool labelclear' on the active partition, we
+	# can't simply run 'gpart resize', and let ZFS' autoexpand do its job.
+	# If there's old ZFS label data on the device, we will get errors.
+	#
+	# Instead we create a new partition with the remaining size, run
+	# 'zpool labelclear' on it, and add the new partition to our pool.
+	#
+	($rootdev, $rootpart, $parttype) = get_rootdev();
+	bail("Couldn't find root device") if (!$rootdev);
+
+	$rootpart++;
+	if ($parttype eq 'GPT') {
+		$device = "/dev/${rootdev}p${rootpart}";
+		$gpart_parttype = "freebsd-zfs";
+	} else {
+		$device = "/dev/${rootdev}s${rootpart}";
+		$gpart_parttype = "freebsd";
+	}
+	system("gpart recover $rootdev");
+	system("gpart add -t $gpart_parttype -a 1m $rootdev") == 0
+		or bail("'gpart add -t $gpart_parttype -a 1m $rootdev' failed");
+	status("Clearing ZFS label on $device");
+	system("zpool labelclear -f $device");
+	system("glabel label $datalabel $device") == 0
+		or bail("Failed to create label");
+	status("Adding /dev/label/$datalabel to ZFS pool");
+	system("zpool add -f $pool /dev/label/$datalabel") == 0
+		or bail("Failed to add device to pool");
+
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
 	status("Setting timezone");
 	set_timezone($cfg_timezone);
 	system("cap_mkdb /etc/login.conf");
 	
-	if ($cfg_geli_password) {
-		mkgelidata();
+	if ($cfg_zfs_enc_password) {
+		mk_enc_zfs_dataset(); 
 	} else {
-		mkdatafs();
+		system("mkdir -p /home/nomad");
+		system("chown nomad:nomad /home/nomad");
 	}
-	status("Creating /data/usr/local");
-	system("mkdir -p /data/usr/local") == 0 or bail("Couldn't create /data/usr/local");
-	status("Creating /data/compat");
-	system("mkdir /data/compat") == 0 or bail("Couldn't create /data/compat");
-	status("Creating /data/var/tmp");
-	system("mkdir -p /data/var/tmp") == 0
-		or bail("Couldn't create /data/var/tmp");
-	system("chmod a+rwxt /data/var/tmp");
-		system("unlink /home >/dev/null 2>&1");
-
-	status("Creating /data/var/db");
-	system("mkdir -p /data/var/db");
-
-	system("rmdir -rf /home 2>&1");
-	status("Creating /data/home/nomad");
-	system("mkdir -p /data/home/nomad") == 0
-		or bail("Couldn't create /data/home/nomad");
-	system("chown nomad:nomad /data/home/nomad");
-	status("Symlinking /home to /data/home");
-	system("ln -s /data/home /home") == 0
-		or bail("Failed to create symlink /home -> /data/home");
-
-	status("Creating /data/usr/ports");
-	system("mkdir -p /data/usr/ports");
-
+	status("Creating /rwlocal");
+	system("mkdir /rwlocal");
 	status("Creating /usr/ports");
 	system("mkdir -p /usr/ports");
 
-	status("Extracting databases to /data/var/db/");
-	system("cd /data && tar xf /usr/share/nomadbsd/var.db.tar.xz");
+	status("Extracting databases to /var/db/");
+	system("cd / && tar xf /usr/share/nomadbsd/var.db.tar.xz");
 
-	# Copy new files and directories to /data/var/db
-	system("tar -C /var -cf - db | tar -C /data/var -xf -");
-
-	status("Mounting /data/var/db to /var/db");
-	system("mount -t nullfs /data/var/db /var/db");
-
-	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/db\t/var/db\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
-
-	close($fh);
 	status("Counting files to copy");
 	progress(-1);
 	foreach (`tar tf ${path_dotfiles}`) {
@@ -791,10 +856,12 @@ sub commit {
 			or bail("Couldn't create directory '/usr/local'");
 	}
 	system("rm -rf /root/.config/autostart");
+
 	# Force initgfx to re-configure the gfx driver, because there might be
 	# missing files it couldn't write, since /usr/local is r/o when running
 	# the setup.
 	system("rm -f /var/initgfx_config.id");
+
 	status("Sync'ing filesystems");
 	system("sync");
 	exit 0;
@@ -803,13 +870,13 @@ sub commit {
 sub dummy_commit {
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	status("Setting timezone $cfg_timezone");
-	if ($cfg_geli_password) {
-		status("Creating geli encrypted /home with " .
-			   "geli password $cfg_geli_password");
+	if ($cfg_zfs_enc_password) {
+		status("Creating encrypted /private ZFS dataset with " .
+			   "password $cfg_zfs_enc_password");
 	} else {
 		status("Creating /home");
 	}
-	status("Creating /data/usr/local");
+	status("Creating /usr/local");
 	status("Extracting dot files and directories for user nomad");
 	for (my $p = 0; $p < 100; $p++) {
 		print "%$p\n"; usleep(50000);

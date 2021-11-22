@@ -33,7 +33,7 @@ class PasswordWidget : public QWidget
 	Q_OBJECT
 
 public:
-	PasswordWidget(QWidget *parent = 0);
+	PasswordWidget(int minlen, QWidget *parent = 0);
 	bool	isValid(void);
 	QString	password(void);
 	void setPl1Text(const QString &);
@@ -46,6 +46,9 @@ public slots:
 	void compareFields(const QString &);
 	void notifyInvalidChar(void);
 private:
+	bool checkPassLen(void);
+private:
+	int	  minlen;
 	bool	  valid;
 	QLabel	  *status;
 	QLabel	  *pl1;

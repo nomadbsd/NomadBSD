@@ -77,7 +77,7 @@
 #
 
 . ./common
-
+set -x
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
@@ -93,9 +93,9 @@ FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
 UZIP_IMAGE="${WORKDIR}/uzip_image"
 UZIP_MNT="${WORKDIR}/uzip_mnt"
-ROOTLABEL=nomadroot
 TMP_BASE_DIR="${WORKDIR}/tmpbase"
 TMP_IMAGE_NAME="${WORKDIR}/tmpbase.img"
+ZFS_TMP_POOL=nomadbsd_tmp_$$
 
 init_vars()
 {
@@ -168,6 +168,7 @@ initbase()
 		sed -E -i '' 's/^(hosts:) (.*)/\1 \2 mdns/' \
 			"${SYSDIR}"/etc/nsswitch.conf
 	fi
+	sed -E -i '' "s/@POOLNAME@/${ZFS_POOL}/g" "${SYSDIR}/boot/loader.conf"
 }
 
 mkfontpaths()
@@ -512,7 +513,7 @@ estimgsize() {
 	echo ${size}
 }
 
-createtmpimage()
+zfs_createtmpimage()
 {
 	local mddev maxsize
 
@@ -522,9 +523,10 @@ createtmpimage()
 	[ $? -ne 0 ] && bail
 	gpart destroy -F ${mddev}
 	gpart create -s gpt ${mddev} || bail
-	gpart add -t freebsd-ufs ${mddev} || bail
-	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-	    -m ${UFS_MINFREE} /dev/${mddev}p1 || bail
+	gpart add -t freebsd-zfs ${mddev} || bail
+	zpool create -m none ${ZFS_TMP_POOL} /dev/${mddev}p1 || bail
+	zfs set atime=off ${ZFS_TMP_POOL}
+	zpool export ${ZFS_TMP_POOL}
 	mdconfig -d -u ${mddev}
 }
 
@@ -552,11 +554,11 @@ createimage()
 
 	[ ! -d "${TMP_BASE_DIR}" ] && mkdir -p ${TMP_BASE_DIR}
 
-	createtmpimage
+	zfs_createtmpimage
 	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
 	[ $? -ne 0 ] && bail
-	mount /dev/${tmpimgdev}p1 ${TMP_BASE_DIR} || bail
-
+	zpool import ${ZFS_TMP_POOL}
+	zfs set mountpoint="${TMP_BASE_DIR}" ${ZFS_TMP_POOL} || bail
 	get_version > ${TMP_BASE_DIR}/VERSION
 
 	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
@@ -617,12 +619,8 @@ createimage()
 		else
 			rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac.fuse
 		fi
-		sed -i '' -E "s#@ROOTDEV@#/dev/gpt/${ROOTLABEL}#" \
-			${TMP_BASE_DIR}/etc/fstab
 	else
 		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac
-		sed -i '' -E "s#@ROOTDEV@#/dev/label/${ROOTLABEL}#" \
-			${TMP_BASE_DIR}/etc/fstab
 	fi
 	(cd ${TMP_BASE_DIR} && \
 		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
@@ -630,8 +628,6 @@ createimage()
 	(cd ${SYSDIR} && \
 		tar cfJ ${TMP_BASE_DIR}/usr/share/nomadbsd/var.db.tar.xz \
 			var/db || bail)
-	used=$(df -m /dev/${tmpimgdev}p1 | tail -1 | awk -F" " '{print $3}')
-	basesz=$((100 * (${BASEFS_EXTRA} + ${used}) / (100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
 	touch ${IMAGE_NAME}
 	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
 	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
@@ -655,21 +651,29 @@ createimage()
 			fi
 			_umount "${MNT}"
 		fi
-		gpart add -t freebsd -a 1m -s ${basesz}m ${mddev}
+		gpart add -t freebsd -a 1m ${mddev} || bail
 		pn=$(($pn + 1))
-		gpart create -s bsd ${mddev}s${pn}
-		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev}
-		gpart bootcode -b "${SYSDIR}/boot/boot" ${mddev}s${pn}
-		gpart add -t freebsd-ufs -a 1m -b 16 ${mddev}s${pn} || bail
-		gpart set -a active -i ${pn} ${mddev}
-		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-			  -m ${UFS_MINFREE} /dev/${mddev}s${pn}a || bail
-		mount /dev/${mddev}s${pn}a "${MNT}" || bail
+		glabel label ${ROOTLABEL} /dev/${mddev}s${pn}
+		DEV=/dev/label/${ROOTLABEL}
+		zpool create -m none ${ZFS_POOL} $DEV || bail
+		zpool set autoexpand=off ${ZFS_POOL}
+		zpool set bootfs=${ZFS_POOL} ${ZFS_POOL}
+		zfs set atime=off compression=lz4 ${ZFS_POOL}
+		zpool export ${ZFS_POOL}
+
+		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev} || bail
+		dd if=/dev/zero of=$DEV count=2 || bail 
+		dd if=/boot/zfsboot of=$DEV count=1 || bail
+		dd if=/boot/zfsboot of=$DEV iseek=1 oseek=1024 || bail
+		gpart set -a active -i ${pn} ${mddev} || bail
+		zpool import -d /dev/label ${ZFS_POOL} || bail
+		zfs set mountpoint="${MNT}" ${ZFS_POOL} || bail
 	else
 		gpart create -s gpt ${mddev} || bail
 		gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
 		pn=$((${pn} + 1))
-		gpart bootcode -b /boot/pmbr -p /boot/gptboot -i ${pn} ${mddev} || bail
+		gpart bootcode -b ${SYSDIR}/boot/pmbr -p ${SYSDIR}/boot/gptzfsboot \
+			-i ${pn} ${mddev} || bail "Couldn't install boot code"
 		gpart add -t efi -a 1m -l gpefiboot -s 200m ${mddev} || bail
 		pn=$((${pn} + 1))
 		newfs_msdos -F 32 -c 1 /dev/${mddev}p${pn} || bail
@@ -681,21 +685,29 @@ createimage()
 			cp ${SYSDIR}/boot/boot1.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
 		fi
 		_umount "${MNT}"
-		gpart add -t freebsd-ufs -a 1m -l ${ROOTLABEL} -s ${basesz}m ${mddev} || bail
+		gpart add -t freebsd-zfs -a 1m ${mddev} || bail
 		pn=$((${pn} + 1))
-		newfs -t -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-		      -m ${UFS_MINFREE} /dev/${mddev}p${pn} || bail
-		mount /dev/${mddev}p${pn} "${MNT}" || bail
+		glabel label ${ROOTLABEL} /dev/${mddev}p${pn} || bail
+
+		DEV=/dev/label/${ROOTLABEL}
+		zpool create -m none ${ZFS_POOL} $DEV || bail
+		zpool set autoexpand=off ${ZFS_POOL}
+		zpool set bootfs=${ZFS_POOL} ${ZFS_POOL}
+		zfs set atime=off compression=lz4 ${ZFS_POOL}
+		zpool export ${ZFS_POOL}
+		zpool import -d /dev/label ${ZFS_POOL} || bail
+		zfs set mountpoint="${MNT}" ${ZFS_POOL} || bail
 	fi
 	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd "${MNT}" && tar pxf -) || bail
 	_umount "${MNT}"
-	if [ "${ARCH}" != "mac" ]; then
-		glabel label nomadroot /dev/${mddev}s${pn}a || bail
-	fi
+	zfs set mountpoint=legacy ${ZFS_POOL}
+	zpool export ${ZFS_POOL}
+
 	mdconfig -d -u ${mddev}
 	rmdir "${MNT}"
 	chflags -R noschg,nosunlnk ${TMP_BASE_DIR}
 	_umount ${TMP_BASE_DIR} || bail
+	zpool destroy ${ZFS_TMP_POOL}
 	mdconfig -d -u ${tmpimgdev}
 	rm -f ${TMP_IMAGE_NAME}
 	rm -rf ${TMP_BASE_DIR}
@@ -782,15 +794,15 @@ build_unionfs()
 
 build_setupgui()
 {
+	QMAKE_VARS="ROOTLABEL=${ROOTLABEL} DATALABEL=${DATALABEL}"
+	QMAKE_VARS="${QMAKE_VARS} POOLNAME=${ZFS_POOL}"
 	if [ "${ARCH}" = "mac" ]; then
-		QMAKE_VARS="MAC=1"
-	else
-		QMAKE_VARS=""
+		QMAKE_VARS="${QMAKE_VARS} MAC=1"
 	fi
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-setup-gui && make distclean; \
-		qmake ${QMAKE_VARS} && make && make install" || bail
+		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
@@ -804,7 +816,7 @@ build_installgui()
 	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-install-gui && make distclean; \
-		qmake ${QMAKE_VARS} && make && make install" || bail
+		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
@@ -813,7 +825,7 @@ build_addusergui()
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-adduser-gui && make distclean; \
-		qmake && make && make install" || bail
+		qmake-qt5 && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
@@ -822,21 +834,15 @@ build_dmconfig()
 	cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-dmconfig && make distclean; \
-		qmake && make && make install" || bail
+		qmake-qt5 && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
 build_chusr()
 {
-	required_pkgs="py37-qt5-core py37-qt5-xml py37-qt5-gui py37-qt5-widgets"
 	cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" \
 			sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
-	for i in ${required_pkgs}; do
-		if ! pkg -c "${SYSDIR}" info --exists $i; then
-			pkg -c "${SYSDIR}" install -y $i
-		fi
-	done
 }
 
 build_lbi_gui()

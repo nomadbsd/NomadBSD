@@ -86,18 +86,16 @@ do_mount_unionfs()
 	fi
 	# Create and mount a writeable directory to /usr/local using
 	# unionfs, so users can install packages.
-	if (mount | grep -q '/data '); then
-		if [ ! -d /data/usr/local ]; then
-			mkdir -p /data/usr/local
-		fi
-		if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
-			kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
-		fi
-		unionfs -o cow,max_files=${unionfs_maxfiles} \
-		        -o allow_other,use_ino,suid,nonempty,kernel_cache \
-		        /data/usr/local=RW:/unionfs/usr/local=RO /usr/local
-		service ldconfig start
+	if [ ! -d /rwlocal ]; then
+		return
 	fi
+	if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
+		kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
+	fi
+	unionfs -o cow,max_files=${unionfs_maxfiles} \
+	        -o allow_other,use_ino,suid,nonempty,kernel_cache \
+	        /rwlocal=RW:/unionfs/usr/local=RO /usr/local
+	service ldconfig start
 }
 
 do_unmount()

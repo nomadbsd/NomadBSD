@@ -263,23 +263,23 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Geli page
+// ZFSEncPage
 //
 //////////////////////////////////////////////////////////////////////////////
-class GeliPage : public QWizardPage
+class ZFSEncPage : public QWizardPage
 {
 	Q_OBJECT
 public:
-	GeliPage(QWidget *parent = 0);
+	ZFSEncPage(QWidget *parent = 0);
 	bool isComplete() const;
 public slots:
-	void setGeli(bool state);
+	void setZFSEnc(bool state);
 	void passwordChanged(void);
 protected:
 	void initializePage();
 private:
 	QWidget	       *passContainer;
-	QCheckBox      *gelicb;
+	QCheckBox      *zfsenccb;
 	QLabel	       *title;
 	QLabel	       *intro;
 	QLabel	       *pwdLabel;

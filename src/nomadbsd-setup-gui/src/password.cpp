@@ -27,10 +27,10 @@
 #include <QRegExpValidator>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-
+#include <QDebug>
 #include "password.h"
 
-PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
+PasswordWidget::PasswordWidget(int minlen, QWidget *parent) : QWidget(parent)
 {
 	status		  = new QLabel(tr("Passwords do not match"));
 	pfield1		  = new QLineEdit;
@@ -58,7 +58,7 @@ PasswordWidget::PasswordWidget(QWidget *parent) : QWidget(parent)
 	vbox->addWidget(status);
 	setLayout(vbox);
 	valid = false;
-
+	this->minlen = minlen;
 	pfield2->setEnabled(false);
 	connect(pfield1, SIGNAL(textChanged(const QString &)), this,
 	    SLOT(setActive(const QString &)));
@@ -77,8 +77,23 @@ void PasswordWidget::notifyInvalidChar()
 	status->setText(tr("Only 7-bit ASCII characters are allowed"));
 }
 
+bool PasswordWidget::checkPassLen()
+{
+	if (pfield1->text().length() >= this->minlen)
+		return (true);
+	status->setText(
+		tr("Password must be at least %1 charaters long")
+		    .arg(this->minlen)
+	);
+	pfield2->setEnabled(false);
+
+	return (false);
+}
+
 void PasswordWidget::setActive(const QString &input)
 {
+	if (!checkPassLen())
+		return;
 	if (input == "") {
 		valid = false;
 		pfield2->setEnabled(false);
@@ -89,6 +104,8 @@ void PasswordWidget::setActive(const QString &input)
 
 void PasswordWidget::compareFields(const QString &input)
 {
+	if (!checkPassLen())
+		return;
 	if (input != "" && pfield2->text() == pfield1->text()) {
 		valid = true;
 		status->setText(tr("OK"));
