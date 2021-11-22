@@ -9,6 +9,7 @@ REPO_URL	    = https://github.com/mrclksr/linux-browser-installer
 LBI_DIR		    = /tmp/linux-browser-installer
 BSD_INSTALL_DATA   ?= install -m 0644
 BSD_INSTALL_SCRIPT ?= install -m 555
+LRELEASE           ?= lrelease-qt5
 
 all: ${PROGRAM} ${MODULE} ${PROGRAM}.desktop
 
@@ -30,7 +31,7 @@ lupdate: ${PROGRAM}
 
 translate:
 	for i in locale/*.ts; do \
-		lrelease $$i -qm $${i%ts}qm; done
+		${LRELEASE} $$i -qm $${i%ts}qm; done
 
 install: ${INSTALL_TARGETS}
 	${BSD_INSTALL_SCRIPT} ${PROGRAM} ${BINDIR}
