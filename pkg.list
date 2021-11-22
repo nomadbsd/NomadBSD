@@ -99,6 +99,7 @@ textproc/aspell
 textproc/en-aspell
 textproc/en-hunspell
 textproc/hunspell
+textproc/py-qt5-xml
 ukrainian/aspell
 ukrainian/hunspell
 vietnamese/aspell
