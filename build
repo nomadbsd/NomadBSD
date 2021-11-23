@@ -790,7 +790,7 @@ build_setupgui()
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-setup-gui && make distclean; \
-		qmake ${QMAKE_VARS} && make && make install" || bail
+		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
@@ -804,7 +804,7 @@ build_installgui()
 	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-install-gui && make distclean; \
-		qmake ${QMAKE_VARS} && make && make install" || bail
+		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
@@ -813,7 +813,7 @@ build_addusergui()
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-adduser-gui && make distclean; \
-		qmake && make && make install" || bail
+		qmake-qt5 && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
