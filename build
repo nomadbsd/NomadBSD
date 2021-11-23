@@ -822,21 +822,15 @@ build_dmconfig()
 	cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-dmconfig && make distclean; \
-		qmake && make && make install" || bail
+		qmake-qt5 && make && make install" || bail
 	_umount "${SYSDIR}/dev"
 }
 
 build_chusr()
 {
-	required_pkgs="py37-qt5-core py37-qt5-xml py37-qt5-gui py37-qt5-widgets"
 	cp -a src/nomadbsd-chusr "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" \
 			sh -c "cd /tmp/nomadbsd-chusr && make install" || bail
-	for i in ${required_pkgs}; do
-		if ! pkg -c "${SYSDIR}" info --exists $i; then
-			pkg -c "${SYSDIR}" install -y $i
-		fi
-	done
 }
 
 build_lbi_gui()
