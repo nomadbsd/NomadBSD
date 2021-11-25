@@ -24,6 +24,6 @@ xrdb /usr/share/nomadbsd-setup/Xresources
 # Enable tapping on touchpad
 /usr/bin/enable_tapping
 
-(/usr/bin/nomadbsd-setup-gui; /usr/bin/nomadbsd-adduser; shutdown -r now)&
+(/usr/bin/nomadbsd-setup-gui; /usr/bin/nomadbsd-adduser-gui; shutdown -r now)&
 exec openbox-session
 

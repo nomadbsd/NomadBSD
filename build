@@ -55,6 +55,9 @@
 # dmconfig	 (Re)build and (re)install nomadbsd-dmconfig-gui
 #
 
+. ./build.cfg
+set -x
+
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
@@ -63,8 +66,7 @@ RELEASE|BETA|RC*)
 esac
 
 # Where bsdinstall stores fetched files.
-DISTDIR="${WORKDIR}/dists"
-PATCHDIR="${WORKDIR}/patchset"
+DISTDIR="/tmp"
 XORG_CONF_D="${SYSDIR}/usr/local/etc/X11/xorg.conf.d"
 FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
@@ -77,7 +79,7 @@ initbase()
 {
 	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
@@ -187,8 +189,8 @@ buildnvidia()
 	done
 	# Remove textproc/gsed if we just installed it for building nvidia-driver
 	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/usr/ports"
+	umount "${SYSDIR}/dev"
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/extensions
 
@@ -229,7 +231,7 @@ instpkgs()
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 instgit()
@@ -251,7 +253,7 @@ instgit()
 		[ -z "${build_cmd}" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
 	done
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 postpkgcfg()
@@ -396,8 +398,8 @@ instports()
 	fi
 	pkg -c "${SYSDIR}" autoremove -y
 
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/usr/ports"
+	umount "${SYSDIR}/dev"
 }
 
 buildkernel()
@@ -415,7 +417,7 @@ buildkernel()
 	done
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 	    cd /usr/src && make ${makeopts} kernel" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 instsrcdist()
@@ -437,7 +439,7 @@ build_setupgui()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-setup-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 build_installgui()
@@ -451,18 +453,21 @@ build_installgui()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-install-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 build_addusergui()
 {
+	if [ ! -d "${SYSDIR}/usr/share/nomadbsd" ]; then
+		mkdir -p "${SYSDIR}/usr/share/nomadbsd"
+	fi
 	(cd nomad && tar cfz - .) > \
 		"${SYSDIR}/usr/share/nomadbsd/home.nomad.tgz"
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-adduser-gui && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 build_dmconfig()
@@ -471,7 +476,7 @@ build_dmconfig()
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/nomadbsd-dmconfig && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 build_chusr()
@@ -486,7 +491,7 @@ build_lbi_gui()
 	cp -a src/lbi-gui "${SYSDIR}/tmp/"
 	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
 		cd /tmp/lbi-gui && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount "${SYSDIR}/dev"
 }
 
 insthandbook()
@@ -534,10 +539,13 @@ all()
 {
 	local i stages
 
-	stages="installsrc instpkgs instgit build_setupgui build_installgui build_addusergui"
+	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui "
 	stages="${stages} instports buildnvidia postpkgcfg runsetup"
 	initbase
+	instsrcdist
+	save_stage "instsrcdist"
+
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
 		save_stage updatebase
@@ -560,7 +568,7 @@ all()
 
 resumebuild()
 {
-	stages="installsrc updatebase buildkernel instpkgs instgit build_setupgui"
+	stages="instsrcdest updatebase buildkernel instpkgs instgit build_setupgui"
 	stages="${stages} build_installgui build_addusergui"
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui "
 	stages="${stages} instports buildnvidia postpkgcfg runsetup"
@@ -638,7 +646,6 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-init_vars
 
 while [ $# -gt 0 ]; do
 	case "$1" in
