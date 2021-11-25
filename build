@@ -236,22 +236,22 @@ instpkgs()
 
 instgit()
 {
-	[ ! -d "${SYSDIR}/git" ] && mkdir "${SYSDIR}/git"
+	[ ! -d "${SYSDIR}/tmp/git" ] && mkdir "${SYSDIR}/tmp/git"
 	if ! (mount | grep -q "${SYSDIR}/dev"); then
 		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	fi
 	for r in ${GIT_REPOS}; do
 		rd=$(echo $r | sed -E 's#.*/(.*)\.git$#\1#')
 		repo_dirs="${repo_dirs} ${rd}"
-		if [ ! -d "${SYSDIR}/git/${rd}" ]; then
-			chroot "${SYSDIR}" sh -c "cd /git && git clone ${r}"
+		if [ ! -d "${SYSDIR}/tmp/git/${rd}" ]; then
+			chroot "${SYSDIR}" sh -c "cd /tmp/git && git clone ${r}"
 		fi
 	done
 	for r in ${repo_dirs}; do
 		rname=$(echo $r | tr '-' '_')
 		eval build_cmd=\${${rname}_BUILD_CMD}
 		[ -z "${build_cmd}" ] && continue
-		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
+		chroot "${SYSDIR}" sh -c "cd /tmp/git/${r}; ${build_cmd}"
 	done
 	umount "${SYSDIR}/dev"
 }
