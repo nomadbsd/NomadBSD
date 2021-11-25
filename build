@@ -266,9 +266,6 @@ postpkgcfg()
 	if grep -q ^webcamd: "${SYSDIR}/etc/group"; then
 		chroot "${SYSDIR}" sh -c 'pw groupmod webcamd -m nomad'
 	fi
-	# Remove tesserac-data which uses ~1G.
-	rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
-
 	# Remove desktop files for LXDE and Xfce preferred applications
 	rm -f "${SYSDIR}"/usr/local/share/applications/exo-*.desktop
 	rm -f "${SYSDIR}"/usr/local/share/applications/libfm-pref-apps.desktop
