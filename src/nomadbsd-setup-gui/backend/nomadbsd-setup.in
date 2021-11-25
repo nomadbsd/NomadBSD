@@ -26,21 +26,14 @@ use utf8;
 use strict;
 use POSIX ":sys_wait_h";
 use Time::HiRes "usleep";
-use lib('@MODULE_PATH@');
-use nomadbsd_setup_@MODULE_ARCH@;
 
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
-
-our $fragsize		= 4096;
-our $blksize		= $fragsize * 8;
-our $cfg_geli_password;
 
 my $dummy;
 my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
 my $path_zoneinfo	= "/usr/share/zoneinfo/zone.tab";
-my $path_dotfiles	= "/usr/share/nomadbsd/home.nomad.tgz";
 my $path_templates	= "/usr/share/nomadbsd-setup";
 my $path_xkbd_conf	= "/usr/local/etc/X11/xorg.conf.d/10-input-keyboard.conf";
 my $path_xinitrc	= "$path_templates/xinitrc";
@@ -48,45 +41,14 @@ my $path_scfb_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
 my $path_vesa_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 my ($xlayoutstr, $xvariantstr);
 
-my $cfg_fm;
-my $cfg_locale;
 my $cfg_timezone;
-my $cfg_shell;
-my $cfg_password;
 my $cfg_kbdlayout;
 my $cfg_kbdvariant;
-my $cfg_editor;
-my $cfg_gui_editor;
 my @cfg_xkbdlayouts;
 ##############################################################################
 # This section is for defining data.
 #
 # 
-my @file_manager_list = (
-	'thunar		Xfce file manager',
-	'pcmanfm	PCMan file manager'
-);
-
-my @shell_list = (
-	'fish		The friendly interactive shell',
-	'zsh		The Z shell',
-	'bash		GNU Bourne-Again SHell',
-	'csh		Shell with file name completion and command line editing',
-	'sh			Bourne shell'
-);
-
-my @editor_list = (
-	'ee			Easy editor',
-	'vim		Vi IMproved, a programmer\'s text editor',
-	'vi			Bug-for-bug compatible replacement for 4BSD\'s vi'
-);
-
-my @gui_editor_list = (
-	'leafpad	GTK+ based simple text editor',
-	'gvim		Vim with a GTK+ frontend',
-	'vim		Vim running in a X terminal'
-);
-
 my %locales = (
 	af_ZA	=>	'Afrikaans - South Africa',
 	ar_AE	=>	'Arabic - United Arab Emirates',
@@ -212,42 +174,6 @@ sub progress {
 	select $ofh;
 }
 
-#
-# A wrapper for the newfs program which outputs the progress in %.
-# It takes a newfs command with all its parameters as a string.
-#
-sub newfswrp {
-	my $cmd = $_[0];
-	my (@sbb, $ngroups, $sbbc, $fh, $p);
-
-	open($fh, "$cmd |") or
-		bail("Couldn't execute $cmd");
-	progress(-1);
-	while ((defined($_ = <$fh>))) {
-		chomp;
-		if (/^\tusing ([0-9]+) cylinder/) {
-			$ngroups = $1;
-		} elsif (/^super-block backups.*at:$/) {
-			last;
-		}
-	}
-	if ($ngroups <= 0) {
-		print STDERR "Warning: Failed to parse newfs output\n";
-		$ngroups = 1;
-	}
-	#
-	# Change the input separator to a space character so that we can
-	# read single space-separated records printed out by newfs.
-	#
-	local $/ = ' ';
-	while ((defined($_ = <$fh>))) {
-		next if (!/^[0-9]+/);
-		$p = int(++$sbbc * 100 / $ngroups);
-		progress($p);
-	}
-	bail("\"$cmd\" failed") if (!close($fh));
-}
-
 sub write_xorg_video_cfg {
 	my $fh;
 	my ($driver, $busID) = @_;
@@ -268,9 +194,6 @@ sub write_xorg_video_cfg {
 
 #
 # Initialize environment for the graphical setup.
-# 
-# Depending on the boot method, set up and start an X server with
-# the SCFB driver (EFI) or the VESA (BIOS) driver.
 #
 sub bootstrap_gui {
 	my ($efiboot, $in_vgapci, $vbox, $path, $driver, $kms, $busID);
@@ -487,149 +410,12 @@ sub print_xkbdmodels {
 	}
 }
 
-sub set_password {
-	my ($user, $pass) = @_;
-	open(my $fh, "| pw usermod $user -h 0") or bail("Failed to execute 'pw'");
-	print $fh $pass;
-	if (!close($fh)) {
-		bail("Failed to set password for user $user");
-	}
-}
-
 sub set_timezone {
 	my ($tz) = @_;
 	# This needs fixing
 	system("echo $tz > /var/db/zoneinfo");
 	system("cp /usr/share/zoneinfo/$tz /etc/localtime");
 	system("adjkerntz -i");
-}
-
-sub set_shell {
-	my ($user, $sh) = @_;
-	my $shpath = $sh;
-	
-	if ($sh !~ /^\//) {
-		open(my $fh, "</etc/shells") or bail("Couldn't open /etc/shells");
-		foreach (<$fh>) {
-			if (/\/$sh$/) {
-				$shpath = $_; last
-			}
-		}
-		close($fh);
-	}
-	system("pw usermod $user -s $shpath");
-}
-	
-sub find_desktop_file {
-	local $_;
-	my ($appsdir, $name) = @_;
-	my ($dh, $fh, $fname);
-
-	opendir($dh, $appsdir)
-		or return "";
-	while (readdir $dh) {
-		next if (! -f "$appsdir/$_");
-		$fname = $_;
-		open($fh, "<$appsdir/$fname") or die "$!";
-		while (<$fh>) {
-			if (/^Name=$name/im) {
-				close $fh;
-				closedir $dh;
-				return "$appsdir/$fname";
-			}
-		}
-		close $fh;
-	}
-	closedir $dh;
-	return "";
-}
-
-sub desktopsettings {
-	my $appsdir		= "/usr/local/share/applications";
-	my $usrappsdir	= "/home/nomad/.local/share/applications";
-	my $mimelist	= "/home/nomad/.config/mimeapps.list";
-	my $dsbmc_cfg	= "/home/nomad/.config/DSB/dsbmc/config";
-	my $xinitrc		= "/home/nomad/.xinitrc";
-	my $plank_ini	= "/home/nomad/.config/plank.ini";
-	my $plank_launcher_dir	= "/home/nomad/.config/plank/dock1/launchers";
-	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
-	my $path_xkbdmap = "/home/nomad/.config/xkbdmap.sh";
-
-	my @apps = (
-		'home', 'sakura', 'firefox', 'thunderbird',
-		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
-		'mpv', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
-	);
-	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
-		open(my $fh, ">>$_") or bail("Couldn't open $_");
-		print $fh $logincfg_rec;
-		close($fh);
-	}
-	open(my $fh, $xinitrc) or bail("Couldn't open $xinitrc");
-	my @xinit = <$fh>;
-	close($fh);
-	open(my $fh, ">$xinitrc") or bail("Couldn't open $xinitrc");
-	foreach (@xinit) {
-		if (/#!/) {
-			print $fh "$_";
-			print $fh "export EDITOR=$cfg_editor\n";
-		} else {
-			print $fh "$_";
-		}
-	}
-	close($fh);
-
-	# Create "plank" dock items for filemanager, gimp, vlc, terminal, etc.
-	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
-	foreach (@apps) {
-		my $desktopfile = "$appsdir/$_.desktop";
-		$desktopfile = "$usrappsdir/$_.desktop" if (! -f $desktopfile);
-		if (! -f $desktopfile) {
-			$desktopfile = find_desktop_file($appsdir, $_);
-		}
-		next if (! -f $desktopfile);
-		open(my $fh, ">${plank_launcher_dir}/$_.dockitem") or next;
-		print $fh "[PlankDockItemPreferences]\n" .
-				  "Launcher=file://$desktopfile\n";
-		close($fh);
-	}
-	# Define order of plank's dock items
-	my $items;
-	foreach (@apps) {
-		$items .= ", " if ($items);
-		$items .= "'$_.dockitem'";
-	}
-	open(my $fh, ">>$plank_ini") or bail("Couldn't open $plank_ini");
-	print $fh "dock-items=[$items]\n";
-	close($fh);
-	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/EMAILCLIENT/thunderbird.desktop/g' " .
-		   "${mimelist}");
-	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
-		   "${mimelist}");
-	system("rm -f ${mimelist}.bak 2>/dev/null");
-
-	# Update Openbox menu
-	system("su -l nomad -c '/usr/bin/update_obmenu -u'");
-	
-	# Create localized XDG standard dirs.
-	system("su -l nomad -c '/usr/local/bin/xdg-user-dirs-update'");
-	
-	# Create dconf file from plank.ini
-	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
-	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-	open(my $fh, ">$path_xkbdmap") or bail("Couldn't create $path_xkbdmap");
-	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
-	close($fh);
-	chmod(0744, $path_xkbdmap);
-	# Autostart gxkb if multiple keyboard layouts were set.
-	if (@cfg_xkbdlayouts > 0) {
-		my $cmd = qq(su -l nomad -c 'echo gxkb | dsbautostart -c');
-		system($cmd);
-	}
-	# Make nomad the owner of all the files under /home/nomad
-	system("chown -R nomad /home/nomad");
 }
 
 sub set_kbdmap {
@@ -668,16 +454,9 @@ sub commit {
 		$| = 1;
 		select $ofh;
 		chomp;
-		$cfg_locale		   = $1 if (/^cfg_locale\s*=\s*(.*)/);
-		$cfg_fm		   	   = $1 if (/^cfg_file_manager\s*=\s*(.*)/);
 		$cfg_timezone	   = $1 if (/^cfg_timezone\s*=\s*(.*)/);
-		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
-		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
-		$cfg_geli_password = $1 if (/^cfg_geli_password\s*=\s*(.*)/);
 		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
-		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
-		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
 		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
 			@cfg_xkbdlayouts = split(/,/, $1);
 		}
@@ -692,137 +471,24 @@ sub commit {
 	status("Setting timezone");
 	set_timezone($cfg_timezone);
 	system("cap_mkdb /etc/login.conf");
-	
-	if ($cfg_geli_password) {
-		mkgelidata();
-	} else {
-		mkdatafs();
-	}
-	status("Creating /data/usr/local");
-	system("mkdir -p /data/usr/local") == 0 or bail("Couldn't create /data/usr/local");
-	status("Creating /data/compat");
-	system("mkdir /data/compat") == 0 or bail("Couldn't create /data/compat");
-	status("Creating /data/var/tmp");
-	system("mkdir -p /data/var/tmp") == 0
-		or bail("Couldn't create /data/var/tmp");
-	system("chmod a+rwxt /data/var/tmp");
-		system("unlink /home >/dev/null 2>&1");
-
-	status("Creating /data/var/db");
-	system("mkdir -p /data/var/db");
-
-	system("rmdir -rf /home 2>&1");
-	status("Creating /data/home/nomad");
-	system("mkdir -p /data/home/nomad") == 0
-		or bail("Couldn't create /data/home/nomad");
-	system("chown nomad:nomad /data/home/nomad");
-	status("Symlinking /home to /data/home");
-	system("ln -s /data/home /home") == 0
-		or bail("Failed to create symlink /home -> /data/home");
-
-	status("Creating /data/usr/ports");
-	system("mkdir -p /data/usr/ports");
-
-	status("Creating /usr/ports");
-	system("mkdir -p /usr/ports");
-
-	status("Extracting databases to /data/var/db/");
-	system("cd /data && tar xf /usr/share/nomadbsd/var.db.tar.xz");
-
-	# Copy new files and directories to /data/var/db
-	system("tar -C /var -cf - db | tar -C /data/var -xf -");
-
-	status("Mounting /data/var/db to /var/db");
-	system("mount -t nullfs /data/var/db /var/db");
-
-	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
-	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/var/db\t/var/db\t\t\tnullfs\trw,late\t0 0\n";
-	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
-
-	close($fh);
-	status("Counting files to copy");
-	progress(-1);
-	foreach (`tar tf ${path_dotfiles}`) {
-		$nfiles++;
-	}
-	$nfiles = 1 if (!$nfiles);
-	status("Extracting dot files and directories for user nomad");
-	open(my $fh, "-|", "cd /home/nomad && tar xvf ${path_dotfiles} 2>&1")
-		or bail("Failed to open pipe to 'tar xvf ${path_dotfiles}'");
-	while (defined($_ = <$fh>)) {
-		next if (! /^x/);
-		chomp;
-		my $p = int(++$n * 100 / $nfiles);
-		print ">$_\n";
-		progress($p);
-	}
-	close($fh);
-	system("cd /home/nomad && chown -R nomad .");
-	foreach (qw(root nomad)) {
-		status("Setting password for $_");
-		set_password($_, $cfg_password);
-	}
-	status("Setting shell for user nomad");
-	set_shell("nomad", $cfg_shell);
-	status("Setting locale for user nomad");
-	system("pw usermod nomad -L ${cfg_locale}") == 0
-			or bail("Failed to set locale $cfg_locale");
 	status("Setting keyboard map for X and vt");
 	set_kbdmap();
-	status("Configuring desktop");
-	desktopsettings();
-	status("Disabling auto-login on ttyv0");
-	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
-	system("cp /usr/share/skel/dot.login /root/.login");
 	system("sysrc -e initgfx_kmods >> /etc/rc.conf.in");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	system("touch /etc/wpa_supplicant.conf");
 	status("Regenerating font cache");
 	system("/usr/local/bin/fc-cache -sfr");
-	status("Locking kernel module packages");
-	system("pkg lock -y -g '*-kmod'");
 	unlink($path_vesa_cfg);
 	unlink($path_scfb_cfg);
-	if (-l "/usr/local") {
-		status("Replacing symlink to /unionfs/usr/local by /usr/local");
-		system("unlink /usr/local && mkdir /usr/local") == 0
-			or bail("Couldn't create directory '/usr/local'");
-	}
 	system("rm -rf /root/.config/autostart");
-	# Force initgfx to re-configure the gfx driver, because there might be
-	# missing files it couldn't write, since /usr/local is r/o when running
-	# the setup.
-	system("rm -f /var/initgfx_config.id");
-	status("Sync'ing filesystems");
-	system("sync");
 	exit 0;
 }
 
 sub dummy_commit {
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	status("Setting timezone $cfg_timezone");
-	if ($cfg_geli_password) {
-		status("Creating geli encrypted /home with " .
-			   "geli password $cfg_geli_password");
-	} else {
-		status("Creating /home");
-	}
-	status("Creating /data/usr/local");
-	status("Extracting dot files and directories for user nomad");
-	for (my $p = 0; $p < 100; $p++) {
-		print "%$p\n"; usleep(50000);
-	}
-	foreach (qw(root nomad)) {
-		status("Setting password for $_ to $cfg_password");
-	}
-	status("Setting shell $cfg_shell for user nomad");
-	status("Setting locale $cfg_locale for user nomad");
-	status("Configuring desktop");
 	status("Setting keyboard map ($cfg_kbdlayout, $cfg_kbdvariant) " .
 		   "for X and vt");
-	status("Disabling auto-login on ttyv0");
 	exit 0;
 }
 
@@ -928,18 +594,6 @@ while (@ARGV) {
 		exit 0;
 	} elsif ($ARGV[0] eq "timezones") {
 		print_timezones();
-		exit 0;
-	} elsif ($ARGV[0] eq "shells") {
-		print_array_data(\@shell_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "editors") {
-		print_array_data(\@editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "guieditors") {
-		print_array_data(\@gui_editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "filemanagers") {
-		print_array_data(\@file_manager_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "commit") {
 		commit();

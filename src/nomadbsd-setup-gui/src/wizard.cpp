@@ -42,8 +42,6 @@
 // Global variables to hold the configuration
 //
 //////////////////////////////////////////////////////////////////////////////
-static bool    cfg_use_geli = false;
-static QString cfg_geli;
 static QString cfg_locale;
 static QString cfg_localedescr;
 static QString cfg_region;
@@ -51,12 +49,6 @@ static QString cfg_kbdlayout;
 static QString cfg_kbdvariant;
 static QString cfg_kbdconfigdescr;
 static QString cfg_timezone;
-static QString cfg_shell;
-static QString cfg_password;
-static QString cfg_geli_password;
-static QString cfg_editor;
-static QString cfg_gui_editor;
-static QString cfg_file_manager;
 static QStringList cfg_xkbdlayouts;
 static QStringList cfg_xkbdvariants;
 static QStringList cfg_xkbdconfigdescr;
@@ -75,24 +67,12 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	addPage(new KbdLayoutPage);
 	addPage(new ExtraKbdLayoutPage);
 	addPage(new TimezonePage);
-	addPage(new PasswordPage);
-	addPage(new GeliPage);
-	addPage(new ProgramsPage);
 	addPage(new SummaryPage);
 	addPage(new CommitPage);
 }
 
 void SetupWizard::accept()
 {
-	QMessageBox msgBox;
-	msgBox.setWindowModality(Qt::WindowModal);
-	msgBox.setText(tr("Rebooting. Please wait ..."));
-	msgBox.setWindowTitle(tr("Rebooting"));
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setWindowIcon(msgBox.iconPixmap());
-	msgBox.setStandardButtons(0);
-	system(REBOOT_CMD);
-	msgBox.exec();
 	QDialog::accept();
 }
 
@@ -123,11 +103,8 @@ WelcomePage::WelcomePage(QWidget *parent) : QWizardPage(parent)
 void WelcomePage::initializePage()
 {
 	title->setText(tr("Welcome to the NomadBSD setup wizard.\n\n"));
-	intro->setText(tr("Before you can use NomadBSD, there are some " \
-			  "things that need to be set up.\n\n"	    	 \
-			  "The setup will only write to the USB "   	 \
-			  "flash drive it is currently running "	 \
-			  "from. It will not change your system."));
+	intro->setText(tr("The setup wizard will help you to configure " \
+			  "some system wide settings.\n\n"));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -710,238 +687,6 @@ void TimezonePage::timezoneSelected(int row)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Password page
-//
-//////////////////////////////////////////////////////////////////////////////
-PasswordPage::PasswordPage(QWidget *parent) : QWizardPage(parent)
-{
-	pass		    = new PasswordWidget;
-	title		    = new QLabel;
-	intro		    = new QLabel;
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	title->setStyleSheet("font-weight: bold;");
-	title->setAlignment(Qt::AlignHCenter);
-	intro->setWordWrap(true);
-	layout->addWidget(title);
-	layout->addWidget(intro);
-	layout->addWidget(pass);
-	setLayout(layout);
-	connect(pass, SIGNAL(passwordChanged()), this,
-	    SLOT(passwordChanged()));
-}
-
-void PasswordPage::initializePage()
-{
-	title->setText(tr("Set password for user and root\n"));
-	intro->setText(tr("The password you choose here will be used "	\
-			  "for your user account (nomad), and for the "	\
-			  "administration account (root)\n\n"));
-	pass->setPl1Text(tr("Password:"));
-	pass->setPl2Text(tr("Repeat password:"));
-	pass->setStatusText(tr("Passwords do not match"));
-}
-
-void PasswordPage::passwordChanged()
-{
-	if (pass->isValid())
-		cfg_password = pass->password();
-	emit completeChanged();
-}
-
-bool PasswordPage::isComplete() const
-{
-	if (!pass->isValid())
-		return (false);
-	return (true);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Geli page
-//
-//////////////////////////////////////////////////////////////////////////////
-GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
-{
-	pass			  = new PasswordWidget;
-	gelicb			  = new QCheckBox;
-	passContainer		  = new QWidget;
-	intro			  = new QLabel;
-	title			  = new QLabel;
-	pwdLabel		  = new QLabel;
-	QVBoxLayout *layout	  = new QVBoxLayout;
-	QVBoxLayout *containerBox = new QVBoxLayout(passContainer);
-
-	title->setStyleSheet("font-weight: bold;");
-	title->setAlignment(Qt::AlignHCenter);
-
-	intro->setWordWrap(true);
-	containerBox->addWidget(pwdLabel);
-	containerBox->addWidget(pass);
-
-	passContainer->setEnabled(cfg_use_geli);
-	gelicb->setTristate(false);
-
-	layout->addWidget(title);
-	layout->addWidget(intro);
-	layout->addWidget(gelicb);
-	layout->addWidget(passContainer);
-	setLayout(layout);
-
-	connect(pass, SIGNAL(passwordChanged()), this,
-	    SLOT(passwordChanged()));
-	connect(gelicb, SIGNAL(toggled(bool)), this, SLOT(setGeli(bool)));
-}
-
-void GeliPage::initializePage()
-{
-	gelicb->setChecked(cfg_use_geli);
-	cfg_geli = cfg_use_geli ? tr("Yes") : tr("No");
-	gelicb->setText(tr("Encrypt /data using Geli"));
-	title->setText(tr("Geli encrypted /data\n"));
-	intro->setText(tr("NomadBSD allows you to protect your personal "  \
-			  "files by encrypting the /data partition using " \
-			  "geli(8). If you don't know what geli(8) is, "  \
-			  "you should skip this page.\n\n"));
-	pwdLabel->setText(tr("Define a password required to decrypt /data"));
-	pass->setPl1Text(tr("Password:"));
-	pass->setPl2Text(tr("Repeat password:"));
-	pass->setStatusText(tr("Passwords do not match"));
-}
-
-void GeliPage::passwordChanged()
-{
-	if (pass->isValid())
-		cfg_geli_password = pass->password();
-	emit completeChanged();
-}
-
-void GeliPage::setGeli(bool state)
-{
-	passContainer->setEnabled(state);
-	cfg_geli = state ? tr("Yes") : tr("No");
-	cfg_use_geli = state;
-	emit completeChanged();
-}
-
-bool GeliPage::isComplete() const
-{
-	if (gelicb->isChecked() && !pass->isValid())
-		return (false);
-	return (true);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Default applications page
-//
-//////////////////////////////////////////////////////////////////////////////
-ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
-{
-	intro		    = new QLabel;
-	title		    = new QLabel;
-	QVBoxLayout *layout = new QVBoxLayout;
-
-	struct apps_s {
-		const char *command;
-		QString	   *cfg_var;
-		QComboBox  **box;
-	} apps[ncats] = {
-		{ BACKEND_GET_SHELLS,	    &cfg_shell,        &shells       },
-		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
-		{ BACKEND_GET_GUIEDITORS,   &cfg_gui_editor,   &guiEditors   },
-		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
-
-	};
-	layout->setSpacing(10);
-	layout->addWidget(title);
-	layout->addWidget(intro);
-
-	intro->setWordWrap(true);
-	title->setStyleSheet("font-weight: bold;");
-	title->setAlignment(Qt::AlignHCenter);
-
-	for (int n = 0; n < ncats; n++) {
-		QProcess   proc;
-		QByteArray line;
-
-		*apps[n].box = new QComboBox;
-		proc.setReadChannel(QProcess::StandardOutput);
-		proc.start(apps[n].command);
-
-		(void)proc.waitForStarted(-1);
-		//
-		// According to the Qt docs, we can not rely on the return value.
-		// We have to check state().
-		//
-		if (proc.state() == QProcess::NotRunning) {
-			SetupWizard::errAndOut(
-			    tr("Couldn't start backend '%1': %2")
-			    .arg(apps[n].command).arg(proc.errorString()));
-		}
-		while (proc.waitForReadyRead(-1)) {
-			while (!(line = proc.readLine()).isEmpty()) {
-				// Remove trailing newline.
-				line.truncate(line.size() - 1);
-				QList<QByteArray>fields = line.split('|');
-				if (fields.count() < 2)
-					continue;
-				QString id    = fields.at(0);
-				QString descr = QString("%1 - %2")
-				    .arg(QString(fields.at(0)))
-				    .arg(QString(fields.at(1)));
-				(*apps[n].box)->addItem(descr, QVariant(id));
-				if ((*apps[n].box)->count() == 1)
-					*apps[n].cfg_var = id;
-			}
-		}
-		proc.waitForFinished(-1);
-		if (proc.exitCode() != 0) {
-			SetupWizard::errAndOut(
-			    tr("Command '%1' returned with an error.")
-			    .arg(apps[n].command));
-		}
-		if ((*apps[n].box)->count() == 0)
-			*apps[n].cfg_var = "";
-		connect(*apps[n].box, SIGNAL(currentIndexChanged(int)), this,
-		    SLOT(selectionChanged(int)));
-		catLabel[n]	   = new QLabel;
-		QVBoxLayout *vbox  = new QVBoxLayout;
-		catLabel[n]->setStyleSheet("font-weight: bold;");
-		vbox->addWidget(catLabel[n]);
-		vbox->addWidget(*apps[n].box);
-		layout->addLayout(vbox);
-	}
-	setLayout(layout);
-}
-
-void ProgramsPage::initializePage()
-{
-	QString label[ncats] = {
-		tr("Shell"), tr("Editor"), tr("GUI Editor"), tr("File manager")
-	};
-	for (int n = 0; n < ncats; n++)
-		catLabel[n]->setText(label[n]);
-	title->setText(tr("Choose your default applications\n"));
-	intro->setText(tr("Please choose your preferred shell, editors, " \
-			  "and filemanager\n"));
-}
-
-QString ProgramsPage::getBoxVal(QComboBox *box)
-{
-	return (box->itemData(box->currentIndex()).toString());
-}
-
-void ProgramsPage::selectionChanged(int /* unused */)
-{
-	cfg_shell	 = getBoxVal(shells);
-	cfg_editor	 = getBoxVal(editors);
-	cfg_gui_editor	 = getBoxVal(guiEditors);
-	cfg_file_manager = getBoxVal(fileManagers);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//
 // Summary page
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -975,15 +720,9 @@ void SummaryPage::initializePage()
 		QString key;
 		QString val;
 	} summary[] = {
-		{ tr("Locale:"),			cfg_localedescr	   },
-		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
-		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
-		{ tr("Encrypt /data:"),			cfg_geli	   },
-		{ tr("Shell:"),				cfg_shell	   },
-		{ tr("Editor:"),			cfg_editor	   },
-		{ tr("GUI editor:"),			cfg_gui_editor     },
-		{ tr("File manager:"),			cfg_file_manager   },
+		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
+		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   }
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -991,7 +730,7 @@ void SummaryPage::initializePage()
 	}
 	title->setText(tr("Summary\n"));
 	text->setText(tr("\n\nIf you click \"commit\", the changes " \
-			 "will be written to your USB flash drive"));
+			 "will be written to your system."));
 	text->setWordWrap(true);
 }
 
@@ -1030,16 +769,9 @@ void CommitPage::initializePage()
 		QString var;
 		QString val;
 	} config[] = {
-		{ "cfg_locale",		cfg_locale	  },
 		{ "cfg_timezone",	cfg_timezone	  },
 		{ "cfg_kbdlayout",	cfg_kbdlayout	  },
 		{ "cfg_kbdvariant",	cfg_kbdvariant	  },
-		{ "cfg_password",	cfg_password	  },
-		{ "cfg_geli_password",	cfg_geli_password },
-		{ "cfg_shell",		cfg_shell	  },
-		{ "cfg_editor",		cfg_editor	  },
-		{ "cfg_gui_editor",	cfg_gui_editor	  },
-		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);
@@ -1136,7 +868,6 @@ void CommitPage::cleanup(int exitCode, QProcess::ExitStatus /* exitStatus */)
 		    tr("%1 returned with error code %2:\n\"%3\"")
 		    .arg(BACKEND_COMMIT).arg(exitCode).arg(errorMsgBuf));
 	}
-	statusMsg->setText(tr("Press \"Finish\" to reboot"));
 	emit completeChanged();
 }
 

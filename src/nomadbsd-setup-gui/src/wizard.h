@@ -241,81 +241,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// Password page
-//
-//////////////////////////////////////////////////////////////////////////////
-class PasswordPage : public QWizardPage
-{
-	Q_OBJECT
-	
-public:
-	PasswordPage(QWidget *parent = 0);
-	bool isComplete() const;
-public slots:
-	void passwordChanged();
-protected:
-	void initializePage();
-private:
-	QLabel	       *title;
-	QLabel	       *intro;
-	PasswordWidget *pass;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Geli page
-//
-//////////////////////////////////////////////////////////////////////////////
-class GeliPage : public QWizardPage
-{
-	Q_OBJECT
-public:
-	GeliPage(QWidget *parent = 0);
-	bool isComplete() const;
-public slots:
-	void setGeli(bool state);
-	void passwordChanged(void);
-protected:
-	void initializePage();
-private:
-	QWidget	       *passContainer;
-	QCheckBox      *gelicb;
-	QLabel	       *title;
-	QLabel	       *intro;
-	QLabel	       *pwdLabel;
-	PasswordWidget *pass;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Default application page
-//
-//////////////////////////////////////////////////////////////////////////////
-class ProgramsPage : public QWizardPage
-{
-	Q_OBJECT
-
-public:
-	ProgramsPage(QWidget *parent = 0);
-public slots:
-	void selectionChanged(int);
-private:
-	QString getBoxVal(QComboBox *box);
-protected:
-	void initializePage(void);
-private:
-	static const int ncats = 4;
-	QLabel	  *catLabel[ncats];
-	QLabel	  *intro;
-	QLabel	  *title;
-	QComboBox *shells;
-	QComboBox *editors;
-	QComboBox *guiEditors;
-	QComboBox *fileManagers;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//
 // Summary page
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -327,7 +252,7 @@ public:
 protected:
 	void initializePage();
 private:
-	static const int nkeys = 9;
+	static const int nkeys = 3;
 	QLabel *val[nkeys];
 	QLabel *key[nkeys];
 	QLabel *title;
