@@ -80,8 +80,12 @@ initbase()
 	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
 	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
 	umount "${SYSDIR}/dev"
+	cp "${SYSDIR}/etc/rc.conf" "${SYSDIR}/etc/rc.conf.$$"
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
+	cp "${SYSDIR}/etc/rc.conf.$$" "${SYSDIR}/etc/rc.conf"
+	cat "config/etc/rc.conf" >>  "${SYSDIR}/etc/rc.conf"
+
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
 	insthandbook
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
