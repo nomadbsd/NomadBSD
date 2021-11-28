@@ -624,6 +624,14 @@ help()
 
 [ $# -lt 1 ] && usage
 
+if [ -z "${SYSDIR}" ]; then
+	echo "SYSDIR must not be empty" >&2
+	exit 1
+fi
+if [ ! -d "${SYSDIR}" ]; then
+	echo "${SYSDIR} does not exist" >&2
+	exit 1
+fi
 if ! which mkfontscale >/dev/null;  then
 	echo "Installing mkfontscale ..."
 	pkg install -y x11-fonts/mkfontscale || bail
