@@ -189,9 +189,7 @@ buildnvidia()
 	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
 		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
 	fi
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_devfs
 	# Building nvidia-driver>=410 requires textproc/gsed
 	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
 		have_gsed=1
@@ -248,9 +246,7 @@ pkglist()
 
 instpkgs()
 {
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_devfs
 	export ASSUME_ALWAYS_YES=yes
 	pkglist | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
 
@@ -259,15 +255,13 @@ instpkgs()
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 instgit()
 {
 	[ ! -d "${SYSDIR}/tmp/git" ] && mkdir "${SYSDIR}/tmp/git"
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_devfs
 	for r in ${GIT_REPOS}; do
 		rd=$(echo $r | sed -E 's#.*/(.*)\.git$#\1#')
 		repo_dirs="${repo_dirs} ${rd}"
@@ -281,7 +275,7 @@ instgit()
 		[ -z "${build_cmd}" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /tmp/git/${r}; ${build_cmd}"
 	done
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 postpkgcfg()
@@ -370,9 +364,7 @@ instports()
 	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
 		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
 	fi
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_devfs
 	#
 	# We need devel/autoconf and devel/automake to build
 	# sysutils/fusefs-jmtpfs
@@ -424,7 +416,7 @@ instports()
 	pkg -c "${SYSDIR}" autoremove -y
 
 	umount "${SYSDIR}/usr/ports"
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 buildkernel()
@@ -440,9 +432,9 @@ buildkernel()
 	for i in $(pwd)/patch/usr/src/*.diff; do
 		(cd "${SYSDIR}"/usr/src && patch -N < $i)
 	done
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-	    cd /usr/src && make ${makeopts} kernel" || bail
-	umount "${SYSDIR}/dev"
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /usr/src && make ${makeopts} kernel" || bail
+	umount_devfs
 }
 
 instsrcdist()
@@ -461,10 +453,10 @@ build_setupgui()
 		QMAKE_VARS=""
 	fi
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-setup-gui && make distclean; \
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-setup-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 build_installgui()
@@ -475,10 +467,10 @@ build_installgui()
 		QMAKE_VARS=""
 	fi
 	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-install-gui && make distclean; \
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-install-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 build_addusergui()
@@ -489,19 +481,19 @@ build_addusergui()
 	(cd nomad && tar cfz - .) > \
 		"${SYSDIR}/usr/share/nomadbsd/home.nomad.tgz"
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-adduser-gui && make distclean; \
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-adduser-gui && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 build_dmconfig()
 {
 	cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-dmconfig && make distclean; \
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-dmconfig && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	umount_devfs
 }
 
 build_chusr()
@@ -514,9 +506,9 @@ build_chusr()
 build_lbi_gui()
 {
 	cp -a src/lbi-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/lbi-gui && make && make install" || bail
-	umount "${SYSDIR}/dev"
+	mount_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/lbi-gui && make && make install" || bail
+	umount_devfs
 }
 
 insthandbook()
