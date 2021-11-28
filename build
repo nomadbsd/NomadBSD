@@ -74,18 +74,42 @@ DISTSITE=${URL}/${ARCH}/${RELEASE}
 KERNCONF_DIR="${SYSDIR}/usr/src/sys/${ARCH}/conf"
 KERNCONF_NOMADBSD="${KERNCONF_DIR}/NOMADBSD"
 KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
+SYSDIR=$(realpath ${SYSDIR})
+
+mount_devfs()
+{
+	if [ "${SYSDIR}" != "/" ]; then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
+}
+
+umount_devfs()
+{
+	if [ "${SYSDIR}" != "/" ]; then
+		umount "${SYSDIR}/dev"
+	fi
+}
 
 initbase()
 {
-	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
-	umount "${SYSDIR}/dev"
-	cp "${SYSDIR}/etc/rc.conf" "${SYSDIR}/etc/rc.conf.$$"
-	(cd config && tar cf - .) | \
-	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
-	cp "${SYSDIR}/etc/rc.conf.$$" "${SYSDIR}/etc/rc.conf"
-	cat "config/etc/rc.conf" >>  "${SYSDIR}/etc/rc.conf"
+	local files="/etc/rc.conf /etc/sysctl.conf /boot/loader.conf"
+	local excludes
 
+	mount_devfs
+	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
+	umount_devfs
+
+	# Back up config files
+	for f in $files; do
+		cp "${SYSDIR}/$f" "${SYSDIR}/$f.bak.$$"
+		excludes="${excludes} --exclude '^.$f'"
+	done
+	(cd config && eval tar cf - ${excludes} .) | \
+	    (cd "${SYSDIR}" && tar -vxf - --uname root --gname wheel)
+	# Append our config files
+	for x in ${files}; do
+		cat "config/$x" >> "${SYSDIR}/$x"
+	done
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
 	insthandbook
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
