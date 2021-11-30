@@ -560,8 +560,8 @@ all()
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui "
 	stages="${stages} instports buildnvidia postpkgcfg runsetup"
 	initbase
+	save_stage instsrcdist
 	instsrcdist
-	save_stage "instsrcdist"
 
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
