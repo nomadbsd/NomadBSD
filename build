@@ -186,8 +186,10 @@ buildnvidia()
 	local d v pkgname have_gsed
 
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	if [ "${SYSDIR}" != "/" ]; then
+		if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+			mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+		fi
 	fi
 	mount_devfs
 	# Building nvidia-driver>=410 requires textproc/gsed
@@ -215,8 +217,10 @@ buildnvidia()
 	done
 	# Remove textproc/gsed if we just installed it for building nvidia-driver
 	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-	umount "${SYSDIR}/usr/ports"
-	umount "${SYSDIR}/dev"
+	if [ "${SYSDIR}" != "/" ]; then
+		umount "${SYSDIR}/usr/ports"
+	fi
+	umount_devfs
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/extensions
 
@@ -361,8 +365,10 @@ port_opts()
 instports()
 {
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	if [ "${SYSDIR}" != "/" ]; then
+		if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+			mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+		fi
 	fi
 	mount_devfs
 	#
@@ -415,7 +421,9 @@ instports()
 	fi
 	pkg -c "${SYSDIR}" autoremove -y
 
-	umount "${SYSDIR}/usr/ports"
+	if [ "${SYSDIR}" != "/" ]; then
+		umount "${SYSDIR}/usr/ports"
+	fi
 	umount_devfs
 }
 
