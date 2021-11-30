@@ -207,11 +207,11 @@ buildnvidia()
 			d="nvidia-driver-$v"
 		fi
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
-		[ -f "${PKGDIR}/${pkgname}.txz" ] && continue
+		[ -f "${PKGDIR}/${pkgname}.pkg" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
 			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
 		mkdir -p "${SYSDIR}/usr/local/nvidia/$v" 2>/dev/null
-		cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.txz" | \
+		cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.pkg" | \
 			(cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
