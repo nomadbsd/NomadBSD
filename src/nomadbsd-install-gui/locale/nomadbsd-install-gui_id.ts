@@ -6,7 +6,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="408"/>
         <source>Last chance to quit installation.</source>
-        <translation>Kesempatan terakhir untuk keluar dari pemasangan.</translation>
+        <translation>Kesempatan terakhir untuk keluar dari instalasi.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="409"/>
@@ -21,7 +21,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="415"/>
         <source>Install</source>
-        <translation>Pasang</translation>
+        <translation>Instal</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="436"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="60"/>
         <source>NomadBSD Installation Wizard</source>
-        <translation>Panduan Pemasangan NomadBSD</translation>
+        <translation>Panduan Instalasi NomadBSD</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="63"/>
@@ -87,7 +87,7 @@ We are sorry for the inconvenience
 </source>
         <translation>
 
-Silahkan kirim laporan kutu ke milis NomadBSD.
+Silahkan kirim laporan bug ke milis NomadBSD.
 
 Mohon maaf atas ketidaknyamanan ini</translation>
     </message>
@@ -99,7 +99,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
     <message>
         <location filename="../src/wizard.h" line="81"/>
         <source>Quit installation</source>
-        <translation>Keluar pemasangan</translation>
+        <translation>Keluar instalasi</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="84"/>
@@ -117,7 +117,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
     <message>
         <location filename="../src/wizard.cpp" line="164"/>
         <source>&lt;b&gt;Please select the device you want to install NomadBSD on&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Pilih perangkat yang akan anda pasangi NomadBSD&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Pilih perangkat yang akan diinstal NomadBSD&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="172"/>
@@ -162,7 +162,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
     <message>
         <location filename="../src/wizard.cpp" line="216"/>
         <source>&lt;i&gt;* The installation script will adopt nomad&apos;s complete account. Only the username changes.&lt;/i&gt;</source>
-        <translation>&lt;i&gt;* Pemasangan akan mengadopsi akun komplit nomad. Hanya nama pengguna yang berubah.&lt;/i&gt;</translation>
+        <translation>&lt;i&gt;* Instalasi akan mengadopsi akun komplit nomad. Hanya nama pengguna yang berubah.&lt;/i&gt;</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="255"/>
@@ -172,7 +172,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
     <message>
         <location filename="../src/wizard.cpp" line="260"/>
         <source>Username already in use</source>
-        <translation>Nama pengguna telah sedang digunakan</translation>
+        <translation>Nama pengguna sudah digunakan</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="273"/>
@@ -222,7 +222,7 @@ Mohon maaf atas ketidaknyamanan ini</translation>
     <message>
         <location filename="../src/wizard.cpp" line="362"/>
         <source>Filesystem:</source>
-        <translation>Sistem berkas:</translation>
+        <translation>Sistem file:</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="363"/>
@@ -242,14 +242,14 @@ Jika anda klik &lt;i&gt;terapkan&lt;/i&gt;, sistem akan ditulis ke &lt;i&gt;%1&l
     <message>
         <location filename="../src/wizard.cpp" line="96"/>
         <source>&lt;b&gt;Welcome to the NomadBSD installation wizard.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
-        <translation>&lt;b&gt;Selamat datang di panduan pemasangan NomadBSD.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;Selamat datang di panduan instalasi NomadBSD.&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="98"/>
         <source>This program will install your NomadBSD with its current configuration on a hard disk.
 
 </source>
-        <translation>Program ini akan memasang NomadBSD anda dengan semua konfigurasi saat ini ke dalam hard disk.
+        <translation>Program ini akan menginstal NomadBSD anda dengan semua konfigurasi saat ini ke dalam hard disk.
 </translation>
     </message>
 </context>
