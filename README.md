@@ -1,10 +1,15 @@
-### About
+# NomadBSD
+## About
 
-NomadBSD is a persistant live system for flash drives, based on FreeBSD.
+NomadBSD is a persistent live system for flash drives, based on FreeBSD.
 
-### Screenshots
+## Screenshots
 ![](http://nomadbsd.org/screenshots/nomadbsd-1.3-RC1-ss1.png)
 
+## Ready to use image
+Visit http://nomadbsd.org to download the recent image.
+
+## Building the image
 ### Requirements for building the image
 A recent FreeBSD system with at least 40GB free disk space. The build machine's
 major FreeBSD version must be >= the base system's major version of the image
@@ -32,10 +37,7 @@ the problem that caused the build to stop.
 # ./build resume
 ~~~
 
-### Writing the image to an USB memory stick
+### Writing the image to a USB memory stick
 ~~~ csh
 # dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
 ~~~
-
-### Ready to use image
-Visit http://nomadbsd.org to download the recent image.

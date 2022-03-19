@@ -11,13 +11,13 @@
     <message>
         <location filename="../src/wizard.cpp" line="1070"/>
         <source>An unexpected error occured while executing %1: %2</source>
-        <translation>Terjadi galat saat memulai %1: %2</translation>
+        <translation>Terjadi eror saat memulai %1: %2</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="1128"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
-        <translation>%1 kembali dengan kode galat %2:
+        <translation>%1 kembali dengan kode eror %2:
 &quot;%3&quot;</translation>
     </message>
     <message>
@@ -38,7 +38,7 @@
         <location filename="../src/wizard.cpp" line="452"/>
         <location filename="../src/wizard.cpp" line="483"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan galat.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="613"/>
@@ -142,7 +142,7 @@
         <location filename="../src/wizard.cpp" line="259"/>
         <location filename="../src/wizard.cpp" line="290"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan galat.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="387"/>
@@ -180,7 +180,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="176"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan galat.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="180"/>
@@ -284,7 +284,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="893"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan galat.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
@@ -304,7 +304,7 @@
     <message>
         <location filename="../src/wizard.cpp" line="913"/>
         <source>File manager</source>
-        <translation>Manajer berkas</translation>
+        <translation>Manajer file</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="917"/>
@@ -316,7 +316,7 @@
         <location filename="../src/wizard.cpp" line="918"/>
         <source>Please choose your preferred shell, editors, and filemanager
 </source>
-        <translation>Silahkan pilih shell, editor dan manajer berkas anda</translation>
+        <translation>Silahkan pilih shell, editor dan manajer file anda</translation>
     </message>
 </context>
 <context>
@@ -339,12 +339,12 @@
     <message>
         <location filename="../src/wizard.h" line="58"/>
         <source>Fatal error</source>
-        <translation>Galat fatal</translation>
+        <translation>Eror fatal</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="59"/>
         <source>Error</source>
-        <translation>Galat</translation>
+        <translation>Eror</translation>
     </message>
     <message>
         <location filename="../src/wizard.h" line="62"/>
@@ -356,7 +356,7 @@ We are sorry for the inconvenience
 </source>
         <translation>
 
-Silahkan mengirimkan laporan kutu ke milis NomadBSD 
+Silahkan mengirimkan laporan bug ke milis NomadBSD 
 
 Kami mohon maaf atas ketidaknyamanan ini</translation>
     </message>
@@ -468,7 +468,7 @@ Jika anda klik &quot;simpan&quot;, perubahan akan ditulis ke perangkat penyimpan
     <message>
         <location filename="../src/wizard.cpp" line="668"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan galat.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/wizard.cpp" line="695"/>

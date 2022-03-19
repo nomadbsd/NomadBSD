@@ -48,7 +48,7 @@
         <location filename="../src/mainwin.cpp" line="126"/>
         <location filename="../src/mainwin.cpp" line="127"/>
         <source>The file has been modified.</source>
-        <translation>Berkas sudah dimodifikasi.</translation>
+        <translation>File sudah dimodifikasi.</translation>
     </message>
     <message>
         <location filename="../src/mainwin.cpp" line="128"/>
@@ -75,7 +75,7 @@
         <location filename="../src/mainwin.cpp" line="230"/>
         <source>Command &apos;%1&apos; returned with an error:
 %2</source>
-        <translation>Perintah &apos;%1&apos;kembali dengan kesalahan:
+        <translation>Perintah &apos;%1&apos;kembali dengan eror:
 %2</translation>
     </message>
     <message>
@@ -86,17 +86,17 @@
     <message>
         <location filename="../src/mainwin.cpp" line="315"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
-        <translation>Perintah &apos;%1&apos; kembali dengan kesalahan.</translation>
+        <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
         <location filename="../src/mainwin.h" line="53"/>
         <source>Fatal error</source>
-        <translation>Kesalahan fatal</translation>
+        <translation>Eror fatal</translation>
     </message>
     <message>
         <location filename="../src/mainwin.h" line="54"/>
         <source>Error</source>
-        <translation>Kesalahan</translation>
+        <translation>Eror</translation>
     </message>
     <message>
         <location filename="../src/mainwin.h" line="57"/>
@@ -108,7 +108,7 @@ We are sorry for the inconvenience
 </source>
         <translation>
 
-Silahkan kirim laporan kutu ke milis NomadBSD.
+Silahkan kirim laporan bug ke milis NomadBSD.
 
 Mohon maaf atas ketidaknyamanan ini</translation>
     </message>
