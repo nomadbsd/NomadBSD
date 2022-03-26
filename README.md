@@ -1,6 +1,10 @@
 # NomadBSD
-![](../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-bright-128x128.png#gh-dark-mode-only)
-![](../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-dark-128x128.png#gh-light-mode-only)
+
+<p align="center">
+<img src="../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-bright-128x128.png#gh-dark-mode-only"></img>
+<img src="../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-dark-128x128.png#gh-light-mode-only"></img>
+</p>
+
 ## About
 NomadBSD is a persistent live system for flash drives, based on FreeBSD.
 
