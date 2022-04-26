@@ -15,7 +15,7 @@ devel/geany
 devel/git
 devel/p5-IO-KQueue
 devel/pkgconf
-devel/py-qt5-core
+devel/py-qt5
 devel/py-xdg
 devel/qt5-buildtools
 devel/qt5-linguisttools
@@ -99,7 +99,6 @@ textproc/aspell
 textproc/en-aspell
 textproc/en-hunspell
 textproc/hunspell
-textproc/py-qt5-xml
 ukrainian/aspell
 ukrainian/hunspell
 vietnamese/aspell
@@ -133,8 +132,6 @@ x11-themes/gnome-icons-faenza
 x11-themes/Kvantum
 x11-themes/lxappearance
 x11-themes/papirus-icon-theme
-x11-toolkits/py-qt5-gui
-x11-toolkits/py-qt5-widgets
 x11-wm/picom
 x11-wm/obconf
 x11-wm/openbox
