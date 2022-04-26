@@ -861,8 +861,6 @@ sub commit {
 	# the setup.
 	system("rm -f /var/initgfx_config.id");
 
-	status("Sync'ing filesystems");
-	system("sync");
 	exit 0;
 }
 
