@@ -93,9 +93,14 @@ FONTSDIR="${SYSDIR}/usr/local/share/fonts"
 FONTPATHS_FILE="${XORG_CONF_D}/files.conf"
 UZIP_IMAGE="${WORKDIR}/uzip_image"
 UZIP_MNT="${WORKDIR}/uzip_mnt"
-TMP_BASE_DIR="${WORKDIR}/tmpbase"
-TMP_IMAGE_NAME="${WORKDIR}/tmpbase.img"
-ZFS_TMP_POOL=nomadbsd_tmp_$$
+DESTDIR="${WORKDIR}/mnt"
+
+BUILD_DEPENDENCIES=$(cat <<BUILD_DEPENCIES_LIST_EOF
+x11-fonts/mkfontscale
+textproc/markdown
+devel/git
+BUILD_DEPENCIES_LIST_EOF
+)
 
 init_vars()
 {
@@ -133,17 +138,42 @@ _umount()
 	umount -f "$1"
 }
 
-instusrcfg()
+mount_chroot_devfs()
+{
+	if ! (mount | grep -q "${SYSDIR}/dev"); then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	fi
+}
+
+umount_chroot_devfs()
+{
+	_umount "${SYSDIR}/dev"
+}
+
+mount_ports_tree()
+{
+	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
+	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
+		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	fi
+}
+
+umount_ports_tree()
+{
+	_umount "${SYSDIR}/usr/ports"
+}
+
+install_user_config()
 {
 	(cd nomad  && tar cf - .) | (cd "${SYSDIR}/usr/home/nomad" && tar xf -)
 	chroot "${SYSDIR}" sh -c 'chown -R nomad:nomad /usr/home/nomad'
 }
 
-initbase()
+init_base()
 {
-	chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	mount_chroot_devfs
 	chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 	if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
 		chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
 		    -G wheel,operator,video,games -s /bin/csh'
@@ -151,8 +181,8 @@ initbase()
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
-	insthandbook
-	instusrcfg
+	install_handbook
+	install_user_config
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
 		rm -f "${SYSDIR}/usr/local/etc/X11/xorg.conf.d/wacom.conf"
@@ -168,10 +198,9 @@ initbase()
 		sed -E -i '' 's/^(hosts:) (.*)/\1 \2 mdns/' \
 			"${SYSDIR}"/etc/nsswitch.conf
 	fi
-	sed -E -i '' "s/@POOLNAME@/${ZFS_POOL}/g" "${SYSDIR}/boot/loader.conf"
 }
 
-mkfontpaths()
+define_font_paths()
 {
 	[ ! -d "${XORG_CONF_D}" ] && mkdir -p "${XORG_CONF_D}"
 
@@ -203,7 +232,7 @@ mkfontpaths()
 	echo "EndSection") > "${FONTPATHS_FILE}"
 }
 
-createbase()
+create_base()
 {
 	local version srcurl
 
@@ -216,7 +245,7 @@ createbase()
 	cp /etc/resolv.conf "${SYSDIR}"/etc
 }
 
-updatebase()
+update_base()
 {
 	PAGER=cat freebsd-update --currently-running ${RELEASE} \
 		-f "${SYSDIR}/etc/freebsd-update.conf" -b "${SYSDIR}" \
@@ -226,24 +255,19 @@ updatebase()
 		-d "${SYSDIR}/var/db/freebsd-update" install
 }
 
-buildnvidia()
+build_nvidia_drivers()
 {
 	local d v pkgname have_gsed
 
-	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
-	fi
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_ports_tree
+	mount_chroot_devfs
 	# Building nvidia-driver>=410 requires textproc/gsed
 	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
 		have_gsed=1
 	else
 		pkg --chroot "${SYSDIR}" install -y textproc/gsed
 	fi
-	for v in 304 340 390 latest; do
+	for v in ${NVIDIA_DRIVERS}; do
 		# Skip nvidia-driver>=440 on i386
 		[ ${ARCH} = "i386" -a $v = "latest" ] && continue
 		if [ $v = "latest" ]; then
@@ -262,8 +286,8 @@ buildnvidia()
 	done
 	# Remove textproc/gsed if we just installed it for building nvidia-driver
 	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
+	umount_ports_tree
+	umount_chroot_devfs
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/extensions
 
@@ -291,11 +315,10 @@ pkglist()
 	fi
 }
 
-instpkgs()
+install_packages()
 {
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_chroot_devfs
+
 	export ASSUME_ALWAYS_YES=yes
 	pkglist | xargs -J% pkg -c "${SYSDIR}" install -y % || bail
 
@@ -304,15 +327,14 @@ instpkgs()
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
 	fi
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
-instgit()
+install_from_git_repos()
 {
 	[ ! -d "${SYSDIR}/git" ] && mkdir "${SYSDIR}/git"
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+
+	mount_chroot_devfs
 	for r in ${GIT_REPOS}; do
 		rd=$(echo $r | sed -E 's#.*/(.*)\.git$#\1#')
 		repo_dirs="${repo_dirs} ${rd}"
@@ -326,10 +348,10 @@ instgit()
 		[ -z "${build_cmd}" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
 	done
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
-postpkgcfg()
+post_pkg_config()
 {
 	cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
 		"${SYSDIR}/usr/local/etc/dsbmd.conf"
@@ -358,7 +380,7 @@ postpkgcfg()
 	"${SYSDIR}"/usr/local/share/pixmaps/terminal.svg
 	(cd config/usr/local/share/slim && tar cf - .) | \
 	    (cd "${SYSDIR}"/usr/local/share/slim && tar xf -)
-	mkfontpaths
+	define_font_paths
 }
 
 #
@@ -386,7 +408,7 @@ check_port_opts()
 # Creates a port's _SET and _UNSET make variables from a list
 # of OPT=<on|off> pairs.
 #
-# Example: port_popts cat/fooport "FOO=on BAR=off BAZ=on"
+# Example: port_opts cat/fooport "FOO=on BAR=off BAZ=on"
 #          becomes cat_fooport_SET="FOO BAZ" cat_fooport_UNSET="BAR"
 #
 port_opts()
@@ -412,15 +434,11 @@ port_opts()
 	}'
 }
 
-instports()
+install_ports()
 {
-	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
-	fi
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
-	fi
+	mount_ports_tree
+	mount_chroot_devfs
+
 	#
 	# We need devel/autoconf and devel/automake to build
 	# sysutils/fusefs-jmtpfs
@@ -471,11 +489,11 @@ instports()
 	fi
 	pkg -c "${SYSDIR}" autoremove -y
 
-	_umount "${SYSDIR}/usr/ports"
-	_umount "${SYSDIR}/dev"
+	umount_ports_tree
+	umount_chroot_devfs
 }
 
-buildkernel()
+build_kernel()
 {
 	local makeopts="KERNCONF=NOMADBSD ${BUILDKERNEL_OPTS}"
 	      makeopts="${makeopts} WITHOUT_MODULES=\"${WITHOUT_KMODS}\""
@@ -488,12 +506,12 @@ buildkernel()
 	for i in $(pwd)/patch/usr/src/*.diff; do
 		(cd "${SYSDIR}"/usr/src && patch -N < $i)
 	done
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-	    cd /usr/src && make ${makeopts} kernel" || bail
-	_umount "${SYSDIR}/dev"
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /usr/src && make ${makeopts} kernel" || bail
+	umount_chroot_devfs
 }
 
-instsrcdist()
+install_src_dist()
 {
 	BSDINSTALL_DISTDIR="${DISTDIR}" DISTRIBUTIONS=src.txz \
 	    BSDINSTALL_DISTSITE=${DISTSITE} bsdinstall distfetch
@@ -501,7 +519,7 @@ instsrcdist()
 	    DISTRIBUTIONS=src.txz bsdinstall distextract
 }
 
-estimgsize() {
+calculate_est_image_size() {
 	local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
 	if [ "${rootfs}" = "zfs" ]; then
 	    du_extra_args="-A"
@@ -513,218 +531,172 @@ estimgsize() {
 	echo ${size}
 }
 
-zfs_createtmpimage()
+create_zpool()
 {
-	local mddev maxsize
+	local DEV
 
-	touch ${TMP_IMAGE_NAME}
-	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
-	mddev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME} -s ${maxsize}k)
-	[ $? -ne 0 ] && bail
-	gpart destroy -F ${mddev}
-	gpart create -s gpt ${mddev} || bail
-	gpart add -t freebsd-zfs ${mddev} || bail
-	zpool create -m none ${ZFS_TMP_POOL} /dev/${mddev}p1 || bail
-	zfs set atime=off ${ZFS_TMP_POOL}
-	zpool export ${ZFS_TMP_POOL}
-	mdconfig -d -u ${mddev}
+	DEV=$1
+	if [ ! -d "${DESTDIR}" ]; then
+		mkdir -p "${DESTDIR}" || bail
+	fi
+	zpool create -o altroot=${DESTDIR} ${ZFS_POOL} $DEV || bail
+	zpool set autoexpand=off ${ZFS_POOL}
+
+	zfs set atime=off compress=on compression=lz4 ${ZFS_POOL}
+	zfs create -o mountpoint=none ${ZFS_POOL}/ROOT || bail
+	zfs create -o mountpoint=/ -o canmount=noauto \
+		${ZFS_POOL}/ROOT/${ZFS_BE} || bail
+	mount -t zfs ${ZFS_POOL}/ROOT/${ZFS_BE} ${DESTDIR} || bail
+	zpool set bootfs=${ZFS_POOL}/ROOT/${ZFS_BE} ${ZFS_POOL} || bail
 }
 
-createimage()
+create_zfs_datasets()
 {
-	local tmpimgdev used pn MNT
+	zfs create -o canmount=off -o mountpoint=/usr ${ZFS_POOL}/usr || bail
+	zfs create -o exec=off -o setuid=off ${ZFS_POOL}/usr/src || bail
+	zfs create ${ZFS_POOL}/usr/obj || bail
+	zfs create -o mountpoint=/usr/ports  ${ZFS_POOL}/usr/ports || bail
+	zfs create -o exec=off -o setuid=off ${ZFS_POOL}/usr/ports/distfiles || bail
+	zfs create -o exec=off -o setuid=off ${ZFS_POOL}/usr/ports/packages || bail
+	zfs create -o canmount=off -o mountpoint=/var ${ZFS_POOL}/var || bail
+	zfs create -o exec=off -o setuid=off ${ZFS_POOL}/var/audit || bail
+	zfs create -o exec=off -o setuid=off ${ZFS_POOL}/var/crash || bail
+	zfs create -o atime=on -o exec=off -o setuid=off ${ZFS_POOL}/var/mail || bail
+}
 
-	MNT="${WORKDIR}/mnt"
+create_zfs_and_copy_files()
+{
+	local mnt dev
 
-	IMAGE_NAME=$(imagename)
-
-	if [ -f ${IMAGE_NAME} ]; then
-		echo "${IMAGE_NAME} already exists" >&2
-		bail
-	fi
-	if [ ! -f ${UZIP_IMAGE}.uzip ]; then
-		echo "${UZIP_IMAGE}.uzip does not exist." >&2
-		bail
-	fi
-	if [ "${rootfs}" = "zfs" ]; then
-	    du_extra_args="-A"
-	fi
-	blksize=$((${FRAGSIZE} * 8))
-	uzipsz=$(du -m ${du_extra_args} ${UZIP_IMAGE}.uzip | cut -f1)
-
-	[ ! -d "${TMP_BASE_DIR}" ] && mkdir -p ${TMP_BASE_DIR}
-
-	zfs_createtmpimage
-	tmpimgdev=$(mdconfig -a -t vnode -f ${TMP_IMAGE_NAME})
-	[ $? -ne 0 ] && bail
-	zpool import ${ZFS_TMP_POOL}
-	zfs set mountpoint="${TMP_BASE_DIR}" ${ZFS_TMP_POOL} || bail
-	get_version > ${TMP_BASE_DIR}/VERSION
-
-	(cd "${SYSDIR}" && rm -rf var/tmp/*; rm -rf tmp/*)
-	(cd "${SYSDIR}" && tar -cf -       \
-		--exclude '^boot/kernel.old'   \
-	    --exclude '^git*'              \
-	    --exclude '^pkgs/*'            \
-	    --exclude '^usr/obj*'          \
-	    --exclude '^usr/src*'          \
-	    --exclude '^usr/ports*'        \
-	    --exclude '^usr/local'         \
-	    --exclude '^home*'             \
-	    --exclude '^usr/home*'         \
-	    --exclude '^var/cache/pkg*'    \
-	    --exclude '^var/db/portsnap/*' \
-	    --exclude '^var/db/ports/*'    \
-	    --exclude '^var/db/*'		   \
-		--exclude '^var/log/*' .) | (cd ${TMP_BASE_DIR} && tar pxf -) || bail
-	mkdir ${TMP_BASE_DIR}/var/db
-	mkdir ${TMP_BASE_DIR}/var/log
-	mkdir ${TMP_BASE_DIR}/usr/share/nomadbsd
-	mkdir ${TMP_BASE_DIR}/compat
-	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
-		${TMP_BASE_DIR}/usr/share/nomadbsd/home.nomad.tgz
-	mkdir ${TMP_BASE_DIR}/usr.local.etc
-	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
- 	    (cd ${TMP_BASE_DIR}/usr.local.etc && tar vpxf -) || bail
-	mkdir ${TMP_BASE_DIR}/uzip; mkdir ${TMP_BASE_DIR}/usr/local
-	cp ${UZIP_IMAGE}.uzip ${TMP_BASE_DIR}/uzip/usr.local.uzip || bail
-	if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
-		mkdir -p ${TMP_BASE_DIR}/unionfs/usr/local || bail
-		mv ${TMP_BASE_DIR}/etc/rc.d/mount_uzip.fuse \
-				${TMP_BASE_DIR}/etc/rc.d/mount_uzip || bail
-		mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.fuse \
-				${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset || bail
-		rmdir ${TMP_BASE_DIR}/usr/local || bail
-		ln -s /unionfs/usr/local ${TMP_BASE_DIR}/usr/local || bail
-		awk '{
-			if (/^# Insert other /) {
-				print $0;
-				print "/etc/rc.d/mount_uzip stop"
-			} else
-				print $0
-		}' "${SYSDIR}/etc/rc.shutdown" > ${TMP_BASE_DIR}/etc/rc.shutdown
-	else
-		rm -f ${TMP_BASE_DIR}/etc/rc.d/mount_uzip.fuse || bail
-		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.fuse || bail
-	fi
-	rm -rf "${TMP_BASE_DIR}/root/.subversion"
-	if [ ${ARCH} = "mac" ]; then
-		# echo wsp_load=\"YES\" >> ${TMP_BASE_DIR}/boot/loader.conf
-		for i in ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac; do
-			mv $i ${i%.mac}
-		done
-		if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
-			mv ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac.fuse \
-				${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset || bail
-		else
-			rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-reset.mac.fuse
-		fi
-	else
-		rm -f ${TMP_BASE_DIR}/usr/libexec/nomadbsd-*.mac
-	fi
-	(cd ${TMP_BASE_DIR} && \
-		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
-			etc root var usr.local.etc) || bail
-	(cd ${SYSDIR} && \
-		tar cfJ ${TMP_BASE_DIR}/usr/share/nomadbsd/var.db.tar.xz \
-			var/db || bail)
-	touch ${IMAGE_NAME}
-	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
-	mddev=$(mdconfig -a -t vnode -f ${IMAGE_NAME} -s ${maxsize}k)
-	[ $? -ne 0 ] && bail
-	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
-	[ ! -d "${MNT}" ] && mkdir -p "${MNT}"
-	pn=0
-	if [ "${ARCH}" != "mac" ]; then
-		dd if=/dev/zero of=/dev/${mddev} bs=1M count=100
-		gpart create -s mbr ${mddev}
-		if [ "${ARCH}" != "i386" ]; then
-			gpart add -a 1m -t efi -b 0 -s 40M ${mddev}
-			pn=$(($pn + 1))
-			newfs_msdos -F 32 -c 1 /dev/${mddev}s${pn} || bail
-			mount -t msdosfs /dev/${mddev}s${pn} "${MNT}" || bail
-			mkdir -p "${MNT}/EFI/BOOT" || bail
-			if (echo ${RELEASE} | grep -q 'CURRENT'); then
-				cp ${SYSDIR}/boot/loader.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
-			else
-				cp ${SYSDIR}/boot/boot1.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
-			fi
-			_umount "${MNT}"
-		fi
-		gpart add -t freebsd -a 1m ${mddev} || bail
-		pn=$(($pn + 1))
-		glabel label ${ROOTLABEL} /dev/${mddev}s${pn}
-		DEV=/dev/label/${ROOTLABEL}
-		zpool create -m none ${ZFS_POOL} $DEV || bail
-		zpool set autoexpand=off ${ZFS_POOL}
-		zpool set bootfs=${ZFS_POOL} ${ZFS_POOL}
-		zfs set atime=off compression=lz4 ${ZFS_POOL}
-		zpool export ${ZFS_POOL}
-
-		gpart bootcode -b "${SYSDIR}/boot/mbr" ${mddev} || bail
-		dd if=/dev/zero of=$DEV count=2 || bail 
-		dd if=/boot/zfsboot of=$DEV count=1 || bail
-		dd if=/boot/zfsboot of=$DEV iseek=1 oseek=1024 || bail
-		gpart set -a active -i ${pn} ${mddev} || bail
-		zpool import -d /dev/label ${ZFS_POOL} || bail
-		zfs set mountpoint="${MNT}" ${ZFS_POOL} || bail
-	else
-		gpart create -s gpt ${mddev} || bail
-		gpart add -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev} || bail
-		pn=$((${pn} + 1))
-		gpart bootcode -b ${SYSDIR}/boot/pmbr -p ${SYSDIR}/boot/gptzfsboot \
-			-i ${pn} ${mddev} || bail "Couldn't install boot code"
-		gpart add -t efi -a 1m -l gpefiboot -s 200m ${mddev} || bail
-		pn=$((${pn} + 1))
-		newfs_msdos -F 32 -c 1 /dev/${mddev}p${pn} || bail
-		mount -t msdosfs /dev/${mddev}p${pn} "${MNT}" || bail
-		mkdir -p "${MNT}/EFI/BOOT" || bail
-		if (echo ${RELEASE} | grep -q 'CURRENT'); then
-			cp ${SYSDIR}/boot/loader.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
-		else
-			cp ${SYSDIR}/boot/boot1.efi "${MNT}/EFI/BOOT/BOOTX64.EFI" || bail
-		fi
-		_umount "${MNT}"
-		gpart add -t freebsd-zfs -a 1m ${mddev} || bail
-		pn=$((${pn} + 1))
-		glabel label ${ROOTLABEL} /dev/${mddev}p${pn} || bail
-
-		DEV=/dev/label/${ROOTLABEL}
-		zpool create -m none ${ZFS_POOL} $DEV || bail
-		zpool set autoexpand=off ${ZFS_POOL}
-		zpool set bootfs=${ZFS_POOL} ${ZFS_POOL}
-		zfs set atime=off compression=lz4 ${ZFS_POOL}
-		zpool export ${ZFS_POOL}
-		zpool import -d /dev/label ${ZFS_POOL} || bail
-		zfs set mountpoint="${MNT}" ${ZFS_POOL} || bail
-	fi
-	(cd ${TMP_BASE_DIR} && tar cf - .) | (cd "${MNT}" && tar pxf -) || bail
-	_umount "${MNT}"
-	zfs set mountpoint=legacy ${ZFS_POOL}
+	dev=$1
+	create_zpool ${dev}
+	create_zfs_datasets
+	copy_system_files_to_dest_dir
+	_umount ${DESTDIR}
 	zpool export ${ZFS_POOL}
-
-	mdconfig -d -u ${mddev}
-	rmdir "${MNT}"
-	chflags -R noschg,nosunlnk ${TMP_BASE_DIR}
-	_umount ${TMP_BASE_DIR} || bail
-	zpool destroy ${ZFS_TMP_POOL}
-	mdconfig -d -u ${tmpimgdev}
-	rm -f ${TMP_IMAGE_NAME}
-	rm -rf ${TMP_BASE_DIR}
+	rmdir ${DESTDIR}
 }
 
-createuzip()
+write_mbr_zfs_bootcode()
+{
+	local DEV PART
+	DEV=$1
+	PART=$2
+
+	gpart bootcode -b "${SYSDIR}/boot/mbr" ${DEV} || bail
+	dd if=/dev/zero of=${PART} count=2 || bail
+	dd if=/boot/zfsboot of=${PART} count=1 || bail
+	dd if=/boot/zfsboot of=${PART} iseek=1 oseek=1024 || bail
+}
+
+#
+# Calls `gpart add` with the given arguments, and returns the name
+# of the new partition device.
+#
+add_partition()
+{
+	local output
+	output=$(gpart add $*)
+	set -- ${output}
+	[ "$2" != "added" ] && bail
+	echo $1
+}
+
+#
+# Returns the index of a given partition name.
+#
+# Examples: ada0s1 -> 1, ada0s1e -> 5, ada0p3 -> 3
+#
+index_from_partition()
+{
+	local part
+	part=$1
+
+	if echo ${part} | egrep -q 's[1-4][a-h]$'; then
+		echo ${part} | sed -E 's/.*([a-h])$/\1/' | tr 'abcdefgh' '12345678'
+	elif echo ${part} | egrep -q '[sp][0-9]+$'; then
+		echo ${part} | sed -E 's/.*[sp]([0-9]+)$/\1/'
+	fi
+}
+
+add_amd64_efi_partition()
+{
+	local dev
+
+	dev=$1
+	gpart add -a 1m -t efi -b 0 -s 40m ${dev} || bail
+}
+
+add_mac_efi_partition()
+{
+	local dev
+
+	dev=$1
+	gpart add -t efi -a 1m -l gpefiboot -s 200m ${dev} || bail
+}
+
+copy_efi_loader_to_partition()
+{
+	local part mnt
+
+	part=$(basename $1)
+	mnt=$(mktemp -d /tmp/efi.XXXXX)
+
+	newfs_msdos -F 32 -c 1 /dev/${part} || bail
+	mount -t msdosfs /dev/${part} ${mnt} || bail
+	mkdir -p ${mnt}/EFI/BOOT || bail
+	if (echo ${RELEASE} | grep -q 'CURRENT'); then
+		cp ${SYSDIR}/boot/loader.efi ${mnt}/EFI/BOOT/BOOTX64.EFI || bail
+	else
+		cp ${SYSDIR}/boot/boot1.efi ${mnt}/EFI/BOOT/BOOTX64.EFI || bail
+	fi
+	_umount ${mnt}
+	rmdir ${mnt}
+}
+	
+create_efi_partition()
+{
+	local part dev
+
+	dev=$(basename $1)
+
+	if [ ${ARCH} = "amd64" ]; then
+		part=$(add_amd64_efi_partition ${dev})
+	elif [ ${ARCH} = "mac" ]; then
+		part=$(add_mac_efi_partition ${dev})
+	else
+		bail "Cannot create EFI partition for ${ARCH}"
+	fi
+	copy_efi_loader_to_partition ${part}
+}
+
+#
+# Creates a md(4) device backed by the given file, and returns
+# the name of the new md(4) device.
+#
+create_mddev()
+{
+	local image_file
+	
+	image_file=$1
+
+	touch ${image_file} || bail
+	maxsize=$(echo "scale=0; ${MEDIASIZE} * 1000^3 / 1024" | bc)
+	mddev=$(mdconfig -a -t vnode -f ${image_file} -s ${maxsize}k) || bail
+	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
+	echo ${mddev}
+}
+
+build_uzip_image()
 {
 	if [ -f ${UZIP_IMAGE}.uzip ]; then
-		echo "${UZIP_IMAGE}.uzip already exists" >&2
-		bail
+		bail "${UZIP_IMAGE}.uzip already exists"
 	fi
 	if [ -f ${UZIP_IMAGE}.img ]; then
-		echo "${UZIP_IMAGE}.img already exists" >&2
-		bail
+		bail "${UZIP_IMAGE}.img already exists"
 	fi
 	blksize=$((${FRAGSIZE} * 8))
-	uzipsz=$(estimgsize "${SYSDIR}/usr/local")
+	uzipsz=$(calculate_est_image_size "${SYSDIR}/usr/local")
 
 	touch ${UZIP_IMAGE}.img
 	mddev=$(mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s ${uzipsz}m) || bail
@@ -749,12 +721,145 @@ createuzip()
 	fi
 }
 
-createpatch()
+copy_system_files_to_dest_dir()
+{
+	rm -rf "${SYSDIR}"/var/tmp/*
+	rm -rf "${SYSDIR}"/tmp/*
+
+	(cd "${SYSDIR}" && tar -cf -       \
+		--exclude '^boot/kernel.old'   \
+	    --exclude '^git*'              \
+	    --exclude '^pkgs/*'            \
+	    --exclude '^usr/obj*'          \
+	    --exclude '^usr/src*'          \
+	    --exclude '^usr/ports*'        \
+	    --exclude '^usr/local'         \
+	    --exclude '^home*'             \
+	    --exclude '^usr/home*'         \
+	    --exclude '^var/cache/pkg*'    \
+	    --exclude '^var/db/portsnap/*' \
+	    --exclude '^var/db/ports/*'    \
+	    --exclude '^var/db/*'		   \
+		--exclude '^var/log/*' .) | (cd ${DESTDIR} && tar pxf -) || bail
+	mkdir ${DESTDIR}/var/db
+	mkdir ${DESTDIR}/var/log
+	mkdir ${DESTDIR}/usr/share/nomadbsd
+	mkdir ${DESTDIR}/compat
+	(cd "${SYSDIR}/usr/home/nomad" && tar cfz - .) > \
+		${DESTDIR}/usr/share/nomadbsd/home.nomad.tgz
+	mkdir ${DESTDIR}/usr.local.etc
+	(cd "${SYSDIR}/usr/local/etc" && tar cf - .) | \
+ 	    (cd ${DESTDIR}/usr.local.etc && tar vpxf -) || bail
+	mkdir ${DESTDIR}/uzip; mkdir ${DESTDIR}/usr/local
+	cp ${UZIP_IMAGE}.uzip ${DESTDIR}/uzip/usr.local.uzip || bail
+	if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
+		mkdir -p ${DESTDIR}/unionfs/usr/local || bail
+		mv ${DESTDIR}/etc/rc.d/mount_uzip.fuse \
+				${DESTDIR}/etc/rc.d/mount_uzip || bail
+		rmdir ${DESTDIR}/usr/local || bail
+		ln -s /unionfs/usr/local ${DESTDIR}/usr/local || bail
+		awk '{
+			if (/^# Insert other /) {
+				print $0;
+				print "/etc/rc.d/mount_uzip stop"
+			} else
+				print $0
+		}' "${SYSDIR}/etc/rc.shutdown" > ${DESTDIR}/etc/rc.shutdown
+	else
+		rm -f ${DESTDIR}/etc/rc.d/mount_uzip.fuse || bail
+	fi
+	rm -rf "${DESTDIR}/root/.subversion"
+	if [ ${ARCH} = "mac" ]; then
+		# echo wsp_load=\"YES\" >> ${DESTDIR}/boot/loader.conf
+		for i in ${DESTDIR}/usr/libexec/nomadbsd-*.mac; do
+			mv $i ${i%.mac}
+		done
+	else
+		rm -f ${DESTDIR}/usr/libexec/nomadbsd-*.mac
+	fi
+	(cd ${DESTDIR} && \
+		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
+			etc root var usr.local.etc) || bail
+	(cd ${SYSDIR} && \
+		tar cfJ ${DESTDIR}/usr/share/nomadbsd/var.db.tar.xz \
+			var/db || bail)
+	get_version > ${DESTDIR}/VERSION
+}
+
+build_amd64_image()
+{
+	local idx MNT part mddev
+
+	mddev=$1
+
+	gpart create -s mbr ${mddev}
+	create_efi_partition ${mddev}
+
+	part=$(add_partition -t freebsd -a 1m ${mddev}) || bail
+	idx=$(index_from_partition ${part})
+	gpart set -a active -i ${idx} ${mddev} || bail
+	glabel label ${ROOTLABEL} /dev/${part}
+	create_zfs_and_copy_files /dev/label/${ROOTLABEL}
+	write_mbr_zfs_bootcode ${mddev} /dev/label/${ROOTLABEL}
+}
+
+build_i386_image()
+{
+	local idx MNT part mddev
+
+	mddev=$1
+
+	gpart create -s mbr ${mddev}
+	part=$(add_partition -t freebsd -a 1m ${mddev}) || bail
+	idx=$(index_from_partition ${part})
+	gpart set -a active -i ${idx} ${mddev} || bail
+	glabel label ${ROOTLABEL} /dev/${part}
+	create_zfs_and_copy_files /dev/label/${ROOTLABEL}
+	write_mbr_zfs_bootcode ${mddev} /dev/label/${ROOTLABEL}
+}
+
+build_mac_image()
+{
+	local idx MNT mddev part
+
+	mddev=$1
+	gpart create -s gpt ${mddev} || bail
+	part=$(add_partition -t freebsd-boot -l gpboot -b 40 -s 512K ${mddev}) || bail
+	idx=$(index_from_partition ${part})
+	gpart bootcode -b ${SYSDIR}/boot/pmbr -p ${SYSDIR}/boot/gptzfsboot \
+		-i ${idx} ${mddev} || bail "Couldn't install boot code"
+	create_efi_partition ${mddev}
+	part=$(add_partition -t freebsd-zfs -a 1m ${mddev}) || bail
+	glabel label ${ROOTLABEL} /dev/${part} || bail
+	create_zfs_and_copy_files /dev/label/${ROOTLABEL}
+}
+
+build_image()
+{
+	local mddev
+
+	IMAGE_NAME=$(imagename)
+	if [ -f ${IMAGE_NAME} ]; then
+		bail "${IMAGE_NAME} already exists"
+	fi
+	if [ ! -f ${UZIP_IMAGE}.uzip ]; then
+		bail "${UZIP_IMAGE}.uzip does not exist."
+	fi
+	if [ "${rootfs}" = "zfs" ]; then
+	    du_extra_args="-A"
+	fi
+	uzipsz=$(du -m ${du_extra_args} ${UZIP_IMAGE}.uzip | cut -f1)
+	mddev=$(create_mddev ${IMAGE_NAME})
+
+	build_${ARCH}_image ${mddev}
+	mdconfig -d -u ${mddev}
+}
+
+create_patch()
 {
 	[ ! -d "${PATCHDIR}" ] && mkdir -p "${PATCHDIR}" || bail
 	if [ -z "${PATCHVERSION}" ]; then
-		echo "PATCHVERSION not defined" >&2
-		bail
+		bail "PATCHVERSION not defined"
 	fi
 	(cd config && tar cf - .) | (cd "${PATCHDIR}" && tar xf -)
 	echo "${PATCHVERSION}" > "${PATCHDIR}/VERSION"
@@ -783,9 +888,10 @@ build_unionfs()
 	else
 		(cd "${SYSDIR}/tmp/unionfs-fuse" && git pull) || bail
 	fi
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/unionfs-fuse && cmake . && make" || bail
-	_umount "${SYSDIR}/dev"
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/unionfs-fuse && cmake . && make" || bail
+	umount_chroot_devfs
+	
 	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfs" "${SYSDIR}/usr/bin" || bail
 	cp "${SYSDIR}/tmp/unionfs-fuse/src/unionfsctl" "${SYSDIR}/usr/bin" || bail
 	cp "${SYSDIR}/tmp/unionfs-fuse/LICENSE" \
@@ -800,10 +906,10 @@ build_setupgui()
 		QMAKE_VARS="${QMAKE_VARS} MAC=1"
 	fi
 	cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-setup-gui && make distclean; \
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-setup-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
 build_installgui()
@@ -814,28 +920,28 @@ build_installgui()
 		QMAKE_VARS=""
 	fi
 	cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-install-gui && make distclean; \
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-install-gui && make distclean; \
 		qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
 build_addusergui()
 {
 	cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-adduser-gui && make distclean; \
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-adduser-gui && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
 build_dmconfig()
 {
 	cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/nomadbsd-dmconfig && make distclean; \
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-dmconfig && make distclean; \
 		qmake-qt5 && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	umount_chroot_devfs
 }
 
 build_chusr()
@@ -848,12 +954,12 @@ build_chusr()
 build_lbi_gui()
 {
 	cp -a src/lbi-gui "${SYSDIR}/tmp/"
-	chroot "${SYSDIR}" sh -c "mount -t devfs devfs /dev; \
-		cd /tmp/lbi-gui && make && make install" || bail
-	_umount "${SYSDIR}/dev"
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/lbi-gui && make && make install" || bail
+	umount_chroot_devfs
 }
 
-insthandbook()
+install_handbook()
 {
 	local i
 
@@ -883,48 +989,48 @@ cleanup()
 	if (mount | grep "${UZIP_MNT}"); then
 		_umount "${UZIP_MNT}"
 	fi
-	if (mount | grep "${WORKDIR}/mnt"); then
-		_umount "${WORDIR}/mnt"
+	if (mount | grep "${DESTDIR}"); then
+		_umount "${DESTDIR}"
 	fi
-	if (mount | grep "${TMP_BASE_DIR}" || \
-	    mount | grep "${TMP_BASE_DIR}"); then
-		_umount ${TMP_BASE_DIR}
-	fi
-	rmdir "${UZIP_MNT}" "${WORKDIR}/mnt" ./${TMP_BASE_DIR} 2>/dev/null
+	zpool export -f ${ZFS_POOL}
+
+	rmdir "${UZIP_MNT}" "${DESTDIR}" 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
 	done
-	rm -f "${TMP_IMAGE_NAME}" 2>/dev/null
 }
 
 bail()
 {
+	if [ $# -gt 0 ]; then
+		echo $* >&2
+	fi
 	cleanup
 	exit 1
 }
 
-usrclean()
+clean_home_directory()
 {
 	rm -rf "${SYSDIR}/home/nomad/"*
 	rm -rf "${SYSDIR}/home/nomad/".* 2>/dev/null
 }
 
-baseclean()
+clean_sysdir()
 {
 	chflags -R noschg,nosunlnk "${SYSDIR}"
 	rm -rf "${SYSDIR}"
 }
 
-allclean()
+clean_all()
 {
-	baseclean
+	clean_sysdir
 	rm -rf "${WORKDIR}"
 }
 
 _init()
 {
-	createbase
-	initbase
+	create_base
+	init_base
 }
 
 save_stage()
@@ -942,21 +1048,21 @@ all()
 {
 	local i stages
 
-	stages="instpkgs instgit build_setupgui build_installgui build_addusergui"
+	stages="install_packages install_from_git_repos build_setupgui build_installgui build_addusergui"
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
-	stages="${stages} instports buildnvidia postpkgcfg createuzip"
-	stages="${stages} createimage cleanup"
+	stages="${stages} install_ports build_nvidia_drivers post_pkg_config build_uzip_image"
+	stages="${stages} build_image cleanup"
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
-		save_stage updatebase
-		updatebase
+		save_stage update_base
+		update_base
 	fi 
 	if [ ! -z "${BUILD_KERNEL}" ]; then
 		case ${BUILD_KERNEL} in
 		[yY][eE][sS])
-			save_stage buildkernel
-			buildkernel
+			save_stage build_kernel
+			build_kernel
 			;;
 		esac
 	fi
@@ -967,13 +1073,13 @@ all()
 	rm -f ".failed-stage"
 }
 
-resumebuild()
+resume_build()
 {
-	stages="updatebase buildkernel instpkgs instgit build_setupgui"
+	stages="update_base build_kernel install_packages install_from_git_repos build_setupgui"
 	stages="${stages} build_installgui build_addusergui"
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
-	stages="${stages} instports buildnvidia postpkgcfg createuzip"
-	stages="${stages} createimage cleanup"
+	stages="${stages} install_ports build_nvidia_drivers post_pkg_config build_uzip_image"
+	stages="${stages} build_image cleanup"
 
 	stage_found=0
 	restore_stage
@@ -995,6 +1101,21 @@ resumebuild()
 	rm -f ".failed-stage"
 }
 
+check_build_dependencies()
+{
+	for d in ${BUILD_DEPENDENCIES}; do
+		if ! pkg info --exists $d; then
+			echo "Please install $d"
+			exit 1
+		fi
+	done
+	
+	if [ ! -f /usr/ports/Makefile ]; then
+		echo "Please install the FreeBSD ports tree under /usr/ports"
+		exit 1
+	fi
+}
+
 usage()
 {
 	echo "Usage: build cmd ..."
@@ -1010,22 +1131,7 @@ help()
 
 [ $# -lt 1 ] && usage
 
-if ! which mkfontscale >/dev/null;  then
-	echo "Please install x11-fonts/mkfontscale"
-	exit 1
-fi
-if ! which markdown >/dev/null; then
-	echo "Please install textproc/markdown"
-	exit 1
-fi
-if ! which git >/dev/null; then
-	echo "Please install devel/git"
-	exit 1
-fi
-if [ ! -f /usr/ports/Makefile ]; then
-	echo "Please install the FreeBSD ports tree under /usr/ports"
-	exit 1
-fi
+check_build_dependencies
 
 trap bail SIGINT SIGTERM SIGHUP
 
@@ -1054,30 +1160,30 @@ init_vars
 while [ $# -gt 0 ]; do
 	case "$1" in
 	all)		all;;
-	clean)		allclean;;
+	clean)		clean_all;;
 	cleanup)	cleanup;;
-	git)		instgit;;
-	handbook)	insthandbook;;
-	image)		createimage;;
+	git)		install_from_git_repos;;
+	handbook)	install_handbook;;
+	image)		build_image;;
 	init)		_init;;
-	initbase)	initbase;;
-	kernel)		buildkernel;;
-	patch)		createpatch;;
-	pkgcfg)		postpkgcfg;;
-	pkgs)		instpkgs;;
-	ports)		instports;;
-	resume)		resumebuild;;
+	initbase)	init_base;;
+	kernel)		build_kernel;;
+	patch)		create_patch;;
+	pkgcfg)		post_pkg_config;;
+	pkgs)		install_packages;;
+	ports)		install_ports;;
+	resume)		resume_build;;
 	setupgui)	build_setupgui;;
 	installgui) build_installgui;;
 	addusergui)	build_addusergui;;
 	dmconfig)	build_dmconfig;;
 	chusr)		build_chusr;;
-	src)		instsrcdist;;
+	src)		install_src_dist;;
 	unionfs)	build_unionfs;;
-	uzip)		createuzip;;
-	usrcfg)		instusrcfg;;
-	usrclean)	usrclean;;
-	update)		updatebase;;
+	uzip)		build_uzip_image;;
+	usrcfg)		install_user_config;;
+	usrclean)	clean_home_directory;;
+	update)		update_base;;
 	*)			usage;;
 	esac
 	shift
