@@ -704,7 +704,7 @@ sub mk_enc_zfs_dataset {
 	bail("Failed to create $dataset.")	if (!close($fh));
 	system("zfs set mountpoint=/private $dataset") == 0
 		or bail("Couldn't mount $dataset");
-	status("Creating /data/etc");
+	status("Creating /private/etc");
 	system("mkdir /private/etc") == 0
 		or bail("Failed to create /private/etc");
 	status("Creating /private/home/nomad");
@@ -712,7 +712,7 @@ sub mk_enc_zfs_dataset {
 		or bail("Failed to create /private/home/nomad");
 	system("unlink /home >/dev/null 2>&1");
 	system("rmdir -rf /home 2>&1");
-	status("Symlinking /home to /data/home");
+	status("Symlinking /home to /private/home");
 	system("ln -s /private/home /home") == 0
 		or bail("Failed to create symlink /home -> /private/home");
 	system("chown nomad:nomad /home/nomad");
