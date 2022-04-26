@@ -739,7 +739,6 @@ copy_system_files_to_dest_dir()
 	    --exclude '^var/cache/pkg*'    \
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'    \
-	    --exclude '^var/db/*'		   \
 		--exclude '^var/log/*' .) | (cd ${DESTDIR} && tar pxf -) || bail
 	mkdir ${DESTDIR}/var/db
 	mkdir ${DESTDIR}/var/log
@@ -777,12 +776,6 @@ copy_system_files_to_dest_dir()
 	else
 		rm -f ${DESTDIR}/usr/libexec/nomadbsd-*.mac
 	fi
-	(cd ${DESTDIR} && \
-		tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
-			etc root var usr.local.etc) || bail
-	(cd ${SYSDIR} && \
-		tar cfJ ${DESTDIR}/usr/share/nomadbsd/var.db.tar.xz \
-			var/db || bail)
 	get_version > ${DESTDIR}/VERSION
 }
 
