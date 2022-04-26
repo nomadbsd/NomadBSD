@@ -796,16 +796,15 @@ sub commit {
 	if ($cfg_zfs_enc_password) {
 		mk_enc_zfs_dataset(); 
 	} else {
+		system("unlink /home >/dev/null 2>&1");
+		system("rmdir -rf /home 2>&1");
+		status("Creating /home dataset");
+		system("zfs create -o mountpoint=/home ${pool}/home");
 		system("mkdir -p /home/nomad");
 		system("chown nomad:nomad /home/nomad");
 	}
 	status("Creating /rwlocal");
 	system("mkdir /rwlocal");
-	status("Creating /usr/ports");
-	system("mkdir -p /usr/ports");
-
-	status("Extracting databases to /var/db/");
-	system("cd / && tar xf /usr/share/nomadbsd/var.db.tar.xz");
 
 	status("Counting files to copy");
 	progress(-1);
