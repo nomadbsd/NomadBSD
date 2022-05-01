@@ -5,6 +5,7 @@
 #FIRSTRUN_START
 # Put everything to be run only on the first login here
 cat ${HOME}/.config/plank.ini | dconf load /net/launchpad/plank/docks/
+cat ${HOME}/.config/ibus.ini | dconf load /desktop/ibus/
 sed -i '' '/^#FIRSTRUN_START/,/^#FIRSTRUN_END/d' $0
 #FIRSTRUN_END
 

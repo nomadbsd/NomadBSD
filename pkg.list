@@ -99,6 +99,8 @@ textproc/aspell
 textproc/en-aspell
 textproc/en-hunspell
 textproc/hunspell
+textproc/ibus
+textproc/p5-XML-LibXML
 ukrainian/aspell
 ukrainian/hunspell
 vietnamese/aspell
@@ -138,7 +140,6 @@ x11-wm/openbox
 x11/arandr
 x11/dmenu
 x11/dsbautostart
-x11/gxkb
 x11/libinput
 x11/metalock
 x11/plank

@@ -26,7 +26,8 @@ use utf8;
 use strict;
 use POSIX ":sys_wait_h";
 use Time::HiRes "usleep";
-
+use XML::LibXML;
+use open qw(:std :utf8);
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
@@ -44,6 +45,7 @@ my $path_xinitrc	= "$path_templates/xinitrc";
 my $path_scfb_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-scfb.conf";
 my $path_vesa_cfg	= "/usr/local/etc/X11/xorg.conf.d/10-driver-vesa.conf";
 my ($xlayoutstr, $xvariantstr);
+my $path_xkbrules_xorg_xml = "/usr/local/share/X11/xkb/rules/xorg.xml";
 
 my $cfg_fm;
 my $cfg_locale;
@@ -347,6 +349,24 @@ sub is_nonlatin {
 	return 0;
 }
 
+sub xkb_layout_to_ibus_engine {
+	my ($layout, $variant) = @_;
+	my $filename = $path_xkbrules_xorg_xml;
+	my $dom = XML::LibXML->load_xml(location => $filename);
+	my $layout_node_name = '/xkbConfigRegistry/layoutList/layout';
+	my $iso_code_node_name = './configItem/languageList/iso639Id';
+	my $variant_node_name = './variantList/variant/configItem';
+
+	foreach my $layout_node ($dom->findnodes($layout_node_name)) {
+		my $name = $layout_node->findvalue('./configItem/name');
+		next if ($name ne $_[0]);
+		my $iso_code = $layout_node->findvalue($iso_code_node_name);
+		return "xkb:$layout:$variant:$iso_code";
+	}
+	return "xkb:$layout:$variant:";
+}
+
+
 #
 # Print a list of records of the form:
 #
@@ -542,6 +562,31 @@ sub find_desktop_file {
 	return "";
 }
 
+sub configure_ibus {
+	my $ibus_ini = "/home/nomad/.config/ibus.ini";
+	my ($engines, $output);
+
+	open(my $fh, $ibus_ini) or bail("Couldn't open $ibus_ini");
+	my @ibus_cfg = <$fh>;
+	close($fh);
+
+	$engines = xkb_layout_to_ibus_engine($cfg_kbdlayout, $cfg_kbdvariant);
+	$engines = "'$engines'";
+	for (my $l = 0; $l < @cfg_xkbdlayouts; $l++) {
+		my @lv = split(/\t/, $cfg_xkbdlayouts[$l]);
+		my $engine_str = xkb_layout_to_ibus_engine($lv[0], $lv[1]);
+		$engines .= ", ";
+		$engines .= "'$engine_str'";
+	}
+	foreach (@ibus_cfg) {
+		$_ =~ s/\@ENGINES\@/$engines/g;
+		$output .= $_;
+	}
+	open(my $fh, ">$ibus_ini") or bail("Couldn't open $ibus_ini");
+	print $fh $output;
+	close($fh);
+}
+
 sub desktopsettings {
 	my $appsdir		= "/usr/local/share/applications";
 	my $usrappsdir	= "/home/nomad/.local/share/applications";
@@ -621,11 +666,7 @@ sub desktopsettings {
 	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
 	close($fh);
 	chmod(0744, $path_xkbdmap);
-	# Autostart gxkb if multiple keyboard layouts were set.
-	if (@cfg_xkbdlayouts > 0) {
-		my $cmd = qq(su -l nomad -c 'echo gxkb | dsbautostart -c');
-		system($cmd);
-	}
+	configure_ibus();
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
 }

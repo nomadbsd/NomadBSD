@@ -4,6 +4,10 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/
 export QT_QPA_PLATFORMTHEME=qt5ct
 export QT_FONT_DPI=96
 
+export XMODIFIERS=@im=ibus
+export GTK_IM_MODULE=ibus
+export QT_IM_MODULE=ibus
+
 #
 # Some display managers don't source the login files /etc/login.conf and
 # ~/.login_conf. Make sure the environment variables defined in those files
