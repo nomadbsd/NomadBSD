@@ -1,3 +1,3 @@
 suspend = "zenity --warning --text=\"I'm sorry, Nomad. I'm afraid I can't do that.\\n\\nSuspending the system will turn off the USB ports.\" --width=300"
 lock = "metalock -t NomadBSD -f 'Droid Sans 12'"
-
+logout = /usr/bin/close_session
