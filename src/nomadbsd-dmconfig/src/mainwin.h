@@ -90,20 +90,26 @@ private slots:
 	void autologinCBClicked(int);
 	void defaultUserCBClicked(int);
 	void usernameChanged(int);
+	void sessionChanged(int);
 	void themeChanged(int);
 private:
 	QString		cfg_username;
 	QString		cfg_theme;
 	QString		cfg_autologin;
+	QString		cfg_dm;
+	QString		cfg_session;
 	QString		saved_username;
 	QString		saved_theme;
 	QString		saved_autologin;
+	QString		saved_session;
 	QWidget		*defaultUserContainer;
 	QComboBox	*themeCbB;
 	QComboBox	*usernameCbB;
+	QComboBox	*sessionCbB;
 	QLabel		*previewImage;
 	QCheckBox	*autologinCB;
 	QCheckBox	*defaultUserCB;
 	QStringList	usernames;
 	QStringList	themes;
+	QStringList	sessions;
 };

@@ -36,11 +36,13 @@
 MainWin::MainWin(QWidget *parent) : QMainWindow(parent) {
 	themeCbB	     = new QComboBox;
 	usernameCbB	     = new QComboBox;
+	sessionCbB	     = new QComboBox;
 	previewImage	     = new QLabel;
 	autologinCB	     = new QCheckBox(tr("Auto login"));
 	defaultUserCB	     = new QCheckBox(tr("Set default user"));
 	defaultUserContainer = new QWidget;
 
+	querySettings();
 	autologinCB->setTristate(false);
 	defaultUserCB->setTristate(false);
 	setWindowTitle(tr("Display manager settings"));
@@ -61,18 +63,28 @@ MainWin::MainWin(QWidget *parent) : QMainWindow(parent) {
 	layout->addWidget(previewImage, 1, Qt::AlignCenter);
 	layout->addStretch(1);
 	layout->addWidget(mkLine());
-	layout->addWidget(defaultUserCB);
+
+	if (cfg_dm == "slim")
+		layout->addWidget(defaultUserCB);
 
 	QFormLayout *userForm  = new QFormLayout;
 	QLabel	    *userLabel = new QLabel(tr("Default user"));
 	userForm->addRow(userLabel, usernameCbB);
 
+	QFormLayout *sessionForm  = new QFormLayout;
+	QLabel	    *sessionLabel = new QLabel(tr("Default Session"));
+	sessionForm->addRow(sessionLabel, sessionCbB);
+
 	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addLayout(userForm);
+	if (cfg_dm == "sddm")
+		vbox->addLayout(sessionForm);
 	vbox->addWidget(autologinCB);
-	defaultUserContainer->setLayout(vbox);
-
-	layout->addWidget(defaultUserContainer);
+	if (cfg_dm == "slim") {
+		defaultUserContainer->setLayout(vbox);
+		layout->addWidget(defaultUserContainer);
+	} else
+		layout->addLayout(vbox);
 	layout->addWidget(mkLine());
 
 	QIcon quitIcon = qh_loadStockIcon(QStyle::SP_DialogCloseButton);
@@ -97,10 +109,16 @@ MainWin::MainWin(QWidget *parent) : QMainWindow(parent) {
 	    SLOT(themeChanged(int))); 
 	connect(usernameCbB, SIGNAL(currentIndexChanged(int)), this,
 	    SLOT(usernameChanged(int)));
+	if (cfg_dm == "sddm") {
+		connect(sessionCbB, SIGNAL(currentIndexChanged(int)), this,
+			SLOT(sessionChanged(int)));
+	}
 	connect(autologinCB, SIGNAL(stateChanged(int)), this,
 	    SLOT(autologinCBClicked(int)));
-	connect(defaultUserCB, SIGNAL(stateChanged(int)), this,
-	    SLOT(defaultUserCBClicked(int)));
+	if (cfg_dm == "slim") {
+		connect(defaultUserCB, SIGNAL(stateChanged(int)), this,
+			SLOT(defaultUserCBClicked(int)));
+	}
 	connect(save, SIGNAL(clicked(bool)), this, SLOT(save()));
 	connect(quit, SIGNAL(clicked(bool)), this, SLOT(quit()));
 }
@@ -118,9 +136,10 @@ MainWin::quit()
 {
 	QMessageBox msgBox(this);
 
-	if (saved_theme	    == cfg_theme    &&
-	    saved_username  == cfg_username &&
-	    saved_autologin == cfg_autologin)
+	if (saved_theme	    == cfg_theme     &&
+	    saved_username  == cfg_username  &&
+	    saved_autologin == cfg_autologin &&
+	    saved_session   == cfg_session)
 		QApplication::quit();
 	msgBox.setWindowModality(Qt::WindowModal);
 	msgBox.setText(tr("The file has been modified."));
@@ -157,6 +176,10 @@ void
 MainWin::autologinCBClicked(int state)
 {
 	cfg_autologin = (state == Qt::Unchecked ? "no" : "yes");
+	if (cfg_dm == "sddm") {
+		usernameCbB->setDisabled(state != Qt::Checked);
+		sessionCbB->setDisabled(state != Qt::Checked);
+	}
 }
 
 void
@@ -181,8 +204,15 @@ MainWin::usernameChanged(int /* unused */)
 void
 MainWin::showPreviewImage(QString &theme)
 {
-	QString path = QString("%1/%2/preview.png").arg(PATH_THEME_DIR)
+	QString path;
+
+	if (cfg_dm == "sddm") {
+		path = QString("%1/%2/%3.jpg").arg(PATH_SDDM_THEME_DIR)
+					      .arg(theme).arg(theme);
+	} else {
+		path = QString("%1/%2/preview.png").arg(PATH_SLIM_THEME_DIR)
 						   .arg(theme);
+	}
 	QPixmap image(path);
 	if (image.isNull()) {
 		QPixmap placeholder(PREVIEW_WIDTH, PREVIEW_HEIGHT);
@@ -203,6 +233,12 @@ MainWin::themeChanged(int /* unused */)
 }
 
 void
+MainWin::sessionChanged(int /* unused */)
+{
+	cfg_session = sessionCbB->currentText();
+}
+
+void
 MainWin::save()
 {
 	QProcess    proc;
@@ -212,7 +248,9 @@ MainWin::save()
 
 	args << "-d" << cfg_username
 	     << "-a" << cfg_autologin
-	     << "-t" << cfg_theme;
+	     << "-t" << cfg_theme
+	     << "-s" << cfg_session;
+
 	proc.setReadChannel(QProcess::StandardError);
 	proc.start(PATH_BACKEND, args);
 	(void)proc.waitForStarted(-1);
@@ -233,6 +271,7 @@ MainWin::save()
 	saved_username	= cfg_username;
 	saved_theme	= cfg_theme;
 	saved_autologin	= cfg_autologin;
+	saved_session	= cfg_session;
 	statusBar()->showMessage(tr("Saved"), 5000);
 }
 
@@ -241,7 +280,6 @@ MainWin::init()
 {
 	int idx;
 
-	querySettings();
 	autologinCB->setCheckState(cfg_autologin == "no" ? \
 	    Qt::Unchecked : Qt::Checked);
 	if (cfg_username.length() > 0) {
@@ -251,18 +289,29 @@ MainWin::init()
 		defaultUserContainer->setDisabled(true);
 		defaultUserCB->setCheckState(Qt::Unchecked);
 	}
+	sessionCbB->addItems(sessions);
 	themeCbB->addItems(themes);
 	usernameCbB->addItems(usernames);
 	idx = themeCbB->findText(cfg_theme, Qt::MatchExactly);
 	if (idx >= 0)
 		themeCbB->setCurrentIndex(idx);
+	idx = sessionCbB->findText(cfg_session, Qt::MatchExactly);
+	if (idx >= 0)
+		sessionCbB->setCurrentIndex(idx);
 	idx = usernameCbB->findText(cfg_username, Qt::MatchExactly);
 	if (idx >= 0)
 		usernameCbB->setCurrentIndex(idx);
+	if (cfg_username == "")
+		cfg_username = usernameCbB->currentText();
+	if (cfg_dm == "sddm") {
+		usernameCbB->setDisabled(autologinCB->checkState() == Qt::Unchecked);
+		sessionCbB->setDisabled(autologinCB->checkState() == Qt::Unchecked);
+	}
 	showPreviewImage(cfg_theme);
 	saved_username	= cfg_username;
 	saved_theme	= cfg_theme;
 	saved_autologin	= cfg_autologin;
+	saved_session	= cfg_session;
 }
 
 void
@@ -292,6 +341,11 @@ MainWin::querySettings()
 				QList<QByteArray>list = line.split(' ');
 				for (int i = 0; i < list.count(); i++)
 					themes.append(QString(list.at(i)));
+			} else if (line.startsWith("sessions=")) {
+				line.remove(0, 9);
+				QList<QByteArray>list = line.split(' ');
+				for (int i = 0; i < list.count(); i++)
+					sessions.append(QString(list.at(i)));
 			} else if (line.startsWith("usernames=")) {
 				line.remove(0, 10);
 				QList<QByteArray>list = line.split(' ');
@@ -300,12 +354,18 @@ MainWin::querySettings()
 			} else if (line.startsWith("theme=")) {
 				line.remove(0, 6);
 				cfg_theme = QString(line);
+			} else if (line.startsWith("session=")) {
+				line.remove(0, 8);
+				cfg_session = QString(line);
 			} else if (line.startsWith("default_user=")) {
 				line.remove(0, 13);
 				cfg_username = QString(line);
 			} else if (line.startsWith("autologin=")) {
 				line.remove(0, 10);
 				cfg_autologin = QString(line);
+			} else if (line.startsWith("dm=")) {
+				line.remove(0, 3);
+				cfg_dm = QString(line);
 			} else
 				continue;
 		}
@@ -316,4 +376,3 @@ MainWin::querySettings()
 		    .arg(PATH_BACKEND));
 	}
 }
-
