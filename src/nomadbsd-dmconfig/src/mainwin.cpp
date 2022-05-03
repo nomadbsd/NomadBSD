@@ -67,18 +67,15 @@ MainWin::MainWin(QWidget *parent) : QMainWindow(parent) {
 	if (cfg_dm == "slim")
 		layout->addWidget(defaultUserCB);
 
-	QFormLayout *userForm  = new QFormLayout;
+	QFormLayout *form	   = new QFormLayout;
 	QLabel	    *userLabel = new QLabel(tr("Default user"));
-	userForm->addRow(userLabel, usernameCbB);
+	form->addRow(userLabel, usernameCbB);
 
-	QFormLayout *sessionForm  = new QFormLayout;
-	QLabel	    *sessionLabel = new QLabel(tr("Default Session"));
-	sessionForm->addRow(sessionLabel, sessionCbB);
+	QLabel *sessionLabel = new QLabel(tr("Default Session"));
+	form->addRow(sessionLabel, sessionCbB);
 
 	QVBoxLayout *vbox = new QVBoxLayout;
-	vbox->addLayout(userForm);
-	if (cfg_dm == "sddm")
-		vbox->addLayout(sessionForm);
+	vbox->addLayout(form);
 	vbox->addWidget(autologinCB);
 	if (cfg_dm == "slim") {
 		defaultUserContainer->setLayout(vbox);
