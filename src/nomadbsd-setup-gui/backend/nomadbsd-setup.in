@@ -882,6 +882,7 @@ sub commit {
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
 	system("cp /usr/share/skel/dot.login /root/.login");
 	system("sysrc -e initgfx_kmods >> /etc/rc.conf.in");
+	system("sysrc -f /etc/rc.conf.in sddm_lang=$cfg_locale");
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	system("touch /etc/wpa_supplicant.conf");
 	status("Regenerating font cache");
