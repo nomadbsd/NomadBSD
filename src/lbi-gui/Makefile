@@ -1,5 +1,5 @@
 PROGRAM             = lbi-gui
-PYLUPDATE           = pylupdate5-3.7
+PYLUPDATE           = pylupdate5
 PREFIX             ?= /usr/local
 BINDIR              = ${DESTDIR}${PREFIX}/bin
 DATADIR             = ${DESTDIR}${PREFIX}/share/${PROGRAM}
