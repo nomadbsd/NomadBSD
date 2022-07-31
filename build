@@ -242,7 +242,7 @@ buildnvidia()
 	else
 		pkg --chroot "${SYSDIR}" install -y textproc/gsed
 	fi
-	for v in 304 340 390 latest; do
+	for v in 340 390 470 latest; do
 		# Skip nvidia-driver>=440 on i386
 		[ ${ARCH} = "i386" -a $v = "latest" ] && continue
 		if [ $v = "latest" ]; then
