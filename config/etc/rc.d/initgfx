@@ -294,7 +294,7 @@ setup_nvidia()
 	[ "${vendor}" != "10de" ] && return 1
 	device_descr=$(echo "${descr}" | cut -d"'" -f 2)
 	driver=""
-	for d in latest 390 340 304; do
+	for d in latest 470 390 340 304; do
 		nvidia_${d}_ids | awk -v descr="${device_descr}" '
 			match(tolower(descr), tolower($0)) > 0 {
 				printf("%s ~ %s\n", descr, $0);
