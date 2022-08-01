@@ -14,6 +14,11 @@ NomadBSD is a persistent live system for flash drives, based on FreeBSD.
 ## Ready to use Image
 Visit http://nomadbsd.org to download the recent image.
 
+### Requirements for Running NomadBSD
+* A >= 5GB flash drive
+* A (amd64/i386) system with a 1.2GHz CPU and 1G of RAM should be able to run
+NomadBSD decently.
+
 ## Building the Image
 ### Requirements for Building the Image
 A recent FreeBSD system with at least 40GB free disk space. The build machine's
@@ -22,10 +27,10 @@ you want to build. If you're building the image on a system with ZFS, the build
 might fail due to a problem with the size calculation for the root file system.
 It's best to run a FreeBSD system with UFS in a virtual machine for the build.
 
-### Requirements for Running NomadBSD
-* A >= 5GB flash drive
-* A (amd64/i386) system with a 1.2GHz CPU and 1G of RAM should be able to run
-NomadBSD decently.
+### Cloning the Repository
+~~~ csh
+% git clone --recursive https://github.com/nomadbsd/NomadBSD.git
+~~~
 
 ### Building the Image
 #### Preparation
