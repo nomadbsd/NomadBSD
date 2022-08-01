@@ -7,3 +7,6 @@
 [submodule "src/nomadbsd-adduser-gui"]
 	path = src/nomadbsd-adduser-gui
 	url = https://github.com/nomadbsd/nomadbsd-adduser-gui.git
+[submodule "src/nomadbsd-dmconfig"]
+	path = src/nomadbsd-dmconfig
+	url = https://github.com/nomadbsd/nomadbsd-dmconfig.git
