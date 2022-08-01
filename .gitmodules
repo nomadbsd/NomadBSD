@@ -1,3 +1,6 @@
 [submodule "src/lbi-gui"]
 	path = src/lbi-gui
 	url = https://github.com/nomadbsd/lbi-gui.git
+[submodule "src/nomadbsd-chusr"]
+	path = src/nomadbsd-chusr
+	url = https://github.com/nomadbsd/nomadbsd-chusr.git
