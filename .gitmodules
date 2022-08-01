@@ -1,0 +1,3 @@
+[submodule "src/lbi-gui"]
+	path = src/lbi-gui
+	url = https://github.com/nomadbsd/lbi-gui.git
