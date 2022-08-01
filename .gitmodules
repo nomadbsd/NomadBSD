@@ -10,3 +10,6 @@
 [submodule "src/nomadbsd-dmconfig"]
 	path = src/nomadbsd-dmconfig
 	url = https://github.com/nomadbsd/nomadbsd-dmconfig.git
+[submodule "src/nomadbsd-install-gui"]
+	path = src/nomadbsd-install-gui
+	url = https://github.com/nomadbsd/nomadbsd-install-gui.git

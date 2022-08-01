@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=NomadBSD Installer
-Exec=dsbsu /usr/bin/nomadbsd-install-gui
-Icon=drive-harddisk
-Terminal=false
-StartupNotify=false
-Type=Application
-Categories=System;Application
-
