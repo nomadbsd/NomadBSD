@@ -4,3 +4,6 @@
 [submodule "src/nomadbsd-chusr"]
 	path = src/nomadbsd-chusr
 	url = https://github.com/nomadbsd/nomadbsd-chusr.git
+[submodule "src/nomadbsd-adduser-gui"]
+	path = src/nomadbsd-adduser-gui
+	url = https://github.com/nomadbsd/nomadbsd-adduser-gui.git

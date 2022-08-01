@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Add user
-Name[de]=Benutzerkonto erstellen
-Exec=dsbsu /usr/bin/nomadbsd-adduser-gui
-Icon=system-users
-Terminal=false
-StartupNotify=false
-Type=Application
-Categories=System;
