@@ -65,6 +65,8 @@
 #
 # installgui (Re)build and (re)install nomadbsd-install-gui
 #
+# nbsdupdate Install nomadbsd-update
+#
 # unionfs	 (Re)build and (re)install unionfs-fuse
 #
 # usrcfg	 Install all files from nomad/ in ${SYSDIR]/home/nomad
@@ -953,6 +955,14 @@ build_lbi_gui()
 	umount_chroot_devfs
 }
 
+build_nomadbsd_update()
+{
+	cp -a src/nomadbsd-update "${SYSDIR}/tmp/"
+	mount_chroot_devfs
+	chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-update && make install" || bail
+	umount_chroot_devfs
+}
+
 install_handbook()
 {
 	local i
@@ -1043,7 +1053,7 @@ all()
 	local i stages
 
 	stages="install_packages install_from_git_repos build_setupgui build_installgui build_addusergui"
-	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
+	stages="${stages} build_nomadbsd_update build_dmconfig build_chusr build_lbi_gui build_unionfs"
 	stages="${stages} install_ports build_nvidia_drivers post_pkg_config build_uzip_image"
 	stages="${stages} build_image cleanup"
 	_init
@@ -1070,7 +1080,7 @@ all()
 resume_build()
 {
 	stages="update_base build_kernel install_packages install_from_git_repos build_setupgui"
-	stages="${stages} build_installgui build_addusergui"
+	stages="${stages} build_installgui build_addusergui build_nomadbsd_update"
 	stages="${stages} build_dmconfig build_chusr build_lbi_gui build_unionfs"
 	stages="${stages} install_ports build_nvidia_drivers post_pkg_config build_uzip_image"
 	stages="${stages} build_image cleanup"
@@ -1172,6 +1182,7 @@ while [ $# -gt 0 ]; do
 	addusergui)	build_addusergui;;
 	dmconfig)	build_dmconfig;;
 	chusr)		build_chusr;;
+	nbsdupdate)	build_nomadbsd_update;;
 	src)		install_src_dist;;
 	unionfs)	build_unionfs;;
 	uzip)		build_uzip_image;;
