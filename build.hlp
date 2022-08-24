@@ -27,6 +27,8 @@ installgui  (Re)build and (re)install nomadbsd-install-gui
 
 kernel      Build a custom kernel using kernel/NOMADBSD
 
+nbsdupdate  Install nomadbsd-update.
+
 patch       Create a patch file for nomadbsd-update. Add a new record to the
             patch index.
 
