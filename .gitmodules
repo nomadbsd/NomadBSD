@@ -13,3 +13,6 @@
 [submodule "src/nomadbsd-install-gui"]
 	path = src/nomadbsd-install-gui
 	url = https://github.com/nomadbsd/nomadbsd-install-gui.git
+[submodule "src/nomadbsd-update"]
+	path = src/nomadbsd-update
+	url = https://github.com/nomadbsd/nomadbsd-update.git
