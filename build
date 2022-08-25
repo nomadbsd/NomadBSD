@@ -715,7 +715,7 @@ build_uzip_image()
 	mdconfig -d -u ${mddev}
 	rmdir "${UZIP_MNT}"
 	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
-	if [ "${mversion}" = "13" ]; then
+	if [ ${mversion} -ge 13 ]; then
 		mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} -A zstd -C 19 \
 				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
 	else
