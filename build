@@ -507,7 +507,7 @@ build_kernel()
 	sed -e "${regx}" < ${KERNCONF_GENERIC} > ${KERNCONF_NOMADBSD}
 	KERNELOPTS >> ${KERNCONF_NOMADBSD}
 	if [ "${ARCH}" = "i386" ]; then
-		makeopts="${makeopts} LD=ld.lld"
+		makeopts="${makeopts}"
 	fi
 	for i in $(pwd)/patch/usr/src/*.diff; do
 		(cd "${SYSDIR}"/usr/src && patch -N < $i)
