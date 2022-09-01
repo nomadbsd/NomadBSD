@@ -272,7 +272,10 @@ build_nvidia_drivers()
 	fi
 	for v in ${NVIDIA_DRIVERS}; do
 		# Skip nvidia-driver>=440 on i386
-		[ ${ARCH} = "i386" -a $v = "latest" ] && continue
+		if [ ${ARCH} = "i386" ]; then
+			[ "$v" = "latest" ] && continue
+			[ $v -ge 440 ] && continue
+		fi
 		if [ $v = "latest" ]; then
 			d="nvidia-driver"
 		else
