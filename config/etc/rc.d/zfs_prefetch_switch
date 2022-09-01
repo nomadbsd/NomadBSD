@@ -44,8 +44,8 @@ check_has_less_than_4gb_ram() {
 }
 
 zfs_prefetch_switch_start() {
-	# The default for vfs.zfs.prefetch_disable is 0
-	check_has_less_than_4gb_ram && sysctl vfs.zfs.prefetch_disable=1
+	# The default for vfs.zfs.prefetch.disable is 0
+	check_has_less_than_4gb_ram && sysctl vfs.zfs.prefetch.disable=1
 }
 
 load_rc_config $name
