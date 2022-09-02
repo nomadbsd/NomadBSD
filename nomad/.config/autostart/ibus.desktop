@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=IBus
+Comment=Start IBus Input Method Framework
+Exec=ibus-daemon -drxR
+Hidden=false
+Terminal=false
