@@ -33,9 +33,13 @@ isEmpty(ROOTLABEL) {
 isEmpty(DATALABEL) {
 	DATALABEL = nomaddata
 }
+isEmpty(ASHIFT) {
+	ASHIFT = 12
+}
 
 cmd  = sed -E \"s|@POOLNAME@|$${POOLNAME}|; s|@ROOTLABEL@|$${ROOTLABEL}|;
-cmd += s|@DATALABEL@|$${DATALABEL}|\" backend/$${BACKEND}.in
+cmd += s|@DATALABEL@|$${DATALABEL}|;
+cmd += s|@ASHIFT@|$${ASHIFT}|\" backend/$${BACKEND}.in
 
 system($$cmd > backend/$${BACKEND})
 system(chmod a+x backend/$${BACKEND})

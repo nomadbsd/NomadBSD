@@ -545,9 +545,9 @@ create_zpool()
 	if [ ! -d "${DESTDIR}" ]; then
 		mkdir -p "${DESTDIR}" || bail
 	fi
-	zpool create -o altroot=${DESTDIR} ${ZFS_POOL} $DEV || bail
+	zpool create -o altroot=${DESTDIR} -o ashift=${ASHIFT} \
+		${ZFS_POOL} $DEV || bail
 	zpool set autoexpand=off ${ZFS_POOL}
-
 	zfs set atime=off compress=on compression=lz4 ${ZFS_POOL}
 	zfs create -o mountpoint=none ${ZFS_POOL}/ROOT || bail
 	zfs create -o mountpoint=/ -o canmount=noauto \
@@ -900,7 +900,8 @@ build_unionfs()
 build_setupgui()
 {
 	QMAKE_VARS="ROOTLABEL=${ROOTLABEL} DATALABEL=${DATALABEL}"
-	QMAKE_VARS="${QMAKE_VARS} POOLNAME=${ZFS_POOL}"
+	QMAKE_VARS="${QMAKE_VARS} POOLNAME=${ZFS_POOL} ASHIFT=${ASHIFT}"
+
 	if [ "${ARCH}" = "mac" ]; then
 		QMAKE_VARS="${QMAKE_VARS} MAC=1"
 	fi

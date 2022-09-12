@@ -31,6 +31,7 @@ use open qw(:std :utf8);
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
+my $ashift			= @ASHIFT@;
 my $pool			= "@POOLNAME@";
 my $rootlabel		= "@ROOTLABEL@";
 my $datalabel		= "@DATALABEL@";
@@ -825,7 +826,7 @@ sub commit {
 	system("glabel label $datalabel $device") == 0
 		or bail("Failed to create label");
 	status("Adding /dev/label/$datalabel to ZFS pool");
-	system("zpool add -f $pool /dev/label/$datalabel") == 0
+	system("zpool add -o ashift=$ashift -f $pool /dev/label/$datalabel") == 0
 		or bail("Failed to add device to pool");
 
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
