@@ -799,36 +799,14 @@ sub commit {
 		dummy_commit();
 		exit 0;
 	}
-	#
-	# Since we can't run 'zpool labelclear' on the active partition, we
-	# can't simply run 'gpart resize', and let ZFS' autoexpand do its job.
-	# If there's old ZFS label data on the device, we will get errors.
-	#
-	# Instead we create a new partition with the remaining size, run
-	# 'zpool labelclear' on it, and add the new partition to our pool.
-	#
 	($rootdev, $rootpart, $parttype) = get_rootdev();
 	bail("Couldn't find root device") if (!$rootdev);
 
-	$rootpart++;
-	if ($parttype eq 'GPT') {
-		$device = "/dev/${rootdev}p${rootpart}";
-		$gpart_parttype = "freebsd-zfs";
-	} else {
-		$device = "/dev/${rootdev}s${rootpart}";
-		$gpart_parttype = "freebsd";
-	}
 	system("gpart recover $rootdev");
-	system("gpart add -t $gpart_parttype -a 1m $rootdev") == 0
-		or bail("'gpart add -t $gpart_parttype -a 1m $rootdev' failed");
-	status("Clearing ZFS label on $device");
-	system("zpool labelclear -f $device");
-	system("glabel label $datalabel $device") == 0
-		or bail("Failed to create label");
-	status("Adding /dev/label/$datalabel to ZFS pool");
-	system("zpool add -o ashift=$ashift -f $pool /dev/label/$datalabel") == 0
-		or bail("Failed to add device to pool");
-
+	system("gpart resize -i ${rootpart} ${rootdev}") == 0
+		or bail("'gpart resize $rootdev' failed");
+	system("zpool online -e ${pool} /dev/label/${rootlabel}") == 0
+		or bail("'zpool online -e ${pool} /dev/label/${rootlabel}' failed");
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
 	status("Setting timezone");
