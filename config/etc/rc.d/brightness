@@ -38,7 +38,7 @@ stop_cmd="brightness_stop"
 start_cmd="brightness_start"
 reload_cmd="brightness_start"
 extra_commands="reload"
-path_intel_backlight="/usr/local/bin/intel_backlight"
+path_backlight="/usr/bin/backlight"
 
 load_rc_config $name
 : ${brightness_enable:="YES"}
@@ -52,13 +52,10 @@ brightness_start()
 brightness_stop()
 {
 	local dev
-	if [ -x "${path_intel_backlight}" ]; then
-		brightness=$(${path_intel_backlight} | awk -F'[ %]+' '{
-			if ($4 > 0)
-				print($4);
-		}')
+	if [ -x "${path_backlight}" ]; then
+		brightness=$(${path_backlight} -q)
 		if [ -n "${brightness}" ]; then
-			echo "${path_intel_backlight} ${brightness}" > /var/db/brightness
+			echo "${path_backlight} ${brightness}" > /var/db/brightness
 			return
 		fi
 	fi
