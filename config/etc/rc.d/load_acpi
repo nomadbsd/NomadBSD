@@ -26,7 +26,7 @@
 #
 
 # PROVIDE: load_acpi
-# REQUIRE: FILESYSTEMS
+# REQUIRE: LOGIN initgfx kld
 # KEYWORD: nojail
 #
 # Add these lines to /etc/rc.conf.local or /etc/rc.conf
