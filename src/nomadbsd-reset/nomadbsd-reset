@@ -1,0 +1,160 @@
+#!/bin/sh
+#
+# Copyright (c) 2019 The NomadBSD Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# vim: set tabstop=4:
+
+rootlabel="@NOMADROOT@"
+datalabel="@NOMADDATA@"
+backupfile="/usr/share/nomadbsd/nomadbsd-backup.tar.xz"
+
+exitmenu() {
+	local ret opt
+
+	ret="/tmp/exitmenu.ret"
+	while [ true ]; do
+		dialog --title "LEAVE" --radiolist "$1" 15 60 3 \
+		"Reboot" "Reboot system" off \
+		"Shutdown" "Shutdown system" on \
+		"Exit" "Exit setup" off >/dev/tty 2>${ret}
+		[ $? -ne 0 ] && continue
+		opt=$(cat ${ret})
+		rm -f ${ret}
+
+		case ${opt} in
+		Shutdown)
+			exec shutdown -p now;;
+		Exit)
+			exit 1;;
+		Reboot)
+			exec shutdown -r now;;
+		esac
+	done
+}
+
+errandout() {
+	local msg
+
+	msg=$1
+	msg="${msg}\n\nI'm afraid I can't continue. Sorry for the inconvenience."
+	msg="${msg}\n\nAll I can offer is:\n"
+	exitmenu "${msg}"
+}
+
+getrootdev()
+{
+	local rootdev
+	rootdev=$(df / | tail -n 1 | awk '{sub("/dev/", "", $1); print $1 }')
+	[ "${rootdev}" != "label/${rootlabel}" ] && return
+	rootdev=$(glabel status | grep ${rootlabel} | awk -F" " '{ print $3 }')
+	echo "${rootdev}" | sed -E 's/(.*)s[0-9][a-f]/\1/'
+}
+
+deldatapart()
+{
+	local idx rootdev datadev
+
+	rootdev=$(getrootdev)
+	if [ -z "${rootdev}" ]; then
+		errandout "Error: Failed to find root device."
+	fi
+	datadev=$(glabel status | awk -v dev=${rootdev} \
+								  -v label="label/${datalabel}" -F" " '{
+		if ($1 == label && $3 ~ dev) {
+			print $3
+		}
+	}')
+	if [ -z "${datadev}" ]; then
+		errandout "Error: Unable to find label/${datalabel} on ${rootdev}"
+	fi
+	idx=$(echo ${datadev} | sed -E "s/${rootdev}s([0-9]+)[a-z]/\1/")
+	umount -af 2>/dev/null
+	gpart delete -i ${idx} ${rootdev} || \
+		errandout "Error: Failed to delete label/${datalabel}"
+	rm -rf /data
+}
+
+delsysdir()
+{
+	dialog --infobox "Deleting $1 ..." 5 40
+	rm -rf "$1"
+}
+
+rollback() {
+	local d msg ret opt
+	local dirs="/root /etc /var /usr.local.etc /usr/local"
+	local dev=$(getrootdev)
+
+	ret="/tmp/askrollback.ret"
+	msg="YOU ARE ABOUT TO RESET NOMADBSD."
+	msg="${msg} ALL YOUR FILES WILL BE LOST!\n\n"
+	msg="${msg}ARE YOU SURE YOU WANT TO RESET NOMADBSD ON /dev/$dev?"
+	while [ true ]; do
+		dialog --title "!!! WARNING !!!!" --radiolist "${msg}" 15 60 3 \
+			"Yes" "Reset NomadBSD" off \
+			"No"  "Leave NomadBSD as it is" on >/dev/tty 2>${ret}
+		[ $? -ne 0 ] && exitmenu "What do you want to do next?\n"
+		opt=$(cat ${ret})
+		rm -f ${ret}
+		case ${opt} in
+		Yes)
+			if [ ! -f ${backupfile} ]; then
+				errandout "Error: Couldn't find ${backupfile}"
+			fi
+			# Make sure / is mounted rw. Do not rely on /etc/fstab.
+			mount -u -o rw /dev/label/${rootlabel} / || \
+				errandout "Error: Failed to mount /dev/label/${rootlabel} rw"
+
+			umount -f /var/log 2>/dev/null
+			umount -f /var/run 2>/dev/null
+			dialog --infobox "Deleting data partition ..." 5 40
+			deldatapart
+			for d in ${dirs}; do
+				delsysdir $d
+			done
+			dialog --infobox "Restoring files from backup ..." 5 40
+			(cd / && tar xf ${backupfile} 2>/dev/null)
+			ln -s /unionfs/usr/local /usr/local
+			pwd_mkdb -p /etc/master.passwd
+			exitmenu "Resetting NomadBSD done.\n"
+			exit 0
+			;;
+		No)
+			exitmenu "What do you want to do next?\n"
+			exit 0
+			;;
+		esac
+	done
+}
+
+# Check for singel user mode. Is there a better way doing this?
+if ! (ps ax | head | grep '/sbin/init -s'); then
+	errandout "Error: Please boot into single user mode to reset NomadBSD."
+fi
+# Mount /tmp if not mounted
+if ! mount | grep /tmp; then
+	mount -t tmpfs -o rw tmpfs /tmp || \
+		errandout "Error: Failed to mount tmpfs on /tmp"
+fi
+rollback
+exit 0

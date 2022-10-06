@@ -42,8 +42,16 @@
 // Global variables to hold the configuration
 //
 //////////////////////////////////////////////////////////////////////////////
+#ifdef USE_ZFS
 static bool    cfg_use_zfs_enc = false;
 static QString cfg_zfs_enc;
+static QString cfg_zfs_enc_password;
+#else
+static bool    cfg_use_geli = false;
+static QString cfg_geli;
+static QString cfg_geli_password;
+#endif
+
 static QString cfg_locale;
 static QString cfg_localedescr;
 static QString cfg_region;
@@ -53,7 +61,6 @@ static QString cfg_kbdconfigdescr;
 static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
-static QString cfg_zfs_enc_password;
 static QString cfg_editor;
 static QString cfg_gui_editor;
 static QString cfg_file_manager;
@@ -76,7 +83,11 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	addPage(new ExtraKbdLayoutPage);
 	addPage(new TimezonePage);
 	addPage(new PasswordPage);
+#ifdef USE_ZFS
 	addPage(new ZFSEncPage);
+#else
+	addPage(new GeliPage);
+#endif
 	addPage(new ProgramsPage);
 	addPage(new SummaryPage);
 	addPage(new CommitPage);
@@ -756,6 +767,7 @@ bool PasswordPage::isComplete() const
 	return (true);
 }
 
+#ifdef USE_ZFS
 //////////////////////////////////////////////////////////////////////////////
 //
 // ZFSEnc page
@@ -829,6 +841,82 @@ bool ZFSEncPage::isComplete() const
 		return (false);
 	return (true);
 }
+#else
+//////////////////////////////////////////////////////////////////////////////
+//
+// Geli page
+//
+//////////////////////////////////////////////////////////////////////////////
+GeliPage::GeliPage(QWidget *parent) : QWizardPage(parent)
+{
+	pass			  = new PasswordWidget(1);
+	gelicb			  = new QCheckBox;
+	passContainer		  = new QWidget;
+	intro			  = new QLabel;
+	title			  = new QLabel;
+	pwdLabel		  = new QLabel;
+	QVBoxLayout *layout	  = new QVBoxLayout;
+	QVBoxLayout *containerBox = new QVBoxLayout(passContainer);
+
+	title->setStyleSheet("font-weight: bold;");
+	title->setAlignment(Qt::AlignHCenter);
+
+	intro->setWordWrap(true);
+	containerBox->addWidget(pwdLabel);
+	containerBox->addWidget(pass);
+
+	passContainer->setEnabled(cfg_use_geli);
+	gelicb->setTristate(false);
+
+	layout->addWidget(title);
+	layout->addWidget(intro);
+	layout->addWidget(gelicb);
+	layout->addWidget(passContainer);
+	setLayout(layout);
+
+	connect(pass, SIGNAL(passwordChanged()), this,
+	    SLOT(passwordChanged()));
+	connect(gelicb, SIGNAL(toggled(bool)), this, SLOT(setGeli(bool)));
+}
+
+void GeliPage::initializePage()
+{
+	gelicb->setChecked(cfg_use_geli);
+	cfg_geli = cfg_use_geli ? tr("Yes") : tr("No");
+	gelicb->setText(tr("Encrypt /data using Geli"));
+	title->setText(tr("Geli encrypted /data\n"));
+	intro->setText(tr("NomadBSD allows you to protect your personal "  \
+			  "files by encrypting the /data partition using " \
+			  "geli(8). If you don't know what geli(8) is, "  \
+			  "you should skip this page.\n\n"));
+	pwdLabel->setText(tr("Define a password required to decrypt /data"));
+	pass->setPl1Text(tr("Password:"));
+	pass->setPl2Text(tr("Repeat password:"));
+	pass->setStatusText(tr("Passwords do not match"));
+}
+
+void GeliPage::passwordChanged()
+{
+	if (pass->isValid())
+		cfg_geli_password = pass->password();
+	emit completeChanged();
+}
+
+void GeliPage::setGeli(bool state)
+{
+	passContainer->setEnabled(state);
+	cfg_geli = state ? tr("Yes") : tr("No");
+	cfg_use_geli = state;
+	emit completeChanged();
+}
+
+bool GeliPage::isComplete() const
+{
+	if (gelicb->isChecked() && !pass->isValid())
+		return (false);
+	return (true);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -978,7 +1066,11 @@ void SummaryPage::initializePage()
 		{ tr("Keyboard layout:"),		cfg_kbdconfigdescr },
 		{ tr("Additional keyboard layouts:"),	xkbdlayouts	   },
 		{ tr("Timezone:"),			cfg_timezone       },
+#ifdef USE_ZFS
 		{ tr("Encrypt /private:"),		cfg_zfs_enc	   },
+#else
+		{ tr("Encrypt /data:"),			cfg_geli	   },
+#endif
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
 		{ tr("GUI editor:"),			cfg_gui_editor     },
@@ -1034,7 +1126,11 @@ void CommitPage::initializePage()
 		{ "cfg_kbdlayout",	cfg_kbdlayout	  },
 		{ "cfg_kbdvariant",	cfg_kbdvariant	  },
 		{ "cfg_password",	cfg_password	  },
-		{ "cfg_zfs_enc_password",cfg_zfs_enc_password },
+#ifdef USE_ZFS
+		{ "cfg_enc_password",cfg_zfs_enc_password },
+#else
+		{ "cfg_enc_password",	cfg_geli_password },
+#endif
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
 		{ "cfg_gui_editor",	cfg_gui_editor	  },

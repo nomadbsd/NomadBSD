@@ -260,7 +260,7 @@ private:
 	QLabel	       *intro;
 	PasswordWidget *pass;
 };
-
+#ifdef USE_ZFS
 //////////////////////////////////////////////////////////////////////////////
 //
 // ZFSEncPage
@@ -285,6 +285,33 @@ private:
 	QLabel	       *pwdLabel;
 	PasswordWidget *pass;
 };
+#else
+//////////////////////////////////////////////////////////////////////////////
+//
+// Geli page
+//
+//////////////////////////////////////////////////////////////////////////////
+class GeliPage : public QWizardPage
+{
+	Q_OBJECT
+public:
+	GeliPage(QWidget *parent = 0);
+	bool isComplete() const;
+public slots:
+	void setGeli(bool state);
+	void passwordChanged(void);
+protected:
+	void initializePage();
+private:
+	QWidget	       *passContainer;
+	QCheckBox      *gelicb;
+	QLabel	       *title;
+	QLabel	       *intro;
+	QLabel	       *pwdLabel;
+	PasswordWidget *pass;
+};
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////////
 //

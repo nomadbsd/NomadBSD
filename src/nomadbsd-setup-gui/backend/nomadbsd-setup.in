@@ -28,13 +28,20 @@ use POSIX ":sys_wait_h";
 use Time::HiRes "usleep";
 use XML::LibXML;
 use open qw(:std :utf8);
+use lib('@MODULE_PATH@');
+use nomadbsd_setup_@MODULE_ARCH@;
+
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
-my $ashift			= @ASHIFT@;
-my $pool			= "@POOLNAME@";
-my $rootlabel		= "@ROOTLABEL@";
-my $datalabel		= "@DATALABEL@";
+our $ashift			= @ASHIFT@;
+our $pool			= "@POOLNAME@";
+our $rootlabel		= "@ROOTLABEL@";
+our $datalabel		= "@DATALABEL@";
+our $filesystem		= "@FILESYSTEM@";
+our $fragsize		= 4096;
+our $blksize		= $fragsize * 8;
+
 my $dummy;
 my $xkbdlist		= "/usr/local/share/X11/xkb/rules/base.lst";
 my $vtkbdlist		= "/usr/share/vt/keymaps/INDEX.keymaps";
@@ -57,8 +64,9 @@ my $cfg_kbdlayout;
 my $cfg_kbdvariant;
 my $cfg_editor;
 my $cfg_gui_editor;
-my $cfg_zfs_enc_password;
 my @cfg_xkbdlayouts;
+our $cfg_enc_password;
+
 ##############################################################################
 # This section is for defining data.
 #
@@ -697,83 +705,83 @@ sub set_kbdmap {
 	system("sysrc -f /etc/rc.conf.in keymap=$vtkbdmap");
 }
 
-#
-# 1. Get the device associated with our ZFS pool
-# 2. Get the device name from glabel if a device label was used.
-# 3. Return (device name, slice number). E.g. (da0, 2)
-#
-sub get_rootdev {
-	my ($device, $partition, $found_pool);
+sub zfs_extend_fs {
+	my ($rootdev, $rootpart, $parttype) = get_rootdev();
+	bail("Couldn't find root device") if (!$rootdev);
 
-	foreach (`zpool list -H -v`) {
-		if ($found_pool) {
-			$device = (split(/\s+/, $_))[1];
-			last;
-		} elsif (/^${pool}\s+/) {
-			$found_pool = 1;
-		}
+	system("gpart recover $rootdev");
+	system("gpart resize -i ${rootpart} ${rootdev}") == 0
+		or bail("'gpart resize $rootdev' failed");
+	system("zpool online -e ${pool} /dev/label/${rootlabel}") == 0
+		or bail("'zpool online -e ${pool} /dev/label/${rootlabel}' failed");
+	
+	if ($cfg_enc_password) {
+		mk_enc_zfs_dataset(); 
+	} else {
+		system("unlink /home >/dev/null 2>&1");
+		system("rmdir -rf /home 2>&1");
+		status("Creating /home dataset");
+		system("zfs create -o mountpoint=/home ${pool}/home");
+		system("mkdir -p /home/nomad");
+		system("chown nomad:nomad /home/nomad");
 	}
-	return if (!$device);
-
-	$device =~ s#/dev/##;
-
-	if ($device =~ /^(gpt|label|gptid)\//) {
-		foreach (`glabel status`) {
-			$_ =~ s/\s+//;
-			my ($l, $s, $d) = split(/\s+/, $_);
-			if ($l eq $device) {
-				$device = $d;
-				last;
-			}
-		}
-	}
-	if ($device =~ /([a-zA-Z0-9]+)[sp]([0-9]{1,})[a-f]?$/) {
-		$device = $1; $partition = $2;
-		# Get partition type: GPT or MBR
-		my @out = `gpart show $device`;
-		my @fields = split(/\s+/, $out[0]); 
-		return ($device, $partition, $fields[4]);
-	}
+	status("Creating /rwlocal");
+	system("mkdir /rwlocal");
 }
 
-sub mk_enc_zfs_dataset {
-	my $dataset     = "${pool}/private";
-	my $create_cmd  = "zfs create -o encryption=on -o keylocation=prompt " .
-					  "-o keyformat=passphrase $dataset";
-	status("Creating encrypted ZFS dataset on $dataset");
-	open(my $fh, "|$create_cmd") or bail("Couldn't create $dataset");
-	print $fh "${cfg_zfs_enc_password}\n";
-	bail("Failed to create $dataset.")	if (!close($fh));
-	system("zfs set mountpoint=/private $dataset") == 0
-		or bail("Couldn't mount $dataset");
-	status("Creating /private/etc");
-	system("mkdir /private/etc") == 0
-		or bail("Failed to create /private/etc");
-	status("Creating /private/home/nomad");
-	system("mkdir -p /private/home/nomad") == 0
-		or bail("Failed to create /private/home/nomad");
-	system("unlink /home >/dev/null 2>&1");
+sub ufs_extend_fs {
+	if ($cfg_enc_password) {
+		mkgelidata();
+	} else {
+		mkdatafs();
+	}
+	status("Creating /data/usr/local");
+	system("mkdir -p /data/usr/local") == 0 or bail("Couldn't create /data/usr/local");
+	status("Creating /data/compat");
+	system("mkdir /data/compat") == 0 or bail("Couldn't create /data/compat");
+	status("Creating /data/var/tmp");
+	system("mkdir -p /data/var/tmp") == 0
+		or bail("Couldn't create /data/var/tmp");
+	system("chmod a+rwxt /data/var/tmp");
+		system("unlink /home >/dev/null 2>&1");
+
+	status("Creating /data/var/db");
+	system("mkdir -p /data/var/db");
+
 	system("rmdir -rf /home 2>&1");
-	status("Symlinking /home to /private/home");
-	system("ln -s /private/home /home") == 0
-		or bail("Failed to create symlink /home -> /private/home");
-	system("chown nomad:nomad /home/nomad");
+	status("Creating /data/home/nomad");
+	system("mkdir -p /data/home/nomad") == 0
+		or bail("Couldn't create /data/home/nomad");
+	system("chown nomad:nomad /data/home/nomad");
+	status("Symlinking /home to /data/home");
+	system("ln -s /data/home /home") == 0
+		or bail("Failed to create symlink /home -> /data/home");
 
-	# Protect plain text passwords from ppp.conf and wpa_supplicant.conf
-	system("mv /etc/ppp /private/etc/");
-	system("mv /etc/wpa_supplicant.conf /private/etc");
-	system("touch /private/etc/wpa_supplicant.conf");
-	system("cd /etc && ln -sf /private/etc/ppp; " .
-		   "ln -sf /private/etc/wpa_supplicant.conf");
-	system("sysrc -f /etc/rc.conf.in mount_enc_zfs_enable=YES");
-	system("sysrc -f /etc/rc.conf.in mount_enc_zfs_dataset=\"${dataset}\"");
+	status("Creating /data/usr/ports");
+	system("mkdir -p /data/usr/ports");
+
+	status("Creating /usr/ports");
+	system("mkdir -p /usr/ports");
+
+	status("Extracting databases to /data/var/db/");
+	system("cd /data && tar xf /usr/share/nomadbsd/var.db.tar.xz");
+
+	# Copy new files and directories to /data/var/db
+	system("tar -C /var -cf - db | tar -C /data/var -xf -");
+
+	status("Mounting /data/var/db to /var/db");
+	system("mount -t nullfs /data/var/db /var/db");
+
+	open(my $fh, ">>/etc/fstab") or bail("Couldn't open /etc/fstab");
+	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/db\t/var/db\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
+	close($fh);
 }
 
-#
-# Read the configuration from stdin, and do the installation
-#
 sub commit {
-	my ($nfiles, $device, $rootdev, $rootpart, $parttype, $gpart_parttype, $n);
+	my ($nfiles, $n);
 
 	while ($_ = <STDIN>) {
 		my $ofh = select STDIN;
@@ -785,7 +793,7 @@ sub commit {
 		$cfg_timezone	   = $1 if (/^cfg_timezone\s*=\s*(.*)/);
 		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
 		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
-		$cfg_zfs_enc_password  = $1 if (/^cfg_zfs_enc_password\s*=\s*(.*)/);
+		$cfg_enc_password  = $1 if (/^cfg_enc_password\s*=\s*(.*)/);
 		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
@@ -799,33 +807,17 @@ sub commit {
 		dummy_commit();
 		exit 0;
 	}
-	($rootdev, $rootpart, $parttype) = get_rootdev();
-	bail("Couldn't find root device") if (!$rootdev);
-
-	system("gpart recover $rootdev");
-	system("gpart resize -i ${rootpart} ${rootdev}") == 0
-		or bail("'gpart resize $rootdev' failed");
-	system("zpool online -e ${pool} /dev/label/${rootlabel}") == 0
-		or bail("'zpool online -e ${pool} /dev/label/${rootlabel}' failed");
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	system("cp $path_templates/rc.conf.in /etc/rc.conf.in");
 	status("Setting timezone");
 	set_timezone($cfg_timezone);
 	system("cap_mkdb /etc/login.conf");
-	
-	if ($cfg_zfs_enc_password) {
-		mk_enc_zfs_dataset(); 
-	} else {
-		system("unlink /home >/dev/null 2>&1");
-		system("rmdir -rf /home 2>&1");
-		status("Creating /home dataset");
-		system("zfs create -o mountpoint=/home ${pool}/home");
-		system("mkdir -p /home/nomad");
-		system("chown nomad:nomad /home/nomad");
-	}
-	status("Creating /rwlocal");
-	system("mkdir /rwlocal");
 
+	if ($filesystem eq "ZFS") {
+		zfs_extend_fs();
+	} elsif ($filesystem eq "UFS") {
+		ufs_extend_fs();
+	}
 	status("Counting files to copy");
 	progress(-1);
 	foreach (`tar tf ${path_dotfiles}`) {
@@ -862,6 +854,9 @@ sub commit {
 	system("cp /usr/share/skel/dot.login /root/.login");
 	system("sysrc -e initgfx_kmods >> /etc/rc.conf.in");
 	system("sysrc -f /etc/rc.conf.in sddm_lang=$cfg_locale");
+	if ($filesystem eq "ZFS") {
+		system("sysrc -f /etc/rc.conf.in zfs_enable=YES");
+	}
 	system("mv /etc/rc.conf.in /etc/rc.conf");
 	system("touch /etc/wpa_supplicant.conf");
 	status("Regenerating font cache");
@@ -888,9 +883,9 @@ sub commit {
 sub dummy_commit {
 	status("Copying $path_templates/rc.conf.in to /etc/rc.conf.in");
 	status("Setting timezone $cfg_timezone");
-	if ($cfg_zfs_enc_password) {
+	if ($cfg_enc_password) {
 		status("Creating encrypted /private ZFS dataset with " .
-			   "password $cfg_zfs_enc_password");
+			   "password $cfg_enc_password");
 	} else {
 		status("Creating /home");
 	}

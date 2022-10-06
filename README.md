@@ -48,6 +48,9 @@ By default, the build script builds a 64-bit (amd64) image. For a 32-bit (i386)
 image, or a Mac image set `ARCH=i386` or `ARCH=mac` accordingly in `build.cfg`.
 ARCH can also be defined via the `-a` option.
 
+NomadBSD can be build with UFS (default), and ZFS as file system. The file
+system can be defined via `FILESYSTEM` in `build.cfg`.
+
 ~~~ csh
 # ./build all
 ~~~

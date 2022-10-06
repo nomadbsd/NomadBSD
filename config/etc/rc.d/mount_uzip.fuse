@@ -38,6 +38,12 @@ stop_cmd=do_unmount
 
 spinner_pid=-1
 
+is_zfs_root()
+{
+	local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
+	[ "${rootfs}" = "zfs" ]
+}
+
 #
 # Make sure to kill the spinner if the script receives a signal
 #
@@ -81,20 +87,27 @@ do_mount_uzip()
 
 do_mount_unionfs()
 {
+	local rwdir
+
 	if (mount | grep -q ' /usr/local '); then
 		return
 	fi
-	# Create and mount a writeable directory to /usr/local using
-	# unionfs, so users can install packages.
-	if [ ! -d /rwlocal ]; then
-		return
+	if is_zfs_root; then
+		rwdir=/rwlocal
+		[ ! -d "${rwdir}" ] && return
+	else
+		rwdir=/data/usr/local
+		if !(mount | grep -q '/data '); then
+			return
+		fi
+		[ ! -d "${rwdir}" ] && mkdir -p "${rwdir}"
 	fi
 	if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
 		kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
 	fi
 	unionfs -o cow,max_files=${unionfs_maxfiles} \
 	        -o allow_other,use_ino,suid,nonempty,kernel_cache \
-	        /rwlocal=RW:/unionfs/usr/local=RO /usr/local
+	        "${rwdir}"=RW:/unionfs/usr/local=RO /usr/local
 	service ldconfig start
 }
 
