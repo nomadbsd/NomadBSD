@@ -889,6 +889,7 @@ copy_system_files_to_dest_dir()
 		--exclude '^boot/kernel.old'   \
 	    --exclude '^git*'              \
 	    --exclude '^pkgs/*'            \
+	    --exclude '^tmp/*'             \
 	    --exclude '^usr/obj*'          \
 	    --exclude '^usr/src*'          \
 	    --exclude '^usr/ports*'        \
@@ -899,11 +900,15 @@ copy_system_files_to_dest_dir()
 	    --exclude '^var/db/portsnap/*' \
 	    --exclude '^var/db/ports/*'    \
 		--exclude '^var/log/*'         \
+		--exclude '^var/tmp/*'         \
 		--exclude '^var/db/*' .) | (cd ${_DESTDIR} && tar pxf -) || bail
+	mkdir ${_DESTDIR}/tmp
+	mkdir ${_DESTDIR}/var/tmp
 	mkdir ${_DESTDIR}/var/db
 	mkdir ${_DESTDIR}/var/log
 	mkdir ${_DESTDIR}/usr/share/nomadbsd
 	mkdir ${_DESTDIR}/compat
+	chmod a=rwxt ${_DESTDIR}/tmp ${_DESTDIR}/var/tmp
 	(cd "${_SRCDIR}/usr/home/nomad" && tar cfz - .) > \
 		${_DESTDIR}/usr/share/nomadbsd/home.nomad.tgz
 	if [ "${FILESYSTEM}" = "UFS" ]; then
