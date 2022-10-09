@@ -839,6 +839,7 @@ build_uzip_image()
 
 	touch ${UZIP_IMAGE}.img
 	mddev=$(mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s ${uzipsz}m) || bail
+	dd if=/dev/zero of=/dev/${mddev} bs=4M
 	newfs -O 1 -o space -m 0 -b ${blksize} -f ${FRAGSIZE} \
 	    /dev/${mddev} || bail
 	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
