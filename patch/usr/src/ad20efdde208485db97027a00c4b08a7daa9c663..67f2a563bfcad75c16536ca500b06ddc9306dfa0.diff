@@ -1,0 +1,74 @@
+From 67f2a563bfcad75c16536ca500b06ddc9306dfa0 Mon Sep 17 00:00:00 2001
+From: Tom Jones <thj@FreeBSD.org>
+Date: Mon, 10 Oct 2022 14:46:25 +0100
+Subject: acpi: Tell SMM we will handle CPPC notifications
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Buggy SMM implementations can hang while processing CPPC notifications.
+This leads to some laptops (notably Thinkpads) hanging when the
+hwpstate_intel driver is loaded.
+
+Tell the SMM that we will handle CPPC notifications as described in:
+
+- Intel® Processor Vendor-Specific ACPI
+- Intel® 64 and IA-32 Architectures Software Developer’s Manual
+
+CPPC events default to masked (disabled) so while we do not do any
+handling right now this does not seem to lead to any issues.
+
+This approach was found via this Linux Kernel patch:
+https://lkml.org/lkml/2016/3/17/563
+
+PR:		253288
+Reviewed by:	imp, jhb
+Sponsored by:	Modirum
+Sponsored by:	Klara, Inc.
+Differential Revision:	https://reviews.freebsd.org/D36699
+---
+ sys/dev/acpica/acpi_cpu.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/sys/dev/acpica/acpi_cpu.c b/sys/dev/acpica/acpi_cpu.c
+index 762ea37cfa34..49d2bd11fdaa 100644
+--- a/sys/dev/acpica/acpi_cpu.c
++++ b/sys/dev/acpica/acpi_cpu.c
+@@ -153,6 +153,7 @@ static struct sysctl_ctx_list cpu_sysctl_ctx;
+ static struct sysctl_oid *cpu_sysctl_tree;
+ static int		 cpu_cx_generic;
+ static int		 cpu_cx_lowest_lim;
++static bool		 cppc_notify;
+ 
+ static struct acpi_cpu_softc **cpu_softc;
+ ACPI_SERIAL_DECL(cpu, "ACPI CPU");
+@@ -396,6 +397,13 @@ acpi_cpu_attach(device_t dev)
+      */
+     if (!acpi_disabled("mwait") && cpu_mwait_usable())
+ 	sc->cpu_features |= ACPI_CAP_SMP_C1_NATIVE | ACPI_CAP_SMP_C3_NATIVE;
++
++    /*
++     * Work around a lingering SMM bug which leads to freezes when handling
++     * CPPC notifications. Tell the SMM we will handle any CPPC notifications.
++     */
++    if ((cpu_power_eax & CPUTPM1_HWP_NOTIFICATION) && cppc_notify)
++	    sc->cpu_features |= ACPI_CAP_INTR_CPPC;
+ #endif
+ 
+     if (devclass_get_drivers(device_get_devclass(dev), &drivers,
+@@ -977,6 +985,12 @@ acpi_cpu_startup(void *arg)
+ 	NULL, 0, acpi_cpu_global_cx_lowest_sysctl, "A",
+ 	"Global lowest Cx sleep state to use");
+ 
++    /* Add sysctl handler to control registering for CPPC notifications */
++    cppc_notify = 1;
++    SYSCTL_ADD_BOOL(&cpu_sysctl_ctx, SYSCTL_CHILDREN(cpu_sysctl_tree),
++	OID_AUTO, "cppc_notify", CTLFLAG_RDTUN | CTLFLAG_MPSAFE,
++	&cppc_notify, 0, "Register for CPPC Notifications");
++
+     /* Take over idling from cpu_idle_default(). */
+     cpu_cx_lowest_lim = 0;
+     CPU_FOREACH(i) {
+-- 
+cgit v1.2.3
+
