@@ -1,5 +1,5 @@
 PROGRAM             = nomadbsd-reset
-PREFIX             ?= /tmp
+PREFIX             ?= /usr
 NOMADROOT          ?= nomadroot
 NOMADDATA          ?= nomaddata
 BINDIR              = ${PREFIX}/libexec
