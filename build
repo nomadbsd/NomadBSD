@@ -1347,7 +1347,7 @@ check_build_dependencies()
 
 usage()
 {
-	echo "Usage: build cmd ..."
+	echo "Usage: build [-a <arch>][-f <file system type>] cmd ..."
 	echo "       build -h"
 	exit 1
 }
@@ -1370,6 +1370,11 @@ while [ $# -gt 0 ]; do
 		shift
 		[ $# -eq 0 ] && usage
 		ARCH=$1
+		;;
+	-f)
+		shift
+		[ $# -eq 0 ] && usage
+		FILESYSTEM=$1
 		;;
 	-h)
 		help;;
