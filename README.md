@@ -49,7 +49,8 @@ image, or a Mac image set `ARCH=i386` or `ARCH=mac` accordingly in `build.cfg`.
 ARCH can also be defined via the `-a` option.
 
 NomadBSD can be build with UFS (default), and ZFS as file system. The file
-system can be defined via `FILESYSTEM` in `build.cfg`.
+system can be defined via `FILESYSTEM` in `build.cfg`, or via the `-f`
+option.
 
 ~~~ csh
 # ./build all
