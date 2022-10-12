@@ -1,13 +1,8 @@
 accessibility/redshift
 arabic/aspell
 archivers/xarchiver
-audio/asunder
-audio/audacity
-audio/cantata
 audio/deadbeef
 audio/dsbmixer
-audio/musicpd
-audio/ncmpc
 benchmarks/bonnie++
 devel/cmake
 devel/dconf
@@ -23,7 +18,6 @@ devel/qt5-qmake
 devel/xdg-user-dirs
 dns/nss_mdns
 editors/leafpad
-editors/libreoffice
 editors/vim
 emulators/virtualbox-ose-additions
 french/aspell
@@ -50,7 +44,6 @@ mail/thunderbird
 math/galculator
 misc/mc
 misc/qt5ct
-multimedia/mpv
 multimedia/simplescreenrecorder
 multimedia/vlc
 multimedia/x264
@@ -94,7 +87,6 @@ sysutils/powerdxx
 sysutils/sleuthkit
 sysutils/smartmontools
 sysutils/tmux
-sysutils/xfburn
 textproc/aspell
 textproc/en-aspell
 textproc/en-hunspell
@@ -130,7 +122,6 @@ x11-fonts/urwfonts
 x11-fonts/urwfonts-ttf
 x11-fonts/webfonts
 x11-fonts/xorg-fonts
-x11-themes/gnome-icons-faenza
 x11-themes/Kvantum
 x11-themes/lxappearance
 x11-themes/papirus-icon-theme
