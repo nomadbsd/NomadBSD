@@ -1076,7 +1076,7 @@ build_image()
 {
 	local mddev
 
-	IMAGE_NAME=$(imagename)
+	IMAGE_NAME=$(imagename ${ARCH} ${FILESYSTEM})
 	if [ -f ${IMAGE_NAME} ]; then
 		bail "${IMAGE_NAME} already exists"
 	fi

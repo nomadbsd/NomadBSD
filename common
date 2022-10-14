@@ -67,10 +67,11 @@ get_baseversion()
 #
 imagename()
 {
+	local arch=$1 filesystem=$2
 	local version=$(get_version)
 	local baseversion=$(get_baseversion)
-	local fs=$(echo ${FILESYSTEM} | tr '[A-Z]' '[a-z]')
+	local fs=$(echo ${filesystem} | tr '[A-Z]' '[a-z]')
 	local image="nomadbsd"
 	image="nomadbsd-${baseversion}-${version}"
-	echo "${image}.${ARCH}.${fs}.img"
+	echo "${image}.${arch}.${fs}.img"
 }
