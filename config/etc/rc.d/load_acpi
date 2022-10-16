@@ -54,6 +54,7 @@ toshiba_hids="TOS6200 TOS6207 TOS6208"
 ibm_hids="IBM0068 LEN0068"
 sony_hids="SNY5001"
 wmi_hids="PNP0C14"
+hp_hids="PNP0C14"
 fujitsu_hids="FUJ02B1"
 panasonic_hids="MAT0019"
 
@@ -62,8 +63,30 @@ toshiba_kmod="acpi_toshiba"
 ibm_kmod="acpi_ibm"
 sony_kmod="acpi_sony"
 wmi_kmod="acpi_wmi"
+hp_kmod="acpi_hp"
 fujitsu_kmod="acpi_fujitsu"
 panasonic_kmod="acpi_panasonic"
+
+# The acpi_video module will not be loaded if the system's model name
+# matches one of the patterns. The Fn keys for controlling the brightness
+# will not work on some devices if the acpi_video(4) module is loaded.
+acpi_video_exclude_patterns()
+{
+cat << PATTERNS_END
+.*ThinkPad.*(T450|x260|x230)
+.*EliteBook.*820.*G2
+PATTERNS_END
+}
+
+match_acpi_video_exclude_patterns()
+{
+	local device="$(kenv smbios.system.product) $(kenv smbios.system.family)"
+	local IFS=$'\n'
+	for p in $(acpi_video_exclude_patterns); do
+		echo ${device} | egrep -q $p && return 0
+	done
+	return 1
+}
 
 load_acpi_start()
 {
@@ -80,17 +103,9 @@ load_acpi_start()
 			fi
 		done
 	done
-	sysfam=$(kenv smbios.system.family)
-	load_acpi_video=1
-	case ${sysfam} in
-	*ThinkPad*T450*|*ThinkPad*x260*|*ThinkPad*x230*)
-		# The Fn keys of the ThinkPad T450 for controlling the
-		# brightness will not work if the acpi_video(4) module
-		# is loaded.
-		load_acpi_video=0
-		;;
-	esac
-	[ ${load_acpi_video} -eq 1 ] && kldload acpi_video
+	if ! match_acpi_video_exclude_patterns; then
+		kldload acpi_video
+	fi
 }
 
 run_rc_command "$1"
