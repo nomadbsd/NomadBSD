@@ -210,6 +210,17 @@ menu.boot_options = {
 			func = core.disableSyscons,
 			alias = {"c", "C"},
 		},
+		-- disable automatic GFX driver detection
+		{
+			entry_type = core.MENU_ENTRY,
+			name = function()
+				return OnOff("Disable automatic " ..
+				    color.highlight("G") .. "raphics detec" ..
+				    "tion: ", core.disable_gfxdetect)
+			end,
+			func = core.disableGfxDetect,
+			alias = {"g", "G"},
+		},
 		-- verbose boot
 		{
 			entry_type = core.MENU_ENTRY,
@@ -268,7 +279,6 @@ menu.welcome = {
 			menu_entries.zpool_checkpoints,
 			menu_entries.boot_envs,
 			menu_entries.chainload,
-			menu_entries.disable_gfxdetect
 		}
 	end,
 	all_entries = {
@@ -412,16 +422,7 @@ menu.welcome = {
 			end,
 			alias = {"l", "L"},
 		},
-		disable_gfxdetect = {
-			entry_type = core.MENU_ENTRY,
-			name = function()
-				return OnOff("Disable automatic " ..
-				    color.highlight("G") .. "raphics detec" ..
-				    "tion: ", core.disable_gfxdetect)
-			end,
-			func = core.disableGfxDetect,
-			alias = {"g", "G"},
-		}
+
 	},
 }
 
