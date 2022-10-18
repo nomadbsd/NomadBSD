@@ -772,8 +772,8 @@ write_mbr_zfs_bootcode()
 
 	gpart bootcode -b "${SYSDIR}/boot/mbr" ${DEV} || bail
 	dd if=/dev/zero of=${PART} count=2 || bail
-	dd if=/boot/zfsboot of=${PART} count=1 || bail
-	dd if=/boot/zfsboot of=${PART} iseek=1 oseek=1024 || bail
+	dd if="${SYSDIR}/boot/zfsboot" of=${PART} count=1 || bail
+	dd if="${SYSDIR}/boot/zfsboot" of=${PART} iseek=1 oseek=1024 || bail
 }
 
 #
