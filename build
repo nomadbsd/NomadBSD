@@ -1237,6 +1237,7 @@ install_handbook()
 
 cleanup()
 {
+	[ ${FILESYSTEM} = "ZFS" ] && zpool export -f ${ZFS_POOL}
 	if (mount | grep "${SYSDIR}/usr/ports"); then
 		_umount "${SYSDIR}/usr/ports"
 	fi
@@ -1249,7 +1250,6 @@ cleanup()
 	if (mount | grep "${DESTDIR}"); then
 		_umount "${DESTDIR}"
 	fi
-	[ ${FILESYSTEM} = "ZFS" ] && zpool export -f ${ZFS_POOL}
 	rmdir "${UZIP_MNT}" "${DESTDIR}" 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
