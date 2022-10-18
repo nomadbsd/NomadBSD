@@ -739,8 +739,7 @@ create_zfs_and_copy_files()
 	create_zpool ${dev}
 	create_zfs_datasets
 	copy_system_files_to_dest_dir ${SYSDIR} ${DESTDIR}
-	_umount ${DESTDIR}
-	zpool export ${ZFS_POOL}
+	zpool export ${ZFS_POOL} || zpool export -f ${ZFS_POOL}
 	rmdir ${DESTDIR}
 }
 
