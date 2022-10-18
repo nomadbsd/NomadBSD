@@ -713,10 +713,30 @@ sub set_kbdmap {
 }
 
 sub zfs_extend_fs {
+	my $device;
 	my ($rootdev, $rootpart, $parttype) = get_rootdev();
 	bail("Couldn't find root device") if (!$rootdev);
 
 	system("gpart recover $rootdev");
+
+	#
+	# Remove old ZFS label info from device in a hacky way:
+	# Create a FAT32 partition which takes up the remaining disk space.
+	# Run `zpool labelclear -f` on the FAT32 partition.
+	# Delete the FAT32 partition.
+	#
+	$rootpart++;
+	if ($parttype eq 'GPT') {
+		$device = "/dev/${rootdev}p${rootpart}";
+	} else {
+		$device = "/dev/${rootdev}s${rootpart}";
+	}
+	system("gpart add -t fat32 $rootdev");
+	status("Clearing old ZFS label info on $device");
+	system("zpool labelclear -f $device");
+	system("gpart delete -i $rootpart $rootdev");
+	$rootpart--;
+
 	system("gpart resize -i ${rootpart} ${rootdev}") == 0
 		or bail("'gpart resize $rootdev' failed");
 	system("zpool online -e ${pool} /dev/label/${rootlabel}") == 0
