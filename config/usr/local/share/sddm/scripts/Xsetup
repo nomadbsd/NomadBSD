@@ -1,4 +1,5 @@
 #!/bin/sh
 # Xsetup - run as root before the login dialog appears
 /usr/bin/tpquirk
+[ -x /usr/local/etc/setxkbmap.sh ] && . /usr/local/etc/setxkbmap.sh
 

@@ -606,7 +606,7 @@ sub desktopsettings {
 	my $plank_launcher_dir	= "/home/nomad/.config/plank/dock1/launchers";
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
 	my $path_xkbdmap = "/home/nomad/.config/xkbdmap.sh";
-	my $path_sddm_xsetup = "/usr/local/share/sddm/scripts/Xsetup";
+	my $path_setxkbmap_sh = "/usr/local/etc/setxkbmap.sh";
 
 	my @apps = (
 		'home', 'sakura', 'firefox', 'thunderbird',
@@ -677,8 +677,8 @@ sub desktopsettings {
 	close($fh);
 	chmod(0744, $path_xkbdmap);
 
-	open(my $fh, ">>$path_sddm_xsetup")
-		or bail("Couldn't create $path_sddm_xsetup");
+	open(my $fh, ">>$path_setxkbmap_sh")
+		or bail("Couldn't create $path_setxkbmap_sh");
 	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
 	close($fh);
 
