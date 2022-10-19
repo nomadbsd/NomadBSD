@@ -376,7 +376,7 @@ setup_via()
 		}
 	'
 	[ $? -ne 100 ] && return 1
-	nv_xorg_cfg > "${path_xorg_cfg}"
+	via_xorg_cfg > "${path_xorg_cfg}"
 	return 0
 }
 
