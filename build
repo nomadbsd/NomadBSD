@@ -1304,7 +1304,7 @@ all()
 {
 	local i stages
 
-	stages=$(BUILD_STAGES)
+	stages=${BUILD_STAGES}
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
@@ -1330,7 +1330,7 @@ resume_build()
 {
 	local stages
 
-	stages="update_base build_kernel $(BUILD_STAGES)"
+	stages="update_base build_kernel ${BUILD_STAGES}"
 	stage_found=0
 	restore_stage
 	init_vars
