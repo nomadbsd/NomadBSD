@@ -611,7 +611,7 @@ sub desktopsettings {
 	my @apps = (
 		'home', 'sakura', 'firefox', 'thunderbird',
 		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
-		'mpv', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
+		'vlc', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
 	);
 	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
 		open(my $fh, ">>$_") or bail("Couldn't open $_");
