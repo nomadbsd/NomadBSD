@@ -77,6 +77,41 @@ clean()
 	./build clean
 }
 
+usage()
+{
+	echo "Usage: release [-h]|[-P]"
+}
+
+help()
+{
+	echo "Options:"
+	echo "-P  Do not compress images or calculate checksums."
+	echo "-h  This one."
+}
+
+no_post_process=0
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-P)
+		no_post_process=1
+		;;
+	-h)
+		usage
+		help
+		exit 0
+		;;
+	-*)
+		echo "Invalid option '$1'" >&2
+		usage
+		exit 1
+		;;
+	*)
+		break
+		;;
+	esac
+	shift
+done
+
 clean
 
 # Order of arch is important. After building the amd64 image we can
@@ -101,7 +136,7 @@ for arch in amd64 mac; do
 				call_build -a ${arch} -f ${fs} all
 			fi
 		fi
-		post_process "${image}"
+		[ ${no_post_process} -eq 0 ] && post_process "${image}"
 	done
 done
 
@@ -110,6 +145,6 @@ clean
 call_build -a i386 -f UFS all
 image=$(imagename i386 UFS)
 create_manifest "${image%ufs.img}manifest"
-post_process "${image}"
+[ ${no_post_process} -eq 0 ] && post_process "${image}"
 
 exit 0
