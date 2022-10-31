@@ -319,7 +319,9 @@ create_base()
 {
 	local version srcurl
 
-	[ ! -d "${SYSDIR}" ] && mkdir -p "${SYSDIR}" || bail
+	if [ ! -d "${SYSDIR}" ]; then
+		mkdir -p "${SYSDIR}" || bail
+	fi
 	for d in base.txz kernel.txz src.txz; do
 		fetch ${DISTSITE}/$d -o /tmp/$d || bail
 		tar --unlink -xvpJf /tmp/$d -C "${SYSDIR}" || bail
