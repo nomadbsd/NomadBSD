@@ -1075,8 +1075,10 @@ build_mac_image()
 
 build_image()
 {
-	local mddev
-
+	if components_need_rebuild; then
+		rebuild_components
+	fi
+	save_config
 	IMAGE_NAME=$(imagename ${ARCH} ${FILESYSTEM})
 	if [ -f ${IMAGE_NAME} ]; then
 		bail "${IMAGE_NAME} already exists"
@@ -1283,6 +1285,8 @@ clean_all()
 {
 	clean_sysdir
 	rm -rf "${WORKDIR}"
+	rm -f .failed-stage
+	rm -f .prev_build.cfg
 }
 
 _init()
@@ -1300,6 +1304,39 @@ save_stage()
 restore_stage()
 {
 	. ./.failed-stage
+}
+
+components_need_rebuild()
+{
+	[ ! -f ./.prev_build.cfg ] && return 1
+
+	. ./.prev_build.cfg
+
+	if [ ${ARCH} = "amd64" -o ${ARCH} = "mac" ]; then
+		[ ${CFG_ARCH} = "i386" ] && \
+			bail "ARCH changed. Rebuild required. Run './build clean all'"
+	fi
+	if [ ${ARCH} = "i386" ]; then
+		[ ${CFG_ARCH} = "amd64" -o ${CFG_ARCH} = "mac" ] && \
+			bail "ARCH changed. Rebuild required. Run './build clean all'"
+	fi
+	[ ${ARCH} != ${CFG_ARCH} ] && return 0
+	[ ${FILESYSTEM} != ${CFG_FILESYSTEM} ] && return 0
+	return 1
+}
+
+rebuild_components()
+{
+	local c
+	for c in init_base build_setupgui build_installgui install_nomadbsd_reset; do
+		$c || bail
+	done
+}
+
+save_config()
+{
+	echo "CFG_ARCH=${ARCH}" > ".prev_build.cfg"
+	echo "CFG_FILESYSTEM=${FILESYSTEM}" >> ".prev_build.cfg"
 }
 
 all()
