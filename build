@@ -1306,6 +1306,11 @@ all()
 {
 	local i stages
 
+	if [ -f ".failed-stage" ]; then
+		bail ".failed-stage file found. Run './build resume' to " \
+			 "resume previous build, or run './build clean all' " \
+			 "to start a fresh build."
+	fi
 	stages=${BUILD_STAGES}
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
