@@ -1353,18 +1353,21 @@ all()
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
 		save_stage update_base
+		cecho -c cyan -b "Running 'update_base'"
 		update_base
 	fi 
 	if [ ! -z "${BUILD_KERNEL}" ]; then
 		case ${BUILD_KERNEL} in
 		[yY][eE][sS])
 			save_stage build_kernel
+			cecho -c cyan -b "Running 'build_kernel'"
 			build_kernel
 			;;
 		esac
 	fi
 	for i in ${stages}; do
 		save_stage "$i"
+		cecho -c cyan -b "Running '$i'"
 		$i
 	done
 	rm -f ".failed-stage"
@@ -1386,9 +1389,11 @@ resume_build()
 	for i in ${stages}; do
 		if  [ ${stage_found} -eq 1 ]; then
 			save_stage "$i"
+			cecho -c cyan -b "Running '$i'"
 			$i
 		elif [ "${failed_stage}" = $i ]; then
 			stage_found=1
+			cecho -c cyan -b "Running '$i'"
 			$i
 		fi
 	done
