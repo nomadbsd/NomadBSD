@@ -26,6 +26,54 @@
 
 . ./build.cfg
 
+cecho()
+{
+	local ansi_str ansi_reset=$'\e[0m'
+
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		-c)
+			shift
+			local color=$1
+			for c in black.0 red.1 green.2 yellow.3 \
+			         blue.4 magenta.5 cyan.6 white.7; do
+				if [ ${c%%.*} = ${color} ]; then
+					local color_code=${c##*.}
+					ansi_str=${ansi_str}$'\e['3${color_code}m
+					break
+				fi
+			done
+			;;
+		-b)
+			# Bold
+			ansi_str=${ansi_str}$'\e[1m'
+			;;
+		-*)
+			echo "Invalid option '$1'" >&2
+			;;
+		*)
+			break
+			;;
+		esac
+		shift
+	done
+	if [ ! -t 1 ]; then
+		ansi_str=""
+		ansi_reset=""
+	fi
+	echo ${ansi_str}$*${ansi_reset}
+}
+
+printwarn()
+{
+	[ $# -gt 0 ] && cecho -c yellow -b "Warning:" $* >&2
+}
+
+printerr()
+{
+	[ $# -gt 0 ] && cecho -c red -b "Error:" $* >&2
+}
+
 #
 # Returns the shortened, current git commit ID, or the tag if given.
 #
