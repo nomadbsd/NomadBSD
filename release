@@ -33,13 +33,13 @@
 
 sha256_chksum()
 {
-	echo "Calculating sha256 checksum for $1 ..."
+	printmsg "Calculating sha256 checksum for $1 ..."
 	sha256 "$1" > "$1".sha256
 }
 
 lzma_compress()
 {
-	echo "Compressing $1 ..."
+	printmsg "Compressing $1 ..."
 	lzma -k -9 "$1"
 }
 
@@ -53,7 +53,7 @@ post_process()
 call_build()
 {
 	if ! ./build $*; then
-		echo "Build command '$*' failed." >&2
+		printerr "Build command '$*' failed."
 		exit 1
 	fi
 }
@@ -65,7 +65,7 @@ create_manifest()
 
 clean()
 {
-	echo "Cleaning ..."
+	printmsg "Cleaning ..."
 	./build clean
 }
 
@@ -93,7 +93,7 @@ while [ $# -gt 0 ]; do
 		exit 0
 		;;
 	-*)
-		echo "Invalid option '$1'" >&2
+		printerr "Invalid option '$1'"
 		usage
 		exit 1
 		;;
@@ -111,7 +111,7 @@ clean
 for arch in amd64 mac; do
 	for fs in ufs zfs; do
 		image=$(imagename ${arch} ${fs})
-		echo "Building ${image} ..."
+		printmsg "Building ${image} ..."
 		if [ ${arch} = "mac" ]; then
 			# There is no need to rebuild everything for the mac image
 			call_build -a ${arch} -f ${fs} image
@@ -132,8 +132,9 @@ done
 
 # In case of i386 just build a UFS image.
 clean
-call_build -a i386 -f UFS all
 image=$(imagename i386 UFS)
+printmsg "Building ${image} ..."
+call_build -a i386 -f UFS all
 create_manifest "${image%ufs.img}manifest"
 [ ${no_post_process} -eq 0 ] && post_process "${image}"
 
