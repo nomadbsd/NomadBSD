@@ -33,9 +33,16 @@
 . /etc/rc.subr 
 name=mount_uzip
 start_cmd=do_mount_uzip
+stop_cmd=do_unmount
+: ${unionfs_maxfiles:=65536}
 
-required_modules="geom_uzip"
 spinner_pid=-1
+
+is_zfs_root()
+{
+	local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
+	[ "${rootfs}" = "zfs" ]
+}
 
 #
 # Make sure to kill the spinner if the script receives a signal
@@ -47,6 +54,15 @@ kill_spinner() {
 
 do_mount_uzip()
 {
+	if (mount | grep -q '/unionfs/usr/local'); then
+		# The uzip image is already mounted. Try to mount
+		# the unionfs.
+		do_mount_unionfs
+		return
+	fi
+	if (! kldstat -q -m geom_uzip); then
+		kldload geom_uzip 2>/dev/null
+	fi
 	#
 	# Create a spinner to indicate progress
 	#
@@ -63,17 +79,43 @@ do_mount_uzip()
 	}&
 	spinner_pid=$!
 	trap kill_spinner SIGINT SIGTERM SIGHUP
-	mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /usr/local
+	mdmfs -P -F /uzip/usr.local.uzip -oro md.uzip /unionfs/usr/local
 	kill ${spinner_pid}
 	echo
+	do_mount_unionfs
+}
 
-	# Create and mount a writeable directory to /usr/local using
-	# unionfs, so users can install packages.
-	if (mount | grep -qE '/data '); then
-		if [ ! -d /data/usr/local ]; then
-			mkdir -p /data/usr/local
+do_mount_unionfs()
+{
+	local rwdir
+
+	if (mount | grep -q ' /usr/local '); then
+		return
+	fi
+	if is_zfs_root; then
+		rwdir=/rwlocal
+		[ ! -d "${rwdir}" ] && return
+	else
+		rwdir=/data/usr/local
+		if !(mount | grep -q '/data '); then
+			return
 		fi
-		mount -t unionfs -o rw,noatime /data/usr/local /usr/local
+		[ ! -d "${rwdir}" ] && mkdir -p "${rwdir}"
+	fi
+	if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
+		kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
+	fi
+	unionfs -o cow,max_files=${unionfs_maxfiles} \
+	        -o allow_other,use_ino,suid,nonempty,kernel_cache \
+	        "${rwdir}"=RW:/unionfs/usr/local=RO /usr/local
+	service ldconfig start
+}
+
+do_unmount()
+{
+	if (mount | grep -q ' /usr/local '); then
+		echo "Unmounting /usr/local ..."
+		umount -f /usr/local
 	fi
 }
 

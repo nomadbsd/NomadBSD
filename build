@@ -909,21 +909,15 @@ copy_system_files_to_dest_dir()
  	    (cd ${_DESTDIR}/usr.local.etc && tar vpxf -) || bail
 	mkdir ${_DESTDIR}/uzip
 	cp ${UZIP_IMAGE}.uzip ${_DESTDIR}/uzip/usr.local.uzip || bail
-	if [ "${USE_UNIONFS_FUSE}" = "YES" ]; then
-		mkdir -p ${_DESTDIR}/unionfs/usr/local || bail
-		mv ${_DESTDIR}/etc/rc.d/mount_uzip.fuse \
-				${_DESTDIR}/etc/rc.d/mount_uzip || bail
-		ln -s /unionfs/usr/local ${_DESTDIR}/usr/local || bail
-		awk '{
-			if (/^# Insert other /) {
-				print $0;
-				print "/etc/rc.d/mount_uzip stop"
-			} else
-				print $0
-		}' "${_SRCDIR}/etc/rc.shutdown" > ${_DESTDIR}/etc/rc.shutdown
-	else
-		rm -f ${_DESTDIR}/etc/rc.d/mount_uzip.fuse || bail
-	fi
+	mkdir -p ${_DESTDIR}/unionfs/usr/local || bail
+	ln -s /unionfs/usr/local ${_DESTDIR}/usr/local || bail
+	awk '{
+		if (/^# Insert other /) {
+			print $0;
+			print "/etc/rc.d/mount_uzip stop"
+		} else
+			print $0
+	}' "${_SRCDIR}/etc/rc.shutdown" > ${_DESTDIR}/etc/rc.shutdown
 	rm -rf "${_DESTDIR}/root/.subversion"
 	if [ ${ARCH} = "mac" ]; then
 		# echo wsp_load=\"YES\" >> ${_DESTDIR}/boot/loader.conf
@@ -1055,8 +1049,6 @@ build_image()
 
 build_unionfs()
 {
-	[ "${USE_UNIONFS_FUSE}" != "YES" ] && return
-
 	if [ ! -d "${SYSDIR}/tmp/unionfs-fuse" ]; then
 		(cd "${SYSDIR}/tmp" && \
 			git clone https://github.com/nomadbsd/unionfs-fuse) || bail
