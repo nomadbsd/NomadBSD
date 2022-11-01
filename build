@@ -81,7 +81,7 @@
 #
 
 . ./common
-set -x
+
 case ${RELEASE##*-} in
 RELEASE|BETA|RC*)
 	URL="${BASEURL}/releases";;
@@ -1417,7 +1417,7 @@ check_build_dependencies()
 
 usage()
 {
-	echo "Usage: build [-a <arch>][-f <file system type>] cmd ..."
+	echo "Usage: build [-d][-a <arch>][-f <file system type>] cmd ..."
 	echo "       build -h"
 	exit 1
 }
@@ -1440,6 +1440,9 @@ while [ $# -gt 0 ]; do
 		shift
 		[ $# -eq 0 ] && usage
 		ARCH=$1
+		;;
+	-d)
+		set -x
 		;;
 	-f)
 		shift
