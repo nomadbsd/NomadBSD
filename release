@@ -50,14 +50,6 @@ post_process()
 	sha256_chksum "$1".lzma
 }
 
-rebuild_nomadbsd_components()
-{
-	local arch=$1 fs=$2
-	for c in initbase setupgui installgui reset; do
-		./build -a ${arch} -f ${fs} $c || exit 1
-	done
-}
-
 call_build()
 {
 	if ! ./build $*; then
@@ -122,14 +114,12 @@ for arch in amd64 mac; do
 		echo "Building ${image} ..."
 		if [ ${arch} = "mac" ]; then
 			# There is no need to rebuild everything for the mac image
-			rebuild_nomadbsd_components ${arch} ${fs}
 			call_build -a ${arch} -f ${fs} image
 			if [ ${fs} = "zfs" ]; then
 				create_manifest "${image%${fs}.img}manifest"
 			fi
 		elif [ ${arch} = "amd64" ]; then
 			if [ ${fs} = "zfs" ]; then
-				rebuild_nomadbsd_components ${arch} ${fs}
 				call_build -a ${arch} -f ${fs} image
 				create_manifest "${image%${fs}.img}manifest"
 			else
