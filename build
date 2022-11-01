@@ -144,7 +144,7 @@ init_vars()
 		_ARCH=amd64
 		;;
 	*)
-		echo "Invalid architecture '${ARCH}'. Must be one of i386, amd64, or mac" >&2
+		printerr "Invalid architecture '${ARCH}'. Must be one of i386, amd64, or mac"
 		exit 1
 		;;
 	esac
@@ -156,7 +156,7 @@ init_vars()
 	KERNCONF_GENERIC="${KERNCONF_DIR}/GENERIC"
 	FILESYSTEM=$(echo ${FILESYSTEM} | tr '[a-z]' '[A-Z]')
 	if [ \( ${FILESYSTEM} != "UFS" \) -a \( ${FILESYSTEM} != "ZFS" \) ]; then
-		echo "FILESYSTEM '${FILESYSTEM}' is invalid. Must be UFS or ZFS." >&2
+		printerr "FILESYSTEM '${FILESYSTEM}' is invalid. Must be UFS or ZFS."
 		exit 1
 	fi
 }
@@ -582,7 +582,7 @@ install_ports()
 		pkg --chroot "${SYSDIR}" install -y devel/automake
 	fi
 	for p in ${PORTSLIST}; do
-		echo "Checking whether $p is already installed" >&2
+		printmsg "Checking whether $p is already installed"
 		pname=$(echo $p | cut -d/ -f2 | tr '.-' '__')
 		eval popts=\${${pname}_OPTS}
 		if pkg --chroot "${SYSDIR}" info --exists $p; then
@@ -593,12 +593,12 @@ install_ports()
 				p2=$(cd ${SYSDIR}/usr/ports/$p && make -VPKGNAME);
 				result=$(pkg version -t $p2 $p1)
 				[ $result = '<' -o $result = '=' ] && continue
-				echo "Building newer version from ports ..."
+				printmsg "Building newer version from ports ..."
 			else
-				echo "Options of installed package do not match."
+				printmsg "Options of installed package do not match."
 			fi
 		fi
-		echo "Building $p ..." >&2
+		printmsg "Building $p ..." >&2
 		local opts=$(port_opts $p "${popts}")
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
 			make BATCH=1 ${opts} clean deinstall install" || bail
@@ -1023,8 +1023,7 @@ build_amd64_i386_image()
 		write_mbr_zfs_bootcode ${disk} /dev/label/${ROOTLABEL}
 		;;
 	*)
-		echo "Invalid filesystem '${FILESYSTEM}' defined" >&2
-		bail
+		bail "Invalid filesystem '${FILESYSTEM}' defined"
 	esac
 	mdconfig -d -u ${disk}
 }
@@ -1353,21 +1352,21 @@ all()
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
 		save_stage update_base
-		cecho -c cyan -b "Running 'update_base'"
+		printmsg "Running 'update_base'"
 		update_base
 	fi 
 	if [ ! -z "${BUILD_KERNEL}" ]; then
 		case ${BUILD_KERNEL} in
 		[yY][eE][sS])
 			save_stage build_kernel
-			cecho -c cyan -b "Running 'build_kernel'"
+			printmsg "Running 'build_kernel'"
 			build_kernel
 			;;
 		esac
 	fi
 	for i in ${stages}; do
 		save_stage "$i"
-		cecho -c cyan -b "Running '$i'"
+		printmsg "Running '$i'"
 		$i
 	done
 	rm -f ".failed-stage"
@@ -1383,17 +1382,16 @@ resume_build()
 	init_vars
 	failed_stage=$__stage
 	if [ -z "${failed_stage}" ]; then
-		echo "There is nothing to continue" >&2
-		exit 1
+		bail "There is nothing to resume"
 	fi
 	for i in ${stages}; do
 		if  [ ${stage_found} -eq 1 ]; then
 			save_stage "$i"
-			cecho -c cyan -b "Running '$i'"
+			printmsg "Running '$i'"
 			$i
 		elif [ "${failed_stage}" = $i ]; then
 			stage_found=1
-			cecho -c cyan -b "Running '$i'"
+			printmsg "Running '$i'"
 			$i
 		fi
 	done
@@ -1404,13 +1402,13 @@ check_build_dependencies()
 {
 	for d in ${BUILD_DEPENDENCIES}; do
 		if ! pkg info --exists $d; then
-			echo "Please install $d"
+			printerr "Please install $d"
 			exit 1
 		fi
 	done
 	
 	if [ ! -f /usr/ports/Makefile ]; then
-		echo "Please install the FreeBSD ports tree under /usr/ports"
+		printerr "Please install the FreeBSD ports tree under /usr/ports"
 		exit 1
 	fi
 }
@@ -1452,7 +1450,7 @@ while [ $# -gt 0 ]; do
 	-h)
 		help;;
 	-*)
-		echo "Invalid option '$1'" >&2
+		printerr "Invalid option '$1'"
 		usage
 		;;
 	*)
@@ -1461,6 +1459,11 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
+
+if [ $(id -u) -ne 0 ]; then
+	printerr "You must be root to run this script"
+	exit 1
+fi
 
 init_vars
 
