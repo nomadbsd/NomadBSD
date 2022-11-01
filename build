@@ -43,9 +43,6 @@
 #
 # uzip		 Create uzip image.
 #
-# patch		 Create a patch file for nomadbsd-update. Add a new record to the
-#			 patch index.
-#
 # handbook	 Build and install the NomadBSD handbook.
 #
 # image		 Build the NomadBSD image.
@@ -669,40 +666,6 @@ get_uzip_size()
 		tail -1 | cut -f 1
 }
 
-calculate_ufs_base_size()
-{
-	local base_size tmp_img_dev used
-
-	tmp_img_dev=$(create_ufs_tmp_image)
-	[ ! -d "${TMP_BASE_DIR}" ] && mkdir -p "${TMP_BASE_DIR}"
-	mount /dev/${tmp_img_dev}p1 "${TMP_BASE_DIR}" || bail
-	copy_system_files_to_dest_dir "${SYSDIR}" "${TMP_BASE_DIR}"
-	used=$(df -m ${TMP_BASE_DIR} | tail -1 | awk -F" " '{print $3}')
-	base_size=$((100 * (${BASEFS_EXTRA} + ${used}) / \
-		(100 - (${UFS_MINFREE} + ${UFS_OVERHEAD}))))
-
-	chflags -R noschg,nosunlnk ${TMP_BASE_DIR}
-	_umount "${TMP_BASE_DIR}" || bail
-	mdconfig -d -u ${tmp_img_dev}
-	rm -f "${TMP_IMAGE_NAME}"
-	rm -rf "${TMP_BASE_DIR}"
-	echo ${base_size}
-}
-
-create_ufs_tmp_image()
-{
-	local blksize mddev
-
-	mddev=$(create_mddev "${TMP_IMAGE_NAME}" 8192)
-	blksize=$((${FRAGSIZE} * 8))
-	gpart destroy -F ${mddev} >/dev/null 2>&1
-	gpart create -s gpt ${mddev} >/dev/null 2>&1 || bail
-	gpart add -t freebsd-ufs ${mddev} >/dev/null 2>&1 || bail
-	newfs -E -U -O 1 -o time -b ${blksize} -f ${FRAGSIZE} \
-	    -m ${UFS_MINFREE} /dev/${mddev}p1 >/dev/null 2>&1 || bail
-	echo ${mddev}
-}
-
 create_zpool()
 {
 	local DEV=$1
@@ -1090,29 +1053,6 @@ build_image()
 	return 0
 }
 
-create_patch()
-{
-	[ ! -d "${PATCHDIR}" ] && mkdir -p "${PATCHDIR}" || bail
-	if [ -z "${PATCHVERSION}" ]; then
-		bail "PATCHVERSION not defined"
-	fi
-	(cd config && tar cf - .) | (cd "${PATCHDIR}" && tar xf -)
-	echo "${PATCHVERSION}" > "${PATCHDIR}/VERSION"
-	mkdir "${PATCHDIR}/home"
-	(tar cf - nomad) | (cd "${PATCHDIR}/home" && tar xf -)
-	(cd "${PATCHDIR}" && find . -type f -exec md5 {} \; > \
-	    "$(pwd)/nomadbsd-patch-${PATCHVERSION}.files")
-	(cd "${PATCHDIR}" && \
-	    tar cfz "$(pwd)/nomadbsd-patch-${PATCHVERSION}.tgz" .)
-	cs=$(sha256 nomadbsd-patch-${PATCHVERSION}.tgz | \
-	    cut -d'=' -f2 | tr -d ' ')
-	r="version=${PATCHVERSION}"
-	r="${r}:archive=nomadbsd-patch-${PATCHVERSION}.tgz"
-	r="${r}:archivecs=${cs}"
-	r="${r}:flist=nomadbsd-patch-${PATCHVERSION}.files"
-	echo ${r} >> nomadbsd-patch.index
-}
-
 build_unionfs()
 {
 	[ "${USE_UNIONFS_FUSE}" != "YES" ] && return
@@ -1478,7 +1418,6 @@ while [ $# -gt 0 ]; do
 	init)		_init;;
 	initbase)	init_base;;
 	kernel)		build_kernel;;
-	patch)		create_patch;;
 	pkgcfg)		post_pkg_config;;
 	pkgs)		install_packages;;
 	ports)		install_ports;;

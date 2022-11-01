@@ -29,9 +29,6 @@ kernel      Build a custom kernel using kernel/NOMADBSD
 
 nbsdupdate  Install nomadbsd-update.
 
-patch       Create a patch file for nomadbsd-update. Add a new record to the
-            patch index.
-
 pkgcfg      Set up configuration files and users required by installed
             software packages.
 
