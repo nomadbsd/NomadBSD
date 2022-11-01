@@ -1262,10 +1262,9 @@ cleanup()
 
 bail()
 {
-	if [ $# -gt 0 ]; then
-		echo $* >&2
-	fi
+	printerr $*
 	cleanup
+	cecho -c red -b "** Exiting with errors **"
 	exit 1
 }
 
