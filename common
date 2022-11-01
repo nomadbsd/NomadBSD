@@ -74,6 +74,11 @@ printerr()
 	[ $# -gt 0 ] && cecho -c red -b "Error:" $* >&2
 }
 
+printmsg()
+{
+	[ $# -gt 0 ] && cecho -c cyan -b $* >&2
+}
+
 #
 # Returns the shortened, current git commit ID, or the tag if given.
 #
