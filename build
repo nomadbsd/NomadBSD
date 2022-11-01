@@ -919,14 +919,6 @@ copy_system_files_to_dest_dir()
 			print $0
 	}' "${_SRCDIR}/etc/rc.shutdown" > ${_DESTDIR}/etc/rc.shutdown
 	rm -rf "${_DESTDIR}/root/.subversion"
-	if [ ${ARCH} = "mac" ]; then
-		# echo wsp_load=\"YES\" >> ${_DESTDIR}/boot/loader.conf
-		for i in ${_DESTDIR}/usr/libexec/nomadbsd-*.mac; do
-			mv $i ${i%.mac}
-		done
-	else
-		rm -f ${_DESTDIR}/usr/libexec/nomadbsd-*.mac
-	fi
 	get_version > ${_DESTDIR}/VERSION
 	write_config_files ${_DESTDIR}
 	if [ ${FILESYSTEM} = "UFS" ]; then
