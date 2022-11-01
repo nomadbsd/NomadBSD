@@ -918,7 +918,6 @@ copy_system_files_to_dest_dir()
 		} else
 			print $0
 	}' "${_SRCDIR}/etc/rc.shutdown" > ${_DESTDIR}/etc/rc.shutdown
-	rm -rf "${_DESTDIR}/root/.subversion"
 	get_version > ${_DESTDIR}/VERSION
 	write_config_files ${_DESTDIR}
 	if [ ${FILESYSTEM} = "UFS" ]; then
