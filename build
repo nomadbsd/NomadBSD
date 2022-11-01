@@ -836,7 +836,7 @@ copy_efi_loader_to_partition()
 	_umount ${mnt}
 	rmdir ${mnt}
 }
-	
+
 create_efi_partition()
 {
 	local part dev
@@ -1298,6 +1298,7 @@ _init()
 save_stage()
 {
 	echo "ARCH=${ARCH}" > ".failed-stage"
+	echo "FILESYSTEM=${FILESYSTEM}" >> ".failed-stage"
 	echo "__stage=$1" >> ".failed-stage"
 }
 
