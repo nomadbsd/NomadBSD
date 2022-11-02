@@ -1261,6 +1261,14 @@ save_config()
 	echo "CFG_FILESYSTEM=${FILESYSTEM}" >> ".prev_build.cfg"
 }
 
+catch_sig()
+{
+	printmsg "Build interrupted by signal"
+	printmsg "Cleaning up ..."
+	cleanup
+	exit 1
+}
+
 all()
 {
 	local i stages
@@ -1353,7 +1361,7 @@ help()
 
 check_build_dependencies
 
-trap bail SIGINT SIGTERM SIGHUP
+trap catch_sig SIGINT SIGTERM SIGHUP
 
 while [ $# -gt 0 ]; do
 	case "$1" in
