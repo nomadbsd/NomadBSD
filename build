@@ -1330,8 +1330,8 @@ check_build_dependencies()
 		fi
 	done
 	
-	if [ ! -f /usr/ports/Makefile ]; then
-		printerr "Please install the FreeBSD ports tree under /usr/ports"
+	if [ ! -f ${PORTSTREE}/Makefile ]; then
+		printerr "Please install the FreeBSD ports tree under ${PORTSTREE}"
 		exit 1
 	fi
 }
