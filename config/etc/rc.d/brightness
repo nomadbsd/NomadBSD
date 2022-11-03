@@ -26,7 +26,7 @@
 #
 
 # PROVIDE: brightness
-# REQUIRE: FILESYSTEMS kld
+# REQUIRE: FILESYSTEMS kld initgfx
 # KEYWORD: nojail shutdown
 
 . /etc/rc.subr
