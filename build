@@ -739,8 +739,7 @@ write_mbr_zfs_bootcode()
 #
 add_partition()
 {
-	local output
-	output=$(gpart add $*)
+	local output=$(gpart add $*)
 	set -- ${output}
 	[ "$2" != "added" ] && bail
 	echo $1
@@ -794,9 +793,7 @@ copy_efi_loader_to_partition()
 
 create_efi_partition()
 {
-	local part dev
-
-	dev=$(basename $1)
+	local part dev=$(basename $1)
 
 	if [ ${ARCH} = "amd64" ]; then
 		part=$(add_amd64_efi_partition ${dev})
@@ -985,10 +982,7 @@ build_amd64_i386_image()
 
 write_mbr_bootcode()
 {
-	local disk part
-	
-	disk=$(basename "$1")
-	part=$2
+	local disk=$(basename "$1") part=$2
 	gpart bootcode -b "${SYSDIR}/boot/mbr" ${disk}
 	gpart bootcode -b "${SYSDIR}/boot/boot" ${part}
 }
@@ -1268,14 +1262,13 @@ catch_sig()
 
 all()
 {
-	local i stages
+	local i stages=${BUILD_STAGES}
 
 	if [ -f ".failed-stage" ]; then
 		bail ".failed-stage file found. Run './build resume' to " \
 			 "resume previous build, or run './build clean all' " \
 			 "to start a fresh build."
 	fi
-	stages=${BUILD_STAGES}
 	_init
 	# Do not run freebsd-update on STABLE or CURRENT.
 	if ! (echo ${RELEASE} | grep -Eq 'STABLE|CURRENT'); then
@@ -1302,10 +1295,9 @@ all()
 
 resume_build()
 {
-	local stages
+	local stages="update_base build_kernel ${BUILD_STAGES}"
+	local stage_found=0
 
-	stages="update_base build_kernel ${BUILD_STAGES}"
-	stage_found=0
 	restore_stage
 	init_vars
 	failed_stage=$__stage
@@ -1350,8 +1342,7 @@ usage()
 
 help()
 {
-	less build.hlp
-	exit 0
+	exec less build.hlp
 }
 
 [ $# -lt 1 ] && usage
