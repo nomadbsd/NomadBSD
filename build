@@ -779,11 +779,7 @@ copy_efi_loader_to_partition()
 	newfs_msdos -F 32 -c 1 /dev/${part} || bail
 	mount -t msdosfs /dev/${part} ${mnt} || bail
 	mkdir -p ${mnt}/EFI/BOOT || bail
-	if (echo ${RELEASE} | grep -q 'CURRENT'); then
-		cp ${SYSDIR}/boot/loader.efi ${mnt}/EFI/BOOT/BOOTX64.EFI || bail
-	else
-		cp ${SYSDIR}/boot/boot1.efi ${mnt}/EFI/BOOT/BOOTX64.EFI || bail
-	fi
+	cp ${EFI_LOADER} ${mnt}/EFI/BOOT/BOOTX64.EFI || bail
 	_umount ${mnt}
 	rmdir ${mnt}
 }
