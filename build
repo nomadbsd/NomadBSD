@@ -852,9 +852,7 @@ build_uzip_image()
 	blksize=$((${FRAGSIZE} * 8))
 	uzipsz=$(calculate_est_uzip_image_size "${SYSDIR}/usr/local")
 
-	touch ${UZIP_IMAGE}.img
-	mddev=$(mdconfig -a -t vnode -f ${UZIP_IMAGE}.img -s ${uzipsz}m) || bail
-	dd if=/dev/zero of=/dev/${mddev} bs=4M
+	mddev=$(create_mddev ${UZIP_IMAGE}.img ${uzipsz})
 	newfs -O 1 -o space -m 0 -b ${blksize} -f ${FRAGSIZE} \
 	    /dev/${mddev} || bail
 	[ ! -d "${UZIP_MNT}" ] && mkdir "${UZIP_MNT}"
