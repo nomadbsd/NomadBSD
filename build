@@ -576,20 +576,6 @@ install_ports()
 	mount_ports_tree
 	mount_chroot_devfs
 
-	#
-	# We need devel/autoconf and devel/automake to build
-	# sysutils/fusefs-jmtpfs
-	#
-	if pkg --chroot "${SYSDIR}" info --exists devel/autoconf; then
-		have_autoconf=1
-	else
-		pkg --chroot "${SYSDIR}" install -y devel/autoconf
-	fi
-	if pkg --chroot "${SYSDIR}" info --exists devel/automake; then
-		have_automake=1
-	else
-		pkg --chroot "${SYSDIR}" install -y devel/automake
-	fi
 	for p in ${PORTSLIST}; do
 		printmsg "Checking whether $p is already installed"
 		pname=$(echo $p | cut -d/ -f2 | tr '.-' '__')
@@ -610,19 +596,13 @@ install_ports()
 		printmsg "Building $p ..." >&2
 		local opts=$(port_opts $p "${popts}")
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-			make BATCH=1 ${opts} clean deinstall install" || bail
+			make USE_PACKAGE_DEPENDS=1 BATCH=1 ${opts} \
+			clean deinstall install" || bail
 	done
 	# Lock all kernel module packages to prevent kernel version mismatch
 	# problems when updating packages on CURRENT.
 	if (echo ${RELEASE} | grep -q 'CURRENT'); then
 		pkg -c "${SYSDIR}" lock -y -g '*-kmod-*'
-	fi
-	# Delete packages needed to build the ports
-	if [ -z "$have_autoconf" ]; then
-		pkg -c "${SYSDIR}" delete -y devel/autoconf
-	fi
-	if [ -z "$have_automake" ]; then
-		pkg -c "${SYSDIR}" delete -y devel/autoconf
 	fi
 	pkg -c "${SYSDIR}" autoremove -y
 
