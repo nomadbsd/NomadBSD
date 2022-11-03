@@ -171,8 +171,9 @@ _umount()
 
 mount_chroot_devfs()
 {
-	if ! (mount | grep -q "${SYSDIR}/dev"); then
-		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev'
+	if ! is_mounted "${SYSDIR}/dev"; then
+		chroot "${SYSDIR}" sh -c 'mount -t devfs devfs /dev' || \
+			bail "Failed to mount devfs"
 	fi
 }
 
@@ -184,14 +185,25 @@ umount_chroot_devfs()
 mount_ports_tree()
 {
 	[ ! -d "${SYSDIR}/usr/ports" ] && mkdir "${SYSDIR}/usr/ports"
-	if ! (mount | grep -q "${SYSDIR}/usr/ports"); then
-		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports"
+	if ! is_mounted "${SYSDIR}/usr/ports"; then
+		mount -t nullfs "${PORTSTREE}" "${SYSDIR}/usr/ports" || \
+			bail "Failed to mount ports tree"
 	fi
 }
 
 umount_ports_tree()
 {
 	_umount "${SYSDIR}/usr/ports"
+}
+
+is_mounted()
+{
+	local d mntpt
+	mntpt=$(realpath -q "$1") || return 1
+	for d in $(mount -p | awk '{print $2}'); do
+		[ $d = "${mntpt}" ] && return 0
+	done
+	return 1
 }
 
 install_user_config()
@@ -1164,18 +1176,10 @@ install_handbook()
 cleanup()
 {
 	[ ${FILESYSTEM} = "ZFS" ] && zpool export -f ${ZFS_POOL}
-	if (mount | grep "${SYSDIR}/usr/ports"); then
-		_umount "${SYSDIR}/usr/ports"
-	fi
-	if (mount | grep "${SYSDIR}/dev"); then
-		_umount "${SYSDIR}/dev"
-	fi
-	if (mount | grep "${UZIP_MNT}"); then
-		_umount "${UZIP_MNT}"
-	fi
-	if (mount | grep "${DESTDIR}"); then
-		_umount "${DESTDIR}"
-	fi
+	for d in "${SYSDIR}/usr/ports" "${SYSDIR}/dev" \
+			 "${UZIP_MNT}" "${DESTDIR}"; do
+		is_mounted "$d" && _umount "$d"
+	done
 	rmdir "${UZIP_MNT}" "${DESTDIR}" 2>/dev/null
 	for i in $(mdconfig -l); do
 		mdconfig -d -u $i
