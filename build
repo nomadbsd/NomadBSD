@@ -1046,7 +1046,7 @@ build_image()
 		bail "${UZIP_IMAGE}.uzip does not exist."
 	fi
 	build_${ARCH}_image ${IMAGE_NAME}
-
+	printmsg "${IMAGE_NAME} successfully built"
 	return 0
 }
 
