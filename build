@@ -818,7 +818,25 @@ create_mddev()
 	touch ${image_file} || bail
 	mddev=$(mdconfig -a -t vnode -f ${image_file} -s ${image_size_mib}m) || bail
 	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
+	__active_mddevs="${__active_mddevs} ${mddev}"
 	echo ${mddev}
+}
+
+destroy_mddev()
+{
+	local mddev=$1
+	__active_mddevs=$(echo ${__active_mddevs} | tr ' ' '\n' | \
+		awk -v dev=${mddev} '$0 != dev {print $0}')
+	mdconfig -d -u ${mddev}
+}
+
+destroy_active_mddevs()
+{
+	local dev
+	for dev in ${__active_mddevs}; do
+		mdconfig -d -u ${dev}
+	done
+	__active_mddevs=""
 }
 
 build_uzip_image()
@@ -842,7 +860,7 @@ build_uzip_image()
 		cpio -pdmu "${UZIP_MNT}")
 	(cd "${UZIP_MNT}" && ln -s /usr.local.etc etc)
 	_umount "${UZIP_MNT}"
-	mdconfig -d -u ${mddev}
+	destroy_mddev ${mddev}
 	rmdir "${UZIP_MNT}"
 	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
 	if [ ${mversion} -ge 13 ]; then
@@ -962,7 +980,7 @@ build_amd64_i386_image()
 	*)
 		bail "Invalid filesystem '${FILESYSTEM}' defined"
 	esac
-	mdconfig -d -u ${disk}
+	destroy_mddev ${disk}
 }
 
 write_mbr_bootcode()
@@ -1006,7 +1024,7 @@ build_mac_image()
 		create_zfs_and_copy_files /dev/label/${ROOTLABEL}
 		;;
 	esac
-	mdconfig -d -u ${disk}
+	destroy_mddev ${disk}
 }
 
 build_image()
@@ -1158,9 +1176,7 @@ cleanup()
 		is_mounted "$d" && _umount "$d"
 	done
 	rmdir "${UZIP_MNT}" "${DESTDIR}" 2>/dev/null
-	for i in $(mdconfig -l); do
-		mdconfig -d -u $i
-	done
+	destroy_active_mddevs
 }
 
 bail()
