@@ -836,8 +836,7 @@ create_mddev()
 {
 	local image_file=$1 image_size_mib=$2
 	touch ${image_file} || bail
-	maxsize=$(echo "scale=0; ${image_size_mib} * 1000^2 / 1024" | bc)
-	mddev=$(mdconfig -a -t vnode -f ${image_file} -s ${maxsize}k) || bail
+	mddev=$(mdconfig -a -t vnode -f ${image_file} -s ${image_size_mib}m) || bail
 	dd if=/dev/zero of=/dev/${mddev} bs=1M 2>/dev/null
 	echo ${mddev}
 }
