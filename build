@@ -351,16 +351,10 @@ update_base()
 
 build_nvidia_drivers()
 {
-	local d v pkgname have_gsed
+	local d v pkgname
 
 	mount_ports_tree
 	mount_chroot_devfs
-	# Building nvidia-driver>=410 requires textproc/gsed
-	if pkg --chroot "${SYSDIR}" info --exists textproc/gsed; then
-		have_gsed=1
-	else
-		pkg --chroot "${SYSDIR}" install -y textproc/gsed
-	fi
 	for v in ${NVIDIA_DRIVERS}; do
 		# Skip nvidia-driver>=440 on i386
 		if [ ${ARCH} = "i386" ]; then
@@ -375,14 +369,16 @@ build_nvidia_drivers()
 		pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
 		[ -f "${PKGDIR}/${pkgname}.pkg" ] && continue
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-			make BATCH=1 ${NVIDIA_BUILD_OPTS} clean package" || bail
+			make BATCH=1 USE_PACKAGE_DEPENDS=1 ${NVIDIA_BUILD_OPTS} \
+			clean package" || bail
 		mkdir -p "${SYSDIR}/usr/local/nvidia/$v" 2>/dev/null
 		cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.pkg" | \
 			(cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
 		chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
 	done
-	# Remove textproc/gsed if we just installed it for building nvidia-driver
-	[ -z "${have_gsed}" ] && pkg --chroot "${SYSDIR}" delete -y textproc/gsed
+	# Remove build dependencies
+	pkg -c "${SYSDIR}" autoremove -y
+
 	umount_ports_tree
 	umount_chroot_devfs
 	mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
