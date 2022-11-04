@@ -2,7 +2,7 @@
 
 # vim: set tabstop=4:
 
-# Copyright (c) 2020 The NomadBSD Project. All rights reserved.
+# Copyright (c) 2020-2022 The NomadBSD Project. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,8 +25,8 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# This script listens to events from devd and when a button press to change
-# the screen brightness is found it uses intel_backlight(1) to get the current
+# This script listens to events from devd(8) and when a button press to change
+# the screen brightness is found it uses backlight(1) to get / set the 
 # brightness level and dunst(1) to display it.
 
 use strict;
@@ -41,21 +41,18 @@ my $socket = IO::Socket::UNIX->new(
 
 die "Can't create socket: $!" unless $socket;
 
-my $intel_backlight_bin = '/usr/local/bin/intel_backlight';
+my $backlight_bin = '/usr/bin/backlight';
 my $dunstify_bin = '/usr/local/bin/dunstify';
 my $dunstify_id = 3729;
-my $dunstify_timeout = 1;
+my $dunstify_timeout = 1000;
 my $dunstify_icon = 'contrast'; # I couldn't find a 'brightness' icon
+my $step = 10;
 
-$dunstify_timeout *= 1000;
+my $sign;
+my $brightness_level;
 
 if ( ! -f $dunstify_bin ) {
   print STDERR  "dunstify not found. Install x11/dunst first!\n";
-  exit 1;
-}
-
-if ( ! -f $intel_backlight_bin ) {
-  print STDERR  "intel_backlight not found. Install graphics/intel_backlight first!\n";
   exit 1;
 }
 
@@ -63,16 +60,19 @@ if ( ! -f $intel_backlight_bin ) {
 while (chomp( my $line = <$socket> )) {
 	# Example line when a brightness change button on Thinkpads is pressed
 	# subsystem=IBM type=\_SB_.PCI0.LPC_.EC__.HKEY notify=0x10
-	if  ($line =~ /subsystem=IBM\ type=\\_SB_\.PCI0\.LPC_\.EC__\.HKEY\ notify=0x1[01]/) {
-		my $brightness_level = qx/$intel_backlight_bin/;
-		if ($brightness_level =~ /(\d+)%/) {
-			# Use U+2589 to print the bar
-			my $bar = sprintf "▉" x ($1 / 5 - 1);
-			qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "$1    $bar");
-		}
-	} elsif ($line =~ /subsystem=Video type=brightness notify=([0-9]+)/) {
-		my $bar = sprintf "▉" x ($1 / 5 - 1);
-		qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "$1    $bar");
+	if  ($line =~ /subsystem=IBM.*type=.*HKEY\ notify=0x1([01])/x) {
+		$sign = ( $1 == 0 ? '+' : '-' );
+		qx($backlight_bin $sign $step);
+		$brightness_level = qx/$backlight_bin -q/;
+		print_bar($1) if ($brightness_level =~ /(\d+)/x); 
+	} elsif ($line =~ /subsystem=Video type=brightness notify=([0-9]+)/x) {
+		print_bar($1);
 	}
 }
 
+sub print_bar {
+	# Use U+2589 to print the bar
+	my $bar = sprintf "▉" x ($1 / 5 + 1);
+	qx($dunstify_bin -i $dunstify_icon -r $dunstify_id -t $dunstify_timeout -u normal "    $bar");
+	return $?;
+}
