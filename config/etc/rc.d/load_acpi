@@ -73,7 +73,7 @@ panasonic_kmod="acpi_panasonic"
 acpi_video_exclude_patterns()
 {
 cat << PATTERNS_END
-.*ThinkPad.*(T450|x260|x230)
+.*ThinkPad.*(T450|T470|x260|x230)
 .*EliteBook.*820.*G2
 PATTERNS_END
 }
