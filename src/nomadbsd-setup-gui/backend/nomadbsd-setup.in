@@ -63,7 +63,6 @@ my $cfg_password;
 my $cfg_kbdlayout;
 my $cfg_kbdvariant;
 my $cfg_editor;
-my $cfg_gui_editor;
 my @cfg_xkbdlayouts;
 our $cfg_enc_password;
 
@@ -88,12 +87,6 @@ my @editor_list = (
 	'ee			Easy editor',
 	'vim		Vi IMproved, a programmer\'s text editor',
 	'vi			Bug-for-bug compatible replacement for 4BSD\'s vi'
-);
-
-my @gui_editor_list = (
-	'leafpad	GTK+ based simple text editor',
-	'gvim		Vim with a GTK+ frontend',
-	'vim		Vim running in a X terminal'
 );
 
 my %locales = (
@@ -610,7 +603,7 @@ sub desktopsettings {
 
 	my @apps = (
 		'home', 'sakura', 'firefox', 'thunderbird',
-		'libreoffice-startcenter', 'galculator', $cfg_gui_editor, 'geany',
+		'libreoffice-startcenter', 'galculator', 'geany',
 		'vlc', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
 	);
 	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
@@ -658,8 +651,6 @@ sub desktopsettings {
 	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/EMAILCLIENT/thunderbird.desktop/g' " .
-		   "${mimelist}");
-	system("sed -i .bak -E 's/GUIEDITOR/${cfg_gui_editor}.desktop/g' " .
 		   "${mimelist}");
 	system("rm -f ${mimelist}.bak 2>/dev/null");
 
@@ -824,7 +815,6 @@ sub commit {
 		$cfg_kbdlayout	   = $1 if (/^cfg_kbdlayout\s*=\s*(.*)/);
 		$cfg_kbdvariant	   = $1 if (/^cfg_kbdvariant\s*=\s*(.*)/);
 		$cfg_editor		   = $1 if (/^cfg_editor\s*=\s*(.*)/);
-		$cfg_gui_editor	   = $1 if (/^cfg_gui_editor\s*=\s*(.*)/);
 		if (/^cfg_xkbdlayouts\s*=\s*(.*)/) {
 			@cfg_xkbdlayouts = split(/,/, $1);
 		}
@@ -1041,9 +1031,6 @@ while (@ARGV) {
 		exit 0;
 	} elsif ($ARGV[0] eq "editors") {
 		print_array_data(\@editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "guieditors") {
-		print_array_data(\@gui_editor_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "filemanagers") {
 		print_array_data(\@file_manager_list);

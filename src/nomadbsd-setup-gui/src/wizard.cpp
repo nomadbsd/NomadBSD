@@ -62,7 +62,6 @@ static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
 static QString cfg_editor;
-static QString cfg_gui_editor;
 static QString cfg_file_manager;
 static QStringList cfg_xkbdlayouts;
 static QStringList cfg_xkbdvariants;
@@ -936,7 +935,6 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 	} apps[ncats] = {
 		{ BACKEND_GET_SHELLS,	    &cfg_shell,        &shells       },
 		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
-		{ BACKEND_GET_GUIEDITORS,   &cfg_gui_editor,   &guiEditors   },
 		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
 
 	};
@@ -1005,7 +1003,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 void ProgramsPage::initializePage()
 {
 	QString label[ncats] = {
-		tr("Shell"), tr("Editor"), tr("GUI Editor"), tr("File manager")
+		tr("Shell"), tr("Editor"), tr("File manager")
 	};
 	for (int n = 0; n < ncats; n++)
 		catLabel[n]->setText(label[n]);
@@ -1023,7 +1021,6 @@ void ProgramsPage::selectionChanged(int /* unused */)
 {
 	cfg_shell	 = getBoxVal(shells);
 	cfg_editor	 = getBoxVal(editors);
-	cfg_gui_editor	 = getBoxVal(guiEditors);
 	cfg_file_manager = getBoxVal(fileManagers);
 }
 
@@ -1073,8 +1070,7 @@ void SummaryPage::initializePage()
 #endif
 		{ tr("Shell:"),				cfg_shell	   },
 		{ tr("Editor:"),			cfg_editor	   },
-		{ tr("GUI editor:"),			cfg_gui_editor     },
-		{ tr("File manager:"),			cfg_file_manager   },
+		{ tr("File manager:"),			cfg_file_manager   }
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -1133,7 +1129,6 @@ void CommitPage::initializePage()
 #endif
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
-		{ "cfg_gui_editor",	cfg_gui_editor	  },
 		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
