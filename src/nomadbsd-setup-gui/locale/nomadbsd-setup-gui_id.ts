@@ -4,24 +4,24 @@
 <context>
     <name>CommitPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="1149"/>
+        <location filename="../src/wizard.cpp" line="1144"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1173"/>
+        <location filename="../src/wizard.cpp" line="1168"/>
         <source>An unexpected error occured while executing %1: %2</source>
         <translation>Terjadi eror saat memulai %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1231"/>
+        <location filename="../src/wizard.cpp" line="1226"/>
         <source>%1 returned with error code %2:
 &quot;%3&quot;</source>
         <translation>%1 kembali dengan kode eror %2:
 &quot;%3&quot;</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1234"/>
+        <location filename="../src/wizard.cpp" line="1229"/>
         <source>Press &quot;Finish&quot; to reboot</source>
         <translation>Tekan &quot;Selesai&quot; untuk memulai ulang</translation>
     </message>
@@ -29,49 +29,49 @@
 <context>
     <name>ExtraKbdLayoutPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="442"/>
-        <location filename="../src/wizard.cpp" line="475"/>
+        <location filename="../src/wizard.cpp" line="441"/>
+        <location filename="../src/wizard.cpp" line="474"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="462"/>
-        <location filename="../src/wizard.cpp" line="495"/>
+        <location filename="../src/wizard.cpp" line="461"/>
+        <location filename="../src/wizard.cpp" line="494"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="632"/>
+        <location filename="../src/wizard.cpp" line="631"/>
         <source>Add layout</source>
         <translation>Menambah tata letak</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="633"/>
+        <location filename="../src/wizard.cpp" line="632"/>
         <source>Remove layout</source>
         <translation>Buang tata letak</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="634"/>
+        <location filename="../src/wizard.cpp" line="633"/>
         <source>Additional keyboard layouts</source>
         <translation>Tata letak papan ketik lain</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="635"/>
+        <location filename="../src/wizard.cpp" line="634"/>
         <source>Here you can add additional keyboard layouts. You can switch between them from the NomadBSD desktop.</source>
         <translation>Anda dapat menambahkan tata letak papan ketik lain. Anda dapat beralih mode papan ketik melalui desktop NomadBSD.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="638"/>
+        <location filename="../src/wizard.cpp" line="637"/>
         <source>Keyboard layout</source>
         <translation>Tata letak papan ketik</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="639"/>
+        <location filename="../src/wizard.cpp" line="638"/>
         <source>Keyboard variant</source>
         <translation>Jenis papan ketik</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="641"/>
+        <location filename="../src/wizard.cpp" line="640"/>
         <source>Additional layouts</source>
         <translation>Tata letak lain</translation>
     </message>
@@ -79,30 +79,30 @@
 <context>
     <name>GeliPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="885"/>
-        <location filename="../src/wizard.cpp" line="908"/>
+        <location filename="../src/wizard.cpp" line="884"/>
+        <location filename="../src/wizard.cpp" line="907"/>
         <source>Yes</source>
         <translation>Ya</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="885"/>
-        <location filename="../src/wizard.cpp" line="908"/>
+        <location filename="../src/wizard.cpp" line="884"/>
+        <location filename="../src/wizard.cpp" line="907"/>
         <source>No</source>
         <translation>Tidak</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="886"/>
+        <location filename="../src/wizard.cpp" line="885"/>
         <source>Encrypt /data using Geli</source>
         <translation>Mengenkripsi /data dengan Geli</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="887"/>
+        <location filename="../src/wizard.cpp" line="886"/>
         <source>Geli encrypted /data
 </source>
         <translation>/data terenkripsi dengan Geli</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="888"/>
+        <location filename="../src/wizard.cpp" line="887"/>
         <source>NomadBSD allows you to protect your personal files by encrypting the /data partition using geli(8). If you don&apos;t know what geli(8) is, you should skip this page.
 
 </source>
@@ -110,22 +110,22 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="892"/>
+        <location filename="../src/wizard.cpp" line="891"/>
         <source>Define a password required to decrypt /data</source>
         <translation>Masukkan kata kunci untuk membuka /data</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="893"/>
+        <location filename="../src/wizard.cpp" line="892"/>
         <source>Password:</source>
         <translation>Kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="894"/>
+        <location filename="../src/wizard.cpp" line="893"/>
         <source>Repeat password:</source>
         <translation>Ulangi kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="895"/>
+        <location filename="../src/wizard.cpp" line="894"/>
         <source>Passwords do not match</source>
         <translation>Kata kunci tidak cocok</translation>
     </message>
@@ -133,39 +133,39 @@
 <context>
     <name>KbdLayoutPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="249"/>
-        <location filename="../src/wizard.cpp" line="280"/>
+        <location filename="../src/wizard.cpp" line="248"/>
+        <location filename="../src/wizard.cpp" line="279"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="269"/>
-        <location filename="../src/wizard.cpp" line="300"/>
+        <location filename="../src/wizard.cpp" line="268"/>
+        <location filename="../src/wizard.cpp" line="299"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="397"/>
+        <location filename="../src/wizard.cpp" line="396"/>
         <source>Default keyboard layout</source>
         <translation>Tata letak papan ketik standar</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="398"/>
+        <location filename="../src/wizard.cpp" line="397"/>
         <source>Please choose a latin layout as system default here. The next screens allows you to add additional keyboard layouts.</source>
         <translation>Silahkan pilih tata letak latin sebagai standar sistem. Langkah selanjutnya anda dapat menambahkan tata letak papan ketik lain.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="401"/>
+        <location filename="../src/wizard.cpp" line="400"/>
         <source>Keyboard layout</source>
         <translation>Tata letak papan ketik</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="402"/>
+        <location filename="../src/wizard.cpp" line="401"/>
         <source>Keyboard variant</source>
         <translation>Variasi papan ketik</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="403"/>
+        <location filename="../src/wizard.cpp" line="402"/>
         <source>Test your keyboard settings</source>
         <translation>Uji pengaturan papan ketik anda</translation>
     </message>
@@ -173,42 +173,42 @@
 <context>
     <name>LocalePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="166"/>
+        <location filename="../src/wizard.cpp" line="165"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="186"/>
+        <location filename="../src/wizard.cpp" line="185"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="190"/>
+        <location filename="../src/wizard.cpp" line="189"/>
         <source>Please select your language/locale</source>
         <translation>Silahkan pilih bahasa lokal anda</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="211"/>
+        <location filename="../src/wizard.cpp" line="210"/>
         <source>Next</source>
         <translation>Berikutnya</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="212"/>
+        <location filename="../src/wizard.cpp" line="211"/>
         <source>Back</source>
         <translation>Kembali</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="213"/>
+        <location filename="../src/wizard.cpp" line="212"/>
         <source>Commit</source>
         <translation>Simpan</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="214"/>
+        <location filename="../src/wizard.cpp" line="213"/>
         <source>Finish</source>
         <translation>Selesai</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="215"/>
+        <location filename="../src/wizard.cpp" line="214"/>
         <source>Cancel</source>
         <translation>Batal</translation>
     </message>
@@ -216,13 +216,13 @@
 <context>
     <name>PasswordPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="747"/>
+        <location filename="../src/wizard.cpp" line="746"/>
         <source>Set password for user and root
 </source>
         <translation>Tentukan kata kunci untuk pengguna dan root</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="748"/>
+        <location filename="../src/wizard.cpp" line="747"/>
         <source>The password you choose here will be used for your user account (nomad), and for the administration account (root)
 
 </source>
@@ -230,17 +230,17 @@
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="751"/>
+        <location filename="../src/wizard.cpp" line="750"/>
         <source>Password:</source>
         <translation>Kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="752"/>
+        <location filename="../src/wizard.cpp" line="751"/>
         <source>Repeat password:</source>
         <translation>Ulangi kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="753"/>
+        <location filename="../src/wizard.cpp" line="752"/>
         <source>Passwords do not match</source>
         <translation>Kata kunci tidak cocok</translation>
     </message>
@@ -282,43 +282,42 @@
 <context>
     <name>ProgramsPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="966"/>
+        <location filename="../src/wizard.cpp" line="964"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="988"/>
+        <location filename="../src/wizard.cpp" line="986"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1008"/>
+        <location filename="../src/wizard.cpp" line="1006"/>
         <source>Shell</source>
         <translation>Shell</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1008"/>
+        <location filename="../src/wizard.cpp" line="1006"/>
         <source>Editor</source>
         <translation>Editor</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1008"/>
         <source>GUI Editor</source>
-        <translation>Editor GUI</translation>
+        <translation type="vanished">Editor GUI</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1008"/>
+        <location filename="../src/wizard.cpp" line="1006"/>
         <source>File manager</source>
         <translation>Manajer file</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1012"/>
+        <location filename="../src/wizard.cpp" line="1010"/>
         <source>Choose your default applications
 </source>
         <translation>Pilih aplikasi-aplikasi standar anda</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1013"/>
+        <location filename="../src/wizard.cpp" line="1011"/>
         <source>Please choose your preferred shell, editors, and filemanager
 </source>
         <translation>Silahkan pilih shell, editor dan manajer file anda</translation>
@@ -327,17 +326,17 @@
 <context>
     <name>SetupWizard</name>
     <message>
-        <location filename="../src/wizard.cpp" line="77"/>
+        <location filename="../src/wizard.cpp" line="76"/>
         <source>NomadBSD Setup</source>
         <translation>Persiapan NomadBSD</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="100"/>
+        <location filename="../src/wizard.cpp" line="99"/>
         <source>Rebooting. Please wait ...</source>
         <translation>Sedang menyalakan ulang. Silahkan tunggu ...</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="101"/>
+        <location filename="../src/wizard.cpp" line="100"/>
         <source>Rebooting</source>
         <translation>Sedang menyalakan ulang</translation>
     </message>
@@ -402,64 +401,63 @@ Kami mohon maaf atas ketidaknyamanan ini</translation>
 <context>
     <name>SummaryPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="1065"/>
+        <location filename="../src/wizard.cpp" line="1062"/>
         <source>Locale:</source>
         <translation>Bahasa Lokal:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1066"/>
+        <location filename="../src/wizard.cpp" line="1063"/>
         <source>Keyboard layout:</source>
         <translation>Tata letak papan ketik:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1067"/>
+        <location filename="../src/wizard.cpp" line="1064"/>
         <source>Additional keyboard layouts:</source>
         <translation>Tata letak papan ketik lain:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1068"/>
+        <location filename="../src/wizard.cpp" line="1065"/>
         <source>Timezone:</source>
         <translation>Zona waktu:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1072"/>
+        <location filename="../src/wizard.cpp" line="1069"/>
         <source>Encrypt /data:</source>
         <translation>Enkripsi /data:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1070"/>
+        <location filename="../src/wizard.cpp" line="1067"/>
         <source>Encrypt /private:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1074"/>
+        <location filename="../src/wizard.cpp" line="1071"/>
         <source>Shell:</source>
         <translation>Shell:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1075"/>
+        <location filename="../src/wizard.cpp" line="1072"/>
         <source>Editor:</source>
         <translation>Editor:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1076"/>
         <source>GUI editor:</source>
-        <translation>Editor GUI:</translation>
+        <translation type="vanished">Editor GUI:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1077"/>
+        <location filename="../src/wizard.cpp" line="1073"/>
         <source>File manager:</source>
         <translation>Manajer berkas:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1083"/>
+        <location filename="../src/wizard.cpp" line="1079"/>
         <source>Summary
 </source>
         <translation>Ringkasan
 </translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="1084"/>
+        <location filename="../src/wizard.cpp" line="1080"/>
         <source>
 
 If you click &quot;commit&quot;, the changes will be written to your USB flash drive</source>
@@ -471,17 +469,17 @@ Jika anda klik &quot;simpan&quot;, perubahan akan ditulis ke perangkat penyimpan
 <context>
     <name>TimezonePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="667"/>
+        <location filename="../src/wizard.cpp" line="666"/>
         <source>Couldn&apos;t start backend &apos;%1&apos;: %2</source>
         <translation>Tidak dapat memulai layanan &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="687"/>
+        <location filename="../src/wizard.cpp" line="686"/>
         <source>Command &apos;%1&apos; returned with an error.</source>
         <translation>Perintah &apos;%1&apos; kembali dengan eror.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="714"/>
+        <location filename="../src/wizard.cpp" line="713"/>
         <source>Please select your timezone</source>
         <translation>Silahkan pilih zona waktu anda</translation>
     </message>
@@ -489,14 +487,14 @@ Jika anda klik &quot;simpan&quot;, perubahan akan ditulis ke perangkat penyimpan
 <context>
     <name>WelcomePage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="136"/>
+        <location filename="../src/wizard.cpp" line="135"/>
         <source>Welcome to the NomadBSD setup wizard.
 
 </source>
         <translation>Selamat datang di panduan pengaturan NomadBSD.</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="137"/>
+        <location filename="../src/wizard.cpp" line="136"/>
         <source>Before you can use NomadBSD, there are some things that need to be set up.
 
 The setup will only write to the USB flash drive it is currently running from. It will not change your system.</source>
@@ -508,52 +506,52 @@ Pengaturan hanya akan menulis ke perangkat penyimpanan USB yang menjalankan sist
 <context>
     <name>ZFSEncPage</name>
     <message>
-        <location filename="../src/wizard.cpp" line="811"/>
-        <location filename="../src/wizard.cpp" line="833"/>
+        <location filename="../src/wizard.cpp" line="810"/>
+        <location filename="../src/wizard.cpp" line="832"/>
         <source>Yes</source>
         <translation type="unfinished">Ya</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="811"/>
-        <location filename="../src/wizard.cpp" line="833"/>
+        <location filename="../src/wizard.cpp" line="810"/>
+        <location filename="../src/wizard.cpp" line="832"/>
         <source>No</source>
         <translation type="unfinished">Tidak</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="812"/>
+        <location filename="../src/wizard.cpp" line="811"/>
         <source>Use encrypted ZFS dataset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="813"/>
+        <location filename="../src/wizard.cpp" line="812"/>
         <source>Encrypted ZFS dataset for personal files
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="814"/>
+        <location filename="../src/wizard.cpp" line="813"/>
         <source>NomadBSD allows you to protect your personal files by storing user directories under an encrypting ZFS dataset
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="817"/>
+        <location filename="../src/wizard.cpp" line="816"/>
         <source>Define a password required to decrypt /private</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="818"/>
+        <location filename="../src/wizard.cpp" line="817"/>
         <source>Password:</source>
         <translation type="unfinished">Kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="819"/>
+        <location filename="../src/wizard.cpp" line="818"/>
         <source>Repeat password:</source>
         <translation type="unfinished">Ulangi kata kunci:</translation>
     </message>
     <message>
-        <location filename="../src/wizard.cpp" line="820"/>
+        <location filename="../src/wizard.cpp" line="819"/>
         <source>Passwords do not match</source>
         <translation type="unfinished">Kata kunci tidak cocok</translation>
     </message>
