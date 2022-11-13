@@ -16,16 +16,15 @@ Visit http://nomadbsd.org to download the recent image.
 
 ### Requirements for Running NomadBSD
 * A >= 5GB flash drive
-* A (amd64/i386) system with a 1.2GHz CPU and 1G of RAM should be able to run
-NomadBSD decently.
+* A (amd64/i386) system with a 1.2GHz CPU and 1G of RAM (2G when using ZFS)
+should be able to run NomadBSD decently.
 
 ## Building the Image
 ### Requirements for Building the Image
-A recent FreeBSD system with at least 40GB free disk space. The build machine's
-major FreeBSD version must be >= the base system's major version of the image
-you want to build. If you're building the image on a system with ZFS, the build
-might fail due to a problem with the size calculation for the root file system.
-It's best to run a FreeBSD system with UFS in a virtual machine for the build.
+* A recent FreeBSD system with at least 30GB free disk space.
+* The build machine's major FreeBSD version must be >= the base system's
+major version of the image you want to build.
+* A recent ports tree.
 
 ### Cloning the Repository
 ~~~ csh
