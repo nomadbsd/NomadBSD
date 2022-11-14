@@ -833,15 +833,16 @@ destroy_active_mddevs()
 
 build_uzip_image()
 {
+	local mkuzip_extra_flags=""
+	local blksize=$((${FRAGSIZE} * 8))
+	local mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
+	local uzipsz mddev
+
 	if [ -f ${UZIP_IMAGE}.uzip ]; then
 		bail "${UZIP_IMAGE}.uzip already exists"
 	fi
-	if [ -f ${UZIP_IMAGE}.img ]; then
-		bail "${UZIP_IMAGE}.img already exists"
-	fi
-	blksize=$((${FRAGSIZE} * 8))
+	rm -f "${UZIP_IMAGE}.img" > /dev/null 2>&1
 	uzipsz=$(calculate_est_uzip_image_size "${SYSDIR}/usr/local")
-
 	mddev=$(create_mddev ${UZIP_IMAGE}.img ${uzipsz})
 	newfs -O 1 -o space -m 0 -b ${blksize} -f ${FRAGSIZE} \
 	    /dev/${mddev} || bail
@@ -854,14 +855,11 @@ build_uzip_image()
 	_umount "${UZIP_MNT}"
 	destroy_mddev ${mddev}
 	rmdir "${UZIP_MNT}"
-	mversion=$(freebsd-version -u | sed -E 's/^([0-9]+).*/\1/')
-	if [ ${mversion} -ge 13 ]; then
-		mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} -A zstd -C 19 \
-				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
-	else
-		mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} \
-				-o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img
-	fi
+
+	[ ${mversion} -ge 13 ] && mkuzip_extra_flags="-A zstd -C 19"
+	mkuzip -Z -j ${MKUZIP_JOBS} -d -s ${UZIP_CLUSTERSZ} ${mkuzip_extra_flags} \
+		   -o ${UZIP_IMAGE}.uzip ${UZIP_IMAGE}.img || bail "mkuzip failed"
+	rm -f "${UZIP_IMAGE}.img"
 }
 
 copy_system_files_to_dest_dir()
