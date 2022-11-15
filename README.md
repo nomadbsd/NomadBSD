@@ -21,10 +21,11 @@ should be able to run NomadBSD decently.
 
 ## Building the Image
 ### Requirements for Building the Image
-* A recent FreeBSD system with at least 30GB free disk space.
+* A recent FreeBSD system with approx. 30GB free disk space.
 * The build machine's major FreeBSD version must be >= the base system's
 major version of the image you want to build.
 * A recent ports tree.
+* The packages x11-fonts/mkfontscale, and textproc/markdown must be installed.
 
 ### Cloning the Repository
 ~~~ csh
