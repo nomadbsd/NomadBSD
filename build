@@ -498,6 +498,7 @@ post_pkg_config()
 		printf '#!/bin/sh\nexit 1\n' > \
 			"${SYSDIR}"/usr/local/lib/ConsoleKit/scripts/ck-system-$s
 	done
+	patch_networkmgr
 }
 
 #
@@ -519,6 +520,13 @@ delete_unneeded_llvm_files()
 			xargs -I % rm -f "${SYSDIR}/%"
 		tar -C ${SYSDIR} -xf ${tarfile}
 		rm -f ${tarfile}
+	done
+}
+
+patch_networkmgr()
+{
+	for i in $(pwd)/patch/usr/local/share/networkmgr/*.diff; do
+		(cd "${SYSDIR}"/usr/local/share/networkmgr && patch -N < $i)
 	done
 }
 

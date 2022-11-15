@@ -1,0 +1,12 @@
+--- net_api.py.orig	2022-11-15 14:41:38.732091000 +0100
++++ net_api.py	2022-11-15 14:42:40.776470000 +0100
+@@ -304,8 +304,7 @@
+     os.system(f"ifconfig {wificard} ssid '{name}'")
+     sleep(0.5)
+     wpa_supplicant = run(
+-        f'wpa_supplicant -B -i {wificard} -c /etc/wpa_supplicant.conf',
+-        shell=True
++        f'service netif restart {wificard}', shell=True
+     )
+     if wpa_supplicant.returncode != 0:
+         return False
