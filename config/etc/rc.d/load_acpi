@@ -49,14 +49,14 @@ load_rc_config $name
 
 vendors="asus fujitsu hp ibm panasonic sony toshiba wmi"
 
-asus_hids="ATK0100 ASUS010"
-toshiba_hids="TOS6200 TOS6207 TOS6208"
-ibm_hids="IBM0068 LEN0068"
-sony_hids="SNY5001"
-wmi_hids="PNP0C14"
-hp_hids="PNP0C14"
-fujitsu_hids="FUJ02B1"
-panasonic_hids="MAT0019"
+asus_ptrn="(asus|asustek)"
+toshiba_ptrn="(toshiba)"
+ibm_ptrn="(ibm|lenovo)"
+sony_ptrn="(sony)"
+wmi_ptrn="(acer|hewlett-packard)"
+hp_ptrn="(hewlett-packard)"
+fujitsu_ptrn="(fujitsu)"
+panasonic_ptrn="(panasonic)"
 
 asus_kmod="acpi_asus"
 toshiba_kmod="acpi_toshiba"
@@ -83,28 +83,31 @@ match_acpi_video_exclude_patterns()
 	local device="$(kenv smbios.system.product) $(kenv smbios.system.family)"
 	local IFS=$'\n'
 	for p in $(acpi_video_exclude_patterns); do
-		echo ${device} | egrep -q $p && return 0
+		echo ${device} | egrep -iq $p && return 0
 	done
 	return 1
 }
 
+match_system_maker_patterns()
+{
+	local maker="$(kenv smbios.system.maker 2>/dev/null)"
+	[ -z "${maker}" ] && return
+
+	for i in ${vendors}; do
+		eval ptrn=\$${i}_ptrn
+		if (echo ${maker} | grep -Eiqw "${ptrn}"); then
+			eval kmod=\$${i}_kmod
+			kldload -n ${kmod}
+		fi
+	done
+}
+
 load_acpi_start()
 {
-	config=$(devinfo -rv)
-	found=0
-	for i in ${vendors}; do
-		[ ${found} -gt 0 ] && break
-		eval hids=\$${i}_hids
-		for j in ${hids}; do
-			if echo "${config}" | grep -q -i _HID=${j}; then
-				eval kmod=\$${i}_kmod
-				kldload ${kmod}
-				found=1; break
-			fi
-		done
-	done
+	match_system_maker_patterns
+
 	if ! match_acpi_video_exclude_patterns; then
-		kldload acpi_video
+		kldload -n acpi_video
 	fi
 }
 
