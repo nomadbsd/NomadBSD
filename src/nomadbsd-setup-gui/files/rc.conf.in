@@ -33,4 +33,5 @@ avahi_daemon_enable="YES"
 ipv6_activate_all_interfaces="YES"
 ackfwl_enable="YES"
 load_iichid_enable="YES"
-
+if_re_load="YES"
+if_re_name="/boot/modules/if_re.ko"

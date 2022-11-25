@@ -51,6 +51,7 @@ net-mgmt/networkmgr
 net-p2p/transmission-qt
 net/avahi-app
 net/mosh
+net/realtek-re-kmod
 polish/aspell
 polish/hunspell
 ports-mgmt/octopkg
