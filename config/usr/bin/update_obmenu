@@ -191,6 +191,23 @@ my %trtbl_ru = (
 	'Update menu' => 'Обновить меню'
 );
 
+my %trtbl_tr = (
+	'AudioVideo'  => 'Ses/videosu',
+	'Audio'       => 'Ses',
+	'Video'       => 'Video',
+	'Development' => 'Gelişim',
+	'Education'   => 'Eğitim',
+	'Game'        => 'oyun',
+	'Graphics'    => 'Grafik',
+	'Network'     => 'Ağ',
+	'Office'      => 'Ofis',
+	'Settings'    => 'Ayarlar',
+	'System'      => 'sistem',
+	'Utility'     => 'Yarar',
+	'Application' => 'Başvuru',
+	'Update menu' => 'Güncelleme menüsü'
+);
+
 my %trtbl_zh = (
 	'AudioVideo'  => '音頻視頻',
 	'Audio'       => '音頻',
@@ -253,6 +270,7 @@ my %trtbl = (
 	jp => \%trtbl_jp,
 	pt => \%trtbl_pt,
 	ru => \%trtbl_ru,
+	tr => \%trtbl_tr,
 	zh => \%trtbl_zh
 );
 
