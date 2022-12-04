@@ -9,7 +9,7 @@
 NomadBSD is a persistent live system for flash drives, based on FreeBSD.
 
 ## Screenshots
-![](http://nomadbsd.org/screenshots/nomadbsd-1.3-RC1-ss1.png)
+![](http://nomadbsd.org/screenshots/nomadbsd-131R-20221130.png)
 
 ## Ready to use Image
 Visit http://nomadbsd.org to download the recent image.
