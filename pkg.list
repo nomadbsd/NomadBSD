@@ -43,6 +43,7 @@ mail/thunderbird
 math/galculator
 misc/mc
 misc/qt5ct
+misc/utouch-kmod
 multimedia/simplescreenrecorder
 multimedia/vlc
 multimedia/x264
@@ -100,6 +101,7 @@ vietnamese/hunspell
 www/firefox-esr
 www/lynx
 x11-drivers/xf86-input-libinput
+x11-drivers/xf86-input-evdev
 x11-drivers/xf86-video-ati
 x11-drivers/xf86-video-intel
 x11-drivers/xf86-video-nv
