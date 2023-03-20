@@ -1,5 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=picom -b
-Hidden=false
-Terminal=false
