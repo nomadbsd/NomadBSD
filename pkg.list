@@ -72,6 +72,7 @@ shells/bash
 shells/fish
 shells/zsh
 sysutils/bsdstats
+sysutils/catfish
 sysutils/ddrescue
 sysutils/dsbbatmon
 sysutils/dsbdriverd
