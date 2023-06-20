@@ -528,6 +528,9 @@ patch_networkmgr()
 	for i in $(pwd)/patch/usr/local/share/networkmgr/*.diff; do
 		(cd "${SYSDIR}"/usr/local/share/networkmgr && patch -N < $i)
 	done
+	# Prevent execution of networkmgr's setup-nic script.
+	sed -i '' -E 's/^[::space::]*(.*action.*setup-nic.*)/#\1/g' \
+		"${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
 }
 
 #
