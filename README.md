@@ -28,7 +28,7 @@ Experience the power and flexibility of FreeBSD on your portable drive today. Vi
 To fully harness the potential of NomadBSD, ensure your hardware meets these prerequisites:
 
 - A flash drive with a minimum of 5GB of storage.
-- A system equipped with an AMD64 or I386 architecture, boasting at least a 1.2GHz CPU and 1GB of RAM (or 2GB when utilizing ZFS). These specifications are designed to provide a seamless NomadBSD experience.
+- A system equipped with an AMD64 or I386 architecture, boasting at least a 1.2GHz CPU and 1GB of RAM (or 2GB when utilizing ZFS).
 
 ## Building Your Custom Image
 
