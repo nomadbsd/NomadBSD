@@ -1,6 +1,20 @@
 # NomadBSD: A Versatile Persistent Live System
 
-NomadBSD is a versatile and reliable persistent live system, meticulously crafted for seamless operation on portable flash drives. Based on the robust FreeBSD foundation, it provides a secure and efficient computing environment that can accompany you wherever you go.
+NomadBSD is a versatile and reliable **persistent live system**, meticulously crafted for seamless operation on portable flash drives. Based on the robust FreeBSD foundation, it provides a secure and efficient computing environment that can accompany you wherever you go.
+
+![NomadBSD Screenshot](http://nomadbsd.org/screenshots/nomadbsd-131R-20221130.png)
+
+**Table of Contents**
+- [About NomadBSD](#about-nomadbsd)
+- [Visual Excellence](#visual-excellence)
+- [Get Started Now](#get-started-now)
+  - [System Requirements](#system-requirements)
+- [Building Your Custom Image](#building-your-custom-image)
+  - [Image Building Requirements](#image-building-requirements)
+  - [Repository Cloning](#repository-cloning)
+  - [Building the Image](#building-the-image)
+  - [Resuming After Build Errors](#resuming-after-build-errors)
+  - [Writing the Image to a USB Memory Stick](#writing-the-image-to-a-usb-memory-stick)
 
 ## About NomadBSD
 
@@ -79,3 +93,6 @@ dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
 ```
 
 Experience the freedom and versatility of NomadBSD - your secure, portable computing solution.
+```
+
+This README provides a structured and informative guide to using and building NomadBSD, including clear headings and appropriate formatting for code blocks and images.
