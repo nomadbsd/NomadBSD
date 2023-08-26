@@ -91,8 +91,3 @@ To write the NomadBSD image to a USB memory stick, utilize the following command
 ```shell
 dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
 ```
-
-Experience the freedom and versatility of NomadBSD - your secure, portable computing solution.
-```
-
-This README provides a structured and informative guide to using and building NomadBSD, including clear headings and appropriate formatting for code blocks and images.
