@@ -6,7 +6,6 @@ NomadBSD is a versatile and reliable **persistent live system**, meticulously cr
 
 **Table of Contents**
 - [About NomadBSD](#about-nomadbsd)
-- [Visual Excellence](#visual-excellence)
 - [Get Started Now](#get-started-now)
   - [System Requirements](#system-requirements)
 - [Building Your Custom Image](#building-your-custom-image)
@@ -19,14 +18,6 @@ NomadBSD is a versatile and reliable **persistent live system**, meticulously cr
 ## About NomadBSD
 
 NomadBSD offers a customizable computing experience, making it an ideal choice for individuals who require both their operating system and data on the move. This project is deeply rooted in the FreeBSD operating system, enhanced with additional stability and performance enhancements.
-
-## Visual Excellence
-
-Explore the elegance of NomadBSD with a glance at our visually stunning interface:
-
-![NomadBSD Screenshot](http://nomadbsd.org/screenshots/nomadbsd-131R-20221130.png)
-
-Discover the rich features and capabilities that NomadBSD has to offer!
 
 ## Get Started Now
 
