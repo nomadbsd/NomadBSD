@@ -1,69 +1,81 @@
-# NomadBSD
+# NomadBSD: A Versatile Persistent Live System
 
-<p align="center">
-<img src="../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-bright-128x128.png#gh-dark-mode-only"></img>
-<img src="../../../../nomadbsd/artwork/blob/main/logo/nomadbsd-logo-dark-128x128.png#gh-light-mode-only"></img>
-</p>
+NomadBSD is a versatile and reliable persistent live system, meticulously crafted for seamless operation on portable flash drives. Based on the robust FreeBSD foundation, it provides a secure and efficient computing environment that can accompany you wherever you go.
 
-## About
-NomadBSD is a persistent live system for flash drives, based on FreeBSD.
+## About NomadBSD
 
-## Screenshots
-![](http://nomadbsd.org/screenshots/nomadbsd-131R-20221130.png)
+NomadBSD offers a customizable computing experience, making it an ideal choice for individuals who require both their operating system and data on the move. This project is deeply rooted in the FreeBSD operating system, enhanced with additional stability and performance enhancements.
 
-## Ready to use Image
-Visit http://nomadbsd.org to download the recent image.
+## Visual Excellence
 
-### Requirements for Running NomadBSD
-* A >= 5GB flash drive
-* A (amd64/i386) system with a 1.2GHz CPU and 1G of RAM (2G when using ZFS)
-should be able to run NomadBSD decently.
+Explore the elegance of NomadBSD with a glance at our visually stunning interface:
 
-## Building the Image
-### Requirements for Building the Image
-* A recent FreeBSD system with approx. 30GB free disk space.
-* The build machine's major FreeBSD version must be >= the base system's
-major version of the image you want to build.
-* A recent ports tree.
-* The packages x11-fonts/mkfontscale, and textproc/markdown must be installed.
+![NomadBSD Screenshot](http://nomadbsd.org/screenshots/nomadbsd-131R-20221130.png)
 
-### Cloning the Repository
-~~~ csh
-% git clone --recursive https://github.com/nomadbsd/NomadBSD.git
-~~~
+Discover the rich features and capabilities that NomadBSD has to offer!
+
+## Get Started Now
+
+Experience the power and flexibility of FreeBSD on your portable drive today. Visit the [NomadBSD website](http://nomadbsd.org) to download the latest image.
+
+### System Requirements
+
+To fully harness the potential of NomadBSD, ensure your hardware meets these prerequisites:
+
+- A flash drive with a minimum of 5GB of storage.
+- A system equipped with an AMD64 or I386 architecture, boasting at least a 1.2GHz CPU and 1GB of RAM (or 2GB when utilizing ZFS). These specifications are designed to provide a seamless NomadBSD experience.
+
+## Building Your Custom Image
+
+If you're interested in creating your personalized NomadBSD image, follow these steps:
+
+### Image Building Requirements
+
+To build a NomadBSD image, you'll need:
+
+- A recent FreeBSD system with approximately 30GB of available disk space.
+- The major version of your FreeBSD system should be equal to or greater than the base system's major version of the image you intend to build.
+- A recent ports tree.
+- Ensure the following packages are installed: `x11-fonts/mkfontscale` and `textproc/markdown`.
+
+### Repository Cloning
+
+Recursively clone the NomadBSD repository with the following command:
+
+```shell
+git clone --recursive https://github.com/nomadbsd/NomadBSD.git
+```
 
 ### Building the Image
-#### Preparation
-If your copy of the NomadBSD repository is not owned by the root user, run
 
-~~~ csh
-# git config --global --add safe.directory /full/path/to/NomadBSD
-~~~
+Before proceeding, make sure your NomadBSD repository copy is owned by the root user. If not, run the following command as root:
 
-as root before the first build. Otherwise the build script can't correctly
-generate the image name.
+```shell
+git config --global --add safe.directory /full/path/to/NomadBSD
+```
 
-#### Building
-By default, the build script builds a 64-bit (amd64) image. For a 32-bit (i386)
-image, or a Mac image set `ARCH=i386` or `ARCH=mac` accordingly in `build.cfg`.
-ARCH can also be defined via the `-a` option.
+This step is critical for generating the image name correctly.
 
-NomadBSD can be build with UFS (default), and ZFS as file system. The file
-system can be defined via `FILESYSTEM` in `build.cfg`, or via the `-f`
-option.
+To initiate the image building process, run the following command. By default, it builds a 64-bit (amd64) image. To create a 32-bit (i386) image or a Mac image, set `ARCH=i386` or `ARCH=mac` accordingly in `build.cfg`. You can also define ARCH via the `-a` option. NomadBSD can be built with UFS (default) or ZFS as the file system. Define the file system via `FILESYSTEM` in `build.cfg` or the `-f` option.
 
-~~~ csh
-# ./build all
-~~~
+```shell
+./build all
+```
 
-#### Resuming from Build Errors
-If something went wrong, you can resume the build after locating and fixing
-the problem that caused the build to stop.
-~~~ csh
-# ./build resume
-~~~
+### Resuming After Build Errors
 
-### Writing the image to a USB memory stick
-~~~ csh
-# dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
-~~~
+In case of build errors, you can resume the process after identifying and rectifying the issue that caused the build to halt:
+
+```shell
+./build resume
+```
+
+### Writing the Image to a USB Memory Stick
+
+To write the NomadBSD image to a USB memory stick, utilize the following command:
+
+```shell
+dd if=nomadbsd.img of=/dev/da0 bs=1M conv=sync
+```
+
+Experience the freedom and versatility of NomadBSD - your secure, portable computing solution.
