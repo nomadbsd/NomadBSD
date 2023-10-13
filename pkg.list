@@ -48,7 +48,7 @@ multimedia/vlc
 multimedia/x264
 net-im/pidgin
 net-mgmt/networkmgr
-net-p2p/transmission-qt
+net-p2p/transmission
 net/avahi-app
 net/mosh
 net/realtek-re-kmod
@@ -119,7 +119,8 @@ x11-fonts/font-gost
 x11-fonts/freefont-ttf
 x11-fonts/hanazono-fonts-ttf
 x11-fonts/noto-emoji
-x11-fonts/sourcecodepro-ttf
+x11-fonts/source-code-pro-ttf
+x11-drivers/xf86-video-amdgpu
 x11-fonts/terminus-font
 x11-fonts/twemoji-color-font-ttf
 x11-fonts/urwfonts
