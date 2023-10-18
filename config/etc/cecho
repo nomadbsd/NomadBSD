@@ -1,0 +1,15 @@
+__tput() {
+	return
+}
+
+if [ ! -x /usr/bin/tput ]; then
+	alias tput=__tput
+fi
+
+__echo() {
+	tput -T xterm AF 2 >/dev/tty
+	\echo $@
+	tput -T xterm me >/dev/tty
+}
+
+alias echo=__echo

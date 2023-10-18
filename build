@@ -225,6 +225,7 @@ write_config_files()
 	write_loader_conf "${_DESTDIR}/boot/loader.conf"
 	write_fstab "${_DESTDIR}/etc/fstab"
 	write_rc_conf "${_DESTDIR}/etc/rc.conf"
+	write_rc_subr "${_DESTDIR}/etc/rc.subr"
 }
 
 write_fstab()
@@ -262,6 +263,20 @@ write_rc_conf()
 	local rc_conf=$1
 	cp config/etc/rc.conf "${rc_conf}" || bail
 	[ ${FILESYSTEM} = "ZFS" ] && sysrc -f ${rc_conf} zfs_enable=YES
+}
+
+write_rc_subr()
+{
+	local rc_subr=$1
+	# Include /etc/cecho in /etc/rc.subr for `echo´ with colors
+	awk '{
+		if (included)
+			print $0;
+		else if (/^$/) {
+			print ". /etc/cecho"; included = 1
+		} else
+			print $0
+	}' < "${SYSDIR}"/etc/rc.subr > "${rc_subr}"
 }
 
 init_base()
