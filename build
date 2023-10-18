@@ -208,6 +208,10 @@ is_mounted()
 
 install_user_config()
 {
+	if [ -d "${SYSDIR}/home" ]; then
+		mv "${SYSDIR}/home" "${SYSDIR}/usr/home" || \
+			bail "Failed to move home dir"
+	fi
 	(cd nomad  && tar cf - .) | (cd "${SYSDIR}/usr/home/nomad" && tar xf -)
 	chroot "${SYSDIR}" sh -c 'chown -R nomad:nomad /usr/home/nomad'
 }
@@ -1187,8 +1191,8 @@ bail()
 
 clean_home_directory()
 {
-	rm -rf "${SYSDIR}/home/nomad/"*
-	rm -rf "${SYSDIR}/home/nomad/".* 2>/dev/null
+	rm -rf "${SYSDIR}/usr/home/nomad/"*
+	rm -rf "${SYSDIR}/usr/home/nomad/".* 2>/dev/null
 }
 
 clean_sysdir()
