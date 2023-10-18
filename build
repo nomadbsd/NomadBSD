@@ -520,7 +520,7 @@ delete_unneeded_llvm_files()
 	for lib in ${llvm_libs}; do
 		local pkg=$(pkg -c ${SYSDIR} shlib -q --provides ${lib})
 		local paths=$(pkg -c ${SYSDIR} info -q --list-files ${pkg} | grep ${lib})
-		tar -C ${SYSDIR} -rf ${tarfile} ${paths}
+		tar -C ${SYSDIR} -rf ${tarfile} ".${paths}"
 		pkg -c ${SYSDIR} info -q --list-files ${pkg} | \
 			xargs -I % rm -f "${SYSDIR}/%"
 		tar -C ${SYSDIR} -xf ${tarfile}
