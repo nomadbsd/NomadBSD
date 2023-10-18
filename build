@@ -274,6 +274,7 @@ init_base()
 		    -G wheel,operator,video,games -s /bin/csh; \
 			pw usermod nomad -c Nomad'
 	fi
+	chroot "${SYSDIR}" pw usermod root -s /bin/csh
 	(cd config && tar cf - .) | \
 	    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
 	chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
