@@ -36,7 +36,7 @@ pkgs        Install all packages from pkg.list
 
 ports       Build and install all ports defined in build.cfg
 
-reset		Build and install nomadbsd-reset
+reset       Build and install nomadbsd-reset
 
 resume      Continue where the build failed. Use this to resume from a failed
             "build all", after removing the error source(s).

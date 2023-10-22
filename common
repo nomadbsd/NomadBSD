@@ -28,55 +28,55 @@
 
 cecho()
 {
-	local ansi_str ansi_reset=$'\e[0m'
+  local ansi_str ansi_reset=$'\e[0m'
 
-	while [ $# -gt 0 ]; do
-		case "$1" in
-		-c)
-			shift
-			local color=$1
-			for c in black.0 red.1 green.2 yellow.3 \
-			         blue.4 magenta.5 cyan.6 white.7; do
-				if [ ${c%%.*} = ${color} ]; then
-					local color_code=${c##*.}
-					ansi_str=${ansi_str}$'\e['3${color_code}m
-					break
-				fi
-			done
-			;;
-		-b)
-			# Bold
-			ansi_str=${ansi_str}$'\e[1m'
-			;;
-		-*)
-			echo "Invalid option '$1'" >&2
-			;;
-		*)
-			break
-			;;
-		esac
-		shift
-	done
-	if [ ! -t 1 ]; then
-		ansi_str=""
-		ansi_reset=""
-	fi
-	echo ${ansi_str}$*${ansi_reset}
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -c)
+      shift
+      local color=$1
+      for c in black.0 red.1 green.2 yellow.3 \
+               blue.4 magenta.5 cyan.6 white.7; do
+        if [ ${c%%.*} = ${color} ]; then
+          local color_code=${c##*.}
+          ansi_str=${ansi_str}$'\e['3${color_code}m
+          break
+        fi
+      done
+      ;;
+    -b)
+      # Bold
+      ansi_str=${ansi_str}$'\e[1m'
+      ;;
+    -*)
+      echo "Invalid option '$1'" >&2
+      ;;
+    *)
+      break
+      ;;
+    esac
+    shift
+  done
+  if [ ! -t 1 ]; then
+    ansi_str=""
+    ansi_reset=""
+  fi
+  echo ${ansi_str}$*${ansi_reset}
 }
 
 printwarn()
 {
-	[ $# -gt 0 ] && cecho -c yellow -b "Warning:" $* >&2
+  [ $# -gt 0 ] && cecho -c yellow -b "Warning:" $* >&2
 }
 
 printerr()
 {
-	[ $# -gt 0 ] && cecho -c red -b "Error:" $* >&2
+  [ $# -gt 0 ] && cecho -c red -b "Error:" $* >&2
 }
 
 printmsg()
 {
-	[ $# -gt 0 ] && cecho -c cyan -b $* >&2
+  [ $# -gt 0 ] && cecho -c cyan -b $* >&2
 }
 
 #
@@ -84,10 +84,10 @@ printmsg()
 #
 get_version()
 {
-	cid=$(git log --oneline | cut -f1 -d' ' | head -1)
-	version=$(git tag --contains "${cid}" | head -1)
-	[ -z "${version}" ] && version="${cid}"
-	echo "${version}"
+  cid=$(git log --oneline | cut -f1 -d' ' | head -1)
+  version=$(git tag --contains "${cid}" | head -1)
+  [ -z "${version}" ] && version="${cid}"
+  echo "${version}"
 }
 
 #
@@ -95,36 +95,36 @@ get_version()
 #
 get_baseversion()
 {
-	echo ${RELEASE} | tr -d '.' | awk -F'[-]+' '{
-		v = $1
-		if ($2 == "RELEASE") s = "R"
-		else if ($2 == "CURRENT") s = "C"
-		else if ($2 == "STABLE") s = "S"
-		else if ($2 ~ /BETA/) {
-			n = substr($2, 5);
-			s = sprintf("B%d", n)
-		} else if ($2 ~ /ALPHA/) {
-			n = substr($2, 6);
-			s = sprintf("A%d", n);
-		} else s = $2
-		p = ""
-		if (NF >= 3)
-			p = $3
-		printf("%d%s%s", v, s, p);
-	}'
+  echo ${RELEASE} | tr -d '.' | awk -F'[-]+' '{
+    v = $1
+    if ($2 == "RELEASE") s = "R"
+    else if ($2 == "CURRENT") s = "C"
+    else if ($2 == "STABLE") s = "S"
+    else if ($2 ~ /BETA/) {
+      n = substr($2, 5);
+      s = sprintf("B%d", n)
+    } else if ($2 ~ /ALPHA/) {
+      n = substr($2, 6);
+      s = sprintf("A%d", n);
+    } else s = $2
+    p = ""
+    if (NF >= 3)
+      p = $3
+    printf("%d%s%s", v, s, p);
+  }'
 }
 
 #
 # Creates an image name of the form
-#	nomadbsd-<base version>-<git tag/ID>.<arch>.img
+# nomadbsd-<base version>-<git tag/ID>.<arch>.img
 #
 imagename()
 {
-	local arch=$1 filesystem=$2
-	local version=$(get_version)
-	local baseversion=$(get_baseversion)
-	local fs=$(echo ${filesystem} | tr '[A-Z]' '[a-z]')
-	local image="nomadbsd"
-	image="nomadbsd-${baseversion}-${version}"
-	echo "${image}.${arch}.${fs}.img"
+  local arch=$1 filesystem=$2
+  local version=$(get_version)
+  local baseversion=$(get_baseversion)
+  local fs=$(echo ${filesystem} | tr '[A-Z]' '[a-z]')
+  local image="nomadbsd"
+  image="nomadbsd-${baseversion}-${version}"
+  echo "${image}.${arch}.${fs}.img"
 }
