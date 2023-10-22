@@ -85,9 +85,7 @@ printmsg()
 get_version()
 {
 	cid=$(git log --oneline | cut -f1 -d' ' | head -1)
-	version=$(git describe --all --exact-match "${cid}" 2>/dev/null)
-	# Remove possible tags/-prefix
-	version="${version##*/}"
+	version=$(git tag --contains "${cid}" | head -1)
 	[ -z "${version}" ] && version="${cid}"
 	echo "${version}"
 }
