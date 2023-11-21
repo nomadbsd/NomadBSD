@@ -132,7 +132,6 @@ x11-fonts/xorg-fonts
 x11-themes/Kvantum
 x11-themes/lxappearance
 x11-themes/papirus-icon-theme
-x11-wm/obconf
 x11-wm/openbox
 x11-wm/picom
 x11/arandr
