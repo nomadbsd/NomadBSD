@@ -413,17 +413,14 @@ build_nvidia_drivers()
   done
 }
 
+pkg_filter() {
+  local exlst=PKG_EXCLUDE_${ARCH}
+  (while read x; do echo $x; done; ${exlst} 2>/dev/null) | sort -n | uniq -u
+}
+
 pkglist()
 {
-  if [ ${ARCH} = "i386" ]; then
-    awk '
-      !/virtualbox-ose-additions/ {
-        print $0
-      }
-    ' < ${PKGLIST}
-  else
-    cat ${PKGLIST}
-  fi
+  cat ${PKGLIST} | pkg_filter
 }
 
 install_packages()
