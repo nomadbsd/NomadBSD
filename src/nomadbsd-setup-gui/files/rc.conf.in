@@ -1,4 +1,5 @@
 allscreens_flags="green"
+devd_flags="-l 50"
 bsdstats_enable="NO"
 clear_tmp_X="NO"
 cupsd_enable="YES"
