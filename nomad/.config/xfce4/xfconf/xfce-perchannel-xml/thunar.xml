@@ -6,4 +6,9 @@
   <property name="misc-single-click" type="bool" value="false"/>
   <property name="misc-volume-management" type="bool" value="false"/>
   <property name="shortcuts-icon-size" type="string" value="THUNAR_ICON_SIZE_32"/>
+  <property name="last-window-width" type="int" value="818"/>
+  <property name="last-window-height" type="int" value="588"/>
+  <property name="last-window-maximized" type="bool" value="false"/>
+  <property name="last-separator-position" type="int" value="170"/>
+  <property name="last-show-hidden" type="bool" value="false"/>
 </channel>

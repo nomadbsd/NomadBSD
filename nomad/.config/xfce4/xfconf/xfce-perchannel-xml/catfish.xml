@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="catfish" version="1.0">
+  <property name="show-hidden-files" type="bool" value="false"/>
+  <property name="show-sidebar" type="bool" value="true"/>
+  <property name="list-toggle" type="bool" value="true"/>
+  <property name="show-thumbnails" type="bool" value="false"/>
+  <property name="search-file-contents" type="bool" value="false"/>
+  <property name="match-results-exactly" type="bool" value="false"/>
+  <property name="close-after-select" type="bool" value="false"/>
+  <property name="search-compressed-files" type="bool" value="false"/>
+  <property name="file-size-binary" type="bool" value="true"/>
+  <property name="window-width" type="int" value="700"/>
+  <property name="window-height" type="int" value="540"/>
+  <property name="window-x" type="int" value="389"/>
+  <property name="window-y" type="int" value="183"/>
+  <property name="exclude-paths" type="string" value="/dev;~/.cache;~/.gvfs;"/>
+</channel>
