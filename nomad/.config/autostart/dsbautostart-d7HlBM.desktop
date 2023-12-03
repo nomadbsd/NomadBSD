@@ -1,5 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=redshift -l$(getlalo)
-Hidden=false
-Terminal=false

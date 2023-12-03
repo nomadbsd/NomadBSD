@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=DSBMixer
+Exec=dbus-launch dsbmixer -i
+Icon=audio-volume-high
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=Audio;AudioVideo;Mixer;
+

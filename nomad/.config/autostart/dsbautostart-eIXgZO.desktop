@@ -1,5 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=daemon -f update_obmenu -a -p 5
-Hidden=false
-Terminal=false

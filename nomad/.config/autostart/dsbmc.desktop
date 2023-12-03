@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DSBMC
+Exec=dsbmc -i
+Icon=drive-removable-media-usb-pendrive
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=System;
+MimeType=application/x-cd-image;application/x-raw-disk-image;
+
