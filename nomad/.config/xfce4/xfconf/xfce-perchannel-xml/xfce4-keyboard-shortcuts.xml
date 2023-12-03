@@ -4,9 +4,9 @@
   <property name="commands" type="empty">
     <property name="default" type="empty">
       <property name="&lt;Alt&gt;F1" type="empty"/>
-      <property name="&lt;Alt&gt;F2" type="empty">
         <property name="startup-notify" type="empty"/>
       </property>
+      <property name="&lt;Alt&gt;F2" type="string" value="dsbexec"/>
       <property name="&lt;Alt&gt;F3" type="empty">
         <property name="startup-notify" type="empty"/>
       </property>
@@ -19,7 +19,7 @@
       <property name="XF86WWW" type="empty"/>
       <property name="HomePage" type="empty"/>
       <property name="XF86Mail" type="empty"/>
-      <property name="Print" type="empty"/>
+      <property name="Print" type="string" values="xfce4-screenshooter"/>
       <property name="&lt;Alt&gt;Print" type="empty"/>
       <property name="&lt;Shift&gt;Print" type="empty"/>
       <property name="&lt;Super&gt;e" type="empty"/>
