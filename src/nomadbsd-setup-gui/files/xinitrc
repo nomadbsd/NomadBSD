@@ -25,5 +25,5 @@ xrdb /usr/share/nomadbsd-setup/Xresources
 /usr/bin/enable_tapping
 
 /usr/bin/nomadbsd-setup-gui&
-exec openbox-session
+exec xfwm4
 

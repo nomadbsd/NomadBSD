@@ -62,7 +62,6 @@ static QString cfg_timezone;
 static QString cfg_shell;
 static QString cfg_password;
 static QString cfg_editor;
-static QString cfg_file_manager;
 static QStringList cfg_xkbdlayouts;
 static QStringList cfg_xkbdvariants;
 static QStringList cfg_xkbdconfigdescr;
@@ -934,9 +933,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 		QComboBox  **box;
 	} apps[ncats] = {
 		{ BACKEND_GET_SHELLS,	    &cfg_shell,        &shells       },
-		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      },
-		{ BACKEND_GET_FILEMANAGERS, &cfg_file_manager, &fileManagers }
-
+		{ BACKEND_GET_EDITORS,      &cfg_editor,       &editors      }
 	};
 	layout->setSpacing(10);
 	layout->addWidget(title);
@@ -1003,13 +1000,12 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 void ProgramsPage::initializePage()
 {
 	QString label[ncats] = {
-		tr("Shell"), tr("Editor"), tr("File manager")
+		tr("Shell"), tr("Editor")
 	};
 	for (int n = 0; n < ncats; n++)
 		catLabel[n]->setText(label[n]);
 	title->setText(tr("Choose your default applications\n"));
-	intro->setText(tr("Please choose your preferred shell, editors, " \
-			  "and filemanager\n"));
+	intro->setText(tr("Please choose your preferred shell and editor\n"));
 }
 
 QString ProgramsPage::getBoxVal(QComboBox *box)
@@ -1021,7 +1017,6 @@ void ProgramsPage::selectionChanged(int /* unused */)
 {
 	cfg_shell	 = getBoxVal(shells);
 	cfg_editor	 = getBoxVal(editors);
-	cfg_file_manager = getBoxVal(fileManagers);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1069,8 +1064,7 @@ void SummaryPage::initializePage()
 		{ tr("Encrypt /data:"),			cfg_geli	   },
 #endif
 		{ tr("Shell:"),				cfg_shell	   },
-		{ tr("Editor:"),			cfg_editor	   },
-		{ tr("File manager:"),			cfg_file_manager   }
+		{ tr("Editor:"),			cfg_editor	   }
 	};
 	for (int n = 0; n < nkeys; n++) {
 		key[n]->setText(summary[n].key);
@@ -1129,7 +1123,6 @@ void CommitPage::initializePage()
 #endif
 		{ "cfg_shell",		cfg_shell	  },
 		{ "cfg_editor",		cfg_editor	  },
-		{ "cfg_file_manager",	cfg_file_manager  },
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);

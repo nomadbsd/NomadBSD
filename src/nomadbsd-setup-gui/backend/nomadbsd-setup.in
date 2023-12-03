@@ -66,15 +66,6 @@ my $cfg_editor;
 my @cfg_xkbdlayouts;
 our $cfg_enc_password;
 
-##############################################################################
-# This section is for defining data.
-#
-# 
-my @file_manager_list = (
-	'thunar		Xfce file manager',
-	'pcmanfm	PCMan file manager'
-);
-
 my @shell_list = (
 	'fish		The friendly interactive shell',
 	'zsh		The Z shell',
@@ -594,7 +585,6 @@ sub desktopsettings {
 	my $usrappsdir	= "/home/nomad/.local/share/applications";
 	my $mimelist	= "/home/nomad/.config/mimeapps.list";
 	my $dsbmc_cfg	= "/home/nomad/.config/DSB/dsbmc/config";
-	my $xinitrc		= "/home/nomad/.xinitrc";
 	my $plank_ini	= "/home/nomad/.config/plank.ini";
 	my $plank_launcher_dir	= "/home/nomad/.config/plank/dock1/launchers";
 	my $logincfg_rec = "me:\\\n\t:setenv=EDITOR=$cfg_editor:";
@@ -602,28 +592,15 @@ sub desktopsettings {
 	my $path_setxkbmap_sh = "/usr/local/etc/setxkbmap.sh";
 
 	my @apps = (
-		'home', 'sakura', 'firefox', 'thunderbird',
+		'sakura', 'firefox', 'thunderbird',
 		'libreoffice-startcenter', 'galculator', 'geany',
-		'vlc', 'gimp', 'octopkg', 'nomadbsd-handbook', 'leave'
+		'vlc', 'gimp', 'octopkg', 'nomadbsd-handbook'
 	);
 	foreach (qw(/root/.login_conf /home/nomad/.login_conf)) {
 		open(my $fh, ">>$_") or bail("Couldn't open $_");
 		print $fh $logincfg_rec;
 		close($fh);
 	}
-	open(my $fh, $xinitrc) or bail("Couldn't open $xinitrc");
-	my @xinit = <$fh>;
-	close($fh);
-	open(my $fh, ">$xinitrc") or bail("Couldn't open $xinitrc");
-	foreach (@xinit) {
-		if (/#!/) {
-			print $fh "$_";
-			print $fh "export EDITOR=$cfg_editor\n";
-		} else {
-			print $fh "$_";
-		}
-	}
-	close($fh);
 
 	# Create "plank" dock items for filemanager, gimp, vlc, terminal, etc.
 	system("mkdir -p ${plank_launcher_dir} >/dev/null 2>&1");
@@ -649,29 +626,10 @@ sub desktopsettings {
 	print $fh "dock-items=[$items]\n";
 	close($fh);
 	system("sed -i .bak -E 's/BROWSER/firefox.desktop/g' ${mimelist}");
-	system("sed -i .bak -E 's/FILEMANAGER/$cfg_fm.desktop/g' ${mimelist}");
+	system("sed -i .bak -E 's/FILEMANAGER/thunar.desktop/g' ${mimelist}");
 	system("sed -i .bak -E 's/EMAILCLIENT/thunderbird.desktop/g' " .
 		   "${mimelist}");
 	system("rm -f ${mimelist}.bak 2>/dev/null");
-
-	# Update Openbox menu
-	system("su -l nomad -c '/usr/bin/update_obmenu -u'");
-	
-	# Create localized XDG standard dirs.
-	system("su -l nomad -c '/usr/local/bin/xdg-user-dirs-update'");
-	
-	# Create dconf file from plank.ini
-	#system("su -l nomad -c \"dbus-launch --exit-with-session sh -c \"" .
-	#	   "cat ${plank_ini} | dconf load /net/launchpad/plank/docks/\"");
-	open(my $fh, ">$path_xkbdmap") or bail("Couldn't create $path_xkbdmap");
-	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
-	close($fh);
-	chmod(0744, $path_xkbdmap);
-
-	open(my $fh, ">>$path_setxkbmap_sh")
-		or bail("Couldn't create $path_setxkbmap_sh");
-	print $fh qq(setxkbmap -rules evdev -layout \"$xlayoutstr\" -variant \"$xvariantstr\");
-	close($fh);
 
 	configure_ibus();
 	# Make nomad the owner of all the files under /home/nomad
@@ -807,7 +765,6 @@ sub commit {
 		select $ofh;
 		chomp;
 		$cfg_locale		   = $1 if (/^cfg_locale\s*=\s*(.*)/);
-		$cfg_fm		   	   = $1 if (/^cfg_file_manager\s*=\s*(.*)/);
 		$cfg_timezone	   = $1 if (/^cfg_timezone\s*=\s*(.*)/);
 		$cfg_shell		   = $1 if (/^cfg_shell\s*=\s*(.*)/);
 		$cfg_password	   = $1 if (/^cfg_password\s*=\s*(.*)/);
@@ -931,7 +888,6 @@ sub usage {
 		  "               without doing anything\n" .
 		  "COMMANDS\n" .
 		  "locales        Print list of locales\n" .
-		  "filemanagers   Print a list of file managers\n" .
 		  "editors        Print a list of editors\n" .
 		  "guieditors     Print a list of GUI editors\n" .
 		  "kbdmodels      Print a list of X keyboard models\n" .
@@ -1031,9 +987,6 @@ while (@ARGV) {
 		exit 0;
 	} elsif ($ARGV[0] eq "editors") {
 		print_array_data(\@editor_list);
-		exit 0;
-	} elsif ($ARGV[0] eq "filemanagers") {
-		print_array_data(\@file_manager_list);
 		exit 0;
 	} elsif ($ARGV[0] eq "commit") {
 		commit();
