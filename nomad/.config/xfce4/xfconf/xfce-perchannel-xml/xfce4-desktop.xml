@@ -3,32 +3,22 @@
 <channel name="xfce4-desktop" version="1.0">
   <property name="backdrop" type="empty">
     <property name="screen0" type="empty">
-      <property name="monitorHDMI-1" type="empty">
-        <property name="workspace0" type="empty">
-          <property name="color-style" type="int" value="0"/>
-          <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/home/nomad/Wallpapers/nomadBSD-2k.jpg"/>
-        </property>
-        <property name="workspace1" type="empty">
-          <property name="color-style" type="int" value="0"/>
-          <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/usr/local/share/backgrounds/xfce/xfce-shapes.svg"/>
-        </property>
-        <property name="workspace2" type="empty">
-          <property name="color-style" type="int" value="0"/>
-          <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/usr/local/share/backgrounds/xfce/xfce-shapes.svg"/>
-        </property>
-        <property name="workspace3" type="empty">
-          <property name="color-style" type="int" value="0"/>
-          <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/usr/local/share/backgrounds/xfce/xfce-shapes.svg"/>
-        </property>
+      <property name="monitor0" type="empty">
+        <property name="image-path" type="string" value="/usr/local/share/backgrounds/nomadbsd/default.jpg"/>
+        <property name="last-image" type="string" value="/usr/local/share/backgrounds/nomadbsd/default.jpg"/>
+        <property name="last-single-image" type="string" value="/usr/local/share/backgrounds/nomadbsd/default.jpg"/>
+        <property name="image-style" type="int" value="5"/>
       </property>
     </property>
   </property>
-  <property name="last" type="empty">
-    <property name="window-width" type="int" value="692"/>
-    <property name="window-height" type="int" value="497"/>
+  <property name="desktop-icons" type="empty">
+    <property name="style" type="int" value="2"/>
+    <property name="file-icons" type="empty">
+      <property name="show-removable" type="bool" value="false"/>
+    </property>
+    <property name="icon-size" type="uint" value="42"/>
+    <property name="tooltip-size" type="double" value="96.000000">
   </property>
 </channel>
+
+
