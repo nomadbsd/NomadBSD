@@ -142,6 +142,7 @@ x11/sddm
 x11/setxkbmap
 x11/xauth
 x11/xev
+x11/xfce4-screensaver
 x11/xfce4-screenshooter-plugin
 x11/xinit
 x11/xinput
