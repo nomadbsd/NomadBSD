@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Commands to be run only on the very first login
+#
+dconf load /net/launchpad/plank/ < ~/.config/plank.ini
+dconf load /desktop/ibus/ < ~/.config/ibus.ini
+
