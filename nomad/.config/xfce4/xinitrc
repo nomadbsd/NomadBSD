@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export QT_QPA_PLATFORMTHEME=qt5ct
+export GIO_USE_VOLUME_MONITOR=unix
 
 export XMODIFIERS=@im=ibus
 export GTK_IM_MODULE=ibus
