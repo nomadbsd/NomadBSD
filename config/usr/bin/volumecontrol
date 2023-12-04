@@ -22,14 +22,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
 mixer_bin=/usr/sbin/mixer
 dunstify_bin=/usr/local/bin/dunstify
 oldvalue_path=/var/tmp/volumecontrol_oldvalue.$(id -un)
-
 # timeout in seconds
 notify_timeout=1
-volume_step=5
+volume_step=0.05
 
 dunstify_id=3728
 
@@ -37,24 +35,25 @@ iconSound="audio-volume-high"
 iconMuted="audio-volume-muted"
 
 get_volume() {
-  ${mixer_bin} vol | cut -d: -f2
+  ${mixer_bin} vol | grep vol.volume | cut -d: -f2
 }
 
 is_muted() {
-  [ $(get_volume) -eq 0 ] && true || false
+  vol=$(get_volume | awk '{ print $1 * 100 }')
+  [ $vol -eq 0 ] && true || false
 }
 
 set_volume() {
-  ${mixer_bin} vol ${1} >/dev/null
+  ${mixer_bin} vol.volume=${1} >/dev/null
 }
 
 send_notification() {
-  volume=$(get_volume)
+  volume=$(get_volume | awk '{print $1 * 100}')
   if is_muted ; then
     ${dunstify_bin} -i $iconMuted -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "muted"
   else
     # Use U+2589 to print the bar
-    bar=$(jot -s ▉ - 0 $((volume / 5 - 1)) | tr -d '[:digit:]')
+    bar=$(jot -s ▉ - 0 $((volume * 18 / 100)) | tr -d '[:digit:]')
     ${dunstify_bin} -i $iconSound -r ${dunstify_id} -t $((notify_timeout * 1000)) -u normal "$volume    $bar"
   fi
 }
