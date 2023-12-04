@@ -112,7 +112,6 @@ x11-drivers/xf86-video-openchrome
 x11-drivers/xf86-video-scfb
 x11-drivers/xf86-video-vesa
 x11-drivers/xf86-video-vmware
-x11-fm/pcmanfm
 x11-fm/thunar
 x11-fonts/bitstream-vera
 x11-fonts/cantarell-fonts
@@ -131,7 +130,6 @@ x11-fonts/xorg-fonts
 x11-themes/Kvantum
 x11-themes/layan-gtk-themes
 x11-themes/papirus-icon-theme
-x11-wm/picom
 x11-wm/xfce4-desktop
 x11-wm/xfce4-panel
 x11-wm/xfce4-session
@@ -142,9 +140,7 @@ x11/plank
 x11/sakura
 x11/sddm
 x11/setxkbmap
-x11/tint
 x11/xauth
-x11/xbindkeys
 x11/xev
 x11/xfce4-screenshooter-plugin
 x11/xinit
