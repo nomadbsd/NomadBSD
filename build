@@ -1042,6 +1042,14 @@ build_mac_image()
 
 build_image()
 {
+  if glabel status | awk '{ print $1 }' | grep ${ROOTLABEL}; then
+    bail "A device with the label '${ROOTLABEL}' already exists. Please remove it and try again"
+  fi
+  if [ "${FILESYSTEM}" = "ZFS" ]; then
+    if zpool status 2>/dev/null | grep -q "pool: ${ZFS_POOL}"; then
+      bail "The pool ${ZFS_POOL} already exists."
+    fi
+  fi
   if components_need_rebuild; then
     rebuild_components
   fi
