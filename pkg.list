@@ -8,6 +8,7 @@ devel/cmake
 devel/dconf
 devel/geany
 devel/git
+devel/kf5-knotifications
 devel/pkgconf
 devel/py-qt5
 devel/qt5-buildtools
