@@ -67,7 +67,7 @@
       <property name="appearance" type="uint" value="0"/>
       <property name="items" type="array">
         <value type="string" value="+lock-screen"/>
-        <value type="string" value="+switch-user"/>
+        <value type="string" value="-switch-user"/>
         <value type="string" value="+separator"/>
         <value type="string" value="-suspend"/>
         <value type="string" value="-hibernate"/>
