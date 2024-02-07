@@ -27,6 +27,8 @@ installgui  (Re)build and (re)install nomadbsd-install-gui
 
 kernel      Build a custom kernel using kernel/NOMADBSD
 
+modules     Build and install kernel modules from the "modules" directory
+
 nbsdupdate  Install nomadbsd-update.
 
 pkgcfg      Set up configuration files and users required by installed

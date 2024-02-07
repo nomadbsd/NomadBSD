@@ -102,8 +102,9 @@ do_mount_unionfs()
 		fi
 		[ ! -d "${rwdir}" ] && mkdir -p "${rwdir}"
 	fi
-	if (! kldstat -q -m fusefs && ! kldstat -q -m fuse); then
-		kldload fusefs 2>/dev/null || kldload fuse 2>/dev/null
+	kldstat -q -n fusefs && kldunload fusefs
+	if (! kldstat -q -n fusefs2 && ! kldstat -q -n fusefs); then
+		kldload fusefs2 2>/dev/null || kldload fusefs 2>/dev/null
 	fi
 	unionfs -o cow,max_files=${unionfs_maxfiles} \
 	        -o allow_other,use_ino,suid,nonempty,kernel_cache \

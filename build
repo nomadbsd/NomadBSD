@@ -45,6 +45,8 @@
 #
 # image       Build the NomadBSD image.
 #
+# modules     Build and install kernel modules from the "modules" directory
+#
 # ports       Build and install all ports defined in build.cfg
 #
 # pkgs        Install all packages from pkg.list
@@ -104,6 +106,7 @@ BUILD_DEPENCIES_LIST_EOF
 )
 
 BUILD_STAGES=$(cat << BUILD_STAGES_END
+build_modules
 install_packages
 install_from_git_repos
 build_setupgui
@@ -1158,6 +1161,25 @@ build_nomadbsd_update()
   umount_chroot_devfs
 }
 
+build_and_install_kmod()
+{
+  chroot "${SYSDIR}" sh -c \
+    "cd $1 && make clean; make && make install" || \
+    bail "Failed to install kernel module $1"
+}
+
+build_modules()
+{
+  local MODULES_DIR="/usr/src/sys/modules"
+
+  for m in modules/*; do
+    [ "$m" = "." -o "$m" = ".." -o ! -d "$m" ] && continue
+    cp -a "$m" "${SYSDIR}/${MODULES_DIR}/" || bail
+    mod=$(basename "$m")
+    build_and_install_kmod "${MODULES_DIR}/${mod}"
+  done
+}
+
 install_nomadbsd_reset()
 {
   local make_opts=""
@@ -1433,6 +1455,7 @@ while [ $# -gt 0 ]; do
   addusergui) build_addusergui;;
   dmconfig)   build_dmconfig;;
   chusr)      build_chusr;;
+  modules)    build_modules;;
   nbsdupdate) build_nomadbsd_update;;
   reset)      install_nomadbsd_reset;;
   src)        install_src_dist;;
