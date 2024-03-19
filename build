@@ -549,6 +549,9 @@ patch_networkmgr()
   # Prevent execution of networkmgr's setup-nic script.
   sed -i '' -E 's/^[::space::]*(.*action.*setup-nic.*)/#\1/g' \
     "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
+  # Prevent execution of networkmgr's auto-switch script.
+  sed -i '' -E 's/^[::space::]*(.*action.*auto-switch.*)/#\1/g' \
+    "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
 }
 
 #
