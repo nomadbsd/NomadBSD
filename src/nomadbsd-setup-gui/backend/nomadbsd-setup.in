@@ -825,7 +825,7 @@ sub commit {
 	desktopsettings();
 	status("Disabling auto-login on ttyv0");
 	system("sed -i .bak 's/autologin/Pc/' /etc/ttys");
-	system("cp /usr/share/skel/dot.login /root/.login");
+	system("cp /usr/share/skel/dot.profile /root/.profile");
 	system("sysrc -e initgfx_kmods >> /etc/rc.conf.in");
 	system("sysrc -f /etc/rc.conf.in sddm_lang=$cfg_locale");
 	if ($filesystem eq "ZFS") {

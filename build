@@ -285,14 +285,14 @@ init_base()
   mount_chroot_devfs
   chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
   umount_chroot_devfs
+  chroot "${SYSDIR}" pw usermod root -s /bin/sh
   if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
     chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
-      -G wheel,operator,video,games -s /bin/csh; \
+      -G wheel,operator,video,games -s /bin/sh; \
       pw usermod nomad -c Nomad'
   fi
-  chroot "${SYSDIR}" pw usermod root -s /bin/csh
   (cd config && tar cf - .) | \
-      (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
+    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
   chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
   install_handbook
   install_user_config
