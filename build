@@ -953,7 +953,18 @@ copy_system_files_to_dest_dir()
     (cd ${_DESTDIR} && \
       tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
         etc root var usr.local.etc) || bail
+    test_rootfs_minfree_mb ${_DESTDIR} || \
+      bail "There are less than ${ROOTFS_MINFREE_MIB}M free on the root " \
+           "filesystem. Increase BASESIZE."
   fi
+}
+
+test_rootfs_minfree_mb()
+{
+  local mnt_dir=$1
+  local mb_free=$(df -m ${mnt_dir} | \
+    awk -v mnt_dir=${mnt_dir} '$6 == mnt_dir {print $4}')
+  [ ${mb_free} -ge ${ROOTFS_MINFREE_MIB} ]
 }
 
 build_amd64_image()
