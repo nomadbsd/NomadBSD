@@ -940,13 +940,7 @@ copy_system_files_to_dest_dir()
   cp ${UZIP_IMAGE}.uzip ${_DESTDIR}/uzip/usr.local.uzip || bail
   mkdir -p ${_DESTDIR}/unionfs/usr/local || bail
   ln -s /unionfs/usr/local ${_DESTDIR}/usr/local || bail
-  awk '{
-    if (/^# Insert other /) {
-      print $0;
-      print "/etc/rc.d/mount_uzip stop"
-    } else
-      print $0
-  }' "${_SRCDIR}/etc/rc.shutdown" > ${_DESTDIR}/etc/rc.shutdown
+  write_rc_shutdown "${_SRCDIR}/etc/rc.shutdown" "${_DESTDIR}/etc/rc.shutdown"
   get_version > ${_DESTDIR}/VERSION
   write_config_files ${_DESTDIR}
   if [ ${FILESYSTEM} = "UFS" ]; then
@@ -963,6 +957,20 @@ create_sysdirs_backup()
   (cd ${sysdir} && \
     tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
         etc root var usr.local.etc) || bail "Failed to create sysdirs backup"
+}
+
+write_rc_shutdown()
+{
+  local src_rc_shutdown=$1
+  local dst_rc_shutdown=$2
+
+  awk '{
+    if (/^# Insert other /) {
+      print $0;
+      print "/etc/rc.d/mount_uzip stop"
+    } else
+      print $0
+  }' "${src_rc_shutdown}" > "${dst_rc_shutdown}"
 }
 
 test_rootfs_minfree_mb()
