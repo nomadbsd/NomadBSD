@@ -950,13 +950,19 @@ copy_system_files_to_dest_dir()
   get_version > ${_DESTDIR}/VERSION
   write_config_files ${_DESTDIR}
   if [ ${FILESYSTEM} = "UFS" ]; then
-    (cd ${_DESTDIR} && \
-      tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
-        etc root var usr.local.etc) || bail
+    create_sysdirs_backup "${_DESTDIR}"
     test_rootfs_minfree_mb ${_DESTDIR} || \
       bail "There are less than ${ROOTFS_MINFREE_MIB}M free on the root " \
            "filesystem. Increase BASESIZE."
   fi
+}
+
+create_sysdirs_backup()
+{
+  local sysdir=$1
+  (cd ${sysdir} && \
+    tar cfJ usr/share/nomadbsd/nomadbsd-backup.tar.xz \
+        etc root var usr.local.etc) || bail "Failed to create sysdirs backup"
 }
 
 test_rootfs_minfree_mb()
