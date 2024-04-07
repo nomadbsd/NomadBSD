@@ -282,34 +282,72 @@ write_rc_subr()
 
 init_base()
 {
-  mount_chroot_devfs
-  chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
-  umount_chroot_devfs
-  chroot "${SYSDIR}" pw usermod root -s /bin/sh
+  configure_shlib_cache
+  configure_root_user
+  add_nomad_user
+  install_config_files
+  install_handbook
+  install_user_config
+  set_pkg_repo
+  set_boot_menu_pos
+  configure_device_hints
+  configure_nsswitch
+}
+
+install_config_files()
+{
+  (cd config && tar cf - .) | \
+    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
+  chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
+}
+
+add_nomad_user()
+{
   if ! grep -q ^nomad "${SYSDIR}/etc/passwd"; then
     chroot "${SYSDIR}" sh -c 'pw useradd nomad -m \
       -G wheel,operator,video,games -s /bin/sh; \
       pw usermod nomad -c Nomad'
   fi
-  (cd config && tar cf - .) | \
-    (cd "${SYSDIR}" && tar -xf - --uname root --gname wheel)
-  chroot "${SYSDIR}" sh -c 'cap_mkdb /etc/login.conf'
-  install_handbook
-  install_user_config
-  if (echo ${RELEASE} | grep -q 'CURRENT'); then
-    sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
-    rm -f "${SYSDIR}/usr/local/etc/X11/xorg.conf.d/wacom.conf"
-  fi
-  # Set boot menu position in ${SYSDIR}/boot/lua/drawer.lua
+}
+
+set_boot_menu_pos()
+{
   re="s/^menu_position =.*$/menu_position"
   re="${re} = {x = ${MENU_POSITION_X}, y = ${MENU_POSITION_Y}}/"
   sed -E -i '' "${re}" "${SYSDIR}"/boot/lua/drawer.lua
-  # Disable uart.1 to prevent hangs on CherryTrail systems
-  sed -E -i '' 's/^(hint\.uart\.1.*)/#\1/g' "${SYSDIR}"/boot/device.hints
+}
+
+configure_nsswitch()
+{
   # Add mdns to "hosts:" line in /etc/nsswitch.conf
   if ! grep -q 'hosts:.*mdns*' "${SYSDIR}"/etc/nsswitch.conf; then
     sed -E -i '' 's/^(hosts:) (.*)/\1 \2 mdns/' \
       "${SYSDIR}"/etc/nsswitch.conf
+  fi
+}
+
+configure_device_hints()
+{
+  # Disable uart.1 to prevent hangs on CherryTrail systems
+  sed -E -i '' 's/^(hint\.uart\.1.*)/#\1/g' "${SYSDIR}"/boot/device.hints
+}
+
+configure_shlib_cache()
+{
+  mount_chroot_devfs
+  chroot "${SYSDIR}" sh -c '/etc/rc.d/ldconfig start'
+  umount_chroot_devfs
+}
+
+configure_root_user()
+{
+  chroot "${SYSDIR}" pw usermod root -s /bin/sh
+}
+
+set_pkg_repo()
+{
+  if (echo ${RELEASE} | grep -q 'CURRENT'); then
+    sed -E -i '' 's/quarterly/latest/g' "${SYSDIR}/etc/pkg/FreeBSD.conf"
   fi
 }
 
