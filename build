@@ -500,17 +500,19 @@ install_from_git_repos()
   umount_chroot_devfs
 }
 
+#
+# Configurations to be done after all packages and ports
+# have been installed.
+#
 post_pkg_config()
 {
-  cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
-    "${SYSDIR}/usr/local/etc/dsbmd.conf"
-
   add_nomad_to_groups cups webcamd
 
   define_font_paths
   delete_unneeded_files
   disable_suspend
 
+  configure_dsbmd
   configure_sakura
   configure_networkmgr
 }
@@ -588,6 +590,12 @@ disable_suspend()
     printf '#!/bin/sh\nexit 1\n' > \
       "${SYSDIR}"/usr/local/lib/ConsoleKit/scripts/ck-system-$s
   done
+}
+
+configure_dsbmd()
+{
+  cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
+     "${SYSDIR}/usr/local/etc/dsbmd.conf"
 }
 
 configure_sakura()
