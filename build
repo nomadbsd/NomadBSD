@@ -544,6 +544,7 @@ delete_unneeded_files()
 # According to ldd only /usr/local/llvm13/lib/libLLVM-13.so are needed
 # by mesa-dri and mesa-gallium-xa. So we delete everything else from
 # the llvm package.
+#
 delete_unneeded_llvm_files()
 {
   local lib
