@@ -504,12 +504,9 @@ post_pkg_config()
 {
   cp "${SYSDIR}/usr/local/etc/dsbmd.conf.sample" \
     "${SYSDIR}/usr/local/etc/dsbmd.conf"
-  if grep -q ^cups: "${SYSDIR}/etc/group"; then
-    chroot "${SYSDIR}" sh -c 'pw groupmod cups -m nomad'
-  fi
-  if grep -q ^webcamd: "${SYSDIR}/etc/group"; then
-    chroot "${SYSDIR}" sh -c 'pw groupmod webcamd -m nomad'
-  fi
+
+  add_nomad_to_groups cups webcamd
+
   # Remove tesserac-data which uses ~1G.
   rm -rf "${SYSDIR}"/usr/local/share/tessdata/*
 
@@ -565,6 +562,15 @@ delete_unneeded_llvm_files()
       xargs -I % rm -f "${SYSDIR}/%"
     tar -C ${SYSDIR} -xf ${tarfile}
     rm -f ${tarfile}
+  done
+}
+
+add_nomad_to_groups()
+{
+  while [ $# -gt 0 ]; do
+    chroot "${SYSDIR}" sh -c "pw groupmod $1 -m nomad" || \
+      bail "Could not add user nomad to group $1"
+    shift
   done
 }
 
