@@ -535,11 +535,7 @@ post_pkg_config()
   # Free 177M by removing the boost header files.
   rm -rf "{SYSDIR}"/usr/local/include/boost
 
-  # Disable suspend, hibernate, and hybrid sleep.
-  for s in suspend hibernate hybridsleep; do
-    printf '#!/bin/sh\nexit 1\n' > \
-      "${SYSDIR}"/usr/local/lib/ConsoleKit/scripts/ck-system-$s
-  done
+  disable_suspend
   configure_networkmgr
 }
 
@@ -584,6 +580,15 @@ delete_docs()
 
   # Free ~ 68M
   rm -rf "${SYSDIR}"/usr/local/share/gtk-doc
+}
+
+disable_suspend()
+{
+  # Disable suspend, hibernate, and hybrid sleep.
+  for s in suspend hibernate hybridsleep; do
+    printf '#!/bin/sh\nexit 1\n' > \
+      "${SYSDIR}"/usr/local/lib/ConsoleKit/scripts/ck-system-$s
+  done
 }
 
 configure_networkmgr()
