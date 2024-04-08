@@ -520,10 +520,6 @@ post_pkg_config()
   # Remove useless Xfce desktop file
   rm -f "${SYSDIR}"/usr/local/share/applications/xfce4-about.desktop
 
-  # Remove Networkmgr's netcardmgr script which messes with our auto-
-  # configured network interfaces in /etc/rc.conf.
-  rm -f "${SYSDIR}"/usr/local/bin/netcardmgr
-
   # Use the Papirus terminal icon as default icon for Sakura
   cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
   "${SYSDIR}"/usr/local/share/pixmaps/terminal.svg
@@ -554,7 +550,7 @@ post_pkg_config()
     printf '#!/bin/sh\nexit 1\n' > \
       "${SYSDIR}"/usr/local/lib/ConsoleKit/scripts/ck-system-$s
   done
-  patch_networkmgr
+  configure_networkmgr
 }
 
 #
@@ -579,17 +575,25 @@ delete_unneeded_llvm_files()
   done
 }
 
-patch_networkmgr()
+configure_networkmgr()
 {
-  for i in $(pwd)/patch/usr/local/share/networkmgr/*.diff; do
-    (cd "${SYSDIR}"/usr/local/share/networkmgr && patch -N < $i)
-  done
+  # Remove Networkmgr's netcardmgr script which messes with our auto-
+  # configured network interfaces in /etc/rc.conf.
+  rm -f "${SYSDIR}"/usr/local/bin/netcardmgr
   # Prevent execution of networkmgr's setup-nic script.
   sed -i '' -E 's/^[::space::]*(.*action.*setup-nic.*)/#\1/g' \
     "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
   # Prevent execution of networkmgr's auto-switch script.
   sed -i '' -E 's/^[::space::]*(.*action.*auto-switch.*)/#\1/g' \
     "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
+  patch_networkmgr
+}
+
+patch_networkmgr()
+{
+  for i in $(pwd)/patch/usr/local/share/networkmgr/*.diff; do
+    (cd "${SYSDIR}"/usr/local/share/networkmgr && patch -N < $i)
+  done
 }
 
 #
