@@ -520,8 +520,7 @@ post_pkg_config()
   # Use the Papirus terminal icon as default icon for Sakura
   cp "${SYSDIR}"/usr/local/share/icons/Papirus/48x48/apps/utilities-terminal.svg \
   "${SYSDIR}"/usr/local/share/pixmaps/terminal.svg
-  (cd config/usr/local/share/slim && tar cf - .) | \
-      (cd "${SYSDIR}"/usr/local/share/slim && tar xf -)
+
   define_font_paths
 
   # The mesa ports depend on llvm13 which, unfortunately, requires > 1 GB.
