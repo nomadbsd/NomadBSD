@@ -533,17 +533,10 @@ post_pkg_config()
   # the llvm package.
   delete_unneeded_llvm_files
 
+  delete_docs
+
   # Free 177M by removing the boost header files.
   rm -rf "{SYSDIR}"/usr/local/include/boost
-
-  # Delete most of the doc files under /usr/local/share/doc
-  # This frees approx. 280M
-  find "${SYSDIR}"/usr/local/share/doc -type d -depth 1 \
-    \! \( -name "fish" -o -name "neomutt" \) \
-    -exec rm -rf '{}' \;
-
-  # Free ~ 68M
-  rm -rf "${SYSDIR}"/usr/local/share/gtk-doc
 
   # Disable suspend, hibernate, and hybrid sleep.
   for s in suspend hibernate hybridsleep; do
@@ -573,6 +566,18 @@ delete_unneeded_llvm_files()
     tar -C ${SYSDIR} -xf ${tarfile}
     rm -f ${tarfile}
   done
+}
+
+delete_docs()
+{
+  # Delete most of the doc files under /usr/local/share/doc
+  # This frees approx. 280M
+  find "${SYSDIR}"/usr/local/share/doc -type d -depth 1 \
+    \! \( -name "fish" -o -name "neomutt" \) \
+    -exec rm -rf '{}' \;
+
+  # Free ~ 68M
+  rm -rf "${SYSDIR}"/usr/local/share/gtk-doc
 }
 
 configure_networkmgr()
