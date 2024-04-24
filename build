@@ -617,14 +617,6 @@ configure_networkmgr()
   # Prevent execution of networkmgr's auto-switch script.
   sed -i '' -E 's/^[::space::]*(.*action.*auto-switch.*)/#\1/g' \
     "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
-  patch_networkmgr
-}
-
-patch_networkmgr()
-{
-  for i in $(pwd)/patch/usr/local/share/networkmgr/*.diff; do
-    (cd "${SYSDIR}"/usr/local/share/networkmgr && patch -N < $i)
-  done
 }
 
 #
