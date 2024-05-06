@@ -11,9 +11,12 @@ devel/git
 devel/kf5-knotifications
 devel/pkgconf
 devel/py-qt5
+devel/py-qt6
 devel/qt5-buildtools
 devel/qt5-linguisttools
 devel/qt5-qmake
+devel/qt6-base
+devel/qt6-tools
 devel/xdg-user-dirs
 dns/nss_mdns
 editors/leafpad
