@@ -1182,52 +1182,56 @@ build_unionfs()
 
 build_setupgui()
 {
-  QMAKE_VARS="ROOTLABEL=${ROOTLABEL} DATALABEL=${DATALABEL}"
-  QMAKE_VARS="${QMAKE_VARS} POOLNAME=${ZFS_POOL} ASHIFT=${ASHIFT}"
-  QMAKE_VARS="${QMAKE_VARS} FILESYSTEM=${FILESYSTEM}"
+  local CMAKE_VARS=""
+  CMAKE_VARS="-DROOTLABEL=${ROOTLABEL} -DDATALABEL=${DATALABEL}"
+  CMAKE_VARS="${CMAKE_VARS} -DPOOLNAME=${ZFS_POOL} -DASHIFT=${ASHIFT}"
+  CMAKE_VARS="${CMAKE_VARS} -DFILESYSTEM=${FILESYSTEM}"
 
   if [ "${ARCH}" = "mac" ]; then
-    QMAKE_VARS="${QMAKE_VARS} MAC=1"
+    CMAKE_VARS="${CMAKE_VARS} -DMAC=1"
   fi
-  if [ "${FILESYSTEM}" = "ZFS" ]; then
-    QMAKE_VARS="${QMAKE_VARS} USE_ZFS=1"
-  fi
+  rm -rf "${SYSDIR}/tmp/nomadbsd-setup-gui"
   cp -a src/nomadbsd-setup-gui "${SYSDIR}/tmp/"
+  mkdir "${SYSDIR}/tmp/nomadbsd-setup-gui/build"
   mount_chroot_devfs
-  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-setup-gui && make distclean; \
-    qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
+  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-setup-gui/build && \
+    cmake ${CMAKE_VARS} .. && make && make install" || bail
   umount_chroot_devfs
 }
 
 build_installgui()
 {
-  if [ "${ARCH}" = "mac" ]; then
-    QMAKE_VARS="MAC=1"
-  else
-    QMAKE_VARS=""
-  fi
+  local CMAKE_VARS=""
+
+  [ "${ARCH}" = "mac" ] && CMAKE_VARS="-DMAC=1"
+  rm -rf "${SYSDIR}/tmp/nomadbsd-install-gui"
   cp -a src/nomadbsd-install-gui "${SYSDIR}/tmp/"
+  mkdir "${SYSDIR}/tmp/nomadbsd-install-gui/build"
   mount_chroot_devfs
-  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-install-gui && make distclean; \
-    qmake-qt5 ${QMAKE_VARS} && make && make install" || bail
+  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-install-gui/build && \
+    cmake ${CMAKE_VARS} .. && make && make install" || bail
   umount_chroot_devfs
 }
 
 build_addusergui()
 {
+  rm -rf "${SYSDIR}/tmp/nomadbsd-adduser-gui"
   cp -a src/nomadbsd-adduser-gui "${SYSDIR}/tmp/"
+  mkdir "${SYSDIR}/tmp/nomadbsd-adduser-gui/build"
   mount_chroot_devfs
-  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-adduser-gui && make distclean; \
-    qmake-qt5 && make && make install" || bail
+  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-adduser-gui/build && \
+    cmake .. && make && make install" || bail
   umount_chroot_devfs
 }
 
 build_dmconfig()
 {
+  rm -rf "${SYSDIR}/tmp/nomadbsd-dmconfig"
   cp -a src/nomadbsd-dmconfig "${SYSDIR}/tmp/"
+  mkdir "${SYSDIR}/tmp/nomadbsd-dmconfig/build"
   mount_chroot_devfs
-  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-dmconfig && make distclean; \
-    qmake-qt5 && make && make install" || bail
+  chroot "${SYSDIR}" sh -c "cd /tmp/nomadbsd-dmconfig/build && \
+    cmake .. && make && make install" || bail
   umount_chroot_devfs
 }
 
