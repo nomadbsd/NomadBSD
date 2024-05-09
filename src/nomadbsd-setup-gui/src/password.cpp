@@ -22,9 +22,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QFormLayout>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QDebug>
@@ -39,13 +39,13 @@ PasswordWidget::PasswordWidget(int minlen, QWidget *parent) : QWidget(parent)
 	pl2		  = new QLabel(tr("Repeat password:"));
 	QVBoxLayout *vbox = new QVBoxLayout;
 	QFormLayout *form = new QFormLayout;
-	QRegExp	    chars = QRegExp("[ -~]+");
+	QRegularExpression	    chars = QRegularExpression("[ -~]+");
 
 	pfield1->setEchoMode(QLineEdit::Password);
 	pfield2->setEchoMode(QLineEdit::Password);
 
-	pfield1->setValidator(new QRegExpValidator(chars));
-	pfield2->setValidator(new QRegExpValidator(chars));
+	pfield1->setValidator(new QRegularExpressionValidator(chars));
+	pfield2->setValidator(new QRegularExpressionValidator(chars));
 
 	pl1->setStyleSheet("font-weight: bold;");
 	pl2->setStyleSheet("font-weight: bold;");

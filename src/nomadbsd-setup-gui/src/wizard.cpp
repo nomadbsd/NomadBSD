@@ -99,7 +99,7 @@ void SetupWizard::accept()
 	msgBox.setWindowTitle(tr("Rebooting"));
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.setWindowIcon(msgBox.iconPixmap());
-	msgBox.setStandardButtons(0);
+	msgBox.setStandardButtons(QMessageBox::Ok);
 	system(REBOOT_CMD);
 	msgBox.exec();
 	QDialog::accept();
