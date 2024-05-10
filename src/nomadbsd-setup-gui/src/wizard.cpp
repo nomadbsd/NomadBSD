@@ -153,7 +153,7 @@ LocalePage::LocalePage(QWidget *parent) : QWizardPage(parent)
         QByteArray  line;
 
   	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_LOCALES);
+	proc.startCommand(BACKEND_GET_LOCALES);
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -236,7 +236,7 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
         QByteArray  line;
 
 	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_KBDLAYOUTS_LATIN);
+	proc.startCommand(BACKEND_GET_KBDLAYOUTS_LATIN);
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -270,7 +270,7 @@ KbdLayoutPage::KbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	//
 	// Read keyboard variants.
 	//
-	proc.start(BACKEND_GET_KBDVARIANTS);
+	proc.startCommand(BACKEND_GET_KBDVARIANTS);
 
 	(void)proc.waitForStarted(-1);
 
@@ -429,7 +429,7 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
         QByteArray  line;
 
 	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_KBDLAYOUTS);
+	proc.startCommand(BACKEND_GET_KBDLAYOUTS);
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -465,7 +465,7 @@ ExtraKbdLayoutPage::ExtraKbdLayoutPage(QWidget *parent) : QWizardPage(parent)
 	//
 	// Read keyboard variants.
 	//
-	proc.start(BACKEND_GET_KBDVARIANTS);
+	proc.startCommand(BACKEND_GET_KBDVARIANTS);
 
 	(void)proc.waitForStarted(-1);
 
@@ -653,7 +653,7 @@ TimezonePage::TimezonePage(QWidget *parent) : QWizardPage(parent)
         QByteArray  line;
 
 	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_GET_TIMEZONES);
+	proc.startCommand(BACKEND_GET_TIMEZONES);
 	(void)proc.waitForStarted(-1);
 
 	//
@@ -949,7 +949,7 @@ ProgramsPage::ProgramsPage(QWidget *parent) : QWizardPage(parent)
 
 		*apps[n].box = new QComboBox;
 		proc.setReadChannel(QProcess::StandardOutput);
-		proc.start(apps[n].command);
+		proc.startCommand(apps[n].command);
 
 		(void)proc.waitForStarted(-1);
 		//
@@ -1126,7 +1126,7 @@ void CommitPage::initializePage()
 		{ "cfg_xkbdlayouts",	xkbdlayouts	  }
 	};
 	proc.setReadChannel(QProcess::StandardOutput);
-	proc.start(BACKEND_COMMIT);
+	proc.startCommand(BACKEND_COMMIT);
 	(void)proc.waitForStarted(-1);
 
 	//
