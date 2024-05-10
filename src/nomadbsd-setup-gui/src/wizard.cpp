@@ -204,7 +204,7 @@ void LocalePage::localeSelected(int row)
 	cfg_localedescr	= localels->item(row)->text();
 	qApp->removeTranslator(&translator);
 	if (translator.load(QLocale(cfg_locale), QLatin1String(PROGRAM),
-	    QLatin1String("_"), QLatin1String(":/locale")))
+	    QLatin1String("_"), QLatin1String(":/i18n")))
 		qApp->installTranslator(&translator);
 	wizard()->setButtonText(QWizard::NextButton,   tr("Next"));
 	wizard()->setButtonText(QWizard::BackButton,   tr("Back"));
