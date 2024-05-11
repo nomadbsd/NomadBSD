@@ -7,10 +7,21 @@ export XMODIFIERS=@im=ibus
 export GTK_IM_MODULE=ibus
 export QT_IM_MODULE=ibus
 
+create_cache_dir()
+{
+  local path="${HOME}/.cache"
+  [ ! -L "${path}" ] && return
+  local target=$(readlink "${path}")
+  [ -d "${target}" ] && return
+  mkdir -p "${target}"
+}
+
 if [ -f ~/.firstrun ]; then
   . ~/.firstrun
   rm -f ~/.firstrun
 fi
+
+create_cache_dir
 
 . /usr/local/etc/xdg/xfce4/xinitrc
 

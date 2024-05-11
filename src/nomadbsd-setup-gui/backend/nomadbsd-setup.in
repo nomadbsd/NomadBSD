@@ -632,6 +632,8 @@ sub desktopsettings {
 	system("rm -f ${mimelist}.bak 2>/dev/null");
 
 	configure_ibus();
+	# Create a symlink for the ~/.cache directory.
+	system("ln -s /tmp/nomad/cache /home/nomad/.cache");
 	# Make nomad the owner of all the files under /home/nomad
 	system("chown -R nomad /home/nomad");
 }
