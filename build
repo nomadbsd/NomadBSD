@@ -495,7 +495,8 @@ install_from_git_repos()
     rname=$(echo $r | tr '-' '_')
     eval build_cmd=\${${rname}_BUILD_CMD}
     [ -z "${build_cmd}" ] && continue
-    chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}"
+    chroot "${SYSDIR}" sh -c "cd /git/${r}; ${build_cmd}" || \
+      bail "Build command '${build_cmd}' failed."
   done
   umount_chroot_devfs
 }
