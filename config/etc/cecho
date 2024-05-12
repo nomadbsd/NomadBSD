@@ -1,15 +1,32 @@
+rcmsg_color=${rcmsg_color:-"yellow"}
+
+__color_to_code()
+{
+  local color=$1
+  for c in black.0 red.1 green.2 yellow.3 \
+    blue.4 magenta.5 cyan.6 white.7; do
+    if [ "${c%%.*}" = "${color}" ]; then
+      echo ${c##*.}
+      return
+    fi
+  done
+  echo "cecho: Unknown color '${color}'" >&2
+  # Use fallback color yellow(3)
+  echo 3
+}
+
 __tput() {
-	return
+  return
 }
 
 if [ ! -x /usr/bin/tput ]; then
-	alias tput=__tput
+  alias tput=__tput
 fi
 
 __echo() {
-	tput -T xterm AF 2 >/dev/tty
-	\echo $@
-	tput -T xterm me >/dev/tty
+  tput -T xterm AF $(__color_to_code "${rcmsg_color}") >/dev/tty
+  \echo $@
+  tput -T xterm me >/dev/tty
 }
 
 alias echo=__echo
