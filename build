@@ -736,7 +736,7 @@ install_src_dist()
 calculate_est_uzip_image_size() {
   local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
   if [ "${rootfs}" = "zfs" ]; then
-      du_extra_args="-A"
+    du_extra_args="-A"
   fi
   nfiles=$(find "$1" | wc -l)
   wasted=$(($nfiles * (${FRAGSIZE} / 2) / (1024 * 1024)))
@@ -749,7 +749,7 @@ get_uzip_size()
 {
   local rootfs=$(mount -p | awk '$2 == "/" {print $3}')
   if [ "${rootfs}" = "zfs" ]; then
-      du_extra_args="-A"
+    du_extra_args="-A"
   fi
   du -m ${du_extra_args} -B ${FRAGSIZE} ${UZIP_IMAGE}.uzip | \
     tail -1 | cut -f 1
