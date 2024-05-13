@@ -243,28 +243,28 @@ write_fstab()
     fi
     echo "${rootdev} / ufs rw,noatime   1 1" > ${fstab} || bail
   fi
-  cat config/etc/fstab >> "${fstab}"
+  cat config/etc/fstab >> "${fstab}" || bail
 }
 
 write_sysctl_conf()
 {
   local sysctl_conf=$1
   cp config/etc/sysctl.conf "${sysctl_conf}" || bail
-  ${FILESYSTEM}_SYSCTL_SETTINGS >> "${sysctl_conf}"
+  ${FILESYSTEM}_SYSCTL_SETTINGS >> "${sysctl_conf}" || bail
 }
 
 write_loader_conf()
 {
   local loader_conf=$1
   cp config/boot/loader.conf "${loader_conf}" || bail
-  ${FILESYSTEM}_LOADER_SETTINGS >> "${loader_conf}"
+  ${FILESYSTEM}_LOADER_SETTINGS >> "${loader_conf}" || bail
 }
 
 write_rc_conf()
 {
   local rc_conf=$1
   cp config/etc/rc.conf "${rc_conf}" || bail
-  [ ${FILESYSTEM} = "ZFS" ] && sysrc -f ${rc_conf} zfs_enable=YES
+  [ ${FILESYSTEM} = "ZFS" ] && sysrc -f ${rc_conf} zfs_enable=YES || bail
 }
 
 write_rc_subr()
@@ -278,7 +278,7 @@ write_rc_subr()
       print ". /etc/cecho"; included = 1
     } else
       print $0
-  }' < "${SYSDIR}"/etc/rc.subr > "${rc_subr}"
+  }' < "${SYSDIR}"/etc/rc.subr > "${rc_subr}" || bail
 }
 
 write_rc_shutdown()
@@ -292,7 +292,7 @@ write_rc_shutdown()
       print "/etc/rc.d/mount_uzip stop"
     } else
       print $0
-  }' "${src_rc_shutdown}" > "${dst_rc_shutdown}"
+  }' "${src_rc_shutdown}" > "${dst_rc_shutdown}" || bail
 }
 
 init_base()
