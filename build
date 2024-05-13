@@ -219,7 +219,7 @@ install_user_config()
 
 write_config_files()
 {
-  local _DESTDIR=$1
+  local _SRCDIR=$1 _DESTDIR=$2
   [ -z "${_DESTDIR}" -o "${_DESTDIR}" = "/" ] && \
     bail "Invalid DESTDIR '${_DESTDIR}' defined"
   write_sysctl_conf "${_DESTDIR}/etc/sysctl.conf"
@@ -227,6 +227,7 @@ write_config_files()
   write_fstab "${_DESTDIR}/etc/fstab"
   write_rc_conf "${_DESTDIR}/etc/rc.conf"
   write_rc_subr "${_DESTDIR}/etc/rc.subr"
+  write_rc_shutdown "${_SRCDIR}/etc/rc.shutdown" "${_DESTDIR}/etc/rc.shutdown"
 }
 
 write_fstab()
@@ -278,6 +279,20 @@ write_rc_subr()
     } else
       print $0
   }' < "${SYSDIR}"/etc/rc.subr > "${rc_subr}"
+}
+
+write_rc_shutdown()
+{
+  local src_rc_shutdown=$1
+  local dst_rc_shutdown=$2
+
+  awk '{
+    if (/^# Insert other /) {
+      print $0;
+      print "/etc/rc.d/mount_uzip stop"
+    } else
+      print $0
+  }' "${src_rc_shutdown}" > "${dst_rc_shutdown}"
 }
 
 init_base()
@@ -1006,9 +1021,8 @@ copy_system_files_to_dest_dir()
   cp ${UZIP_IMAGE}.uzip ${_DESTDIR}/uzip/usr.local.uzip || bail
   mkdir -p ${_DESTDIR}/unionfs/usr/local || bail
   ln -s /unionfs/usr/local ${_DESTDIR}/usr/local || bail
-  write_rc_shutdown "${_SRCDIR}/etc/rc.shutdown" "${_DESTDIR}/etc/rc.shutdown"
   get_version > ${_DESTDIR}/VERSION
-  write_config_files ${_DESTDIR}
+  write_config_files ${_SRCDIR} ${_DESTDIR}
   if [ ${FILESYSTEM} = "UFS" ]; then
     create_sysdirs_backup "${_DESTDIR}"
     test_rootfs_minfree_mb ${_DESTDIR} || \
@@ -1025,19 +1039,7 @@ create_sysdirs_backup()
         etc root var usr.local.etc) || bail "Failed to create sysdirs backup"
 }
 
-write_rc_shutdown()
-{
-  local src_rc_shutdown=$1
-  local dst_rc_shutdown=$2
 
-  awk '{
-    if (/^# Insert other /) {
-      print $0;
-      print "/etc/rc.d/mount_uzip stop"
-    } else
-      print $0
-  }' "${src_rc_shutdown}" > "${dst_rc_shutdown}"
-}
 
 test_rootfs_minfree_mb()
 {
