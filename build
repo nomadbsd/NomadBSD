@@ -219,7 +219,7 @@ install_user_config()
 
 write_config_files()
 {
-  local _SRCDIR=$1 _DESTDIR=$2
+  local _SRCDIR=$1 _DESTDIR=$(realpath "$2")
   [ -z "${_DESTDIR}" -o "${_DESTDIR}" = "/" ] && \
     bail "Invalid DESTDIR '${_DESTDIR}' defined"
   write_sysctl_conf "${_DESTDIR}/etc/sysctl.conf"
