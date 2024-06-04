@@ -76,6 +76,7 @@ sysutils/ddrescue
 sysutils/dsbdriverd
 sysutils/dsbmc-cli
 sysutils/dsbmd
+sysutils/dsbwrtsysctl
 sysutils/dunst
 sysutils/fusefs-ext2
 sysutils/fusefs-hfsfuse
