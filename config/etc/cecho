@@ -6,13 +6,13 @@ __color_to_code()
   for c in black.0 red.1 green.2 yellow.3 \
     blue.4 magenta.5 cyan.6 white.7; do
     if [ "${c%%.*}" = "${color}" ]; then
-      echo ${c##*.}
+      /bin/echo ${c##*.}
       return
     fi
   done
-  echo "cecho: Unknown color '${color}'" >&2
+  /bin/echo "cecho: Unknown color '${color}'" >&2
   # Use fallback color yellow(3)
-  echo 3
+  /bin/echo 3
 }
 
 __tput() {
@@ -25,7 +25,7 @@ fi
 
 __echo() {
   tput -T xterm AF $(__color_to_code "${rcmsg_color}") >/dev/tty
-  \echo $@
+  /bin/echo $@
   tput -T xterm me >/dev/tty
 }
 
