@@ -1,0 +1,1 @@
+{"timestamp":0,"category":"nimbus_events","name":"enrollment","extra":{"experiment_type":"rollout","branch":"treatment","enrollment_id":"97cf3f1d-e039-4de7-9280-1b20d768ca4e","experiment":"upgrade-spotlight-rollout"}}
