@@ -6,3 +6,4 @@ chan_mask = -1
 lrview = false
 ticks = true
 tray_theme = "Papirus-Dark"
+inverse_scroll = true
