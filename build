@@ -595,7 +595,7 @@ delete_docs()
   # Delete most of the doc files under /usr/local/share/doc
   # This frees approx. 280M
   find "${SYSDIR}"/usr/local/share/doc -type d -depth 1 \
-    \! \( -name "fish" -o -name "neomutt" \) \
+    \! \( -name "fish" -o -name "neomutt" -o -name "cups" \) \
     -exec rm -rf '{}' \;
 
   # Free ~ 68M
