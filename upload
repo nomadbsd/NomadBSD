@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+#
+# Copyright (c) 2024 The NomadBSD Project. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
+from ftplib import FTP_TLS
+from getpass import getpass
+import ftplib
+import os
+import sys
+import time
+import argparse
+import logging
+
+
+class Progress:
+    def __init__(self, source_file: str, target_path: str):
+        self.target_path = target_path
+        self.source_file = source_file
+        self.file_size = os.path.getsize(source_file)
+        self.transfered_bytes = 0
+        self.start_time = 0
+        self.end_time = 0
+        self.elapsed_time = 0
+        self.kbps = 0
+        self.eta = -1
+        self.pct_transfered = 0
+
+    def start(self) -> None:
+        print(f'{self.source_file} -> {self.target_path}', file=sys.stderr)
+        self.start_time = time.time()
+
+    def update(self, data: bytes) -> None:
+        self.transfered_bytes += len(data)
+        self.calculate_elapsed_time()
+        self.calculate_kbps()
+        self.calculate_eta()
+        self.calculate_pct()
+        self.show()
+        self.check_done()
+
+    def check_done(self) -> None:
+        if self.transfered_bytes < self.file_size:
+            return
+        if self.end_time > 0:
+            return
+        self.end_time = time.time()
+        print('\n', file=sys.stderr)
+
+    def calculate_pct(self) -> None:
+        if self.file_size <= 0:
+            return
+        self.pct_transfered = int(
+            self.transfered_bytes * 100 / self.file_size)
+
+    def calculate_elapsed_time(self) -> None:
+        if not self.start_time:
+            self.start_time = time.time()
+        self.elapsed_time = time.time() - self.start_time
+
+    def calculate_kbps(self) -> None:
+        if self.elapsed_time <= 0:
+            return
+        self.kbps = int(self.transfered_bytes / (1024 * self.elapsed_time))
+
+    def calculate_eta(self) -> None:
+        if self.kbps <= 0:
+            return
+        self.eta = int((self.file_size - self.transfered_bytes) /
+                       (self.kbps * 1024))
+
+    def seconds_to_hms_str(self, seconds: float) -> str:
+        if seconds < 0:
+            return '--:--:--'
+        hours = int(seconds / 60**2)
+        minutes = int((seconds - hours * 60**2) / 60)
+        seconds = int(seconds - minutes * 60 - hours * 60**2)
+        return f'{hours:02d}:{minutes:02d}:{seconds:02d}'
+
+    def show(self) -> None:
+        print(f' {self.pct_transfered:>3}%'
+              f' {self.transfered_bytes:>12}/{self.file_size}'
+              f' {self.kbps:>8} KiB/s Avg.'
+              f' {self.seconds_to_hms_str(self.eta):>12} ETA'
+              f' {self.seconds_to_hms_str(self.elapsed_time)} ET\r',
+              file=sys.stderr, end='')
+
+
+class Uploader:
+    RETRY_DELAY_SECONDS = 30
+    RETRIES = 3
+
+    def __init__(self, host: str, user: str = 'anonymous', passwd=''):
+        self.ftp = None
+        self.host = host
+        self.user = user
+        self.passwd = passwd
+        self.retry_delay_seconds = Uploader.RETRY_DELAY_SECONDS
+        self.retries = Uploader.RETRIES
+
+    def set_retries(self, retries: int) -> None:
+        if retries < 0:
+            raise ValueError(f'retries ({retries}) must be >= 0.')
+        self.retries = retries
+
+    def set_retry_delay(self, seconds: float) -> None:
+        if seconds < 0:
+            raise ValueError(f'seconds ({seconds}) must be >= 0.')
+        self.retry_delay_seconds = seconds
+
+    def upload_file(self, file: str, target_dir: str) -> None:
+        target = os.path.join(target_dir, os.path.basename(file))
+        progress = Progress(file, target)
+        with open(file, 'rb') as fp:
+            progress.start()
+            self.ftp.storbinary(
+                f'STOR {target}', fp, blocksize=8192, callback=progress.update)
+
+    def open_ftp_connection(self) -> None:
+        self.ftp = FTP_TLS(self.host)
+        self.ftp.login(self.user, self.passwd)
+        self.ftp.prot_p()
+
+    def close_ftp_connection(self) -> None:
+        if self.ftp is not None:
+            self.ftp.close()
+        self.ftp = None
+
+    def upload(self, file: str, target_dir: str) -> None:
+        for attempt in range(self.retries + 1):
+            try:
+                self.open_ftp_connection()
+                self.upload_file(file, target_dir)
+            except (ConnectionError, TimeoutError, ftplib.error_reply,
+                    ftplib.error_temp, ftplib.error_proto) as e:
+                logging.warning(f'Uploading of file "{file}" failed: {e}')
+                if attempt >= self.retries:
+                    logging.error('Giving up')
+                    return
+                logging.info(
+                    f'Waiting {self.retry_delay_seconds} sec. before retrying ...')
+                time.sleep(self.retry_delay_seconds)
+            except (FileNotFoundError, PermissionError, IsADirectoryError) as e:
+                logging.error(f'Could not upload file "{file}": {e}')
+                logging.warning(f'Skipping "{file}"')
+                return
+            else:
+                print(f'{file} successfully uploaded.\n', file=sys.stderr)
+                return
+            finally:
+                self.close_ftp_connection()
+
+
+def parse_args() -> dict:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--retries', type=int,
+                        help='Max. # of upload retries')
+    parser.add_argument('-d', '--retry-delay', type=int,
+                        help='# of seconds to wait before retrying an upload.')
+    parser.add_argument('file', nargs='+')
+    parser.add_argument('target', metavar='user@host:dir', nargs=1)
+    args = parser.parse_args()
+    try:
+        (user, host) = args.target[0].split('@')
+        (host, target_dir) = host.split(':')
+    except ValueError:
+        print('Invalid target given. It should be user@host:dir',
+              file=sys.stderr)
+        parser.print_usage()
+        return None
+    args_dict = vars(args)
+    args_dict.update({'host': host, 'user': user, 'target_dir': target_dir})
+    return args_dict
+
+
+def main():
+    logging.basicConfig(level=logging.INFO)
+
+    args = parse_args()
+    if args is None:
+        sys.exit(1)
+
+    passwd = getpass()
+
+    ul = Uploader(args['host'], args['user'], passwd)
+    if args['retries'] is not None:
+        ul.set_retries(args['retries'])
+    if args['retry_delay'] is not None:
+        ul.set_retry_delay(args['retry_delay'])
+
+    for f in args['file']:
+        ul.upload(f, args['target_dir'])
+
+
+if __name__ == '__main__':
+    main()
