@@ -71,6 +71,7 @@ if((${FILESYSTEM} STREQUAL "UFS") OR (${FILESYSTEM} STREQUAL "ufs"))
 elseif((${FILESYSTEM} STREQUAL "ZFS") OR (${FILESYSTEM} STREQUAL "zfs"))
   set(BACKEND_MOD "backend/nomadbsd_setup_zfs.pm")
   set(MODULE_ARCH "zfs")
+  set(USE_ZFS "1")
 endif()
 
 configure_file(defs.h.in defs.h @ONLY)

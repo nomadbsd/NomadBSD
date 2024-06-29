@@ -36,7 +36,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QProgressBar>
-
+#include "defs.h"
 #include "password.h"
 
 #define SHUTDOWN_CMD	"shutdown -p now"

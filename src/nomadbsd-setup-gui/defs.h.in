@@ -2,5 +2,6 @@
 #define DEFS_H
 #define PROGRAM "@CMAKE_PROJECT_NAME@"
 #define PATH_NOMADBSD_SETUP "@PATH_BACKEND@"
+#cmakedefine USE_ZFS 1
 #endif /* !DEFS_H */
 
