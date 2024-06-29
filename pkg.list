@@ -62,7 +62,6 @@ print/hplip
 print/qpdfview
 russian/aspell
 russian/hunspell
-security/opendoas
 security/gnupg
 security/keepassxc
 security/nmap
