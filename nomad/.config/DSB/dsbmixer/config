@@ -1,7 +1,7 @@
 win_pos_x = 100
 win_pos_y = 100
 win_width = 100
-win_height = 300
+win_height = 400
 chan_mask = -1
 lrview = false
 ticks = true
