@@ -533,6 +533,7 @@ post_pkg_config()
   configure_dsbmd
   configure_sakura
   configure_networkmgr
+  configure_cupsd
 }
 
 delete_unneeded_files()
@@ -635,6 +636,14 @@ configure_networkmgr()
   # Prevent execution of networkmgr's auto-switch script.
   sed -i '' -E 's/^[::space::]*(.*action.*auto-switch.*)/#\1/g' \
     "${SYSDIR}"/usr/local/etc/devd/networkmgr.conf
+}
+
+configure_cupsd()
+{
+  # Comment out IdleExitTimeout
+  sed -E 's/^IdleExitTimeout .*/#&/' \
+    "${SYSDIR}"/usr/local/etc/cups/cupsd.conf.sample > \
+    "${SYSDIR}"/usr/local/etc/cups/cupsd.conf
 }
 
 #
