@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+#
+
+# PROVIDE: hdac_polling
+# REQUIRE: sysctl
+#
+# Add these lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# hdac_polling_enable (bool):   Set to YES by default.
+#                               Set to NO to disable.
+#
+
+. /etc/rc.subr
+
+hdac_polling_enable=${hdac_polling_enable-"YES"}
+
+name="hdac_polling"
+rcvar="hdac_polling_enable"
+load_rc_config $name
+start_cmd="${name}_start"
+
+hdac_polling_start() {
+	n=$(sysctl dev.hdac. | grep '\.polling:' | wc -l)
+	while [ $n -gt 0 ]; do
+		n=$(($n - 1))
+		sysctl dev.hdac.${n}.polling=1
+	done
+}
+load_rc_config $name
+run_rc_command "$1"
+
