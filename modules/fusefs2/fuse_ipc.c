@@ -439,9 +439,10 @@ retry:
 	}
 	kern_sigprocmask(td, SIG_BLOCK, &blockedset, NULL, 0);
 	err = msleep(ftick, &ftick->tk_aw_mtx, PCATCH, "fu_ans",
-	    data->daemon_timeout * hz);
+	    data->daemon_timeout * hz * 10);
 	kern_sigprocmask(td, SIG_SETMASK, &oldset, NULL, 0);
 	if (err == EWOULDBLOCK) {
+		printf("fusefs2 Timed out\n");
 		SDT_PROBE2(fusefs, , ipc, trace, 3,
 			"fticket_wait_answer: EWOULDBLOCK");
 #ifdef XXXIP				/* die conditionally */
