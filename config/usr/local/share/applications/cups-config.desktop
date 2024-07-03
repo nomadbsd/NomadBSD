@@ -5,5 +5,4 @@ Icon=printer
 Terminal=false
 StartupNotify=false
 Type=Application
-Categories=System;Settings;Application
-
+Categories=XFCE;Settings;DesktopSettings;X-XFCE-SettingsDialog;X-XFCE-HardwareSettings;
