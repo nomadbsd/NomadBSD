@@ -75,22 +75,9 @@ del_stale_files()
 	rm -f "${path_config_id}" > /dev/null 2>&1
 }
 
-restore_symlinks()
-{
-	local extpath=/usr/local/lib/xorg/modules/extensions
-
-	if [ -L "${extpath}/libglx.so" ]; then
-		rm -f "${extpath}/libglx.so"
-	fi
-	if [ ! -e "${extpath}/libglx.so" ]; then
-		ln -s "${extpath}/.xorg/libglx.so" ${extpath}/
-	fi
-}
-
 __reset()
 {
 	del_stale_files
-	restore_symlinks
 }
 
 calc_config_id()
@@ -331,8 +318,7 @@ setup_nvidia()
 	dir=/usr/local/lib/xorg/modules/extensions
 
 	# Restore symlink if it was removed or overwritten
-	for l in libglx.so libglx.so.1 libglxserver_nvidia.so \
-			 libglxserver_nvidia.so.1; do
+	for l in libglxserver_nvidia.so libglxserver_nvidia.so.1; do
 		if [ ! -L "${dir}/$l" ]; then
 			if [ ! -d "/nvidia/${dir}" ]; then
 				mkdir -p "/nvidia/${dir}"

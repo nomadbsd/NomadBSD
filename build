@@ -463,8 +463,7 @@ build_nvidia_drivers()
   rm -f "${SYSDIR}/usr/local/lib/xorg/modules/drivers/nvidia_drv.so"
   ln -sf "/nvidia/usr/local/lib/xorg/modules/drivers/nvidia_drv.so" \
          "${SYSDIR}/usr/local/lib/xorg/modules/drivers/"
-  for l in libglx.so libglx.so.1 libglxserver_nvidia.so \
-       libglxserver_nvidia.so.1; do
+  for l in libglxserver_nvidia.so libglxserver_nvidia.so.1; do
     rm -f "${SYSDIR}/usr/local/lib/xorg/modules/extensions/$l"
     ln -sf "/nvidia/usr/local/lib/xorg/modules/extensions/$l" \
            "${SYSDIR}/usr/local/lib/xorg/modules/extensions/"
