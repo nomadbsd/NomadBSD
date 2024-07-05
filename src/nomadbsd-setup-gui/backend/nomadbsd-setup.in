@@ -726,6 +726,12 @@ sub ufs_extend_fs {
 	status("Creating /data/var/db");
 	system("mkdir -p /data/var/db");
 
+	status("Creating /data/var/cache");
+	system("mkdir -p /data/var/cache");
+
+	status("Creating /data/var/backups");
+	system("mkdir -p /data/var/backups");
+
 	system("rmdir -rf /home 2>&1");
 	status("Creating /data/home/nomad");
 	system("mkdir -p /data/home/nomad") == 0
@@ -754,6 +760,8 @@ sub ufs_extend_fs {
 	print $fh "/data/compat\t/compat\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/tmp\t/var/tmp\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/var/db\t/var/db\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/cache\t/var/cache\t\t\tnullfs\trw,late\t0 0\n";
+	print $fh "/data/var/backups\t/var/backups\t\t\tnullfs\trw,late\t0 0\n";
 	print $fh "/data/usr/ports\t/usr/ports\t\t\tnullfs\trw,late\t0 0\n";
 	close($fh);
 }
