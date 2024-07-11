@@ -106,7 +106,6 @@ x11-drivers/xf86-video-amdgpu
 x11-drivers/xf86-video-ati
 x11-drivers/xf86-video-intel
 x11-drivers/xf86-video-nv
-x11-drivers/xf86-video-openchrome
 x11-drivers/xf86-video-scfb
 x11-drivers/xf86-video-vesa
 x11-drivers/xf86-video-vmware
