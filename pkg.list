@@ -79,9 +79,9 @@ sysutils/dsbmc-cli
 sysutils/dsbmd
 sysutils/dsbwrtsysctl
 sysutils/dunst
-sysutils/fusefs-ext2
-sysutils/fusefs-hfsfuse
-sysutils/fusefs-sshfs
+filesystems/ext2
+filesystems/hfsfuse
+filesystems/sshfs
 sysutils/powerdxx
 sysutils/sleuthkit
 sysutils/smartmontools
