@@ -7,7 +7,6 @@ devel/cmake
 devel/dconf
 devel/geany
 devel/git
-devel/meson
 devel/pkgconf
 devel/py-qt6-pyqt
 devel/qt6-base
@@ -60,7 +59,6 @@ print/brlaser
 print/gimp-gutenprint
 print/hplip
 print/qpdfview
-print/texinfo
 russian/aspell
 russian/hunspell
 security/gnupg

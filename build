@@ -444,6 +444,7 @@ build_nvidia_drivers()
     fi
     pkgname=$(cd "${PORTSTREE}/x11/$d" && make -VPKGNAME)
     [ -f "${PKGDIR}/${pkgname}.pkg" ] && continue
+    install_nvidia_build_deps ${PORTSTREE}/x11/$d
     chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
       make BATCH=1 USE_PACKAGE_DEPENDS=1 ${NVIDIA_BUILD_OPTS} \
       clean package" || bail
@@ -451,10 +452,8 @@ build_nvidia_drivers()
     cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.pkg" | \
       (cd "${SYSDIR}/usr/local/nvidia/${v}" && tar xf -)
     chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && make distclean"
+    deinstall_nvidia_build_deps ${PORTSTREE}/x11/$d
   done
-  # Remove build dependencies
-  pkg -c "${SYSDIR}" autoremove -y
-
   umount_ports_tree
   umount_chroot_devfs
   mkdir -p "${SYSDIR}"/nvidia/usr/local/lib/xorg/modules/drivers
@@ -468,6 +467,59 @@ build_nvidia_drivers()
     ln -sf "/nvidia/usr/local/lib/xorg/modules/extensions/$l" \
            "${SYSDIR}/usr/local/lib/xorg/modules/extensions/"
   done
+}
+
+install_nvidia_build_deps()
+{
+  local dep port_dir=$1
+  local deps=$(get_port_build_deps ${port_dir})
+  for dep in ${deps}; do
+    pkg -c "${SYSDIR}" info --exists ${dep} && continue
+    pkg -c "${SYSDIR}" install -y ${dep} || bail
+  done
+}
+
+deinstall_nvidia_build_deps()
+{
+  local port_dir=$1
+  local deps=$(get_port_build_deps_to_deinstall ${port_dir})
+  echo ${deps} | xargs -J% pkg -c "${SYSDIR}" delete -y %
+}
+
+get_port_build_deps_to_deinstall()
+{
+  local port_dir=$1
+  local dep="" deps=$(get_port_build_deps ${port_dir})
+  local dep_req_pkgs=""
+  local run_deps=$(get_port_run_deps ${port_dir})
+  local to_keep=$( (pkglist; echo ${PORTSLIST} ${run_deps}) | \
+                   linify | sort | uniq)
+  for dep in ${deps}; do
+    dep_req_pkgs=$(pkg -c "${SYSDIR}" query "%ro" ${dep} | sort | uniq)
+    intersect=$(echo ${dep_req_pkgs} ${to_keep} ${dep} | \
+                linify | sort | uniq -d)
+    [ -z "${intersect}" ] && echo ${dep}
+  done
+}
+
+get_port_build_deps()
+{
+  local dir port_dir=$1
+  for dir in $(make -C ${port_dir} build-depends-list); do
+    echo ${dir} | sed -E 's#(.*/)?([^\]+)/([^\]+)#\2/\3#'
+  done
+}
+
+get_port_run_deps() {
+  local dir port_dir=$1
+  for dir in $(make -C ${port_dir} run-depends-list); do
+    echo ${dir} | sed -E 's#(.*/)?([^\]+)/([^\]+)#\2/\3#'
+  done
+}
+
+linify()
+{
+  sed -E 's#[[:space:]]+#\n#g'
 }
 
 pkg_filter() {
