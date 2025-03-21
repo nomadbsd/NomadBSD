@@ -1,11 +1,15 @@
 HISTFILE=~/.histfile
 HISTSIZE=10000
 SAVEHIST=10000
-export PS1="%m:%d%% "
 # Emacs keybindings
 bindkey -e
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
+zstyle ':completion:*' completer _expand _complete _correct _approximate _history
+zstyle ':completion:*' matcher-list '' '' 'l:|=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' users root
+zstyle ':completion:*' menu select
 zstyle :compinstall filename '~/.zshrc'
 
 autoload -Uz compinit
@@ -44,6 +48,12 @@ export PS2="${cTIM}%T${cSTD} ${cUSR}>${cSTD} ${cPWD}"
 # no history duplicates
 setopt hist_ignore_all_dups
 setopt append_history
+setopt nohashdirs
+setopt auto_menu
+setopt no_beep
+setopt list_rows_first
+setopt extendedglob
+unsetopt beep
 
 alias rm="rm -i"
 alias ls="ls -G"
