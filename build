@@ -80,7 +80,7 @@
 . ./common
 
 case ${RELEASE##*-} in
-RELEASE|BETA|RC*)
+RELEASE|BETA*|RC*)
   URL="${BASEURL}/releases";;
 *)
   URL="${BASEURL}/snapshots";;
