@@ -727,10 +727,9 @@ check_port_opts()
 #
 port_opts()
 {
-  local popts=$2
-  local pname=$(echo $1 | tr '/' '_')
+  local popts=$1
 
-  echo ${popts} | tr ' ' '\n' | awk -v pname=${pname} '{
+  echo ${popts} | tr ' ' '\n' | awk '{
     split($0, a, /=/);
     if (a[2] ~ /on/) {
       set_vars = sprintf("%s%s%s", set_vars,
@@ -738,13 +737,15 @@ port_opts()
     } else if (a[2] ~ /off/) {
       unset_vars = sprintf("%s%s%s", unset_vars,
           unset_vars ? " " : "", a[1]);
+    } else {
+      printf("%s ", $0);
     }
   }
   END {
     if (set_vars)
-      printf("%s_SET=\"%s\" ", pname, set_vars);
+      printf("OPTIONS_FILE_SET=\"%s\" ", set_vars);
     if (unset_vars)
-      printf("%s_UNSET=\"%s\"", pname, unset_vars);
+      printf("OPTIONS_FILE_UNSET=\"%s\"", unset_vars);
   }'
 }
 
@@ -771,7 +772,7 @@ install_ports()
       fi
     fi
     printmsg "Building $p ..." >&2
-    local opts=$(port_opts $p "${popts}")
+    local opts=$(port_opts "${popts}")
     chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
       make USE_PACKAGE_DEPENDS=1 BATCH=1 ${opts} \
       clean deinstall install" || bail
