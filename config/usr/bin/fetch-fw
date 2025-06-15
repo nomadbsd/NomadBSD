@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Wait a certain time for an internet connection, then try to install
+# firmware packages via fwget.
+#
+max_tries=15
+sleep_secs=5
+host_name="google.com"
+log_file="/var/log/fetch-fw.log"
+
+host -R ${max_tries} -W ${sleep_secs} ${host_name} >/dev/null 2>&1
+[ $? -ne 0 ] && exit 1
+for i in 1 2 3; do
+  date >> ${log_file}
+  (/usr/sbin/fwget >> ${log_file} 2>&1) && exit 0
+  sleep 3
+done
+
