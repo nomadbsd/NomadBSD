@@ -36,16 +36,16 @@ qt_standard_project_setup()
 
 set(TS_FILES
     locale/nomadbsd-setup-gui_ar.ts
-    locale/nomadbsd-setup-gui_ru.ts
-    locale/nomadbsd-setup-gui_uk.ts
-    locale/nomadbsd-setup-gui_de.ts
-    locale/nomadbsd-setup-gui_ja.ts
     locale/nomadbsd-setup-gui_cs.ts
-    locale/nomadbsd-setup-gui_id.ts
-    locale/nomadbsd-setup-gui_fr.ts
+    locale/nomadbsd-setup-gui_de.ts
     locale/nomadbsd-setup-gui_es.ts
-    locale/nomadbsd-setup-gui_tr.ts
+    locale/nomadbsd-setup-gui_fr.ts
+    locale/nomadbsd-setup-gui_id.ts
+    locale/nomadbsd-setup-gui_ja.ts
     locale/nomadbsd-setup-gui_ko.ts
+    locale/nomadbsd-setup-gui_ru.ts
+    locale/nomadbsd-setup-gui_tr.ts
+    locale/nomadbsd-setup-gui_uk.ts
     locale/nomadbsd-setup-gui_zh.ts)
 
 add_executable(nomadbsd-setup-gui ${SOURCE_FILES})
