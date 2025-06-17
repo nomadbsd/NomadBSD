@@ -99,9 +99,9 @@ TMP_IMAGE_NAME="${WORKDIR}/tmp_image.$$"
 TMP_BASE_DIR="${WORKDIR}/tmp_mnt.$$"
 
 BUILD_DEPENDENCIES=$(cat << BUILD_DEPENCIES_LIST_EOF
-x11-fonts/mkfontscale
-textproc/markdown
-devel/git
+bin/mkfontscale:x11-fonts/mkfontscale
+bin/markdown:textproc/markdown
+bin/git:devel/git
 BUILD_DEPENCIES_LIST_EOF
 )
 
@@ -1532,9 +1532,9 @@ resume_build()
 
 check_build_dependencies()
 {
-  for d in ${BUILD_DEPENDENCIES}; do
-    if ! pkg info --exists $d; then
-      printerr "Please install $d"
+  echo "$BUILD_DEPENDENCIES" | while IFS=: read -r prog pkg; do
+    if [ ! -f "/usr/local/${prog}" ]; then
+      printerr "Please install ${pkg}"
       exit 1
     fi
   done
