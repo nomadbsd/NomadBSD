@@ -40,9 +40,14 @@ set(TS_FILES
     locale/nomadbsd-setup-gui_de.ts
     locale/nomadbsd-setup-gui_es.ts
     locale/nomadbsd-setup-gui_fr.ts
+    locale/nomadbsd-setup-gui_hi.ts
+    locale/nomadbsd-setup-gui_hu.ts
     locale/nomadbsd-setup-gui_id.ts
+    locale/nomadbsd-setup-gui_it.ts
     locale/nomadbsd-setup-gui_ja.ts
     locale/nomadbsd-setup-gui_ko.ts
+    locale/nomadbsd-setup-gui_pl.ts
+    locale/nomadbsd-setup-gui_pt.ts
     locale/nomadbsd-setup-gui_ru.ts
     locale/nomadbsd-setup-gui_tr.ts
     locale/nomadbsd-setup-gui_uk.ts
