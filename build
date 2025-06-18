@@ -99,9 +99,9 @@ TMP_IMAGE_NAME="${WORKDIR}/tmp_image.$$"
 TMP_BASE_DIR="${WORKDIR}/tmp_mnt.$$"
 
 BUILD_DEPENDENCIES=$(cat << BUILD_DEPENCIES_LIST_EOF
-x11-fonts/mkfontscale
-textproc/markdown
-devel/git
+bin/mkfontscale:x11-fonts/mkfontscale
+bin/markdown:textproc/markdown
+bin/git:devel/git
 BUILD_DEPENCIES_LIST_EOF
 )
 
@@ -446,7 +446,7 @@ build_nvidia_drivers()
     [ -f "${PKGDIR}/${pkgname}.pkg" ] && continue
     install_nvidia_build_deps ${PORTSTREE}/x11/$d
     chroot "${SYSDIR}" sh -c "cd /usr/ports/x11/$d && \
-      make BATCH=1 USE_PACKAGE_DEPENDS=1 ${NVIDIA_BUILD_OPTS} \
+      make BATCH=1 USE_PACKAGE_DEPENDS=1 UNAME_r="${RELEASE}" ${NVIDIA_BUILD_OPTS} \
       clean package" || bail
     mkdir -p "${SYSDIR}/usr/local/nvidia/$v" 2>/dev/null
     cat "${SYSDIR}/usr/ports/x11/$d/work/pkg/${pkgname}.pkg" | \
@@ -774,7 +774,7 @@ install_ports()
     printmsg "Building $p ..." >&2
     local opts=$(port_opts "${popts}")
     chroot "${SYSDIR}" sh -c "cd /usr/ports/$p && \
-      make USE_PACKAGE_DEPENDS=1 BATCH=1 ${opts} \
+      make USE_PACKAGE_DEPENDS=1 BATCH=1 UNAME_r="${RELEASE}" ${opts} \
       clean deinstall install" || bail
   done
   # Lock all kernel module packages to prevent kernel version mismatch
@@ -1532,9 +1532,9 @@ resume_build()
 
 check_build_dependencies()
 {
-  for d in ${BUILD_DEPENDENCIES}; do
-    if ! pkg info --exists $d; then
-      printerr "Please install $d"
+  echo "$BUILD_DEPENDENCIES" | while IFS=: read -r prog pkg; do
+    if [ ! -f "/usr/local/${prog}" ]; then
+      printerr "Please install ${pkg}"
       exit 1
     fi
   done
