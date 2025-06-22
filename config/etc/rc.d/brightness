@@ -45,7 +45,12 @@ load_rc_config $name
 
 brightness_start()
 {
-	[ ! -f /var/db/brightness ] && return
+	if [ ! -f /var/db/brightness ]; then
+		# Set initial brightness to 100
+		${path_backlight} 100 >/dev/null 2>&1
+		sysctl hw.acpi.video.lcd0.brightness=100 >/dev/null 2>&1
+		return
+	fi
 	eval $(cat /var/db/brightness)
 }
 
