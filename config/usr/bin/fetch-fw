@@ -3,8 +3,8 @@
 # Wait a certain time for an internet connection, then try to install
 # firmware packages via fwget.
 #
-max_tries=15
-sleep_secs=5
+max_tries=3
+sleep_secs=3
 host_name="google.com"
 log_file="/var/log/fetch-fw.log"
 
