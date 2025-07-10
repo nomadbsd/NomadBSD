@@ -522,6 +522,14 @@ linify()
   sed -E 's#[[:space:]]+#\n#g'
 }
 
+net_firmware_pkgs()
+{
+  # List all network firmware modules which do not contain NO_PACKAGE.
+  find ${PORTSTREE}/net -d 1 -name "*firmware*" | while read p; do
+    grep -q NO_PACKAGE "$p/Makefile" || echo net/$(basename "$p")
+  done
+}
+
 pkg_filter() {
   local exlst=PKG_EXCLUDE_${ARCH}
   (while read x; do echo $x; done; ${exlst} 2>/dev/null) | sort -n | uniq -u
@@ -529,7 +537,7 @@ pkg_filter() {
 
 pkglist()
 {
-  cat ${PKGLIST} | pkg_filter
+  (cat ${PKGLIST}; net_firmware_pkgs) | pkg_filter
 }
 
 install_packages()
