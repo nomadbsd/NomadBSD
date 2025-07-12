@@ -75,6 +75,7 @@ acpi_video_exclude_patterns()
 cat << PATTERNS_END
 .*ThinkPad.*(T450|T470|x260|x230)
 .*EliteBook.*820.*G2
+.*Laptop\ 13\ \(AMD\ Ryzen\ 7040Series\)
 PATTERNS_END
 }
 
