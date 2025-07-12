@@ -25,5 +25,9 @@ xrdb /usr/share/nomadbsd-setup/Xresources
 /usr/bin/enable_tapping
 
 /usr/bin/nomadbsd-setup-gui&
+# On some laptops X is started with brightness set to 0.
+# Increase it to 90
+backlight 90
+
 exec xfwm4
 
