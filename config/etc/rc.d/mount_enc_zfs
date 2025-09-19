@@ -32,7 +32,7 @@
 . /etc/rc.subr
 
 name="mount_enc_zfs"
-desc="Promp for ZFS passphrase and mount encrypted dataset"
+desc="Prompt for ZFS passphrase and mount encrypted dataset"
 rcvar="mount_enc_zfs_enable"
 start_cmd="mount_enc_zfs_start"
 
